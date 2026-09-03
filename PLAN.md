@@ -16,6 +16,8 @@
 
 **Sensación:** Arcade accesible, vista isométrica cuidada, pixel art vistoso, partidas cortas (5–10 min).
 
+**Vista del jugador — primera persona:** El jugador ve **su propia mano sosteniendo un bolígrafo** (mano pixel art en primer plano, abajo o abajo-centro de la pantalla). Al disparar, **el bolígrafo firma sobre un papel** que sale volando de la mano como proyectil (= un documento firmado). Esta vista refuerza la metáfora cívica: estás literalmente firmando tu apoyo a la lucha vecinal, no "disparando balas". El crosshair aparece cuando el bolígrafo no está activo (menús, pausa).
+
 ---
 
 ## 2. Mecánicas
@@ -29,8 +31,9 @@
 
 ### 2.2. Apuntado y disparo
 
-- **Mira / crosshair** que sigue al puntero (mouse en PC, dedo en móvil).
-- **Disparo:** click (mouse) o tap (touch) → lanza un **documento firmado**.
+- **Vista: primera persona con mano + bolígrafo** (confirmada por el usuario, 2026-09-03). El jugador ve su propia mano pixel art sosteniendo un bolígrafo, normalmente en la parte inferior-central de la pantalla. La mano sigue la posición del puntero (rotación ligera del boli hacia donde apunta).
+- **Mira / crosshair:** cruz pixel art que sigue al puntero. Visible en zonas donde no hay mano activa (menús, transiciones), oculto durante gameplay (la mano es el indicador principal).
+- **Disparo:** click (mouse) o tap (touch) → animación rápida de firma (el boli traza una línea zigzag en un papel) + lanzamiento del **documento firmado** como proyectil que vuela hacia donde apunta la mira.
 - **Cadencia:** ~3 disparos/seg (cooldown configurable).
 - **Visual del proyectil:** pequeña hoja de papel (pixel art) con un garabato de "firma" encima. Vuela recto con leve ondulación (paper flutter). Posibles variantes:
   - **Papeleta estándar** — folio blanco/crema con firma simple y un par de líneas simuladas
@@ -336,9 +339,10 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 ║  documental. Cada "firma" representa apoyo vecinal.         ║
 ║                                                            ║
 ║  ─── SOBRE TRECO ───                                       ║
-║  TRECO es una empresa / marca / proyecto REAL.              ║
-║  El nombre "TRECO" y cualquier variación son PROPIEDAD       ║
-║  de sus respectivos titulares.                              ║
+║  TRECO GESTIÓN DE RESIDUOS S.L. es una empresa REAL.         ║
+║  El nombre "TRECO", "TRECO GESTIÓN DE RESIDUOS S.L." y     ║
+║  cualquier variación son PROPIEDAD de sus respectivos         ║
+║  titulares.                                                 ║
 ║                                                            ║
 ║  Este juego menciona TRECO exclusivamente:                  ║
 ║  • Con fines de crítica documentada y educación cívica     ║
@@ -352,9 +356,9 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 ║    pedagógica del juego                                     ║
 ║                                                            ║
 ║  Este juego NO está autorizado, patrocinado,                 ║
-║  respaldado ni asociado con TRECO ni con sus titulares.     ║
-║  Las marcas, nombres comerciales y cualquier signo           ║
-║  distintivo de TRECO pertenecen a sus titulares             ║
+║  respaldado ni asociado con TRECO GESTIÓN DE RESIDUOS S.L.   ║
+║  ni con sus titulares. Las marcas, nombres comerciales y     ║
+║  cualquier signo distintivo pertenecen a sus titulares       ║
 ║  y se usan aquí sin ánimo de infracción.                    ║
 ║                                                            ║
 ║  ─── SOBRE LOS DATOS ───                                  ║
@@ -405,7 +409,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 | Iconos UI | 4-5 | health, score, firmas, pausa |
 | Sprites de explosión | 2-3 | partículas para hits |
 | **Proyectil = documento firmado** | **1-3** | **papeleta estándar + variante con sello** (pipeline en tools/, mismo método que sprites) |
-| Jugador (mano/boli) | 1 | `[?]` ¿primera persona (mano firmando) o tercera (cuerpo)? |
+| **Mano + bolígrafo (primera persona)** | **1-2** | **vista confirmada en primera persona** — mano pixel art con boli, orientación dinámica según puntero. Animación de firma al disparar. |
 | Datos pedagógicos + fuentes | 13 entradas | `docs/pedagogy-data.json` |
 | Audio SFX (opcional) | 5-10 | disparo (papel volando), hit, victoria |
 
@@ -417,7 +421,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 - ✅ **TRECO:** empresa real, marca propiedad de sus titulares. Disclaimer actualizado con texto legal (Art. 20 CE + uso nominativo +尊重 a derechos de marca).
 
 **Aún pendientes:**
-1. **Vista del jugador:** ¿primera persona (mano firmando / boli) o tercera (cuerpo visible)?
+1. **Stack render:** ¿Pixi.js (vía CDN) o Canvas2D nativo?
 2. **Auto-fire en móvil:** ¿on por defecto u opcional?
 3. **Cartas pedagógicas:** ¿en éxito o resumen al final?
 4. **Traducción:** ¿solo español o también valencià/english?
@@ -427,6 +431,8 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 8. **High score / leaderboard:** ¿local (localStorage) o global?
 9. **Tamaño de canvas:** ¿fijo (1280x720) o responsive?
 10. **Variantes de proyectil:** ¿solo papeleta estándar, o también la versión con sello (más daño), o una super-firma cargada con daño en área?
+11. **Accesibilidad:** ¿modo alto contraste, subtítulos/text-to-speech en cards, prefers-reduced-motion?
+12. **Continues extra tras primer game over** (subdecisión de 7)
 
 ---
 

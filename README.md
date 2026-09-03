@@ -14,7 +14,7 @@ Este juego es una obra de **ficción con fines educativos y cívicos**.
 
 - ✗ **NO promueve la violencia.** La mecánica de "disparar" es una **metáfora de la acción documental**: cada "firma" representa el apoyo vecinal a la defensa del territorio.
 - ✓ Promueve la **lucha legal**: recogida de firmas, alegaciones administrativas, movilización ciudadana, documentación de impactos.
-- **TRECO es una empresa / marca REAL.** El nombre "TRECO" y cualquier variación son **propiedad de sus respectivos titulares**. Este juego la menciona exclusivamente con fines de **crítica documentada y educación cívica**, en ejercicio del derecho a la libertad de expresión e información (Art. 20 CE), de forma nominativa (para identificar la entidad criticada), **sin endorsement, patrocinio ni asociación** con su titular.
+- **TRECO GESTIÓN DE RESIDUOS S.L.** es una empresa REAL. El nombre "TRECO", "TRECO GESTIÓN DE RESIDUOS S.L." y cualquier variación son **propiedad de sus respectivos titulares**. Este juego la menciona exclusivamente con fines de **crítica documentada y educación cívica**, en ejercicio del derecho a la libertad de expresión e información (Art. 20 CE), de forma nominativa (para identificar la entidad criticada), **sin endorsement, patrocinio ni asociación** con su titular.
 - Los datos mostrados (volúmenes, daños, cuantías) provienen de **fuentes citadas en cada card pedagógica** del juego.
 - Si TRECO o sus titulares consideran que el uso excede el ámbito de la crítica documentada, pueden solicitar la modificación de textos vía GitHub Issues. Se atenderá cualquier petición razonable.
 
