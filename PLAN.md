@@ -272,6 +272,31 @@ La música del juego debe **beberse de la tradición del Valle de Ayora-Cofrente
 
 **Recomendación por defecto (si me das luz verde sin más detalles):** opción **B** con Suno (o similar), usando como "estilo" del prompt los tags del CSIC + nuestros temas. Generamos 1 pista por stage + menú + game over + victoria = ~7-10 pistas.
 
+**Opción B CONFIRMADA por el usuario** (2026-09-03). Plan de ejecución:
+
+1. **Setup de credenciales** — el usuario provee una cuenta de Suno (o Udio, AIVA, etc.) con sus credenciales. Se configuran en `tools/suno-pipeline/.env` (no se commitea).
+2. **Catálogo de prompts** — para cada pista (~10), definimos:
+   - **Estilo musical** (descripción textual): "Spanish folk jota from Valencia, dulzaina and tambourine, retro pixel game soundtrack, upbeat but tense, 2 minutes loop"
+   - **Tags** extraídos del CSIC: jota valenciana, dulzaina, tamboril, instrumental
+   - **Mood** por stage (Bosque = contemplativo, Pueblo = tensión social, Río = melancólico, Vertedero = ominoso, Castillo = épico)
+3. **Pipeline Playwright** — script `tools/suno-pipeline/generate.py`:
+   - Login en Suno con credenciales del `.env`
+   - Por cada pista: navega a la página de generación, pega el prompt, dispara la generación, espera el resultado, descarga el MP3
+   - Guarda en `assets/audio/music/<stage|menu>.mp3`
+   - Metadata JSON con: nombre, duración, BPM, key, fecha generación, URL original de Suno
+4. **Validación humana** — el usuario escucha cada MP3 y aprueba/rechaza. Las rechazadas se regeneran con prompt ajustado.
+5. **Integración en el juego** — `src/music.js` carga los MP3 desde `assets/audio/music/`, fade in/out entre stages, volumen por menú.
+6. **Licencia de las pistas generadas** — Suno Pro permite uso comercial. Verificar términos actuales de Suno antes de publicar. Si el usuario tiene plan free, comprobar si permite uso en proyectos públicos.
+
+**Riesgos y mitigaciones:**
+
+| Riesgo | Mitigación |
+|---|---|
+| Suno cambia UI / rompe el scraper | Capturar screenshots del flujo, actualizar el script |
+| Credenciales filtradas en commits | `.env` en `.gitignore`, `.env.example` con placeholders |
+| Generación fuera de estilo jota | Iteración de prompts + revisión humana de cada MP3 |
+| Coste elevado | Empezar con 3 pistas piloto, validar antes de generar las 10 |
+
 #### Efectos de sonido (SFX) — **opción C confirmada: síntesis procedural con Web Audio API**
 
 Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero dependencias externas. Parametrizable.
@@ -297,38 +322,58 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 
 ```
 ╔════════════════════════════════════════════════════════════╗
-║              AVISO · DISCLAIMER                            ║
+║              AVISO LEGAL · DISCLAIMER                       ║
 ╠════════════════════════════════════════════════════════════╣
-║  Este juego es una obra de FICCIÓN con fines EDUCATIVOS     ║
+║                                                            ║
+║  Este juego es una obra de ficción con fines EDUCATIVOS     ║
 ║  y CÍVICOS.                                                 ║
 ║                                                            ║
+║  ─── SOBRE LA VIOLENCIA ───                                ║
 ║  ✗ NO promueve la violencia.                                ║
 ║  ✓ Promueve la lucha LEGAL: recogida de firmas,             ║
 ║    alegaciones administrativas, movilización ciudadana.     ║
+║  La mecánica de "disparar" es una METÁFORA de la acción     ║
+║  documental. Cada "firma" representa apoyo vecinal.         ║
 ║                                                            ║
-║  La mecánica de juego (disparar) es una METÁFORA de la       ║
-║  acción documental: cada "firma" representa el apoyo        ║
-║  vecinal a la defensa del territorio.                       ║
+║  ─── SOBRE TRECO ───                                       ║
+║  TRECO es una empresa / marca / proyecto REAL.              ║
+║  El nombre "TRECO" y cualquier variación son PROPIEDAD       ║
+║  de sus respectivos titulares.                              ║
 ║                                                            ║
-║  ─────────────────────────────────────────────────────────  ║
-║  TRECO es un nombre FICTICIO.                               ║
-║  Cualquier parecido con empresas, proyectos o personas     ║
-║  reales es incidental o constituye una crítica             ║
-║  DOCUMENTADA con fuentes públicas verificables              ║
-║  (ver cards pedagógicas en juego).                          ║
+║  Este juego menciona TRECO exclusivamente:                  ║
+║  • Con fines de crítica documentada y educación cívica     ║
+║  • En ejercicio del derecho a la libertad de expresión     ║
+║    y de información (Art. 20 Constitución Española;         ║
+║    Art. 11 Carta de Derechos Fundamentales UE)              ║
+║  • De forma NOMINATIVA (para identificar la entidad          ║
+║    criticada), NO como endorsement, patrocinio,             ║
+║    patrocinio comercial, asociación o afiliación            ║
+║  • Citando fuentes públicas verificables en cada card        ║
+║    pedagógica del juego                                     ║
 ║                                                            ║
-║  Los datos mostrados (volúmenes, daños, fechas,             ║
-║  cuantías) provienen de fuentes citadas en cada card.       ║
-║  El proyecto no representa a ninguna empresa ni             ║
+║  Este juego NO está autorizado, patrocinado,                 ║
+║  respaldado ni asociado con TRECO ni con sus titulares.     ║
+║  Las marcas, nombres comerciales y cualquier signo           ║
+║  distintivo de TRECO pertenecen a sus titulares             ║
+║  y se usan aquí sin ánimo de infracción.                    ║
+║                                                            ║
+║  ─── SOBRE LOS DATOS ───                                  ║
+║  Los volúmenes, daños, fechas y cuantías mostradas           ║
+║  provienen de fuentes públicas citadas en cada card.        ║
+║  El proyecto no representa a ninguna otra empresa o         ║
 ║  colectivo en particular.                                   ║
 ║                                                            ║
-║  Si alguna persona o colectivo se sintiera identificado     ║
-║  incorrectamente, puede solicitar la modificación de        ║
-║  los textos vía GitHub Issues.                              ║
+║  ─── MODIFICACIONES ───                                   ║
+║  Si TRECO o sus titulares consideran que el uso del          ║
+║  nombre excede el ámbito de la crítica documentada,         ║
+║  pueden solicitar la modificación de los textos              ║
+║  vía GitHub Issues. Se valorará y atenderá cualquier        ║
+║  petición razonable.                                         ║
 ║                                                            ║
-║  Si TRECO representa a una empresa real y se desea su       ║
-║  mención explícita como crítica documentada, se puede       ║
-║  modificar este aviso en el repositorio.                    ║
+║  ─── RESPONSABILIDAD ───                                  ║
+║  Este juego se distribuye con fines exclusivamente          ║
+║  educativos y de crítica cívica documentada.                 ║
+║  El autor no se responsabiliza del uso indebido del mismo.   ║
 ╚════════════════════════════════════════════════════════════╝
 ```
 
@@ -366,6 +411,12 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 
 ### `[?]` Decisiones pendientes
 
+**Confirmadas en sesión 2026-09-03:**
+- ✅ **Música:** opción B (Playwright + Suno externo). Pipeline definido en sección 6.Audio.
+- ✅ **SFX:** opción C (síntesis procedural Web Audio API). Mapeo en sección 6.Audio.
+- ✅ **TRECO:** empresa real, marca propiedad de sus titulares. Disclaimer actualizado con texto legal (Art. 20 CE + uso nominativo +尊重 a derechos de marca).
+
+**Aún pendientes:**
 1. **Vista del jugador:** ¿primera persona (mano firmando / boli) o tercera (cuerpo visible)?
 2. **Auto-fire en móvil:** ¿on por defecto u opcional?
 3. **Cartas pedagógicas:** ¿en éxito o resumen al final?
@@ -376,9 +427,6 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 8. **High score / leaderboard:** ¿local (localStorage) o global?
 9. **Tamaño de canvas:** ¿fijo (1280x720) o responsive?
 10. **Variantes de proyectil:** ¿solo papeleta estándar, o también la versión con sello (más daño), o una super-firma cargada con daño en área?
-11. **Música:** ¿qué opción? (A: Web Audio procedural jota / B: Playwright + Suno externo / C: instalar MCP de música / D: grabaciones CSIC + Suno) **[recomendado: B]**
-12. **SFX:** ✅ CONFIRMADO opción C (síntesis procedural Web Audio API)
-13. **Disclaimer:** ¿TRECO debe ser mencionado explícitamente como empresa real (si lo es), o se mantiene ficticio? El texto propuesto está neutro — fácil de ajustar en una línea.
 
 ---
 
