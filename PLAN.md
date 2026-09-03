@@ -244,6 +244,47 @@ requestAnimationFrame(frame);
 
 ## 6. Inventario de assets
 
+### 🎵 Audio (música + SFX)
+
+> ⚠️ **Heads-up importante:** el MCP de **minimax NO genera música ni efectos de sonido**. Sus herramientas de audio son exclusivamente para **voz/TTS** (`text_to_audio`, `voice_design`, `voice_clone`) — modelos `speech-2.8-hd`. Esto es lo que inspeccioné en el código del MCP server. Lo documento honestamente para no perder tiempo.
+
+#### Música de fondo — visión del proyecto
+
+La música del juego debe **beberse de la tradición del Valle de Ayora-Cofrentes**. Las melodías locales (jotas con dulzaina, coplas) son parte del patrimonio cultural que el proyecto quiere defender.
+
+**Fuentes de referencia identificadas:**
+- **Fondo de Música Tradicional IMF-CSIC** — base de datos oficial del CSIC con cientos de grabaciones de campo en dominio público, incluyendo piezas específicamente de Cofrentes y la comarca:
+  - `musicatradicional.imf.csic.es/es/location/9084` (Cofrentes — fichas locales)
+  - `musicatradicional.imf.csic.es/es/piece/44523` — *Jota popular con dulzaina* (Cofrentes, 1980)
+  - `musicatradicional.imf.csic.es/es/piece/25009` — *El baile de la dulzaina. Jota* (1910)
+- Instrumentos típicos del Valle: **dulzaina** (dolçaina en valencià) + **tamboril** (tabalet)
+- Géneros locales: **jota valenciana**, **coplas locales**, **danzas procesionales**
+- Fiestas donde suena: Batalla del agua (Jarafuel), Día de los Locos (Jalance), Fiesta de la Maderada (Cofrentes), Primer Corte de la Miel (Ayora)
+
+**Opciones para materializar la música** (marcadas con `[?]`):
+
+1. **Usar grabaciones reales del Fondo IMF-CSIC en dominio público** — incluir directamente las jotas grabadas en Cofrentes. Temáticamente perfecto, gratis, legal. Audio con sabor "de campo" (no producción profesional).
+2. **Nuevas composiciones inspiradas** — contratar/grabar nuevas piezas en estilo jota+dulzaina pero con producción limpia. Coste externo, no se puede generar con IA.
+3. **Síntesis procedural con Web Audio API** — generar música en tiempo real siguiendo patrones de jota (compás 3/4 o 6/8, escala frigia/aeolia, instrumentación sintética tipo chiptune). Más esfuerzo de código, control total, pero no suena "real".
+4. **Híbrido** — base procedural + samples cortos de dulzaina real grabados en local (con permiso o sampleados del CSIC).
+
+#### Efectos de sonido (SFX)
+
+Sonidos cortos de gameplay:
+- Disparo de papeleta (flutter de papel + leve impacto)
+- Impacto en enemigo (thud + squash)
+- Recolección de card pedagógica (chime positivo)
+- Game over (acorde disonante)
+- Victoria (jota triunfal — sí, gana con jota)
+- Transiciones de menú (click)
+
+**Opciones marcadas con `[?]`**:
+1. **Síntesis procedural con Web Audio API** — generamos todos los SFX con osciladores y ruido filtrado. Cero dependencias externas, ocupa poco, parametrizable. Suena "8-bit" o "synth" (puede encajar con el pixel art).
+2. **Samples de freesound.org** (CC0 / CC-BY) — busca "paper throw", "hit", "success chime" y los integramos. Sonido más realista.
+3. **Mezcla** — procedural para algunos, samples para otros.
+
+> Nota: si en algún momento se instala un MCP de generación musical/audio (ej: Suno API, Udio, etc.) o se prefiere contratar a un músico local, el plan se actualiza.
+
 ### ✅ Ya tenemos (21 sprites)
 
 - **Trees (3):** encina, pino, almendro
@@ -277,6 +318,8 @@ requestAnimationFrame(frame);
 8. **High score / leaderboard:** ¿local (localStorage) o global?
 9. **Tamaño de canvas:** ¿fijo (1280x720) o responsive?
 10. **Variantes de proyectil:** ¿solo papeleta estándar, o también la versión con sello (más daño), o una super-firma cargada con daño en área?
+11. **Música:** ¿usar grabaciones reales del Fondo IMF-CSIC, inspirarnos en ellas para nuevas composiciones, o ambas?
+12. **SFX:** ¿síntesis procedural con Web Audio API, samples de freesound.org, o el usuario aporta grabaciones?
 
 ---
 
