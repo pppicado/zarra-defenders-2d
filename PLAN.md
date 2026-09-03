@@ -51,6 +51,17 @@
 - Perder todas = **game over final → menú principal** (confirmado por el usuario, 2026-09-03, opción A). Sin continues, sin segunda oportunidad. El jugador debe reiniciar el stage desde el principio. Estilo arcade clásico (Time Crisis, House of the Dead).
 - Cada stage persiste su mejor score en `localStorage` (clave `zarra2d:best:stage_<n>`), pero el run actual muere al primer game over.
 
+### 2.6. Puntuación y compartir
+
+- **Best score local por stage** persistido en `localStorage` (sin servidor, sin tracking).
+- **Compartir en redes sociales** (confirmado por el usuario, 2026-09-03, opción D): al terminar un stage o el juego completo, se genera un **link compartible** con el score:
+  - Formato: `https://<host>/?ref=<base64-score>` (URL-encoded, sin tracking)
+  - Texto sugerido: "Acabo de recoger 234 firmas contra TRECO GESTIÓN DE RESIDUOS S.L. en el Stage 2 — Valle de Ayora: Defensores del Territorio. Juega gratis: <url>"
+  - Botones de "Compartir en Twitter", "Compartir en Facebook", "Copiar al portapapeles"
+  - Usa `navigator.share()` cuando está disponible (móvil moderno), fallback a botones individuales
+  - **No tracking**: la URL es solo informativa, no hay backend que cuente clicks
+- Implementación: `src/scoring.js` (localStorage + UI de share).
+
 ### 2.4. Stages / niveles
 
 Propuesta de 5 stages, cada uno en una zona del Valle:
@@ -468,6 +479,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 - ✅ **Orientación móvil:** forzar landscape con modal de aviso en portrait. Confirmado 2026-09-03.
 - ✅ **Light gun:** opción A — asumir mouse siempre (sin código especial). Pistolas de luz HID funcionan automáticamente como mouse USB estándar. Confirmado 2026-09-03.
 - ✅ **Continues:** opción A — game over final sin continues. Reiniciar stage desde cero. Estilo arcade clásico. Confirmado 2026-09-03.
+- ✅ **Score y compartir:** opción D — best score local en localStorage + link compartible con score en redes sociales. Sin backend ni tracking. Confirmado 2026-09-03.
 
 **Aún pendientes:**
 1. ✅ **Stack render:** **Pixi.js vía CDN** (confirmado).
@@ -477,7 +489,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 5. ✅ **Modo portrait móvil:** **forzar landscape con modal de aviso en portrait**.
 6. ✅ **Light gun detection:** **A — asumir mouse siempre, sin código especial**.
 7. ✅ **Continues / extra lives:** **A — game over final sin continues**.
-8. **High score / leaderboard:** ¿local (localStorage) o global?
+8. ✅ **High score / leaderboard:** **D — best score local + link compartible en redes (sin backend, sin tracking)**.
 9. **Tamaño de canvas:** ¿fijo (1280x720) o responsive?
 10. **Variantes de proyectil:** ¿solo papeleta estándar, o también la versión con sello (más daño), o una super-firma cargada con daño en área?
 11. **Accesibilidad:** ¿modo alto contraste, subtítulos/text-to-speech en cards, prefers-reduced-motion?
