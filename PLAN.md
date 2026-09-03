@@ -12,6 +12,8 @@
 
 **Objetivo pedagógico:** Cada enemigo destruido revela una **card** con datos reales sobre el impacto ambiental/social de esa amenaza (vertedero, lixiviados, incineración, drones de fumigación, etc.) con fuentes citadas. Disparar accidentalmente a elementos del valle (árboles, casas, castillo) penaliza.
 
+**Concepto clave — disparos como firmas:** Los **proyectiles NO son balas ni láseres**. Son **documentos con firmas**: papeletas de recogida de firmas, escritos de alegaciones, instancias administrativas — todo el aparato cívico-burocrático que el Valle de Ayora-Cofrentes ha usado históricamente para luchar contra TRECO. Cada disparo = una firma de un vecino que se suma a la lucha colectiva. HUD muestra **"Firmas recogidas: N"** en vez de "Balas: N". El jugador no "mata" al enemigo — **lo firma**, lo que es a la vez más coherente con el tono cívico y más potente simbólicamente.
+
 **Sensación:** Arcade accesible, vista isométrica cuidada, pixel art vistoso, partidas cortas (5–10 min).
 
 ---
@@ -28,11 +30,15 @@
 ### 2.2. Apuntado y disparo
 
 - **Mira / crosshair** que sigue al puntero (mouse en PC, dedo en móvil).
-- **Disparo:** click (mouse) o tap (touch).
+- **Disparo:** click (mouse) o tap (touch) → lanza un **documento firmado**.
 - **Cadencia:** ~3 disparos/seg (cooldown configurable).
+- **Visual del proyectil:** pequeña hoja de papel (pixel art) con un garabato de "firma" encima. Vuela recto con leve ondulación (paper flutter). Posibles variantes:
+  - **Papeleta estándar** — folio blanco/crema con firma simple y un par de líneas simuladas
+  - **Instancia con sello** — papel + sello rojo/lila esquinado (sello burocrático = "sello burocrático" enemigo, irónico pero visual)
+  - `[?]` ¿Añadir una **super-firma** con sellos múltiples que hace daño en área (área de efecto) tras cargar?
 - **Puntuación:**
-  - Impactar enemigo → puntos + revela card pedagógica
-  - Fallar → -puntos pequeños
+  - Impactar enemigo → puntos + revela card pedagógica + incrementa contador "Firmas recogidas"
+  - Fallar → -puntos pequeños (la firma se pierde sin ser entregada)
   - Disparar a aliado (árbol, casa, castillo) → -vida + card explicando por qué ese elemento protege el valle
   - Enemigo llega al fondo del frame sin ser destruido → -vida
 
@@ -75,6 +81,7 @@ Cada enemigo / acierto dispara una **card flotante** con:
 ```
 
 - Las cards se acumulan en una "biblioteca" accesible desde el menú.
+- El contador de **"Firmas recogidas"** del HUD se incrementa con cada hit, y se persiste en `localStorage` como "firma" del jugador al proyecto (juego de palabras intencionado).
 - `[?]` ¿Cartas solo en éxito o también al final del stage (resumen)?
 - `[?]` ¿Traducción multi-idioma? (mínimo: español, ideal: valencià + english)
 
@@ -251,16 +258,16 @@ requestAnimationFrame(frame);
 | Backgrounds de menú | 4 | pixel art desde fotos reales (pipeline en `tools/postprocess_v4.py`) |
 | Background de stage (parallax) | 5 | uno por stage, panorámico ancho |
 | Crosshair | 1 | simple mira pixel art |
-| Iconos UI | 4-5 | health, score, ammo, pausa |
+| Iconos UI | 4-5 | health, score, firmas, pausa |
 | Sprites de explosión | 2-3 | partículas para hits |
-| Bala / disparo | 1 | opcional, rayo visible |
-| Jugador (mano/pistola) | 1 | `[?]` ¿primera persona (mano) o tercera (cuerpo)? |
+| **Proyectil = documento firmado** | **1-3** | **papeleta estándar + variante con sello** (pipeline en tools/, mismo método que sprites) |
+| Jugador (mano/boli) | 1 | `[?]` ¿primera persona (mano firmando) o tercera (cuerpo)? |
 | Datos pedagógicos + fuentes | 13 entradas | `docs/pedagogy-data.json` |
-| Audio SFX (opcional) | 5-10 | disparo, hit, explosión, victoria |
+| Audio SFX (opcional) | 5-10 | disparo (papel volando), hit, victoria |
 
 ### `[?]` Decisiones pendientes
 
-1. **Vista del jugador:** ¿primera persona (solo manos/pistola) o tercera (cuerpo visible)?
+1. **Vista del jugador:** ¿primera persona (mano firmando / boli) o tercera (cuerpo visible)?
 2. **Auto-fire en móvil:** ¿on por defecto u opcional?
 3. **Cartas pedagógicas:** ¿en éxito o resumen al final?
 4. **Traducción:** ¿solo español o también valencià/english?
@@ -269,6 +276,7 @@ requestAnimationFrame(frame);
 7. **Continues / extra lives:** ¿hay o no?
 8. **High score / leaderboard:** ¿local (localStorage) o global?
 9. **Tamaño de canvas:** ¿fijo (1280x720) o responsive?
+10. **Variantes de proyectil:** ¿solo papeleta estándar, o también la versión con sello (más daño), o una super-firma cargada con daño en área?
 
 ---
 
