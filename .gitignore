@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Backups (dejamos los .bak fuera del repo, son respaldo temporal)
+*.bak
+*.tmp
