@@ -460,7 +460,6 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 - ✅ **Auto-fire móvil:** OFF (disparo manual con tap). Confirmado 2026-09-03.
 - ✅ **Cartas pedagógicas:** combinación B + D — modal intermedio cada 5 enemigos + resumen completo al final del stage. Confirmado 2026-09-03.
 - ✅ **Traducción:** solo español al lanzamiento, estructura i18n-ready. Confirmado 2026-09-03.
-- ✅ **Idioma:** solo español. Confirmado 2026-09-03. Strings en `src/i18n/es.js`, arquitectura preparada para i18n futuro.
 
 **Aún pendientes:**
 1. ✅ **Stack render:** **Pixi.js vía CDN** (confirmado).
