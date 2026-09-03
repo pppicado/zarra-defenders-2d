@@ -10,7 +10,7 @@
 
 ## Contexto
 
-Es la **variante 2D isométrica** del proyecto hermano [`pppicado/zarra-defenders`](https://github.com/pppicado/zarra-defenders) (versión 3D en Three.js). Misma jugabilidad on-rails, misma pedagogía sobre el impacto del macrovertedero de Zarra (TRECO) en el Valle de Ayora-Cofrentes, pero con **sprites 2D isométricos** en lugar de modelos 3D.
+On-rails shooter pedagógico sobre el impacto del macrovertedero de Zarra (TRECO) en el Valle de Ayora-Cofrentes. HTML5 + JS sin build step, con sprites 2D isométricos estilo 16-bit pixel art.
 
 **¿Por qué 2D?**
 - Visualmente más vistoso y "retro" (estilo 16-bit pixel art)
@@ -65,4 +65,4 @@ zarra-defenders-2d/
 
 ## Licencia
 
-Pendiente de definir (probable CC BY-NC-SA 4.0 para assets, MIT para código — confirmar con el autor del proyecto hermano).
+Pendiente de definir (probable CC BY-NC-SA 4.0 para assets, MIT para código).

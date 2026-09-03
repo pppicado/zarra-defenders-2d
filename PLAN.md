@@ -8,7 +8,7 @@
 
 **Género:** On-rails shooter pedagógico (estilo *House of the Dead*, *Time Crisis*, *Virtua Cop*).
 
-**Ambientación:** El jugador viaja por el Valle de Ayora-Cofrentes (Valencia) defendiendo el territorio del impacto del macrovertedero de residuos de Zarra (proyecto TRECO). Es el mismo universo conceptual del proyecto hermano 3D (`pppicado/zarra-defenders`), pero con sprites 2D isométricos en lugar de modelos 3D.
+**Ambientación:** El jugador viaja por el Valle de Ayora-Cofrentes (Valencia) defendiendo el territorio del impacto del macrovertedero de residuos de Zarra (proyecto TRECO).
 
 **Objetivo pedagógico:** Cada enemigo destruido revela una **card** con datos reales sobre el impacto ambiental/social de esa amenaza (vertedero, lixiviados, incineración, drones de fumigación, etc.) con fuentes citadas. Disparar accidentalmente a elementos del valle (árboles, casas, castillo) penaliza.
 
@@ -60,7 +60,7 @@ Propuesta de 5 stages, cada uno en una zona del Valle:
 | 4 | **Vertedero TRECO** | Macrovertedero, montañas de basura | planta TRECO (boss), bidón lixiviado, incineradora, bolsa plástica | vertedero.png (generar) |
 | 5 | **Castillo de Cofrentes** | El peñón con el castillo y el pueblo | sello burocrático (mini-boss), trailer de obra | castillo.png (generar — ya lo tenemos) |
 
-**Total:** 12 enemigos distintos + 1 boss = 13 tipos. Coincide con el catálogo del proyecto 3D.
+**Total:** 12 enemigos distintos + 1 boss = 13 tipos.
 
 ### 2.5. Pedagogía in-game
 
@@ -161,7 +161,7 @@ Pipeline de generación:
 
 ### 5.1. Stack
 
-- **HTML5 + JavaScript vanilla (sin TypeScript, sin framework)** — coherente con el proyecto 3D hermano.
+- **HTML5 + JavaScript vanilla (sin TypeScript, sin framework)** — cero dependencias de build.
 - **Pixi.js** (vía CDN) — manejo de sprites, parallax, tweens, efectos de partículas. Mucho mejor que Canvas2D puro para 21+ sprites con transformaciones.
   - `[?]` Alternativa: Canvas2D nativo sin deps. Más ligero pero más código para tweens/parallax.
 - **Sin build step.** Todo se sirve tal cual desde `index.html`. ES modules con `<script type="module">`.
@@ -368,11 +368,9 @@ Una vez aprobado este plan:
 
 ## 10. Referencias
 
-- Proyecto 3D hermano: [`pppicado/zarra-defenders`](https://github.com/pppicado/zarra-defenders)
-- Sprite atlas del 3D: 12 enemigos + flora + props (origen del catálogo de sprites 2D)
-- Pedagogy data: usar las `.fuente` strings del proyecto 3D (ya investigadas en SDD previo)
 - Pipeline alpha: `tools/postprocess_v4.py` (flood-fill + atenuación HSV purple)
 - Foto del Castillo de Cofrentes ya descargada (referencia visual)
+- Datos pedagógicos: investigación propia de fuentes primarias (periódicos, notas de ayuntamiento, informes técnicos). Pendiente consolidar en `docs/pedagogy-data.json`
 
 ---
 
