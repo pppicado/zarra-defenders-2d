@@ -243,8 +243,13 @@ requestAnimationFrame(frame);
 ### 5.5. Responsive
 
 - **PC:** fullscreen fijo, canvas a 1280x720 o 1920x1080, escalado con letterbox.
-- **Móvil:** canvas a pantalla completa, portrait o landscape según stage.
-- `[?]` ¿Forzar landscape en móvil? (Mejor para rail shooter, pero pierde usuarios en portrait.)
+- **Móvil:** **forzar landscape con aviso en portrait** (confirmado por el usuario, 2026-09-03, opción A + C combinadas).
+  - El juego SOLO funciona en horizontal en móvil.
+  - Si el dispositivo está en portrait al arrancar o se rota a portrait durante el juego, se muestra un **modal fullscreen** con icono SVG de "girar dispositivo" + texto "Por favor, gira el móvil para jugar" + breve instrucción.
+  - El modal desaparece automáticamente cuando `window.matchMedia('(orientation: landscape)').matches` devuelve `true`.
+  - Implementación: `src/orientation-lock.js` escucha el evento `orientationchange` y `resize`, gestiona la visibilidad del modal.
+  - En PC no aplica (el navegador no rota).
+- `[?]` ¿Forzar landscape en móvil? ✅ Confirmado: SÍ, con modal de aviso.
 
 ### 5.6. Internacionalización (i18n)
 
@@ -460,13 +465,14 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 - ✅ **Auto-fire móvil:** OFF (disparo manual con tap). Confirmado 2026-09-03.
 - ✅ **Cartas pedagógicas:** combinación B + D — modal intermedio cada 5 enemigos + resumen completo al final del stage. Confirmado 2026-09-03.
 - ✅ **Traducción:** solo español al lanzamiento, estructura i18n-ready. Confirmado 2026-09-03.
+- ✅ **Orientación móvil:** forzar landscape con modal de aviso en portrait. Confirmado 2026-09-03.
 
 **Aún pendientes:**
 1. ✅ **Stack render:** **Pixi.js vía CDN** (confirmado).
 2. ✅ **Auto-fire en móvil:** **OFF** (disparo manual con tap).
 3. ✅ **Cartas pedagógicas:** **modal intermedio cada 5 + resumen completo al final del stage**.
 4. ✅ **Traducción:** **solo español al lanzamiento, i18n-ready**.
-5. **Modo portrait móvil:** ¿forzar landscape?
+5. ✅ **Modo portrait móvil:** **forzar landscape con modal de aviso en portrait**.
 6. **Light gun detection:** ¿detectar automáticamente (¿Gamepad API?) o asumir mouse?
 7. **Continues / extra lives:** ¿hay o no?
 8. **High score / leaderboard:** ¿local (localStorage) o global?
