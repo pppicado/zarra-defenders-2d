@@ -246,7 +246,7 @@ requestAnimationFrame(frame);
 
 ### 🎵 Audio (música + SFX)
 
-> ⚠️ **Heads-up importante:** el MCP de **minimax NO genera música ni efectos de sonido**. Sus herramientas de audio son exclusivamente para **voz/TTS** (`text_to_audio`, `voice_design`, `voice_clone`) — modelos `speech-2.8-hd`. Esto es lo que inspeccioné en el código del MCP server. Lo documento honestamente para no perder tiempo.
+> ⚠️ **Heads-up confirmado:** después de re-inspeccionar el código del MCP server en `/home/ubuntu/.cache/uv/archive-v0/UDD3X213sG2jBxL4/lib/python3.12/site-packages/minimax_mcp/server.py` y grep exhaustivo por `music|bgm|composition|song`, **minimax MCP NO tiene herramientas de generación musical ni de SFX**. Sus 8 tools son: `text_to_audio` (TTS con `speech-2.8-hd`), `list_voices`, `voice_clone`, `play_audio`, `generate_video`, `query_video_generation`, `text_to_image`, `voice_design`. **Cero música.**
 
 #### Música de fondo — visión del proyecto
 
@@ -263,27 +263,85 @@ La música del juego debe **beberse de la tradición del Valle de Ayora-Cofrente
 
 **Opciones para materializar la música** (marcadas con `[?]`):
 
-1. **Usar grabaciones reales del Fondo IMF-CSIC en dominio público** — incluir directamente las jotas grabadas en Cofrentes. Temáticamente perfecto, gratis, legal. Audio con sabor "de campo" (no producción profesional).
-2. **Nuevas composiciones inspiradas** — contratar/grabar nuevas piezas en estilo jota+dulzaina pero con producción limpia. Coste externo, no se puede generar con IA.
-3. **Síntesis procedural con Web Audio API** — generar música en tiempo real siguiendo patrones de jota (compás 3/4 o 6/8, escala frigia/aeolia, instrumentación sintética tipo chiptune). Más esfuerzo de código, control total, pero no suena "real".
-4. **Híbrido** — base procedural + samples cortos de dulzaina real grabados en local (con permiso o sampleados del CSIC).
+| # | Opción | Cómo cumple la intención | Esfuerzo |
+|---|---|---|---|
+| **A** | **Web Audio API + patrones de jota generados algorítmicamente** | Generamos en runtime música que sigue las reglas de la jota (compás 3/4 o 6/8, escala frigia/aeolia, ornamentación típica de dulzaina). NO usa IA externa, pero el resultado es 100% procedural inspirado en las grabaciones del CSIC. | Código más extenso, sin coste externo |
+| **B** | **Playwright + servicio externo** (Suno.com, Udio.com) | Usamos el MCP de playwright para abrir suno.com u otro servicio de generación musical con IA, le pasamos como input los URLs del CSIC, y descargamos los resultados al proyecto. | Requiere cuenta en el servicio, coste por generación |
+| **C** | **Instalar un MCP de música** (si existe para Suno API, etc.) | Buscamos/instalamos un MCP que sí genere música. Algunas opciones potenciales: suno-mcp, mureka-mcp, etc. | Requiere investigación de qué MCPs existen y config de credenciales |
+| **D** | **Grabaciones reales del CSIC en dominio público + composición IA externa** | Bajar las grabaciones reales del CSIC y usarlas como samples en bucle, o como input para que Suno/Udio genere variaciones estilísticas. | Mixto, depende del servicio externo |
 
-#### Efectos de sonido (SFX)
+**Recomendación por defecto (si me das luz verde sin más detalles):** opción **B** con Suno (o similar), usando como "estilo" del prompt los tags del CSIC + nuestros temas. Generamos 1 pista por stage + menú + game over + victoria = ~7-10 pistas.
 
-Sonidos cortos de gameplay:
-- Disparo de papeleta (flutter de papel + leve impacto)
-- Impacto en enemigo (thud + squash)
-- Recolección de card pedagógica (chime positivo)
-- Game over (acorde disonante)
-- Victoria (jota triunfal — sí, gana con jota)
-- Transiciones de menú (click)
+#### Efectos de sonido (SFX) — **opción C confirmada: síntesis procedural con Web Audio API**
 
-**Opciones marcadas con `[?]`**:
-1. **Síntesis procedural con Web Audio API** — generamos todos los SFX con osciladores y ruido filtrado. Cero dependencias externas, ocupa poco, parametrizable. Suena "8-bit" o "synth" (puede encajar con el pixel art).
-2. **Samples de freesound.org** (CC0 / CC-BY) — busca "paper throw", "hit", "success chime" y los integramos. Sonido más realista.
-3. **Mezcla** — procedural para algunos, samples para otros.
+Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero dependencias externas. Parametrizable.
 
-> Nota: si en algún momento se instala un MCP de generación musical/audio (ej: Suno API, Udio, etc.) o se prefiere contratar a un músico local, el plan se actualiza.
+**Mapeo de sonidos a generar:**
+
+| Evento | Cómo se sintetiza |
+|---|---|
+| Disparo de papeleta | Ruido blanco breve (50ms) + componente sinusoidal agudo en caída |
+| Impacto en enemigo | Sine modulado en frecuencia descendente + ruido breve |
+| Card pedagógica recogida | Tres sinusoides en arpegio ascendente (do-mi-sol) |
+| Game over | Acorde disonante (segunda menor) en fade out |
+| Victoria | Fragmento de jota (3-4 compases) en tono mayor |
+| Click de menú | Sine breve (100Hz, 30ms) |
+| Transición de stage | Crescendo instrumental corto |
+| Error (disparar a aliado) | Tono descendente disonante |
+
+**Implementación:** módulo `src/sfx.js` con función `sfx.play('shoot' | 'hit' | 'card' | ...)`. Cada sonido definido como `AudioNode` graph en código. Configurable via tabla de parámetros.
+
+### 📜 Disclaimer y política de contenido
+
+**Texto del disclaimer** (mostrar al inicio del juego + accesible desde menú "Acerca de"):
+
+```
+╔════════════════════════════════════════════════════════════╗
+║              AVISO · DISCLAIMER                            ║
+╠════════════════════════════════════════════════════════════╣
+║  Este juego es una obra de FICCIÓN con fines EDUCATIVOS     ║
+║  y CÍVICOS.                                                 ║
+║                                                            ║
+║  ✗ NO promueve la violencia.                                ║
+║  ✓ Promueve la lucha LEGAL: recogida de firmas,             ║
+║    alegaciones administrativas, movilización ciudadana.     ║
+║                                                            ║
+║  La mecánica de juego (disparar) es una METÁFORA de la       ║
+║  acción documental: cada "firma" representa el apoyo        ║
+║  vecinal a la defensa del territorio.                       ║
+║                                                            ║
+║  ─────────────────────────────────────────────────────────  ║
+║  TRECO es un nombre FICTICIO.                               ║
+║  Cualquier parecido con empresas, proyectos o personas     ║
+║  reales es incidental o constituye una crítica             ║
+║  DOCUMENTADA con fuentes públicas verificables              ║
+║  (ver cards pedagógicas en juego).                          ║
+║                                                            ║
+║  Los datos mostrados (volúmenes, daños, fechas,             ║
+║  cuantías) provienen de fuentes citadas en cada card.       ║
+║  El proyecto no representa a ninguna empresa ni             ║
+║  colectivo en particular.                                   ║
+║                                                            ║
+║  Si alguna persona o colectivo se sintiera identificado     ║
+║  incorrectamente, puede solicitar la modificación de        ║
+║  los textos vía GitHub Issues.                              ║
+║                                                            ║
+║  Si TRECO representa a una empresa real y se desea su       ║
+║  mención explícita como crítica documentada, se puede       ║
+║  modificar este aviso en el repositorio.                    ║
+╚════════════════════════════════════════════════════════════╝
+```
+
+**Comportamiento en el juego:**
+- Mostrar como modal al primer arranque (checkbox "No volver a mostrar")
+- Accesible siempre desde menú principal → "Acerca de / Disclaimer"
+- Versión corta en el README.md del repo
+- Versión inline al final de cada card pedagógica larga
+
+**Disclaimers por pantalla del juego:**
+- Splash screen al cargar `index.html`
+- Pie de página fijo en cada card pedagógica ("Datos basados en fuentes públicas. Ver refs.")
+- Página "Créditos" en el menú principal con link al repositorio y a las fuentes
 
 ### ✅ Ya tenemos (21 sprites)
 
