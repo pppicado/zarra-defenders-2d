@@ -112,7 +112,7 @@ Cada enemigo / acierto dispara una **card flotante** con:
 | Pausa | Tap en icono de pausa |
 | Menú | Tap en botones |
 
-- **Auto-fire opcional en móvil** `[?]`: ¿el jugador solo apunta y el disparo es automático? Más accesible pero menos "shotter".
+- **Auto-fire en móvil: OFF (confirmado por el usuario, 2026-09-03).** Disparo manual con tap explícito cada vez, mismo patrón que el click del PC. Más "shotter" tradicional, requiere precisión.
 - **Detección tap vs drag:** comparar posición inicial y final del touch; si distancia < umbral y duración < 300ms → tap (dispara); si no → drag (solo apunta).
 
 ### 3.3. Accesibilidad
@@ -422,10 +422,11 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 - ✅ **TRECO:** **TRECO GESTIÓN DE RESIDUOS S.L.**, empresa real con nombre legal explícito. Marca y nombre propiedad de sus titulares. Disclaimer con texto legal completo (Art. 20 CE + Art. 11 CDFUE + uso nominativo + respeto a derechos de marca).
 - ✅ **Vista del jugador:** primera persona con mano pixel art sosteniendo bolígrafo. El boli firma sobre un papel que sale volando como proyectil. Ver Sección 1 y 2.2.
 - ✅ **Stack render:** Pixi.js vía CDN (confirmado por el usuario 2026-09-03). Manejo de sprites, parallax, tweens, partículas.
+- ✅ **Auto-fire móvil:** OFF (disparo manual con tap). Confirmado 2026-09-03.
 
 **Aún pendientes:**
 1. ✅ **Stack render:** **Pixi.js vía CDN** (confirmado).
-2. **Auto-fire en móvil:** ¿on por defecto u opcional?
+2. ✅ **Auto-fire en móvil:** **OFF** (disparo manual con tap).
 3. **Cartas pedagógicas:** ¿en éxito o resumen al final?
 4. **Traducción:** ¿solo español o también valencià/english?
 5. **Modo portrait móvil:** ¿forzar landscape?
