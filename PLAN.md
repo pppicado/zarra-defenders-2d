@@ -103,7 +103,7 @@ Cada enemigo / acierto dispara una **card flotante** con:
 | Pausa | `Esc` o `P` |
 | Menú (en game over) | Click en botón |
 
-**Light gun (pistolas de luz HID):** las pistolas de luz modernas se reconocen como mouse USB estándar. El juego **no requiere código especial** — funciona automáticamente. Sí hay que configurar el navegador para que el cursor esté oculto en fullscreen (CSS: `cursor: none` durante gameplay).
+**Light gun (pistolas de luz HID):** confirmar opción A — asumir mouse siempre (confirmado por el usuario, 2026-09-03). Las pistolas de luz modernas se reconocen como mouse USB estándar. El juego **no requiere código especial** — funciona automáticamente. Sí hay que configurar el navegador para que el cursor esté oculto en fullscreen (CSS: `cursor: none` durante gameplay). El `src/input.js` no necesita rama de código para gamepad/light gun; todo entra por el mismo `pointermove` + `pointerdown`.
 
 ### 3.2. Móvil / Tablet
 
@@ -466,6 +466,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 - ✅ **Cartas pedagógicas:** combinación B + D — modal intermedio cada 5 enemigos + resumen completo al final del stage. Confirmado 2026-09-03.
 - ✅ **Traducción:** solo español al lanzamiento, estructura i18n-ready. Confirmado 2026-09-03.
 - ✅ **Orientación móvil:** forzar landscape con modal de aviso en portrait. Confirmado 2026-09-03.
+- ✅ **Light gun:** opción A — asumir mouse siempre (sin código especial). Pistolas de luz HID funcionan automáticamente como mouse USB estándar. Confirmado 2026-09-03.
 
 **Aún pendientes:**
 1. ✅ **Stack render:** **Pixi.js vía CDN** (confirmado).
@@ -473,7 +474,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 3. ✅ **Cartas pedagógicas:** **modal intermedio cada 5 + resumen completo al final del stage**.
 4. ✅ **Traducción:** **solo español al lanzamiento, i18n-ready**.
 5. ✅ **Modo portrait móvil:** **forzar landscape con modal de aviso en portrait**.
-6. **Light gun detection:** ¿detectar automáticamente (¿Gamepad API?) o asumir mouse?
+6. ✅ **Light gun detection:** **A — asumir mouse siempre, sin código especial**.
 7. **Continues / extra lives:** ¿hay o no?
 8. **High score / leaderboard:** ¿local (localStorage) o global?
 9. **Tamaño de canvas:** ¿fijo (1280x720) o responsive?
