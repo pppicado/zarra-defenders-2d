@@ -88,7 +88,7 @@ Cada enemigo / acierto dispara una **card flotante** con:
 - **Cartas pedagógicas: mostradas en DOS momentos** (confirmado por el usuario, 2026-09-03, opciones B + D combinadas):
   - **Modal intermedio cada X enemigos** (default: cada 5): sin interrumpir el flow, aparece un overlay breve (3-5 segundos) con resumen parcial: "Has destruido 5 lixiviados, contaminando un equivalente a 1000 L del río Cabriel". Se cierra automáticamente o con tap.
   - **Resumen completo al final del stage:** todas las cards acumuladas se muestran en secuencia navegable (estilo debrief), con opción de leer cada detalle + fuentes. Accesible después desde la Biblioteca pedagógica.
-- `[?]` ¿Traducción multi-idioma? (mínimo: español, ideal: valencià + english)
+- **Idioma: solo español** (confirmado por el usuario, 2026-09-03). Strings centralizados en `src/i18n/es.js` como objeto JS plano para facilitar refactor a i18n completo más adelante si se necesita.
 
 ---
 
@@ -426,12 +426,13 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 - ✅ **Stack render:** Pixi.js vía CDN (confirmado por el usuario 2026-09-03). Manejo de sprites, parallax, tweens, partículas.
 - ✅ **Auto-fire móvil:** OFF (disparo manual con tap). Confirmado 2026-09-03.
 - ✅ **Cartas pedagógicas:** combinación B + D — modal intermedio cada 5 enemigos + resumen completo al final del stage. Confirmado 2026-09-03.
+- ✅ **Idioma:** solo español. Confirmado 2026-09-03. Strings en `src/i18n/es.js`, arquitectura preparada para i18n futuro.
 
 **Aún pendientes:**
 1. ✅ **Stack render:** **Pixi.js vía CDN** (confirmado).
 2. ✅ **Auto-fire en móvil:** **OFF** (disparo manual con tap).
 3. ✅ **Cartas pedagógicas:** **modal intermedio cada 5 + resumen completo al final del stage**.
-4. **Traducción:** ¿solo español o también valencià/english?
+4. ✅ **Idioma:** **solo español** (estructura i18n-ready).
 5. **Modo portrait móvil:** ¿forzar landscape?
 6. **Light gun detection:** ¿detectar automáticamente (¿Gamepad API?) o asumir mouse?
 7. **Continues / extra lives:** ¿hay o no?
