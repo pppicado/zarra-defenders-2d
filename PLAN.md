@@ -48,8 +48,8 @@
 ### 2.3. Sistema de vidas
 
 - 3 vidas por stage.
-- Perder todas = game over → menú → reiniciar stage.
-- `[?]` ¿Puntos extra / continues después del primer game over?
+- Perder todas = **game over final → menú principal** (confirmado por el usuario, 2026-09-03, opción A). Sin continues, sin segunda oportunidad. El jugador debe reiniciar el stage desde el principio. Estilo arcade clásico (Time Crisis, House of the Dead).
+- Cada stage persiste su mejor score en `localStorage` (clave `zarra2d:best:stage_<n>`), pero el run actual muere al primer game over.
 
 ### 2.4. Stages / niveles
 
@@ -467,6 +467,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 - ✅ **Traducción:** solo español al lanzamiento, estructura i18n-ready. Confirmado 2026-09-03.
 - ✅ **Orientación móvil:** forzar landscape con modal de aviso en portrait. Confirmado 2026-09-03.
 - ✅ **Light gun:** opción A — asumir mouse siempre (sin código especial). Pistolas de luz HID funcionan automáticamente como mouse USB estándar. Confirmado 2026-09-03.
+- ✅ **Continues:** opción A — game over final sin continues. Reiniciar stage desde cero. Estilo arcade clásico. Confirmado 2026-09-03.
 
 **Aún pendientes:**
 1. ✅ **Stack render:** **Pixi.js vía CDN** (confirmado).
@@ -475,7 +476,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 4. ✅ **Traducción:** **solo español al lanzamiento, i18n-ready**.
 5. ✅ **Modo portrait móvil:** **forzar landscape con modal de aviso en portrait**.
 6. ✅ **Light gun detection:** **A — asumir mouse siempre, sin código especial**.
-7. **Continues / extra lives:** ¿hay o no?
+7. ✅ **Continues / extra lives:** **A — game over final sin continues**.
 8. **High score / leaderboard:** ¿local (localStorage) o global?
 9. **Tamaño de canvas:** ¿fijo (1280x720) o responsive?
 10. **Variantes de proyectil:** ¿solo papeleta estándar, o también la versión con sello (más daño), o una super-firma cargada con daño en área?
