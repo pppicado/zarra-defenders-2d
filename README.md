@@ -1,12 +1,24 @@
 # Zarra Defenders 2D
 
-> **Versión 2D isométrica del on-rails shooter pedagógico sobre el macrovertedero de TRECO (Valle de Ayora, Valencia).**
+> **On-rails shooter pedagógico sobre el impacto del macrovertedero de TRECO en el Valle de Ayora-Cofrentes.**
 >
 > HTML + JS sin build step. Jugar con mouse (o pistola de luz HID) en PC, táctil en móvil.
 
 ![Status](https://img.shields.io/badge/status-planning-yellow)
 ![License](https://img.shields.io/badge/license-TBD-lightgrey)
 ![Tech](https://img.shields.io/badge/tech-HTML5%20%2B%20Canvas2D%20%2F%20Pixi-blue)
+
+## ⚠️ Aviso · Disclaimer
+
+Este juego es una obra de **ficción con fines educativos y cívicos**.
+
+- ✗ **NO promueve la violencia.** La mecánica de "disparar" es una **metáfora de la acción documental**: cada "firma" representa el apoyo vecinal a la defensa del territorio.
+- ✓ Promueve la **lucha legal**: recogida de firmas, alegaciones administrativas, movilización ciudadana, documentación de impactos.
+- El nombre **TRECO es ficticio**. Cualquier parecido con empresas o proyectos reales es incidental o constituye una crítica documentada con fuentes públicas verificables.
+- Los datos mostrados (volúmenes, daños, cuantías) provienen de **fuentes citadas en cada card pedagógica** del juego.
+- Si alguna persona o colectivo se sintiera identificado incorrectamente, puede solicitar la modificación de textos vía GitHub Issues.
+
+Ver el disclaimer completo y la política de contenido en [`PLAN.md`](./PLAN.md#-disclaimer-y-política-de-contenido).
 
 ## Contexto
 

@@ -318,8 +318,9 @@ Sonidos cortos de gameplay:
 8. **High score / leaderboard:** ¿local (localStorage) o global?
 9. **Tamaño de canvas:** ¿fijo (1280x720) o responsive?
 10. **Variantes de proyectil:** ¿solo papeleta estándar, o también la versión con sello (más daño), o una super-firma cargada con daño en área?
-11. **Música:** ¿usar grabaciones reales del Fondo IMF-CSIC, inspirarnos en ellas para nuevas composiciones, o ambas?
-12. **SFX:** ¿síntesis procedural con Web Audio API, samples de freesound.org, o el usuario aporta grabaciones?
+11. **Música:** ¿qué opción? (A: Web Audio procedural jota / B: Playwright + Suno externo / C: instalar MCP de música / D: grabaciones CSIC + Suno) **[recomendado: B]**
+12. **SFX:** ✅ CONFIRMADO opción C (síntesis procedural Web Audio API)
+13. **Disclaimer:** ¿TRECO debe ser mencionado explícitamente como empresa real (si lo es), o se mantiene ficticio? El texto propuesto está neutro — fácil de ajustar en una línea.
 
 ---
 
