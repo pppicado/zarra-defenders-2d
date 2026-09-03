@@ -418,7 +418,8 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 **Confirmadas en sesión 2026-09-03:**
 - ✅ **Música:** opción B (Playwright + Suno externo). Pipeline definido en sección 6.Audio.
 - ✅ **SFX:** opción C (síntesis procedural Web Audio API). Mapeo en sección 6.Audio.
-- ✅ **TRECO:** empresa real, marca propiedad de sus titulares. Disclaimer actualizado con texto legal (Art. 20 CE + uso nominativo +尊重 a derechos de marca).
+- ✅ **TRECO:** **TRECO GESTIÓN DE RESIDUOS S.L.**, empresa real con nombre legal explícito. Marca y nombre propiedad de sus titulares. Disclaimer con texto legal completo (Art. 20 CE + Art. 11 CDFUE + uso nominativo + respeto a derechos de marca).
+- ✅ **Vista del jugador:** primera persona con mano pixel art sosteniendo bolígrafo. El boli firma sobre un papel que sale volando como proyectil. Ver Sección 1 y 2.2.
 
 **Aún pendientes:**
 1. **Stack render:** ¿Pixi.js (vía CDN) o Canvas2D nativo?
