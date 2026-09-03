@@ -246,6 +246,39 @@ requestAnimationFrame(frame);
 - **Móvil:** canvas a pantalla completa, portrait o landscape según stage.
 - `[?]` ¿Forzar landscape en móvil? (Mejor para rail shooter, pero pierde usuarios en portrait.)
 
+### 5.6. Internacionalización (i18n)
+
+Confirmado por el usuario (2026-09-03): **solo español al lanzamiento, pero con estructura preparada para añadir idiomas después** sin refactor.
+
+**Estrategia técnica:**
+
+- **Todas las strings del juego** centralizadas en `docs/i18n/es.json` (único idioma poblado al inicio).
+- Estructura del JSON:
+  ```json
+  {
+    "ui": {
+      "menu": { "play": "Jugar", "library": "Biblioteca pedagógica", "credits": "Créditos" },
+      "hud": { "firmas": "Firmas recogidas: {count}", "vidas": "Vidas: {n}" },
+      "pause": { "title": "Pausa", "resume": "Continuar", "restart": "Reiniciar stage", "exit": "Salir al menú" },
+      "gameover": { "title": "Game Over", "retry": "Reintentar", "menu": "Menú principal" },
+      "victory": { "title": "¡Stage completado!", "next": "Siguiente stage", "library": "Ver biblioteca" }
+    },
+    "disclaimer": { "title": "Aviso Legal · Disclaimer", "..." },
+    "stages": {
+      "bosque": { "name": "Bosque mediterráneo", "intro": "..." },
+      "pueblo": { "..." }
+    },
+    "pedagogy": {
+      "card_template": "{titulo}\n{descripcion}\n\nFuente: {fuente}",
+      "intermediate_modal_template": "Has destruido {n} {enemigo}. Total acumulado: {impacto}"
+    }
+  }
+  ```
+- **Carga en runtime:** `src/i18n.js` carga el JSON según `localStorage.getItem('lang')` o `navigator.language`. Default: `es`.
+- **Pluggable para futuro:** añadir `docs/i18n/val.json` o `en.json` solo requiere crear el archivo y registrar el código de idioma. Sin tocar `src/i18n.js`.
+- **Herramientas futuras:** cuando se quiera traducir, se puede usar minimax MCP `text_to_audio` con voz — NO, ese es solo TTS. Mejor usar un servicio externo o un voluntario local para el valencià.
+- **Tests de i18n:** aserciones simples de que los textos cargan, los placeholders (`{count}`) se interpolan, y los strings críticos existen.
+
 ---
 
 ## 6. Inventario de assets
@@ -426,13 +459,14 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 - ✅ **Stack render:** Pixi.js vía CDN (confirmado por el usuario 2026-09-03). Manejo de sprites, parallax, tweens, partículas.
 - ✅ **Auto-fire móvil:** OFF (disparo manual con tap). Confirmado 2026-09-03.
 - ✅ **Cartas pedagógicas:** combinación B + D — modal intermedio cada 5 enemigos + resumen completo al final del stage. Confirmado 2026-09-03.
+- ✅ **Traducción:** solo español al lanzamiento, estructura i18n-ready. Confirmado 2026-09-03.
 - ✅ **Idioma:** solo español. Confirmado 2026-09-03. Strings en `src/i18n/es.js`, arquitectura preparada para i18n futuro.
 
 **Aún pendientes:**
 1. ✅ **Stack render:** **Pixi.js vía CDN** (confirmado).
 2. ✅ **Auto-fire en móvil:** **OFF** (disparo manual con tap).
 3. ✅ **Cartas pedagógicas:** **modal intermedio cada 5 + resumen completo al final del stage**.
-4. ✅ **Idioma:** **solo español** (estructura i18n-ready).
+4. ✅ **Traducción:** **solo español al lanzamiento, i18n-ready**.
 5. **Modo portrait móvil:** ¿forzar landscape?
 6. **Light gun detection:** ¿detectar automáticamente (¿Gamepad API?) o asumir mouse?
 7. **Continues / extra lives:** ¿hay o no?
