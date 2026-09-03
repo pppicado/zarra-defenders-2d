@@ -166,7 +166,8 @@ Pipeline de generación:
 
 - **HTML5 + JavaScript vanilla (sin TypeScript, sin framework)** — cero dependencias de build.
 - **Pixi.js** (vía CDN) — manejo de sprites, parallax, tweens, efectos de partículas. Mucho mejor que Canvas2D puro para 21+ sprites con transformaciones.
-  - `[?]` Alternativa: Canvas2D nativo sin deps. Más ligero pero más código para tweens/parallax.
+  - Confirmado por el usuario (2026-09-03): Pixi.js vía CDN. Alternativa Canvas2D descartada.
+  - Carga: `<script src="https://cdn.pixijs.com/...">` (versión estable más reciente). Versión también bundleable si queremos offline total.
 - **Sin build step.** Todo se sirve tal cual desde `index.html`. ES modules con `<script type="module">`.
 - **Sin package.json ni node_modules.** Repo 100% estático + assets.
 
@@ -420,9 +421,10 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 - ✅ **SFX:** opción C (síntesis procedural Web Audio API). Mapeo en sección 6.Audio.
 - ✅ **TRECO:** **TRECO GESTIÓN DE RESIDUOS S.L.**, empresa real con nombre legal explícito. Marca y nombre propiedad de sus titulares. Disclaimer con texto legal completo (Art. 20 CE + Art. 11 CDFUE + uso nominativo + respeto a derechos de marca).
 - ✅ **Vista del jugador:** primera persona con mano pixel art sosteniendo bolígrafo. El boli firma sobre un papel que sale volando como proyectil. Ver Sección 1 y 2.2.
+- ✅ **Stack render:** Pixi.js vía CDN (confirmado por el usuario 2026-09-03). Manejo de sprites, parallax, tweens, partículas.
 
 **Aún pendientes:**
-1. **Stack render:** ¿Pixi.js (vía CDN) o Canvas2D nativo?
+1. ✅ **Stack render:** **Pixi.js vía CDN** (confirmado).
 2. **Auto-fire en móvil:** ¿on por defecto u opcional?
 3. **Cartas pedagógicas:** ¿en éxito o resumen al final?
 4. **Traducción:** ¿solo español o también valencià/english?
@@ -433,7 +435,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 9. **Tamaño de canvas:** ¿fijo (1280x720) o responsive?
 10. **Variantes de proyectil:** ¿solo papeleta estándar, o también la versión con sello (más daño), o una super-firma cargada con daño en área?
 11. **Accesibilidad:** ¿modo alto contraste, subtítulos/text-to-speech en cards, prefers-reduced-motion?
-12. **Continues extra tras primer game over** (subdecisión de 7)
+12. **Variantes de proyectil** (subdecisión de 10) — desglosada si quieres tratar aparte
 
 ---
 
@@ -503,7 +505,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 
 | Riesgo | Impacto | Mitigación |
 |---|---|---|
-| Pixi.js no carga desde CDN | Medio | Fallback a Canvas2D nativo |
+| Pixi.js no carga desde CDN | ~~Medio~~ descartado | Stack confirmado = Pixi.js. Si falla el CDN, fallback local (bundle del repo). |
 | Performance con muchos sprites | Medio | Object pooling, sprite batching |
 | Backgrounds de menú muy costosos (API calls) | Bajo | Cachear versiones ya generadas |
 | Pedagogy data incorrecta / sin fuente | Alto | Revisión manual antes de publicar |
