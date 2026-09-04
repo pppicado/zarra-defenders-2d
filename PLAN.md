@@ -67,7 +67,7 @@ Propuesta de 5 stages, cada uno en una zona del Valle:
 |---|---|---|---|---|
 | 1 | **Bosque mediterráneo** | Pinos, encinas, almendros | topadora cortando árboles, dron fumigador | bosque.png (generar) |
 | 2 | **Pueblo de Cofrentes** | Casas blancas, castillo al fondo | camión TRECO, valla publicitaria | pueblo.png (generar) |
-| 3 | **Río Cabriel** | Ribera, agua, rocas | tubos de lixiviado vertiendo, plataforma solar (irónica) | rio.png (generar) |
+| 3 | **Río Cabriel** | Ribera, agua, rocas | tubos de lixiviado vertiendo, **camión cisterna de residuos** | rio.png (generar) |
 | 4 | **Vertedero TRECO** | Macrovertedero, montañas de basura | planta TRECO (boss), bidón lixiviado, incineradora, bolsa plástica | vertedero.png (generar) |
 | 5 | **Castillo de Cofrentes** | El peñón con el castillo y el pueblo | sello burocrático (mini-boss), trailer de obra | castillo.png (generar — ya lo tenemos) |
 
@@ -455,7 +455,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 ### ✅ Ya tenemos (21 sprites)
 
 - **Trees (3):** encina, pino, almendro
-- **Enemies (12):** camion_treco, bidon_lixiviado, bolsa_plastico, valla_publicitaria, plataforma_solar, tubo_lixiviado, dron_fumigador, sello_burocratico, topadora, incineradora, trailer, planta_treco (boss)
+- **Enemies (11 + 1 boss = 12):** camion_treco, bidon_lixiviado, bolsa_plastico, valla_publicitaria, **camion_cisterna_residuos** (reemplaza plataforma_solar, 2026-09-03 — las energías renovables no pueden ser enemigo en este juego, decisión confirmada), tubo_lixiviado, dron_fumigador, sello_burocratico, topadora, incineradora, trailer, planta_treco (boss)
 - **Props (3):** valla, roca, cartel
 - **Buildings (3):** casa_ayora, castillo_cofrentes (con pueblo), torre_central
 
@@ -470,7 +470,8 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 | Sprites de explosión | 2-3 | partículas para hits |
 | **Proyectil = documento firmado** | **1** | **papeleta estándar** (confirmado opción A: solo variante única para v1; las demás quedan como iteración futura) |
 | **Mano + bolígrafo (primera persona)** | **1-2** | **vista confirmada en primera persona** — mano pixel art con boli, orientación dinámica según puntero. Animación de firma al disparar. |
-| Datos pedagógicos + fuentes | 13 entradas | `docs/pedagogy-data.json` |
+| **Camión cisterna de residuos** (nuevo sprite, reemplaza plataforma_solar) | 1 | Prompt sugerido: `"industrial hazardous waste tanker truck, cylindrical tank, hazard symbol, polluted Valle de Ayora road"` |
+| Datos pedagógicos + fuentes | 12 entradas (reducido por reemplazo) | `docs/pedagogy-data.json` |
 | Audio SFX (opcional) | 5-10 | disparo (papel volando), hit, victoria |
 
 ### `[?]` Decisiones pendientes
