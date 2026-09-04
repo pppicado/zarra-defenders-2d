@@ -507,7 +507,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 11. ✅ **Accesibilidad:** **B — solo text-to-speech en cards pedagógicas (Web Speech API, voz es-ES)**.
 12. ✅ **Referencias de locations:** docs creados en `assets/references/stage{1-5}-*/NOTES.md`. Investigar + descargar más referencias antes de implementar cada stage.
 13. ✅ **Test level:** nivel oculto determinista accesible con `?test=1`, API `window.__gameTestAPI__`, sin aleatoriedad, para Playwright.
-14. **Reemplazo de `plataforma_solar`:** propuesta = **Camión cisterna de residuos tóxicos** (decisión pendiente de confirmación del usuario).
+14. ✅ **Reemplazo de `plataforma_solar`:** confirmado **Camión cisterna de residuos tóxicos**. Nuevo sprite a generar en Fase de assets. Decisión cerrada 2026-09-03.
 
 ---
 
