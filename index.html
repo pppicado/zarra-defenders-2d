@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Zarra Defenders 2D</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <!-- Modal de aviso para rotar el móvil si está en portrait -->
+  <div id="orientation-warning" class="hidden" aria-hidden="true">
+    <div class="rotate-icon" aria-hidden="true">
+      <!-- Icono SVG inline: móvil con flecha de rotación -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64">
+        <g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Silueta de móvil en portrait -->
+          <rect x="35" y="15" width="30" height="60" rx="4"/>
+          <circle cx="50" cy="68" r="2"/>
+          <!-- Flecha de rotación -->
+          <path d="M 75 50 Q 85 30 75 15" />
+          <polyline points="80,15 75,15 75,20"/>
+        </g>
+      </svg>
+    </div>
+    <p>Por favor, gira el móvil para jugar</p>
+  </div>
+
+  <!-- Contenedor principal del juego con ratio 16:9 bloqueado -->
+  <div id="game-container">
+    <div id="game-canvas-wrapper"></div>
+    <!-- HUD overlay (placeholder por ahora) -->
+    <div id="hud" class="hidden"></div>
+    <!-- Modal de disclaimer (placeholder; se implementa en Fase 7) -->
+    <div id="disclaimer-modal" class="hidden"></div>
+  </div>
+
+  <!-- Pixi.js v7 estable (cargado desde CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js"></script>
+  <!-- Nuestro código (ES modules, sin build step) — query string para forzar no-cache durante dev -->
+  <script type="module" src="src/main.js?v=4"></script>
+</body>
+</html>

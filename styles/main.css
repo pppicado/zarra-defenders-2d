@@ -1,0 +1,120 @@
+/* ============================================================
+   ZARRA DEFENDERS 2D — Estilos principales
+   - Reset + fullscreen
+   - Canvas 16:9 lock + max-fit (márgenes letterbox/pillarbox)
+   - DPR-aware (Pixi.js maneja el devicePixelRatio)
+   - Modal de orientación para móvil (forzar landscape)
+   - Pixel-perfect rendering (image-rendering: pixelated)
+   ============================================================ */
+
+/* --- Reset --- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* --- html/body fullscreen sin scroll --- */
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0a0a0a;        /* negro pixel-art clásico para los márgenes */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #e8e8e8;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;          /* evita scroll/zoom en touch */
+}
+
+/* ============================================================
+   Contenedor del juego: 16:9 lock + max-fit
+   - Si viewport es widescreen (más ancho que 16:9): ancho=100vw, alto derivado, letterbox arriba/abajo
+   - Si viewport es alto (más alto que 16:9): alto=100vh, ancho derivado, letterbox a los lados
+   - En cualquier caso: máx área posible manteniendo 16:9
+   ============================================================ */
+#game-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100vw;
+  height: 56.25vw;                /* 9/16 = 0.5625 */
+  max-height: 100vh;
+  max-width: 177.77778vh;          /* 16/9 = 1.7778 */
+  background: #000;
+  overflow: hidden;
+}
+
+/* Wrapper interno del canvas Pixi — llena el contenedor */
+#game-canvas-wrapper {
+  position: absolute;
+  inset: 0;
+}
+
+/* HUD y modal overlay encima del canvas */
+#hud, #disclaimer-modal {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+#hud > *, #disclaimer-modal > * {
+  pointer-events: auto;
+}
+
+/* ============================================================
+   Orientación móvil: forzar landscape con modal de aviso
+   - Solo visible cuando el dispositivo está en portrait
+   - Oculta automáticamente al rotar a landscape
+   ============================================================ */
+#orientation-warning {
+  position: fixed;
+  inset: 0;
+  background: #0a0a0a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  z-index: 9999;
+  color: #f5a623;                  /* naranja retro */
+}
+
+#orientation-warning p {
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-align: center;
+  max-width: 80vw;
+  text-shadow: 0 2px 0 #000;
+  padding: 0 1rem;
+}
+
+#orientation-warning .rotate-icon {
+  animation: rotate-hint 2.4s ease-in-out infinite;
+}
+
+@keyframes rotate-hint {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-90deg); }
+}
+
+/* ============================================================
+   Utilidad: ocultar
+   ============================================================ */
+.hidden {
+  display: none !important;
+}
+
+/* ============================================================
+   Canvas Pixi: pixel-perfect scaling, sin blur al escalar
+   (Pixi aplica resolution=devicePixelRatio internamente)
+   ============================================================ */
+canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;     /* fallback Firefox */
+  -ms-interpolation-mode: nearest-neighbor;
+}
