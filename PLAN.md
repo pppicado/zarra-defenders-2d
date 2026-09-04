@@ -253,8 +253,13 @@ requestAnimationFrame(frame);
 
 ### 5.5. Responsive
 
-- **PC:** fullscreen fijo, canvas a 1280x720 o 1920x1080, escalado con letterbox.
-- **Móvil:** **forzar landscape con aviso en portrait** (confirmado por el usuario, 2026-09-03, opción A + C combinadas).
+- **Canvas dinámico + DPR-aware + aspect ratio bloqueado (16:9)** (confirmado por el usuario, 2026-09-03, opción D + requisito de max-fit con márgenes).
+  - El canvas **SIEMPRE** mantiene la proporción 16:9 (ancho / alto fijo). Si el viewport del navegador es más ancho o más estrecho que 16:9, se ponen **márgenes** (letterbox o pillarbox) en el espacio sobrante. Aprovecha el máximo de pantalla sin deformar.
+  - **Pixi.js nativo**: `PIXI.Application` con `resizeTo: window`, `resolution: window.devicePixelRatio` (auto-ajuste para nitidez en pantallas retina/4K), `autoDensity: true`.
+  - Comportamiento CSS análogo a `object-fit: contain`: el canvas se centra en el viewport y se escala al máximo posible manteniendo aspect ratio; el sobrante queda como margen del color de fondo elegido (negro oscuro `#0a0a0a` para evocar pixel art clásico).
+  - **En PC:** se aprovecha pantalla completa con letterbox horizontal o vertical según el ratio del monitor.
+  - **En móvil (landscape):** misma lógica, el canvas aprovecha todo el ancho/alto del navegador landscape.
+- **Móvil: forzar landscape con modal de aviso en portrait** (confirmado).
   - El juego SOLO funciona en horizontal en móvil.
   - Si el dispositivo está en portrait al arrancar o se rota a portrait durante el juego, se muestra un **modal fullscreen** con icono SVG de "girar dispositivo" + texto "Por favor, gira el móvil para jugar" + breve instrucción.
   - El modal desaparece automáticamente cuando `window.matchMedia('(orientation: landscape)').matches` devuelve `true`.
