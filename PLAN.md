@@ -759,6 +759,61 @@ Cada NOTES.md incluye: datos reales del lugar, landmarks reconocibles para el bg
 
 ---
 
+## 13. Revisión post-v0.1 — Pivote a vista isométrica tipo Diablo 2
+
+**Fecha de la propuesta:** 2026-09-04 (mismo día del tag v0.1).
+
+**Contexto:** El tag `v0.1` captura el estado del proyecto como **rail shooter lateral con desplazamiento** (Fase 1 + 2 implementadas). Tras probarlo, el usuario plantea que **prefiere una vista isométrica tipo Diablo 2**:
+
+> *"había pensado en una perspectiva más isométrica en plan el juego de diablo 2 con un plano ligeramente abativido con el tileado del fondo y los decorados y enemigos como verticales sobre este como simulando un 3d y el avance fuese hacia delante o diagonal hacia delante"*
+
+**Traducción técnica:** En lugar de rail shooter (cámara con path fijo que el jugador no controla), un **ARPG isométrico** con:
+- Suelo tileado isométrico (plano "abativido" / con perspectiva de techo bajo)
+- Sprites de enemigos/decorados parados **verticales sobre el suelo** (eje Z simulado)
+- **Avance hacia adelante o diagonal** (no lateral)
+- Simulación de 3D con técnicas 2D (sprites en eje Z virtual)
+
+### Implicaciones del cambio (cascada)
+
+| Componente | Estado v0.1 (rail) | Necesario si isométrico |
+|---|---|---|
+| Vista del jugador | Primera persona con mano + boli | Top-down isométrica, personaje visible desde atrás/3-4 |
+| Sprites | 21 ya generados, "flotan" sobre fondo | Reusables como verticales, pero necesitan **anclaje a tile** (pies en coord del suelo) |
+| RailCamera | Implementado y funcional | **Queda obsoleta**. Nueva clase `IsometricView` o `WorldCamera` |
+| Tile system | No existe | **Nuevo**: `src/tile.js`, `src/world.js` con mapa tileado |
+| Z-ordering | No necesario (sprites ortogonales) | **Necesario**: orden de render por profundidad (más cercano al sur-este del iso = más al frente) |
+| Crosshair | Coords de pantalla | **Coords del mundo iso**: target sobre el suelo, proyectado |
+| Control del jugador | Solo apuntar/disparar | **Movimiento** WASD/touch-drag (libre o automático hacia adelante) |
+| Input.js | Solo move + tap + pause | Añadir: stick virtual / drag del mapa / keys de movimiento |
+| Disparo | Desde coords de pantalla | Desde posición del jugador hacia tile targeteado |
+
+### Componentes que SÍ se reutilizan (no se pierde el trabajo v0.1)
+
+- ✅ `src/input.js` — la base de Pointer Events es la misma
+- ✅ `src/main.js` — la estructura world/hud/ui se mantiene
+- ✅ `styles/main.css` — letterbox 16:9, modal portrait, fullscreen button
+- ✅ `index.html` — modal disclaimer, botón fullscreen
+- ✅ **Los 21 sprites** — son isométricos y se pueden reutilizar como "verticales sobre tile" (solo cambia el anclaje)
+- ✅ `tools/postprocess_v4.py` — pipeline alpha sigue siendo útil
+
+### Decisiones pendientes para confirmar el nuevo diseño (NO cambiar PLAN hasta que estén)
+
+1. **Control del jugador:** ¿Movimiento libre con WASD/touch-drag (estilo Diablo puro) o scroll automático hacia adelante/diagonal con desvío lateral del jugador (estilo Final Fantasy Tactics / Cadash)?
+2. **Tile size:** ¿32×32, 64×64, o 96×96 px por tile isométrico? (afecta cantidad de tiles visibles, complejidad)
+3. **Tamaño del mapa por stage:** ¿Una "pantalla" (1 viewport) de tiles, o más grande con scroll libre?
+4. **Vista del personaje:** ¿Vista isométrica con el personaje centrado en pantalla (estilo Diablo 2), o el personaje fijo en la parte inferior (estilo "alpine slash" donde el mundo se mueve y el PJ está quieto)?
+5. **Tile generation:** ¿Suelo tileado dibujado a mano (estética pixel art coherente), procedural (más rápido pero menos controlado), o generado por minimax por stage?
+6. **Enemigos/aliados:** ¿Tiles separados para enemigos vs terreno (estilo JRPG), o todo es un único mapa con Z-order?
+7. **Stages:** ¿Mismo mapa continuo (caminas de uno a otro) o cada stage es un mapa independiente con menú entre ellos?
+8. **Cards pedagógicas:** ¿Se muestran sobre el mundo isométrico o con modal dedicado estilo Diablo inventory?
+9. **Disparo:** ¿Free-aim (click en cualquier punto del suelo) o solo enemigo-más-cercano (target lock)?
+
+**Pendiente de tu confirmación** antes de re-planificar formalmente el proyecto.
+
+Mientras tanto: **v0.1 sigue siendo el "fallback" si el nuevo diseño no funciona**. Si después de explorar decides volver al rail shooter, `git checkout v0.1` te devuelve al estado funcional de Fase 1+2.
+
+---
+
 **Por favor revisar y:**
 - Marcar las decisiones pendientes `[?]` con tu preferencia
 - Cambiar el orden / alcance de las fases si querés
