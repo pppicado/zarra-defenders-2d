@@ -66,6 +66,9 @@ async function bootstrap() {
   // --- Orientación móvil: setup del modal ---
   setupOrientationLock()
 
+  // --- Botón de pantalla completa ---
+  setupFullscreenButton()
+
   // --- Crear aplicación Pixi (API v7: constructor sincrónico) ---
   const wrapper = document.getElementById('game-canvas-wrapper')
   const app = new PIXI.Application({
@@ -80,8 +83,17 @@ async function bootstrap() {
   wrapper.appendChild(app.view)
 
   // --- Mundo (Container principal de Pixi) ---
+  // Estructura de layers:
+  //   app.stage
+  //     ├── world (se mueve con la cámara — sprites isométricos, parallax)
+  //     └── hud   (NO se mueve — crosshair, mano, proyectiles en coordenadas de pantalla)
+  //     └── ui    (menús, modales — coordenadas de viewport)
   const world = new PIXI.Container()
+  world.name = 'world'
   app.stage.addChild(world)
+  const hud = new PIXI.Container()
+  hud.name = 'hud'
+  app.stage.addChild(hud)
 
   // --- Background del mundo (color sólido placeholder) ---
   // En Fases futuras: imagen de bg pixel art generada con minimax
@@ -106,7 +118,7 @@ async function bootstrap() {
   // --- Input + Crosshair (Fase 2) ---
   const input = new Input()
   input.setCanvas(app.view)
-  const player = new Player(app, input, world, camera)
+  const player = new Player(app, input, hud, camera)
 
   // ============================================================
   // Game loop
@@ -189,6 +201,68 @@ function setupOrientationLock() {
   // Backup: también escuchar resize y orientationchange (algunos navegadores no disparan el matchMedia)
   window.addEventListener('resize', update)
   window.addEventListener('orientationchange', update)
+}
+
+/**
+ * Botón de pantalla completa.
+ * - Aparece en la esquina inferior-derecha del viewport.
+ * - Click alterna entre fullscreen y windowed.
+ * - Se muestra siempre (incluso si no hay márgenes) para que el usuario
+ *   pueda entrar/salir de fullscreen en cualquier momento. Visualmente
+ *   queda "en el margen" si existe letterbox, encima del juego si no.
+ * - Detecta cambios desde fuera (e.g., tecla F11) y actualiza el icono.
+ */
+function setupFullscreenButton() {
+  const btn = document.getElementById('fullscreen-btn')
+  if (!btn) return
+
+  btn.classList.remove('hidden')
+
+  function isFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement)
+  }
+
+  function updateIcon() {
+    if (isFullscreen()) {
+      btn.classList.add('is-fullscreen')
+      btn.setAttribute('aria-label', 'Salir de pantalla completa')
+      btn.title = 'Salir de pantalla completa (Esc)'
+    } else {
+      btn.classList.remove('is-fullscreen')
+      btn.setAttribute('aria-label', 'Pantalla completa')
+      btn.title = 'Pantalla completa'
+    }
+  }
+
+  async function toggle() {
+    try {
+      if (isFullscreen()) {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen()
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen()
+        }
+      } else {
+        // Pedimos fullscreen sobre el documento completo (no solo el canvas)
+        // para que el letterbox del navegador no se vea
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen()
+        } else if (document.documentElement.webkitRequestFullscreen) {
+          document.documentElement.webkitRequestFullscreen()
+        }
+      }
+    } catch (err) {
+      console.warn('[ZarraDefenders2D] No se pudo alternar fullscreen:', err)
+    }
+  }
+
+  btn.addEventListener('click', toggle)
+  // Actualizar icono cuando cambia el estado (F11, Esc, etc.)
+  document.addEventListener('fullscreenchange', updateIcon)
+  document.addEventListener('webkitfullscreenchange', updateIcon)
+
+  // Estado inicial
+  updateIcon()
 }
 
 // ============================================================

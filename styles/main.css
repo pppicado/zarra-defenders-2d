@@ -107,6 +107,49 @@ html, body {
 }
 
 /* ============================================================
+   Botón de pantalla completa
+   - Aparece en la esquina inferior-derecha del viewport
+   - Cuando estamos en fullscreen: dice "Salir" y re-llama a exitFullscreen
+   - Se posiciona siempre dentro del viewport (no se mueve con el juego)
+   - Estilo: pixel art retro, semi-transparente, se ilumina al hacer hover
+   ============================================================ */
+#fullscreen-btn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 1000;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: rgba(20, 20, 20, 0.85);
+  color: #e8e8e8;
+  border: 2px solid #f5a623;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  /* Aspecto pixel-art: esquinas duras, sin antialiasing */
+  image-rendering: pixelated;
+}
+
+#fullscreen-btn:hover {
+  background: rgba(245, 166, 35, 0.9);
+  color: #0a0a0a;
+  transform: scale(1.05);
+}
+
+#fullscreen-btn:active {
+  transform: scale(0.95);
+}
+
+#fullscreen-btn.is-fullscreen {
+  color: #f5a623;
+}
+
+/* ============================================================
    Canvas Pixi: pixel-perfect scaling, sin blur al escalar
    (Pixi aplica resolution=devicePixelRatio internamente)
    ============================================================ */

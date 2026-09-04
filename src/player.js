@@ -11,6 +11,13 @@
  *     superpuesta cuando el boli está activo.
  *   - Tap en el sitio = "el boli firma un papel y lo lanza" = disparo (Fase 3).
  *
+ * IMPORTANTE — Capas:
+ *   El crosshair vive en la capa `hud` (NO en `world`). Esto significa que
+ *   no se mueve con la cámara. Si estuviera en `world`, cuando la cámara
+ *   rail se desplazara el crosshair derivaría con ella aunque el usuario no
+ *   moviera el ratón. El crosshair debe estar siempre bajo el cursor del
+ *   ratón en coordenadas de pantalla, no del mundo.
+ *
  * En esta Fase 2 solo creamos el crosshair. La mano se añade en Fase 3
  * cuando ya tengamos el sprite de mano+boli (a generar con minimax).
  *
@@ -18,12 +25,9 @@
  *   - Cruz pixel art de ~24x24 px, color contrastante (cyan o blanco)
  *   - Línea exterior negra de 1px para destacar contra cualquier fondo
  *   - Ocultar el cursor del sistema durante gameplay (`cursor: none`)
- *
- * Coordenadas: el crosshair usa coordenadas del mundo (mismas que el
- * RailCamera) para que los enemigos y proyectiles vivan en el mismo espacio.
  */
 
-const CROSSHAIR_SIZE = 24               // px en coords del mundo
+const CROSSHAIR_SIZE = 24               // px en pantalla (no mundo)
 const CROSSHAIR_COLOR = 0x00ffff        // cyan
 const CROSSHAIR_OUTLINE = 0x000000      // negro
 
@@ -31,18 +35,18 @@ export class Player {
   /**
    * @param {PIXI.Application} app
    * @param {Input} input
-   * @param {PIXI.Container} world  Container donde vive el crosshair
-   * @param {RailCamera} camera   Para transformar coords screen → world
+   * @param {PIXI.Container} hud    Capa HUD (fija, no se mueve con la cámara)
+   * @param {RailCamera} camera   Solo referencia; el crosshair no la usa para nada visual
    */
-  constructor(app, input, world, camera) {
+  constructor(app, input, hud, camera) {
     this.app = app
     this.input = input
-    this.world = world
+    this.hud = hud
     this.camera = camera
 
     // Crear crosshair con Graphics (vector) — más rápido que sprite
     this.crosshair = this._buildCrosshair()
-    this.world.addChild(this.crosshair)
+    this.hud.addChild(this.crosshair)
 
     // Suscribirse a eventos de input
     this._onMove = this._handleMove.bind(this)
@@ -57,7 +61,7 @@ export class Player {
     this._lastTapTime = 0
     this._tapCount = 0
 
-    // El crosshair sigue al puntero; lo actualizamos en el ticker de Pixi
+    // Reservado para futuras animaciones
     app.ticker.add(() => this._update())
   }
 
@@ -69,9 +73,9 @@ export class Player {
   isPaused() { return this._paused }
 
   /**
-   * @returns {{x: number, y: number}} posición del crosshair en coords del mundo
+   * @returns {{x: number, y: number}} posición del crosshair en coords de pantalla
    */
-  getCrosshairWorldPos() {
+  getCrosshairScreenPos() {
     return { x: this.crosshair.x, y: this.crosshair.y }
   }
 
@@ -105,12 +109,12 @@ export class Player {
   }
 
   _handleMove(screenX, screenY) {
-    // Convertir coords pantalla (relativas al canvas) a coords del mundo
-    // Mundo: worldX = screenX + cameraX
-    const worldX = screenX + this.camera.getCameraX()
-    const worldY = screenY  // Asumimos que la cámara no se mueve en Y
-    this.crosshair.x = worldX
-    this.crosshair.y = worldY
+    // El crosshair está en la capa HUD, NO en el mundo.
+    // Por tanto usamos coords de pantalla directamente, sin compensar la cámara.
+    // Esto es lo correcto: el crosshair siempre debe estar BAJO el cursor del ratón,
+    // independientemente de cómo se mueva la cámara rail.
+    this.crosshair.x = screenX
+    this.crosshair.y = screenY
   }
 
   _handleTap(screenX, screenY) {
@@ -128,7 +132,6 @@ export class Player {
   }
 
   _update() {
-    // Por ahora el crosshair se actualiza en _handleMove, pero el ticker
-    // está aquí listo para futuras animaciones (efecto hover, etc.)
+    // Reservado para futuras animaciones del crosshair (hover, pulse, etc.)
   }
 }

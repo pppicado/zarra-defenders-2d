@@ -34,9 +34,22 @@
     <div id="disclaimer-modal" class="hidden"></div>
   </div>
 
+  <!-- Botones de utilidad en los márgenes del letterbox/pillarbox -->
+  <button id="fullscreen-btn" class="hidden" type="button" aria-label="Pantalla completa">
+    <!-- Icono SVG inline: 4 esquinas + flechas hacia afuera -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4,8 4,4 8,4"/>
+        <polyline points="20,8 20,4 16,4"/>
+        <polyline points="4,16 4,20 8,20"/>
+        <polyline points="20,16 20,20 16,20"/>
+      </g>
+    </svg>
+  </button>
+
   <!-- Pixi.js v7 estable (cargado desde CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js"></script>
   <!-- Nuestro código (ES modules, sin build step) — query string para forzar no-cache durante dev -->
-  <script type="module" src="src/main.js?v=5"></script>
+  <script type="module" src="src/main.js?v=6"></script>
 </body>
 </html>
