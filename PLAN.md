@@ -127,9 +127,15 @@ Cada enemigo / acierto dispara una **card flotante** con:
 
 ### 3.3. Accesibilidad
 
-- `[?]` ¿Modo alto contraste para daltonismo?
-- `[?]` ¿Subtítulos / text-to-speech para las cards pedagógicas?
-- `[?]` ¿Reducción de movimiento (prefers-reduced-motion)?
+- **Subtítulos / text-to-speech en cards pedagógicas: SÍ** (confirmado por el usuario, 2026-09-03, opción B). Hace el contenido accesible para personas con discapacidad visual y refuerzo auditivo para todos.
+  - Implementación: `src/accessibility.js` usa la Web Speech API (`window.speechSynthesis`).
+  - En cada card pedagógica aparece un botón "🔊 Escuchar" que reproduce el texto con voz del sistema.
+  - Voces: usa la del navegador del usuario; default español de España (`es-ES`); fallback a `es` genérico.
+  - Configuración opcional desde menú de pausa: velocidad de lectura, volumen, botón on/off por defecto.
+  - Los textos se leen también automáticamente al aparecer la card (configurable).
+  - Persistente en `localStorage` (`zarra2d:settings:tts`).
+- `[?]` ¿Modo alto contraste para daltonismo? (no seleccionado por ahora — puede añadirse en iteración futura)
+- `[?]` ¿Reducción de movimiento (prefers-reduced-motion)? (no seleccionado por ahora — puede añadirse en iteración futura)
 
 ---
 
@@ -484,6 +490,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 - ✅ **Score y compartir:** opción D — best score local en localStorage + link compartible con score en redes sociales. Sin backend ni tracking. Confirmado 2026-09-03.
 - ✅ **Canvas responsivo:** DPR-aware (Pixi.js nativo) + aspect ratio bloqueado 16:9 + márgenes letterbox/pillarbox para max-fit. Confirmado 2026-09-03.
 - ✅ **Variantes de proyectil:** opción A — solo papeleta estándar para v1. Variantes con sello / super-firma quedan como iteraciones futuras. Confirmado 2026-09-03.
+- ✅ **Accesibilidad:** opción B — subtítulos / text-to-speech en cards pedagógicas vía Web Speech API. Voz es-ES. Toggle desde menú de pausa. Confirmado 2026-09-03.
 
 **Aún pendientes:**
 1. ✅ **Stack render:** **Pixi.js vía CDN** (confirmado).
@@ -496,7 +503,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 8. ✅ **High score / leaderboard:** **D — best score local + link compartible en redes (sin backend, sin tracking)**.
 9. ✅ **Tamaño de canvas:** **DPR-aware + 16:9 lock + márgenes max-fit (letterbox/pillarbox)**.
 10. ✅ **Variantes de proyectil:** **A — solo papeleta estándar para v1**.
-11. **Accesibilidad:** ¿modo alto contraste, subtítulos/text-to-speech en cards, prefers-reduced-motion?
+11. ✅ **Accesibilidad:** **B — solo text-to-speech en cards pedagógicas (Web Speech API, voz es-ES)**.
 12. ~~Variantes de proyectil (subdecisión de 10)~~ ✅ fusionada con item 10.
 
 ---
