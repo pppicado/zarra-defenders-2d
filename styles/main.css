@@ -117,4 +117,5 @@ canvas {
   image-rendering: pixelated;
   image-rendering: crisp-edges;     /* fallback Firefox */
   -ms-interpolation-mode: nearest-neighbor;
+  cursor: none;                     /* ocultar cursor del sistema en gameplay */
 }

@@ -22,6 +22,8 @@
  */
 
 import { RailCamera } from './rail-camera.js'
+import { Input } from './input.js'
+import { Player } from './player.js'
 
 // ============================================================
 // Configuración del stage demo (Fase 1: solo validación de cámara)
@@ -100,6 +102,11 @@ async function bootstrap() {
     waypoints: DEMO_PATH,
     loop: true
   })
+
+  // --- Input + Crosshair (Fase 2) ---
+  const input = new Input()
+  input.setCanvas(app.view)
+  const player = new Player(app, input, world, camera)
 
   // ============================================================
   // Game loop
