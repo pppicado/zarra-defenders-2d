@@ -505,7 +505,9 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 9. ✅ **Tamaño de canvas:** **DPR-aware + 16:9 lock + márgenes max-fit (letterbox/pillarbox)**.
 10. ✅ **Variantes de proyectil:** **A — solo papeleta estándar para v1**.
 11. ✅ **Accesibilidad:** **B — solo text-to-speech en cards pedagógicas (Web Speech API, voz es-ES)**.
-12. ~~Variantes de proyectil (subdecisión de 10)~~ ✅ fusionada con item 10.
+12. ✅ **Referencias de locations:** docs creados en `assets/references/stage{1-5}-*/NOTES.md`. Investigar + descargar más referencias antes de implementar cada stage.
+13. ✅ **Test level:** nivel oculto determinista accesible con `?test=1`, API `window.__gameTestAPI__`, sin aleatoriedad, para Playwright.
+14. **Reemplazo de `plataforma_solar`:** propuesta = **Camión cisterna de residuos tóxicos** (decisión pendiente de confirmación del usuario).
 
 ---
 
@@ -600,6 +602,143 @@ Una vez aprobado este plan:
 - Pipeline alpha: `tools/postprocess_v4.py` (flood-fill + atenuación HSV purple)
 - Foto del Castillo de Cofrentes ya descargada (referencia visual)
 - Datos pedagógicos: investigación propia de fuentes primarias (periódicos, notas de ayuntamiento, informes técnicos). Pendiente consolidar en `docs/pedagogy-data.json`
+
+---
+
+---
+
+## 11. Nivel de pruebas (test level)
+
+**Propósito:** nivel oculto, **determinista, sin aleatoriedad**, usado para validación con Playwright. Se accederá cargando `index.html?test=1` (o pulsando una secuencia de teclas tipo "konami"). **No enlazado desde ningún menú en producción.** Cuando terminemos el desarrollo, queda como Easter egg técnico accesible vía URL o teclado — no como nivel jugable.
+
+### 11.1. Estructura y diseño
+
+**Layout de spawn determinista** (cada enemigo aparece en posición fija, en tiempo fijo, con velocidad fija):
+
+```json
+{
+  "stage_id": "test_validation",
+  "duration_target_seconds": 60,
+  "camera_path": [
+    { "t": 0,   "x": 0,    "y": 720 },   // esquina inferior izquierda
+    { "t": 60,  "x": 1920, "y": 720 }    // esquina inferior derecha
+  ],
+  "enemy_spawns": [
+    { "id": "camion_cisterna_residuos", "t": 3.0,  "x":  200, "y": 360, "speed": 80 },
+    { "id": "camion_treco",             "t": 8.0,  "x":  500, "y": 380, "speed": 90 },
+    { "id": "bolsa_plastico",           "t": 12.0, "x":  800, "y": 320, "speed": 60 },
+    { "id": "valla_publicitaria",       "t": 16.0, "x": 1100, "y": 380, "speed": 0   },   // estática
+    { "id": "topadora",                 "t": 20.0, "x":  350, "y": 450, "speed": 40 },
+    { "id": "incineradora",             "t": 25.0, "x": 1400, "y": 350, "speed": 0   },   // estática
+    { "id": "dron_fumigador",           "t": 28.0, "x": 1700, "y": 250, "speed": 100 },  // a alta velocidad
+    { "id": "bidon_lixiviado",          "t": 32.0, "x":  100, "y": 400, "speed": 30 },   // lento, para testar precisión
+    { "id": "tubo_lixiviado",           "t": 36.0, "x":  900, "y": 410, "speed": 0   },   // estático
+    { "id": "sello_burocratico",        "t": 40.0, "x": 1600, "y": 380, "speed": 20 },   // mini-boss, lento, grande
+    { "id": "trailer",                  "t": 45.0, "x":  250, "y": 460, "speed": 60 },
+    { "id": "planta_treco",             "t": 50.0, "x": 1850, "y": 360, "speed": 0   }    // BOSS final
+  ],
+  "static_targets": [
+    { "id": "tree_pino",     "x":  400, "y": 530 },   // targets aliados — disparar resta vida
+    { "id": "tree_encina",   "x":  900, "y": 530 },
+    { "id": "building_casa_ayora", "x":  1500, "y": 530 }
+  ]
+}
+```
+
+**Total: 12 enemigos (uno de cada tipo disponible, incluido el boss) + 3 targets aliados para testar precisión de daño colateral.**
+
+### 11.2. API expuesta para Playwright (`window.__gameTestAPI__`)
+
+```js
+window.__gameTestAPI__ = {
+  // Métricas en vivo
+  getScore():              number,
+  getFirmasRecogidas():    number,
+  getVidas():               number,
+  getEnemiesDestroyed():    { [enemyId]: count },
+  getEnemiesAlive():        Array<{ id, x, y, hp }>,
+  getCurrentTime():         number,
+  getFps():                 number,
+
+  // Acciones para tests
+  setMousePosition(x, y):   void,
+  clickAt(x, y):            void,  // simula disparo
+  pause():                  void,
+  resume():                 void,
+  skipToTime(t):            void,  // adelanta la simulación
+  getPedagogyCardsShown():  Array<string>,
+
+  // Aserciones (devuelven boolean)
+  assertAllDestroyedBut(t):  boolean,    // todos los enemigos de tipo X destruidos antes de tiempo T
+  assertNoCollisionWithAlly(): boolean,  // no disparaste a aliados
+  assertTimeEquals(expected): boolean   // comparación determinista
+}
+```
+
+**Logs estructurados para assertions** (consumidos por Playwright `page.on('console')`):
+
+```js
+console.log('[TEST_EVENT]', JSON.stringify({
+  t: 12.34,
+  event: 'enemy_destroyed',
+  enemy_id: 'camion_treco',
+  hit_position: [834, 412],
+  vidas_after: 3
+}))
+```
+
+### 11.3. Acceso al nivel de pruebas
+
+**Tres métodos** (todos válidos, el primero es el principal):
+
+1. **URL con query param:** `index.html?test=1` (principal, fácil de automatizar con Playwright)
+2. **Secuencia de teclas:** Konami code o similar en la pantalla de título (Easter egg)
+3. **Consola del navegador:** `window.location.href = window.location.href + '?test=1'` (atajo de testing)
+
+**Comportamiento cuando se accede:**
+- Salta directamente al test level sin pasar por menú principal ni disclaimer (es testing, no onboarding)
+- No accede a `localStorage` para scores o settings persistentes (no contamina datos del jugador real)
+- Renderiza un overlay transparente con contador "TEST MODE: ?test=1" en la esquina superior derecha
+- Renderiza un panel lateral con aserciones en vivo (opcional, toggle con tecla `T`)
+
+### 11.4. Política de ocultación en producción
+
+- El nivel **NO está enlazado** desde ningún menú ni botón en producción
+- La query `?test=1` es la única vía documentada; no se anuncia al jugador normal
+- En `index.html` se detecta la query al cargar; sin query, **toda la rama `if (testMode)` del código nunca se ejecuta** (tree-shaken por minifier en producción, o simplemente no se accede)
+- Se mantiene accesible durante todo el ciclo de vida del juego (v1, v2, etc.) como **regression test del propio código** — si un día cambias la física de hit detection, ejecutar `?test=1` con Playwright valida que nada se rompió
+
+### 11.5. Tests Playwright de ejemplo (en `tests/`)
+
+```js
+// tests/e2e/hit-detection.spec.mjs (no incluido aún — se crea en Fase 8)
+test('cisterna destruida con 1 disparo a 5m', async ({ page }) => {
+  await page.goto('index.html?test=1')
+  await page.evaluate(() => __gameTestAPI__.skipToTime(3.0))
+  await page.evaluate(() => {
+    const e = __gameTestAPI__.getEnemiesAlive()[0]
+    __gameTestAPI__.clickAt(e.x, e.y)
+  })
+  await page.waitForFunction(() => __gameTestAPI__.getEnemiesAlive().length === 12)
+  expect(await page.evaluate(() => true)).toBe(true)
+})
+```
+
+---
+
+## 12. Referencias de los stages (research)
+
+Documentación de investigación de los 5 stages, con datos reales de cada ubicación y referencias a fotos/blueprints pendientes de descargar:
+
+- `assets/references/stage1-bosque/NOTES.md` — bosque mediterráneo
+- `assets/references/stage2-pueblo/NOTES.md` — pueblo de Cofrentes
+- `assets/references/stage3-rio/NOTES.md` — río Cabriel
+- `assets/references/stage4-vertedero/NOTES.md` — macrovertedero de Zarra / TRECO
+- `assets/references/stage5-castillo/NOTES.md` — castillo de Cofrentes
+
+Cada NOTES.md incluye: datos reales del lugar, landmarks reconocibles para el bg pixel art, diseño de cámara path y spawn de enemigos, referencias pendientes de descargar, y fuentes consultadas (Wikipedia, CastillosNet, Wikimedia Commons).
+
+**Investigación es iterativa:** cuando se implemente cada stage, se añaden más referencias concretas (fotos descargadas, mapas específicos). El design de cada stage se basa en estos NOTES para que sea **reconocible** por alguien que conozca la zona.
 
 ---
 
