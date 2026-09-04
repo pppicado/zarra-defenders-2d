@@ -759,58 +759,109 @@ Cada NOTES.md incluye: datos reales del lugar, landmarks reconocibles para el bg
 
 ---
 
-## 13. Revisión post-v0.1 — Pivote a vista isométrica tipo Diablo 2
+## 13. Revisión post-v0.1 — Pivote a vista isométrica tipo Diablo 2 (especificación final)
 
 **Fecha de la propuesta:** 2026-09-04 (mismo día del tag v0.1).
+**Fecha de la clarificación:** 2026-09-04 (mismo día, minutos después).
 
-**Contexto:** El tag `v0.1` captura el estado del proyecto como **rail shooter lateral con desplazamiento** (Fase 1 + 2 implementadas). Tras probarlo, el usuario plantea que **prefiere una vista isométrica tipo Diablo 2**:
+**Contexto:** El tag `v0.1` captura el estado del proyecto como **rail shooter con desplazamiento lateral** (Fase 1 + 2 implementadas). Tras probarlo, el usuario plantea revisar el estilo visual:
 
 > *"había pensado en una perspectiva más isométrica en plan el juego de diablo 2 con un plano ligeramente abativido con el tileado del fondo y los decorados y enemigos como verticales sobre este como simulando un 3d y el avance fuese hacia delante o diagonal hacia delante"*
 
-**Traducción técnica:** En lugar de rail shooter (cámara con path fijo que el jugador no controla), un **ARPG isométrico** con:
-- Suelo tileado isométrico (plano "abativido" / con perspectiva de techo bajo)
-- Sprites de enemigos/decorados parados **verticales sobre el suelo** (eje Z simulado)
-- **Avance hacia adelante o diagonal** (no lateral)
-- Simulación de 3D con técnicas 2D (sprites en eje Z virtual)
+**Tras la clarificación del 2026-09-04**, la propuesta final queda así:
 
-### Implicaciones del cambio (cascada)
+> - Sigue siendo **rail shooter**: el jugador NO controla el movimiento
+> - El crosshair **sigue siendo en pantalla** (no proyectado al suelo iso)
+> - La vista **sigue siendo en primera persona** (mano + boli)
+> - Lo que cambia es el **mundo renderizado**: ahora es un **plano isométrico tileado tipo Diablo 2** (perspectiva de techo bajo), con sprites verticales parados sobre el suelo, en lugar de un background plano que se desplaza lateralmente
 
-| Componente | Estado v0.1 (rail) | Necesario si isométrico |
+### Spec final del rail shooter isométrico (Diablo 2 style)
+
+**Lo que se mantiene del v0.1:**
+- ✅ Rail shooter: cámara automática, jugador solo apunta y dispara
+- ✅ Crosshair en pantalla (HUD layer)
+- ✅ Vista primera persona con mano + boli (HUD layer)
+- ✅ Estructura `world` / `hud` / `ui`
+- ✅ Input.js, modal portrait, fullscreen button, todo el CSS
+- ✅ 21 sprites isométricos pre-generados (se reutilizan con anclaje a tile)
+- ✅ `tools/postprocess_v4.py` para alpha
+
+**Lo que cambia (cascada):**
+- 🔄 **Fondo**: ya no es un sprite plano que se desplaza. Es un **conjunto de tiles isométricos** que se renderizan según la posición de la cámara rail
+- 🆕 **Tile system**: `src/tile.js`, `src/tilemap.js`, `src/world.js`
+- 🔄 **RailCamera**: sigue existiendo pero su path ahora es en **coordenadas isométricas** (avance diagonal o hacia adelante en lugar de lateral)
+- 🆕 **Z-ordering**: orden de render por profundidad (sur-este del iso = más cerca de la cámara = más al frente)
+- 🆕 **Anclaje a tile**: los sprites verticales (enemigos, árboles, decorados) se anclan a coordenadas de tiles (los pies tocan el suelo iso)
+- 🔄 **Asset pipeline**: ahora también genera **tiles isométricos del suelo** con minimax (5 estilos: bosque, pueblo, río, vertedero, castillo)
+- 🔄 **Hit detection**: el click en pantalla se traduce a **coordenada isométrica** (proyección inversa screen→iso) para saber qué tile/enemigo fue clickeado. El crosshair sigue siendo screen-relative (no se proyecta)
+
+### Respuestas del usuario a las 9 decisiones (2026-09-04)
+
+| # | Pregunta | Respuesta | Implicación |
+|---|---|---|---|
+| 1 | Control del jugador | **Sigue siendo rail shooter** (no controla movimiento) | RailCamera se mantiene, pero su path es en mundo iso |
+| 2 | Tile size | **Proporcional al tamaño de pantalla** + sprites a tamaño acorde a los 512×512 ya generados | Tile base ≈ 64-128 px, sprites verticales siguen ~512 px |
+| 3 | Tamaño del mapa | **Dependiente del diseño de nivel** | Cada stage tiene su propio mapa, tamaño según complejidad narrativa |
+| 4 | Vista del personaje | **Perspectiva como Diablo 2 pero vista en primera persona** | Se ve el mundo iso (suelo tileado + sprites verticales) con mano+boli en HUD |
+| 5 | Tile generation | **Generados por minimax** | Pipeline: prompt → minimax → chroma key → `assets/backgrounds/tiles/` |
+| 6 | Stages | **Cada stage independiente con menú entre ellos** + "novel" screen con cards pedagógicas antes del siguiente | Nueva pantalla "Novel" (estilo visual novel) entre stages |
+| 7 | Enemigos | **Tiles separados** del terreno (estilo JRPG) | Enemigos son sprites en tiles propios, no en el mismo mapa que el suelo |
+| 8 | Cards pedagógicas | **Modal sobre el mundo** con pass-through de clicks | El modal no bloquea el disparo (pointer-events: none en zonas no interactivas, hit detection sigue funcionando) |
+| 9 | Disparo | **Free-aim** (click en cualquier punto) | El proyectil viaja desde la mano hacia el punto clickeado del mundo iso |
+
+### Plan de implementación revisado
+
+**Fases que se mantienen SIN cambios (Fase 1, 2 ya hechas; Fase 3 + 5 casi sin cambios):**
+
+| Fase | Estado | Notas |
 |---|---|---|
-| Vista del jugador | Primera persona con mano + boli | Top-down isométrica, personaje visible desde atrás/3-4 |
-| Sprites | 21 ya generados, "flotan" sobre fondo | Reusables como verticales, pero necesitan **anclaje a tile** (pies en coord del suelo) |
-| RailCamera | Implementado y funcional | **Queda obsoleta**. Nueva clase `IsometricView` o `WorldCamera` |
-| Tile system | No existe | **Nuevo**: `src/tile.js`, `src/world.js` con mapa tileado |
-| Z-ordering | No necesario (sprites ortogonales) | **Necesario**: orden de render por profundidad (más cercano al sur-este del iso = más al frente) |
-| Crosshair | Coords de pantalla | **Coords del mundo iso**: target sobre el suelo, proyectado |
-| Control del jugador | Solo apuntar/disparar | **Movimiento** WASD/touch-drag (libre o automático hacia adelante) |
-| Input.js | Solo move + tap + pause | Añadir: stick virtual / drag del mapa / keys de movimiento |
-| Disparo | Desde coords de pantalla | Desde posición del jugador hacia tile targeteado |
+| F1 — Bootstrap + cámara | ✅ DONE (v0.1) | Pixi.js + estructura de capas |
+| F2 — Input + crosshair | ✅ DONE (v0.1) | Mouse + touch, tap/drag |
+| F3 — Disparo + colisiones | 🔄 Adaptar | Hit detection ahora proyecta click→iso; el resto igual |
 
-### Componentes que SÍ se reutilizan (no se pierde el trabajo v0.1)
+**Fases que cambian / se REEMPLAZAN:**
 
-- ✅ `src/input.js` — la base de Pointer Events es la misma
-- ✅ `src/main.js` — la estructura world/hud/ui se mantiene
-- ✅ `styles/main.css` — letterbox 16:9, modal portrait, fullscreen button
-- ✅ `index.html` — modal disclaimer, botón fullscreen
-- ✅ **Los 21 sprites** — son isométricos y se pueden reutilizar como "verticales sobre tile" (solo cambia el anclaje)
-- ✅ `tools/postprocess_v4.py` — pipeline alpha sigue siendo útil
+| Fase nueva | Reemplaza | Descripción |
+|---|---|---|
+| **F2.5 — Tile system + world iso** | nueva | Base para todo el render isométrico: tiles, Z-order, tilemap, mundo iso. Bloqueante para todo lo demás. |
+| **F4 — Primer stage isométrico jugable** | F4 original | Bosque tileado con enemigos en tiles separados, rail camera en iso, free-aim |
+| **F5 — Cards pedagógicas con pass-through** | F5 original | Modal sobre mundo iso, no bloquea disparo |
+| **F6 — Stages restantes en iso** | F6 original | 4 stages iso con sus tiles+enemigos+path |
+| **F7 — Menús + "Novel" entre stages** | F7 original | Menú principal, stage select, pausa, game over, victoria, biblioteca, créditos, **NUEVO: pantalla Novel entre stages con cards pedagógicas** |
+| **F8 — Polish + mobile QA + tests Playwright** | F8 original | Idéntico |
 
-### Decisiones pendientes para confirmar el nuevo diseño (NO cambiar PLAN hasta que estén)
+### Sistema de coordenadas isométrico (referencia para implementación)
 
-1. **Control del jugador:** ¿Movimiento libre con WASD/touch-drag (estilo Diablo puro) o scroll automático hacia adelante/diagonal con desvío lateral del jugador (estilo Final Fantasy Tactics / Cadash)?
-2. **Tile size:** ¿32×32, 64×64, o 96×96 px por tile isométrico? (afecta cantidad de tiles visibles, complejidad)
-3. **Tamaño del mapa por stage:** ¿Una "pantalla" (1 viewport) de tiles, o más grande con scroll libre?
-4. **Vista del personaje:** ¿Vista isométrica con el personaje centrado en pantalla (estilo Diablo 2), o el personaje fijo en la parte inferior (estilo "alpine slash" donde el mundo se mueve y el PJ está quieto)?
-5. **Tile generation:** ¿Suelo tileado dibujado a mano (estética pixel art coherente), procedural (más rápido pero menos controlado), o generado por minimax por stage?
-6. **Enemigos/aliados:** ¿Tiles separados para enemigos vs terreno (estilo JRPG), o todo es un único mapa con Z-order?
-7. **Stages:** ¿Mismo mapa continuo (caminas de uno a otro) o cada stage es un mapa independiente con menú entre ellos?
-8. **Cards pedagógicas:** ¿Se muestran sobre el mundo isométrico o con modal dedicado estilo Diablo inventory?
-9. **Disparo:** ¿Free-aim (click en cualquier punto del suelo) o solo enemigo-más-cercano (target lock)?
+```
+            N (back)
+            ↑
+            |
+            |
+  W --------+--------→ E (right)
+            |
+            |
+            ↓
+            S (front)
 
-**Pendiente de tu confirmación** antes de re-planificar formalmente el proyecto.
+En iso (x, y) → screen (sx, sy):
+  sx = (x - y) * tileHalfWidth
+  sy = (x + y) * tileHalfHeight
 
-Mientras tanto: **v0.1 sigue siendo el "fallback" si el nuevo diseño no funciona**. Si después de explorar decides volver al rail shooter, `git checkout v0.1` te devuelve al estado funcional de Fase 1+2.
+En screen (sx, sy) → iso (x, y):
+  x = (sx / tileHalfWidth + sy / tileHalfHeight) / 2
+  y = (sy / tileHalfHeight - sx / tileHalfWidth) / 2
+```
+
+Donde `tileHalfWidth = tileWidth / 2` y `tileHalfHeight = tileHeight / 2`.
+
+**Z-order**: para cada sprite vertical (enemigo, decoración), su "profundidad" = `x + y` en coords iso. Renderizar de menor a mayor profundidad (los más lejanos primero).
+
+### Pendiente
+
+1. ✅ Tag v0.1 marcado como fallback (en `git checkout v0.1`)
+2. 🔄 Reemplazar `RailCamera` por `RailIsoCamera` (path en coords iso, misma interfaz temporal)
+3. 🔄 Implementar `F2.5` (tile system) antes de continuar con F3+
+4. 🔄 Generar tiles isométricos de cada stage con minimax
 
 ---
 
