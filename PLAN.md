@@ -35,10 +35,7 @@
 - **Mira / crosshair:** cruz pixel art que sigue al puntero. Visible en zonas donde no hay mano activa (menús, transiciones), oculto durante gameplay (la mano es el indicador principal).
 - **Disparo:** click (mouse) o tap (touch) → animación rápida de firma (el boli traza una línea zigzag en un papel) + lanzamiento del **documento firmado** como proyectil que vuela hacia donde apunta la mira.
 - **Cadencia:** ~3 disparos/seg (cooldown configurable).
-- **Visual del proyectil:** pequeña hoja de papel (pixel art) con un garabato de "firma" encima. Vuela recto con leve ondulación (paper flutter). Posibles variantes:
-  - **Papeleta estándar** — folio blanco/crema con firma simple y un par de líneas simuladas
-  - **Instancia con sello** — papel + sello rojo/lila esquinado (sello burocrático = "sello burocrático" enemigo, irónico pero visual)
-  - `[?]` ¿Añadir una **super-firma** con sellos múltiples que hace daño en área (área de efecto) tras cargar?
+- **Visual del proyectil: UNA SOLA VARIANTE — papeleta estándar** (confirmado por el usuario, 2026-09-03, opción A). Folio blanco/crema con firma simple (garabato) y un par de líneas simuladas. Vuela recto con leve ondulación (paper flutter). Implementación mínima para v1; variantes con sello / super-firma quedan como iteraciones futuras si se piden.
 - **Puntuación:**
   - Impactar enemigo → puntos + revela card pedagógica + incrementa contador "Firmas recogidas"
   - Fallar → -puntos pequeños (la firma se pierde sin ser entregada)
@@ -465,7 +462,7 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 | Crosshair | 1 | simple mira pixel art |
 | Iconos UI | 4-5 | health, score, firmas, pausa |
 | Sprites de explosión | 2-3 | partículas para hits |
-| **Proyectil = documento firmado** | **1-3** | **papeleta estándar + variante con sello** (pipeline en tools/, mismo método que sprites) |
+| **Proyectil = documento firmado** | **1** | **papeleta estándar** (confirmado opción A: solo variante única para v1; las demás quedan como iteración futura) |
 | **Mano + bolígrafo (primera persona)** | **1-2** | **vista confirmada en primera persona** — mano pixel art con boli, orientación dinámica según puntero. Animación de firma al disparar. |
 | Datos pedagógicos + fuentes | 13 entradas | `docs/pedagogy-data.json` |
 | Audio SFX (opcional) | 5-10 | disparo (papel volando), hit, victoria |
@@ -485,20 +482,22 @@ Generamos todos los SFX en runtime con osciladores y ruido filtrado. Cero depend
 - ✅ **Light gun:** opción A — asumir mouse siempre (sin código especial). Pistolas de luz HID funcionan automáticamente como mouse USB estándar. Confirmado 2026-09-03.
 - ✅ **Continues:** opción A — game over final sin continues. Reiniciar stage desde cero. Estilo arcade clásico. Confirmado 2026-09-03.
 - ✅ **Score y compartir:** opción D — best score local en localStorage + link compartible con score en redes sociales. Sin backend ni tracking. Confirmado 2026-09-03.
+- ✅ **Canvas responsivo:** DPR-aware (Pixi.js nativo) + aspect ratio bloqueado 16:9 + márgenes letterbox/pillarbox para max-fit. Confirmado 2026-09-03.
+- ✅ **Variantes de proyectil:** opción A — solo papeleta estándar para v1. Variantes con sello / super-firma quedan como iteraciones futuras. Confirmado 2026-09-03.
 
 **Aún pendientes:**
 1. ✅ **Stack render:** **Pixi.js vía CDN** (confirmado).
-2. ✅ **Auto-fire en móvil:** **OFF** (disparo manual con tap).
+2. ✅ **Auto-fire en móvil:** **OFF** (disparo manual con tap)**.
 3. ✅ **Cartas pedagógicas:** **modal intermedio cada 5 + resumen completo al final del stage**.
 4. ✅ **Traducción:** **solo español al lanzamiento, i18n-ready**.
 5. ✅ **Modo portrait móvil:** **forzar landscape con modal de aviso en portrait**.
 6. ✅ **Light gun detection:** **A — asumir mouse siempre, sin código especial**.
 7. ✅ **Continues / extra lives:** **A — game over final sin continues**.
 8. ✅ **High score / leaderboard:** **D — best score local + link compartible en redes (sin backend, sin tracking)**.
-9. **Tamaño de canvas:** ¿fijo (1280x720) o responsive?
-10. **Variantes de proyectil:** ¿solo papeleta estándar, o también la versión con sello (más daño), o una super-firma cargada con daño en área?
+9. ✅ **Tamaño de canvas:** **DPR-aware + 16:9 lock + márgenes max-fit (letterbox/pillarbox)**.
+10. ✅ **Variantes de proyectil:** **A — solo papeleta estándar para v1**.
 11. **Accesibilidad:** ¿modo alto contraste, subtítulos/text-to-speech en cards, prefers-reduced-motion?
-12. **Variantes de proyectil** (subdecisión de 10) — desglosada si quieres tratar aparte
+12. ~~Variantes de proyectil (subdecisión de 10)~~ ✅ fusionada con item 10.
 
 ---
 
