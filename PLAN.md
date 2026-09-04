@@ -335,6 +335,8 @@ La música del juego debe **beberse de la tradición del Valle de Ayora-Cofrente
 
 **Recomendación por defecto (si me das luz verde sin más detalles):** opción **B** con Suno (o similar), usando como "estilo" del prompt los tags del CSIC + nuestros temas. Generamos 1 pista por stage + menú + game over + victoria = ~7-10 pistas.
 
+**Estrategia dos fases confirmada 2026-09-03** (ver bloque expandido más abajo): Fase A usa MIDI/MP3 de dominio público del folklore del Valle durante el desarrollo; Fase B usa las pistas generadas con IA cuando el usuario provea credenciales de Suno.
+
 **Opción B CONFIRMADA por el usuario** (2026-09-03). Plan de ejecución:
 
 1. **Setup de credenciales** — el usuario provee una cuenta de Suno (o Udio, AIVA, etc.) con sus credenciales. Se configuran en `tools/suno-pipeline/.env` (no se commitea).
@@ -351,6 +353,20 @@ La música del juego debe **beberse de la tradición del Valle de Ayora-Cofrente
 5. **Integración en el juego** — `src/music.js` carga los MP3 desde `assets/audio/music/`, fade in/out entre stages, volumen por menú.
 6. **Licencia de las pistas generadas** — Suno Pro permite uso comercial. Verificar términos actuales de Suno antes de publicar. Si el usuario tiene plan free, comprobar si permite uso en proyectos públicos.
 
+**ESTRATEGIA EN DOS FASES** (añadida 2026-09-03 por decisión del usuario):
+
+**Fase A — Primeras versiones (desarrollo y testeo):** música de placeholder basada en música popular del Valle de Ayora disponible en dominio público:
+- Buscar MIDI/WAV/MP3 de jotas, dulzainas, coplas populares de la comarca
+- Fuentes identificadas durante la investigación:
+  - **Antología del Folklore Musical de España** (1959, dominio público) — incluye pistas específicas de Valencia: *La Despertá (Valencia)*, *Per La Valenciana*, *Nana (Valencia)*, *Albaes (Valencia)*, *De Batre (Valencia)*, *Folies (Alicante)* — en `https://archive.org/details/lp_antologa-del-folklore-musical-de-espaa-pri_various`
+  - **Fondo de Música Tradicional IMF-CSIC** (dominio público, específica de Cofrentes): `musicatradicional.imf.csic.es/es/location/9084` — grabaciones de campo de 1980 (*Jota popular con dulzaina* de Cofrentes)
+  - **Fundación Joaquín Díaz — Revista de Folklore** (artículo sobre dulzaina y dulzaineros, contexto etnográfico)
+  - **Mutopia Project** (MIDI clásicos dominio público): guitarra española clásica (Aguado, Tárrega)
+- **Implementación:** `assets/audio/music/` con MP3 descargados. `src/music.js` carga los MP3 y los reproduce con loop seamless. Atribución en pantalla de créditos.
+- **Cuándo se reemplazan:** cada pista placeholder se sustituye por la versión Suno definitiva cuando se genera. Mantener ambos (placeholder + final) hasta validación del usuario.
+
+**Fase B — Versión definitiva:** las pistas generadas con Suno (o equivalente) reemplazan a las de Fase A. Licencia comercial Suno Pro verificada. Sin atribución obligatoria.
+
 **Riesgos y mitigaciones:**
 
 | Riesgo | Mitigación |
@@ -359,6 +375,7 @@ La música del juego debe **beberse de la tradición del Valle de Ayora-Cofrente
 | Credenciales filtradas en commits | `.env` en `.gitignore`, `.env.example` con placeholders |
 | Generación fuera de estilo jota | Iteración de prompts + revisión humana de cada MP3 |
 | Coste elevado | Empezar con 3 pistas piloto, validar antes de generar las 10 |
+| Pistas de Fase A muy "vintage" (1959) y no encajan con pixel art retro moderno | Usar solo como background suave (-12dB) detrás de SFX y ambience; nunca como tema principal |
 
 #### Efectos de sonido (SFX) — **opción C confirmada: síntesis procedural con Web Audio API**
 
