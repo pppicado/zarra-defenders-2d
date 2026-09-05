@@ -1,9 +1,9 @@
 {
   "schema": "tile-manifest/v1",
-  "updatedAt": "2026-09-05T17:19:14+00:00",
+  "updatedAt": "2026-09-05T17:23:56+00:00",
   "totals": {
-    "active": 33,
-    "discarded": 7,
+    "active": 40,
+    "discarded": 0,
     "expected": 40
   },
   "active": [
@@ -270,92 +270,98 @@
       "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Cerro de Agras (Cofrentes), 394 m snm, sobre chimenea volcánica basáltica.\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Construido sobre roca basáltica del volcán Cerro de Agras (origem volcánico)\n  - Planta rectangular, 800×600 (medidas antiguas, hoy día aprox), 8 cubos en perímetro\n  - Torre del Homenaje cuadrada, 4 niveles, con reloj (Patrimonio)\n  - 2 cubos de entrada (semicirculares) con arco de medio punto + rampa de acceso\n  - Barbacana al norte\n  - Puerta en recodo al sur\n  - Patio de armas rectangular con aljibe subterráneo cubierto con bóvedas\n  - S. XII origen islámico (1147-1172 aprox)\n\nCOLOR PALETTE:   - Predominio blanco-crema (castillo) + marrón-rojizo (peñón) + azul (cielo)\n  - Cálido, épico, \"último round\"\n\nVARIANT-SPECIFIC NOTE: Underground aljibe (cistern) vaulted ceiling hint, masonry ribs, dim\n\nREFERENCE PHOTOS available: castillo_vista_carretera.jpg",
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/raw/aljibe_boveda_subterraneo.png",
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/aljibe_boveda_subterraneo.png"
-    }
-  ],
-  "discarded": [
+    },
     {
       "stageId": "stage1-bosque",
       "stageName": "bosque",
       "variant": "pino_underbrush_dark",
-      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Zonas boscosas del término municipal de Cofrentes y municipios del Valle de Ayora (Ayora, Jalance, Jarafuel, Teresa de Cofrentes).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Pinos mediterráneos en ladera (silueta característica)\n  - Encinas dispersas (silueta redondeada)\n  - Suelo rojizo-arcilloso entre pinos\n  - Cielo azul intenso con sol fuerte (luz cálida)\n  - Vegetación densa pero con claros para enemigos\n\nCOLOR PALETTE:   - (no palette documented; default to natural terrain)\n\nVARIANT-SPECIFIC NOTE: Dark underbrush zone under pine canopy, shadowed soil, scattered twigs",
+      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Zonas boscosas del término municipal de Cofrentes y municipios del Valle de Ayora (Ayora, Jalance, Jarafuel, Teresa de Cofrentes).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Pinos mediterráneos en ladera (silueta característica)\n  - Encinas dispersas (silueta redondeada)\n  - Suelo rojizo-arcilloso entre pinos\n  - Cielo azul intenso con sol fuerte (luz cálida)\n  - Vegetación densa pero con claros para enemigos\n\nCOLOR PALETTE:   - (no palette documented; default to natural terrain)\n\nVARIANT-SPECIFIC NOTE: Dark forest underbrush zone under pine canopy, dark soil in deep shadow, dry fallen pine needles and twigs scattered on the ground\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no moss carpet, no green moss, no lush green undergrowth, no ferns, no grass tufts; only dark brown shadowed soil with dry pine needles and twigs",
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage1-bosque/raw/pino_underbrush_dark.png",
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage1-bosque/pino_underbrush_dark.png",
-      "discardedAt": "2026-09-05T17:17:25+00:00",
-      "discardReason": "Tile rendered with too much mossy green cover; name says dark underbrush but image shows moss carpet instead of dry needles + shadowed soil.",
-      "archivedPath": "assets/tiles/_discarded/stage1_pino_underbrush_dark_discarded.png",
-      "archivedRawPath": "assets/tiles/_discarded/raw/stage1_pino_underbrush_dark_discarded.png"
+      "regeneratedFrom": {
+        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
+        "originalDiscardReason": "Tile rendered with too much mossy green cover; name says dark underbrush but image shows moss carpet instead of dry needles + shadowed soil.",
+        "regeneratedAt": "2026-09-05T17:23:56+00:00"
+      }
     },
     {
       "stageId": "stage3-rio",
       "stageName": "rio",
       "variant": "roca_chorrera_humeda",
-      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Tramo del río Cabriel a su paso por Cofrentes (confluencia con Júcar), dentro del Parque Natural de las Hoces del Cabriel + Reserva de la Biosfera Valle del Cabriel.\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Longitud total: 277.6 km (nace en Frías de Albarracín, Teruel)\n  - Cuenca: 4754.2 km²\n  - Caudal medio: 20.92 m³/s\n  - Nace a 1620 m de altitud en Barranco del Agua, Montes Universales\n  - Desemboca en el Júcar en Cofrentes (Valencia)\n  - Embalses principales en su recorrido: Víllora, Contreras (entre Minglanilla y Villargordo del Cabriel)\n  - Calidad del agua: mejor de Europa según datos (poblaciones escasas en cuenca)\n  - Hoces del Cabriel (gargantas/cañones) — paisaje kárstico espectacular\n\nCOLOR PALETTE:   - (no palette documented; default to natural terrain)\n\nVARIANT-SPECIFIC NOTE: Wet rock face of a chorrera (waterfall), dark and glistening, mossy",
+      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Tramo del río Cabriel a su paso por Cofrentes (confluencia con Júcar), dentro del Parque Natural de las Hoces del Cabriel + Reserva de la Biosfera Valle del Cabriel.\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Longitud total: 277.6 km (nace en Frías de Albarracín, Teruel)\n  - Cuenca: 4754.2 km²\n  - Caudal medio: 20.92 m³/s\n  - Nace a 1620 m de altitud en Barranco del Agua, Montes Universales\n  - Desemboca en el Júcar en Cofrentes (Valencia)\n  - Embalses principales en su recorrido: Víllora, Contreras (entre Minglanilla y Villargordo del Cabriel)\n  - Calidad del agua: mejor de Europa según datos (poblaciones escasas en cuenca)\n  - Hoces del Cabriel (gargantas/cañones) — paisaje kárstico espectacular\n\nCOLOR PALETTE:   - (no palette documented; default to natural terrain)\n\nVARIANT-SPECIFIC NOTE: Bare wet rock face of a chorrera (waterfall cascade) on dark karst stone, glistening wet sheen, water streaks running down the rock, NO vegetation at all\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no moss, no lichen, no green plants, no grass, no shrubs, no ferns, no vegetation of any kind; only bare wet dark rock with water sheen and mineral streaks",
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage3-rio/raw/roca_chorrera_humeda.png",
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage3-rio/roca_chorrera_humeda.png",
-      "discardedAt": "2026-09-05T17:17:25+00:00",
-      "discardReason": "minimax returned full-bleed rock with no magenta bg; postprocess mis-cropped to a vertical strip instead of a 128x64 iso diamond.",
-      "archivedPath": "assets/tiles/_discarded/stage3_roca_chorrera_humeda_discarded.png",
-      "archivedRawPath": "assets/tiles/_discarded/raw/stage3_roca_chorrera_humeda_discarded.png"
+      "regeneratedFrom": {
+        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
+        "originalDiscardReason": "minimax returned full-bleed rock with no magenta bg; postprocess mis-cropped to a vertical strip instead of a 128x64 iso diamond.",
+        "regeneratedAt": "2026-09-05T17:23:56+00:00"
+      }
     },
     {
       "stageId": "stage4-vertedero",
       "stageName": "vertedero",
       "variant": "cement_pad_crack",
-      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: El macrovertedero de Zarra (real, proyecto de residuos). En el juego es operado por **TRECO GESTIÓN DE RESIDUOS S.L.** (empresa real según disclaimer).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - **Montañas de basura**: capas acumuladas de residuos mezclados\n  - **Piscinas de lixiviados**: grandes estanques negros/marrones con líquido percolado\n  - **Chimenea de incineración**: torre alta con humo continuo\n  - **Carretera interior**: acceso de camiones pesados\n  - **Vallado perimetral**: vallas metálicas con señalización\n  - **Plantas industriales**: naves de procesamiento, planta de transferencia\n  - **Edificios administrativos**: oficinas, báscula de pesaje, parking de camiones\n  - **Maquinaria pesada**: excavadoras, compactadoras, cisternas\n\nCOLOR PALETTE:   - Predominio gris-marrón (no verde como bosque ni azul como río)\n  - Cielo más sucio (gris-pollution)\n  - Contraste con texto rojo de señales de peligro\n\nVARIANT-SPECIFIC NOTE: Cracked concrete industrial pad, dirty grey, rebar stains, no vegetation, no decoration\n\nNEGATIVE CONSTRAINTS: no green vegetation, no blue sky, no natural beauty, oppressive grey-brown industrial palette, dirty and decayed feel, dump not resort, no aesthetic charm",
+      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: El macrovertedero de Zarra (real, proyecto de residuos). En el juego es operado por **TRECO GESTIÓN DE RESIDUOS S.L.** (empresa real según disclaimer).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - **Montañas de basura**: capas acumuladas de residuos mezclados\n  - **Piscinas de lixiviados**: grandes estanques negros/marrones con líquido percolado\n  - **Chimenea de incineración**: torre alta con humo continuo\n  - **Carretera interior**: acceso de camiones pesados\n  - **Vallado perimetral**: vallas metálicas con señalización\n  - **Plantas industriales**: naves de procesamiento, planta de transferencia\n  - **Edificios administrativos**: oficinas, báscula de pesaje, parking de camiones\n  - **Maquinaria pesada**: excavadoras, compactadoras, cisternas\n\nCOLOR PALETTE:   - Predominio gris-marrón (no verde como bosque ni azul como río)\n  - Cielo más sucio (gris-pollution)\n  - Contraste con texto rojo de señales de peligro\n\nVARIANT-SPECIFIC NOTE: Pure cracked grey concrete industrial pad, dirty grey, rust and oil stains, rebar poking through cracks, NO vegetation at all\n\nNEGATIVE CONSTRAINTS: no green vegetation, no blue sky, no natural beauty, oppressive grey-brown industrial palette, dirty and decayed feel, dump not resort, no aesthetic charm\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no green moss, no plants, no grass, no weeds, no vegetation of any kind; only pure cracked grey concrete with rust and oil stains",
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/raw/cement_pad_crack.png",
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/cement_pad_crack.png",
-      "discardedAt": "2026-09-05T17:17:25+00:00",
-      "discardReason": "Tile rendered with green moss on the concrete - should be pure cracked grey concrete, no vegetation (ASSET-005 anti-glorification).",
-      "archivedPath": "assets/tiles/_discarded/stage4_cement_pad_crack_discarded.png",
-      "archivedRawPath": "assets/tiles/_discarded/raw/stage4_cement_pad_crack_discarded.png"
+      "regeneratedFrom": {
+        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
+        "originalDiscardReason": "Tile rendered with green moss on the concrete - should be pure cracked grey concrete, no vegetation (ASSET-005 anti-glorification).",
+        "regeneratedAt": "2026-09-05T17:23:56+00:00"
+      }
     },
     {
       "stageId": "stage4-vertedero",
       "stageName": "vertedero",
       "variant": "plastic_debris_mixed",
-      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: El macrovertedero de Zarra (real, proyecto de residuos). En el juego es operado por **TRECO GESTIÓN DE RESIDUOS S.L.** (empresa real según disclaimer).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - **Montañas de basura**: capas acumuladas de residuos mezclados\n  - **Piscinas de lixiviados**: grandes estanques negros/marrones con líquido percolado\n  - **Chimenea de incineración**: torre alta con humo continuo\n  - **Carretera interior**: acceso de camiones pesados\n  - **Vallado perimetral**: vallas metálicas con señalización\n  - **Plantas industriales**: naves de procesamiento, planta de transferencia\n  - **Edificios administrativos**: oficinas, báscula de pesaje, parking de camiones\n  - **Maquinaria pesada**: excavadoras, compactadoras, cisternas\n\nCOLOR PALETTE:   - Predominio gris-marrón (no verde como bosque ni azul como río)\n  - Cielo más sucio (gris-pollution)\n  - Contraste con texto rojo de señales de peligro\n\nVARIANT-SPECIFIC NOTE: Mixed plastic debris, shredded bags and packaging, dull and dirty, no colour pop\n\nNEGATIVE CONSTRAINTS: no green vegetation, no blue sky, no natural beauty, oppressive grey-brown industrial palette, dirty and decayed feel, dump not resort, no aesthetic charm",
+      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: El macrovertedero de Zarra (real, proyecto de residuos). En el juego es operado por **TRECO GESTIÓN DE RESIDUOS S.L.** (empresa real según disclaimer).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - **Montañas de basura**: capas acumuladas de residuos mezclados\n  - **Piscinas de lixiviados**: grandes estanques negros/marrones con líquido percolado\n  - **Chimenea de incineración**: torre alta con humo continuo\n  - **Carretera interior**: acceso de camiones pesados\n  - **Vallado perimetral**: vallas metálicas con señalización\n  - **Plantas industriales**: naves de procesamiento, planta de transferencia\n  - **Edificios administrativos**: oficinas, báscula de pesaje, parking de camiones\n  - **Maquinaria pesada**: excavadoras, compactadoras, cisternas\n\nCOLOR PALETTE:   - Predominio gris-marrón (no verde como bosque ni azul como río)\n  - Cielo más sucio (gris-pollution)\n  - Contraste con texto rojo de señales de peligro\n\nVARIANT-SPECIFIC NOTE: Mixed shredded plastic debris pile, dirty dull grey-brown bags and packaging fragments, no living vegetation at all, weathered and stained, ugly industrial trash\n\nNEGATIVE CONSTRAINTS: no green vegetation, no blue sky, no natural beauty, oppressive grey-brown industrial palette, dirty and decayed feel, dump not resort, no aesthetic charm\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no living vegetation, no grass, no plants, no green moss, no trees, no natural beauty; only dirty shredded plastic bags and packaging debris in dull grey-brown tones, industrial trash pile",
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/raw/plastic_debris_mixed.png",
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/plastic_debris_mixed.png",
-      "discardedAt": "2026-09-05T17:17:25+00:00",
-      "discardReason": "minimax rendered lush GREEN vegetation instead of dull dirty plastic debris. Fails ASSET-005 (no green, no natural beauty).",
-      "archivedPath": "assets/tiles/_discarded/stage4_plastic_debris_mixed_discarded.png",
-      "archivedRawPath": "assets/tiles/_discarded/raw/stage4_plastic_debris_mixed_discarded.png"
+      "regeneratedFrom": {
+        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
+        "originalDiscardReason": "minimax rendered lush GREEN vegetation instead of dull dirty plastic debris. Fails ASSET-005 (no green, no natural beauty).",
+        "regeneratedAt": "2026-09-05T17:23:56+00:00"
+      }
     },
     {
       "stageId": "stage4-vertedero",
       "stageName": "vertedero",
       "variant": "weeds_through_pavement",
-      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: El macrovertedero de Zarra (real, proyecto de residuos). En el juego es operado por **TRECO GESTIÓN DE RESIDUOS S.L.** (empresa real según disclaimer).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - **Montañas de basura**: capas acumuladas de residuos mezclados\n  - **Piscinas de lixiviados**: grandes estanques negros/marrones con líquido percolado\n  - **Chimenea de incineración**: torre alta con humo continuo\n  - **Carretera interior**: acceso de camiones pesados\n  - **Vallado perimetral**: vallas metálicas con señalización\n  - **Plantas industriales**: naves de procesamiento, planta de transferencia\n  - **Edificios administrativos**: oficinas, báscula de pesaje, parking de camiones\n  - **Maquinaria pesada**: excavadoras, compactadoras, cisternas\n\nCOLOR PALETTE:   - Predominio gris-marrón (no verde como bosque ni azul como río)\n  - Cielo más sucio (gris-pollution)\n  - Contraste con texto rojo de señales de peligro\n\nVARIANT-SPECIFIC NOTE: Sparse dead weeds forcing through cracked pavement, dry and grey, struggling\n\nNEGATIVE CONSTRAINTS: no green vegetation, no blue sky, no natural beauty, oppressive grey-brown industrial palette, dirty and decayed feel, dump not resort, no aesthetic charm",
+      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: El macrovertedero de Zarra (real, proyecto de residuos). En el juego es operado por **TRECO GESTIÓN DE RESIDUOS S.L.** (empresa real según disclaimer).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - **Montañas de basura**: capas acumuladas de residuos mezclados\n  - **Piscinas de lixiviados**: grandes estanques negros/marrones con líquido percolado\n  - **Chimenea de incineración**: torre alta con humo continuo\n  - **Carretera interior**: acceso de camiones pesados\n  - **Vallado perimetral**: vallas metálicas con señalización\n  - **Plantas industriales**: naves de procesamiento, planta de transferencia\n  - **Edificios administrativos**: oficinas, báscula de pesaje, parking de camiones\n  - **Maquinaria pesada**: excavadoras, compactadoras, cisternas\n\nCOLOR PALETTE:   - Predominio gris-marrón (no verde como bosque ni azul como río)\n  - Cielo más sucio (gris-pollution)\n  - Contraste con texto rojo de señales de peligro\n\nVARIANT-SPECIFIC NOTE: Sparse dead and dying weeds forcing through cracked industrial pavement, dry grey-brown struggling stalks, almost no green left, depressed struggling life\n\nNEGATIVE CONSTRAINTS: no green vegetation, no blue sky, no natural beauty, oppressive grey-brown industrial palette, dirty and decayed feel, dump not resort, no aesthetic charm\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no lush green weeds, no healthy green foliage, no flowers; only sparse dry grey-brown dying weed stalks pushing through cracked pavement, minimal colour, oppressive industrial mood",
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/raw/weeds_through_pavement.png",
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/weeds_through_pavement.png",
-      "discardedAt": "2026-09-05T17:17:25+00:00",
-      "discardReason": "Has dominant green tones. Name allows weeds but the ASSET-005 palette expectation is grey-brown; user flagged as debatable.",
-      "archivedPath": "assets/tiles/_discarded/stage4_weeds_through_pavement_discarded.png",
-      "archivedRawPath": "assets/tiles/_discarded/raw/stage4_weeds_through_pavement_discarded.png"
+      "regeneratedFrom": {
+        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
+        "originalDiscardReason": "Has dominant green tones. Name allows weeds but the ASSET-005 palette expectation is grey-brown; user flagged as debatable.",
+        "regeneratedAt": "2026-09-05T17:23:56+00:00"
+      }
     },
     {
       "stageId": "stage5-castillo",
       "stageName": "castillo",
       "variant": "sendero_subida_penon",
-      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Cerro de Agras (Cofrentes), 394 m snm, sobre chimenea volcánica basáltica.\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Construido sobre roca basáltica del volcán Cerro de Agras (origem volcánico)\n  - Planta rectangular, 800×600 (medidas antiguas, hoy día aprox), 8 cubos en perímetro\n  - Torre del Homenaje cuadrada, 4 niveles, con reloj (Patrimonio)\n  - 2 cubos de entrada (semicirculares) con arco de medio punto + rampa de acceso\n  - Barbacana al norte\n  - Puerta en recodo al sur\n  - Patio de armas rectangular con aljibe subterráneo cubierto con bóvedas\n  - S. XII origen islámico (1147-1172 aprox)\n\nCOLOR PALETTE:   - Predominio blanco-crema (castillo) + marrón-rojizo (peñón) + azul (cielo)\n  - Cálido, épico, \"último round\"\n\nVARIANT-SPECIFIC NOTE: Footpath climbing up the peñón, dirt + steps + low vegetation\n\nREFERENCE PHOTOS available: castillo_vista_carretera.jpg",
+      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Cerro de Agras (Cofrentes), 394 m snm, sobre chimenea volcánica basáltica.\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Construido sobre roca basáltica del volcán Cerro de Agras (origem volcánico)\n  - Planta rectangular, 800×600 (medidas antiguas, hoy día aprox), 8 cubos en perímetro\n  - Torre del Homenaje cuadrada, 4 niveles, con reloj (Patrimonio)\n  - 2 cubos de entrada (semicirculares) con arco de medio punto + rampa de acceso\n  - Barbacana al norte\n  - Puerta en recodo al sur\n  - Patio de armas rectangular con aljibe subterráneo cubierto con bóvedas\n  - S. XII origen islámico (1147-1172 aprox)\n\nCOLOR PALETTE:   - Predominio blanco-crema (castillo) + marrón-rojizo (peñón) + azul (cielo)\n  - Cálido, épico, \"último round\"\n\nVARIANT-SPECIFIC NOTE: Bare dirt and stone footpath climbing up the dark volcanic basalt penon, low stone steps carved into the rock, NO forest or trees lining the path\n\nREFERENCE PHOTOS available: castillo_vista_carretera.jpg\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no trees lining the path, no forest, no lush green vegetation, no dense pines; only bare dirt and stone steps climbing dark volcanic basalt rock with minimal scrub",
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/raw/sendero_subida_penon.png",
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/sendero_subida_penon.png",
-      "discardedAt": "2026-09-05T17:17:25+00:00",
-      "discardReason": "Rendered as green forest; should be a dirt/steps path climbing dark volcanic basalt penon.",
-      "archivedPath": "assets/tiles/_discarded/stage5_sendero_subida_penon_discarded.png",
-      "archivedRawPath": "assets/tiles/_discarded/raw/stage5_sendero_subida_penon_discarded.png"
+      "regeneratedFrom": {
+        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
+        "originalDiscardReason": "Rendered as green forest; should be a dirt/steps path climbing dark volcanic basalt penon.",
+        "regeneratedAt": "2026-09-05T17:23:56+00:00"
+      }
     },
     {
       "stageId": "stage5-castillo",
       "stageName": "castillo",
       "variant": "pino_penon_mediterraneo",
-      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Cerro de Agras (Cofrentes), 394 m snm, sobre chimenea volcánica basáltica.\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Construido sobre roca basáltica del volcán Cerro de Agras (origem volcánico)\n  - Planta rectangular, 800×600 (medidas antiguas, hoy día aprox), 8 cubos en perímetro\n  - Torre del Homenaje cuadrada, 4 niveles, con reloj (Patrimonio)\n  - 2 cubos de entrada (semicirculares) con arco de medio punto + rampa de acceso\n  - Barbacana al norte\n  - Puerta en recodo al sur\n  - Patio de armas rectangular con aljibe subterráneo cubierto con bóvedas\n  - S. XII origen islámico (1147-1172 aprox)\n\nCOLOR PALETTE:   - Predominio blanco-crema (castillo) + marrón-rojizo (peñón) + azul (cielo)\n  - Cálido, épico, \"último round\"\n\nVARIANT-SPECIFIC NOTE: Mediterranean pine (pino) growing on the rocky peñón, sparse\n\nREFERENCE PHOTOS available: castillo_vista_carretera.jpg",
+      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Cerro de Agras (Cofrentes), 394 m snm, sobre chimenea volcánica basáltica.\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Construido sobre roca basáltica del volcán Cerro de Agras (origem volcánico)\n  - Planta rectangular, 800×600 (medidas antiguas, hoy día aprox), 8 cubos en perímetro\n  - Torre del Homenaje cuadrada, 4 niveles, con reloj (Patrimonio)\n  - 2 cubos de entrada (semicirculares) con arco de medio punto + rampa de acceso\n  - Barbacana al norte\n  - Puerta en recodo al sur\n  - Patio de armas rectangular con aljibe subterráneo cubierto con bóvedas\n  - S. XII origen islámico (1147-1172 aprox)\n\nCOLOR PALETTE:   - Predominio blanco-crema (castillo) + marrón-rojizo (peñón) + azul (cielo)\n  - Cálido, épico, \"último round\"\n\nVARIANT-SPECIFIC NOTE: Sparse individual Mediterranean pine trees growing directly out of dark volcanic basalt rock on the penon, large gaps of bare rock between trees, very low density\n\nREFERENCE PHOTOS available: castillo_vista_carretera.jpg\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no dense pine forest, no continuous canopy, no closed tree cover; only sparse scattered individual pines with large bare volcanic rock gaps between them",
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/raw/pino_penon_mediterraneo.png",
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/pino_penon_mediterraneo.png",
-      "discardedAt": "2026-09-05T17:17:25+00:00",
-      "discardReason": "Too dense pine cover; should be sparse individual pines on bare dark volcanic rock.",
-      "archivedPath": "assets/tiles/_discarded/stage5_pino_penon_mediterraneo_discarded.png",
-      "archivedRawPath": "assets/tiles/_discarded/raw/stage5_pino_penon_mediterraneo_discarded.png"
+      "regeneratedFrom": {
+        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
+        "originalDiscardReason": "Too dense pine cover; should be sparse individual pines on bare dark volcanic rock.",
+        "regeneratedAt": "2026-09-05T17:23:56+00:00"
+      }
     }
-  ]
+  ],
+  "discarded": []
 }

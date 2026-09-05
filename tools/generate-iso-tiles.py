@@ -444,6 +444,12 @@ def run_postprocess(stage_filter: str | None = None,
             if y_end - y_start < 64:
                 y_start = max(0, y_end - 64)
             cropped = img.crop((0, y_start, img.width, y_start + 64))
+            # Force the 4 bounding-box corners transparent (outside the
+            # 2:1 diamond). postprocess_v4 misses occasional magenta residue
+            # in corners when the model doesn't render the BG cleanly.
+            for cx, cy in [(0, 0), (cropped.width - 1, 0),
+                           (0, cropped.height - 1), (cropped.width - 1, cropped.height - 1)]:
+                cropped.putpixel((cx, cy), (0, 0, 0, 0))
             cropped.save(stage_folder / src.name, "PNG", optimize=True)
         print(f"  {stage_id}: cropped {len(list(stage_folder.glob('*.png')))} tiles to 128x64")
     # Cleanup temp directory

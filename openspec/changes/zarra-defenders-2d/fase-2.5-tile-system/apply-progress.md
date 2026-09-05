@@ -1,112 +1,71 @@
-# Apply progress — F2.5 Isometric Tile System
+# sdd/zarra-defenders-2d/fase-2.5-tile-system/apply-progress
 
-> **Change**: `fase-2.5-tile-system` · **Project**: `zarra-defenders-2d`
-> **Mode**: hybrid (OpenSpec + Engram) · **Delivery**: stacked-to-main, 3 PRs
-> **Started**: 2026-09-05 · **Apply attempt**: sdd-apply-fase-2.5-initial
-> **Status**: 🟡 PARTIAL — all 3 PRs merged to `main`, awaiting USER VISUAL REVIEW gates (F2.5.2.8 + F2.5.3.4)
+> **Change**: `fase-2.5-tile-system`
+> **Project**: `zarra-defenders-2d` (`/projects/personal/zarra-defenders-2d/`)
+> **Mode**: Standard (no test runner; verification = Playwright + visual review)
+> **Strategy**: `auto-chain` (per user preflight)
+> **Review budget**: 3000 lines
 
----
+## Final state
 
-## PR #1 — F2.5.1 Pure modules · ✅ MERGED
+**Status**: PARTIAL — 3 PRs landed, regeneration loop failed, deferred to F2.5.1
 
-| Field | Value |
-|---|---|
-| Branch | `feat/f2.5.1-iso-pure-modules` |
-| Commit | `ab0a98e` — `feat(iso): add pure iso math, tilemap, and world modules` |
-| Merge | `643300f` — `Merge PR #1: F2.5.1 — pure iso modules` (no-ff into `main`) |
-| LOC | +478 (6 files: 3 modules + smoke test + screenshot) — within 560-budget |
-| Tasks done | F2.5.1.1, F2.5.1.2, F2.5.1.3, F2.5.1.4 |
-| Verification | Playwright headless on `tests/iso-smoke.html`: `window.__isoSmokeOK === true`, 0 failures, console.error=0, console.warning=0. Existing `index.html` regression check: console.error=0, console.warning=0. |
-| Audit invariant | `git diff 581d291 -- src/{rail-camera,input,player}.js styles/main.css index.html` = empty lines. ✅ |
-| Files | `src/iso/iso-math.js` (84 LOC), `src/iso/tilemap.js` (140 LOC), `src/iso/world.js` (111 LOC), `tests/iso-smoke.html` (40 LOC), `tests/iso-smoke.js` (103 LOC), `tests/out/iso-smoke-fase-2.5.1.png` |
+## PRs landed (stacked-to-main)
 
----
+### PR #1 — F2.5.1 pure iso modules ✅
+- Commit: `ab0a98e` → merge `643300f`
+- Files: `src/iso/{iso-math,tilemap,world}.js` (478 LOC total)
+- Smoke test via Playwright (DevTools eval): PASS
+- console.error: 0
+- Audit invariant: `git diff v0.1 -- src/{rail-camera,input,player}.js` = empty
 
-## PR #2 — F2.5.2 Asset generation (40 tiles) · ✅ MERGED · 🔴 USER GATE pending
+### PR #2 — F2.5.2 40 terrain-faithful tiles + asset pipeline ✅
+- Commit: `02c1167` → merge `6e952ef`
+- 40 PNGs generated (5 stages × 8 variants)
+- tools/generate-iso-tiles.py + tools/postprocess_v4.py pipeline
+- 33 tiles met terrain-fidelity, 7 flagged in user visual review
 
-| Field | Value |
-|---|---|
-| Branch | `feat/f2.5.2-asset-pipeline` |
-| Commit | `02c1167` — `feat(assets): generate 40 terrain-faithful iso tiles for 5 stages` |
-| Merge | `6e952ef` — `Merge PR #2: F2.5.2 — 40 terrain-faithful tiles + asset pipeline` (no-ff into `main`) |
-| Tasks done | F2.5.2.1, F2.5.2.2, F2.5.2.3, F2.5.2.4, F2.5.2.5, F2.5.2.6, F2.5.2.7 |
-| Task pending | F2.5.2.8 — user visual review (stage 4 anti-glorification + general terrain fidelity) |
-| Verification | Playwright: 40 PNGs at 128×64. Console error count = 0. |
-| Visual review | See `tests/out/tile-gallery-fase-2.5.2.png` (full 5×8 grid). |
-| Files | `tools/generate-iso-tiles.py` (356 LOC), `tools/variants.json` (53 LOC), `assets/tiles/manifest.json` (40 entries), `assets/tiles/stage{1-5}-*/*.png` × 40, `tests/tile-gallery.html` (visual review tool) |
+### PR #3 — F2.5.3 integration into main.js ✅
+- Commit: `432dac9` → merge `c818d1c`
+- src/main.js: minimal surgical edit (~30 LOC)
+- index.html: cache-bust `?v=6` → `?v=7`
+- DEMO_PATH_ISO = (0,0) → (5,3) → (8,8) monotonic x+y
+- console.error: 0
 
-### ⚠️ Tiles flagged for regeneration (F2.5.2.8 review)
+### PR #4 (deferred) — regeneration loop + iso centering + gallery ⚠️ FAILED
+- Sub-agent attempt: blocked by `sdd_task_result_empty` transport error
+- Partial work landed in commit `99ae457`:
+  - 7 bad tiles moved to `assets/tiles/_discarded/*_discarded.png`
+  - manifest.json restructured to v1 schema
+  - tools/generate-iso-tiles.py extended with `--regenerate`, `--mark-regenerated`, `negative_prompt` support
+  - tools/variants.json: 7 bad variants carry explicit `negative_prompt`
+- Subsequent regeneration attempts produced visually broken tiles (vertical strips, not diamonds)
+- Root cause: minimax MCP `aspect_ratio=2:1` rejected, 1:1 fallback crops to vertical strips
+- **Decision**: restore 7 original tiles from `_discarded/`, defer regeneration to F2.5.1
 
-- **`stage3-rio/roca_chorrera_humeda.png`** — minimax returned full-bleed rock (no magenta bg), so postprocess mis-cropped to vertical strip instead of a 128×64 diamond. Needs regeneration with stronger prompt enforcement of the magenta BG + iso diamond framing.
-- **`stage4-vertedero/plastic_debris_mixed.png`** — minimax rendered GREEN vegetation instead of dull plastic debris. Violates the ASSET-005 anti-glorification gate (no green, no blue). Needs regeneration.
-- **Optional: `stage4-vertedero/weeds_through_pavement.png`** — has lush green elements; "weeds" are naturally green so debatable. User judgment call.
+### Restoration commit
+- 7 original tiles restored from `assets/tiles/_discarded/*_discarded.png` to `stage*/{variant}.png`
+- 40 active tiles (33 from PR #2 + 7 restored originals)
+- `_regen_attempt_1/` preserved as evidence for F2.5.1
 
-### Stage 4 visual analysis (the critical gate)
+## Verification results
 
-The 8 Vertedero tiles lean properly oppressive/industrial:
-- ✅ `cement_pad_crack` — dirty cracked grey concrete with rust stains
-- ✅ `gravel_dust_industrial` — industrial pattern, no vegetation
-- ✅ `container_lixiviado_stain` — heavy industrial rust/oxidation
-- ✅ `metal_scrap_rust` — rusted metal, brown-orange oxidation
-- ✅ `asphalt_cracked_heavy_truck` — cracked industrial asphalt
-- ✅ `weeds_through_pavement` — sparse dead-ish weeds (mostly OK)
-- ⚠️ `dirt_oily_contaminated` — iridescent rainbow oil slick is realistic but adds visual "beauty"
-- ❌ `plastic_debris_mixed` — model rendered lush green grass
+- ✅ console.error = 0 in Playwright (all 3 PRs)
+- ✅ 33/40 tiles visually terrain-faithful (Stages 1-3, 5; some Stage 4 have minor green presence)
+- ❌ 7 tiles fail terrain-fidelity (documented in `_discarded/_regen_attempt_1/` as v2 attempts)
+- ❌ Iso world renders top-left-anchored, not centered (Diablo-2 canonical feel missing)
+- ❌ Tile-gallery.html not implemented (only `tests/f2.5.4-preview.html` partial preview)
 
----
+## Deferred to F2.5.1 (new dedicated change)
 
-## PR #3 — F2.5.3 Integration · ✅ MERGED · 🔴 USER GATE pending
+1. Regenerate 7 bad tiles with verified-working aspect ratio approach (NOT 2:1 — see minimax dev notes)
+2. Iso world centering fix in `src/main.js` (`worldOrigin` + `tileSize` calibration)
+3. Complete `tests/tile-gallery.html` with accepted + discarded sections + visual marking
+4. Manifest sync after regeneration (move new accepted to active[], keep discarded[] accurate)
 
-| Field | Value |
-|---|---|
-| Branch | `feat/f2.5.3-integration` |
-| Commit | `432dac9` — `feat(iso): integrate isometric world into main.js` |
-| Merge | `c818d1c` — `Merge PR #3: F2.5.3 — integration into main.js` (no-ff into `main`) |
-| Tasks done | F2.5.3.1, F2.5.3.2, F2.5.3.3 |
-| Task pending | F2.5.3.4 — user visual gate (Diablo-2 look-and-feel) |
-| LOC delta | +62 / -16 across `src/main.js`, `src/iso/world.js`, `index.html` |
-| Verification | Playwright on `index.html`: `console.error = 0`, `console.warning = 0` (the warning that appears at ~30s is the expected CAM-001 loop-regression warning, not an error). Audit invariant preserved: `git diff 581d291 src/{rail-camera,input,player}.js = 0 lines`. |
-| Visual capture | `tests/out/iso-world-fase-2.5.3.png` (early frame, t≈3s), `tests/out/iso-world-fase-2.5.3-mid.png` (mid-path) |
+## Key Learnings
 
-### ⚠️ Known visual offset (likely needs user judgment)
-
-The spec's `world.position.set(-csx, -csy)` (CAM-002) anchors the camera point at screen (0,0) — i.e. **the iso plane grows DOWN-RIGHT from the top-left corner of the viewport**. This produces an asymmetric "scrolling world" view rather than the centered Diablo-2 camera feel.
-
-If the user wants centered iso (Diablo-2 canonical), the fix is one of:
-1. Set `worldOrigin = (0, 0)` in `main.js` (drops the HUD strip reservation)
-2. Replace `world.position.set(-csx, -csy)` with `world.position.set(W/2 - csx, H/2 - csy)` (centers the camera, keeps HUD reservation)
-
-This is a **visual judgment call**, not a spec violation — the smoke test passes and audit invariants hold. Awaiting F2.5.3.4.
-
----
-
-## Cumulative metrics
-
-| Metric | Value |
-|---|---|
-| PRs merged to `main` | 3 of 3 (F2.5.1, F2.5.2, F2.5.3) |
-| Total commits on `main` since `581d291` | 6 (3 features + 3 merge + 1 docs) |
-| Files changed | ~85 (3 modules + 40 PNGs + 1 generator + variants.json + manifest.json + tile-gallery.html + main.js + world.js + index.html + tasks.md + apply-progress.md + screenshots) |
-| LOC added (excl. binary) | ~870 (478 + 356 + 62 + a few smoke-test edits) — over 560 budget forecast but within SDD tolerance because PNGs and tool scaffolding add fixed cost; net code-only LOC ≈ 600 |
-| Binary size | 40 PNGs ≈ 550 KB post-processed (raw 1280×720 PNGs ~9 MB excluded by .gitignore) |
-| Locked modules touched | 0 (rail-camera.js / input.js / player.js / styles/main.css unchanged) |
-
----
-
-## Engram observations
-
-| topic_key | status |
-|---|---|
-| `sdd/zarra-defenders-2d/fase-2.5-tile-system/apply-progress` | merged across PR #1 / PR #2 / PR #3 |
-
----
-
-## Next action
-
-`sdd-verify` is **NOT YET READY** — user visual gates at F2.5.2.8 and F2.5.3.4 must be answered first.
-
-**Blocker for next phase**:
-1. User must review `tests/out/tile-gallery-fase-2.5.2.png` and either (a) accept, or (b) call out specific tiles to regenerate (notably `roca_chorrera_humeda`, `plastic_debris_mixed`).
-2. User must review `tests/out/iso-world-fase-2.5.3.png` and either (a) accept the current top-left-anchored iso view, or (b) confirm the centering fix is wanted (Diablo-2 canonical).
-
-If both gates pass, F2.5 → `sdd-verify` → `sdd-archive` and tag `v0.2`.
+1. **minimax MCP aspect_ratio limits**: only `1:1`, `4:3`, `3:2`, `16:9`, `9:16`, etc. accepted; `2:1` rejected. Must design around available ratios.
+2. **PR #2 succeeded** because the first run used a slightly different minimax call pattern (likely 1:1 or 4:3) that produced diamond-shaped content. Need to discover what made it work.
+3. **Transport failures** can occur mid-apply; sub-agent produced partial work (commit + untracked files) before failing. Always check working tree state after `sdd_task_result_empty`.
+4. **User-driven regeneration workflow** (move to `_discarded/`, regenerate, gallery with marks) is the right design but needs a different aspect ratio strategy.
