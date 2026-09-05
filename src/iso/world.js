@@ -62,6 +62,12 @@ export class IsoWorld {
   get activeTilemap() { return this._activeTilemap }
   get activeStageId() { return this._activeStageId }
 
+  /** Public sub-layer where main.js mounts vertical sprites (3 pinos + 1 castillo for F2.5). */
+  get spriteLayer() { return this._spriteLayer }
+
+  /** Public sub-layer where the active Tilemap renders tiles. */
+  get tileLayer() { return this._tileLayer }
+
   /**
    * Per-frame update. Camera is duck-typed on getCameraX/getCameraY so
    * `src/rail-camera.js` stays untouched (CAM-001).
