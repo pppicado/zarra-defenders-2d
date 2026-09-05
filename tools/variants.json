@@ -45,14 +45,14 @@
     "dirt_oily_contaminated":      "Oily contaminated dirt, dark brown-black, iridescent patches, no life",
     "plastic_debris_mixed":        {
       "note": "Mixed shredded plastic debris pile, dirty dull grey-brown bags and packaging fragments, no living vegetation at all, weathered and stained, ugly industrial trash",
-      "negative_prompt": "no living vegetation, no grass, no plants, no green moss, no trees, no natural beauty; only dirty shredded plastic bags and packaging debris in dull grey-brown tones, industrial trash pile"
+      "negative_prompt": "no living vegetation, no grass, no plants, no green moss, no trees, no natural beauty; only dirty shredded plastic bags and packaging debris in dull grey-brown tones, industrial trash pile; ONLY concrete/grey-brown, no living plants at all"
     },
     "container_lixiviado_stain":   "Container stained by leachate (lixiviado) runoff, dark crust, rust streaks",
     "metal_scrap_rust":            "Rusty metal scrap heap, brown-orange oxidation, no shine, no green",
     "asphalt_cracked_heavy_truck": "Heavy-truck-cracked asphalt, deep fissures, oil drips, industrial weight",
     "weeds_through_pavement":      {
       "note": "Sparse dead and dying weeds forcing through cracked industrial pavement, dry grey-brown struggling stalks, almost no green left, depressed struggling life",
-      "negative_prompt": "no lush green weeds, no healthy green foliage, no flowers; only sparse dry grey-brown dying weed stalks pushing through cracked pavement, minimal colour, oppressive industrial mood"
+      "negative_prompt": "no lush green weeds, no healthy green foliage, no flowers; only sparse dry grey-brown dying weed stalks pushing through cracked pavement, minimal colour, oppressive industrial mood; ONLY concrete/grey-brown, no living plants at all"
     }
   },
   "stage5-castillo": {

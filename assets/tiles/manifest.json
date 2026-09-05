@@ -1,6 +1,6 @@
 {
   "schema": "tile-manifest/v1",
-  "updatedAt": "2026-09-05T17:23:56+00:00",
+  "updatedAt": "2026-09-05T21:29:23+00:00",
   "totals": {
     "active": 40,
     "discarded": 0,
@@ -279,9 +279,10 @@
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage1-bosque/raw/pino_underbrush_dark.png",
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage1-bosque/pino_underbrush_dark.png",
       "regeneratedFrom": {
-        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
-        "originalDiscardReason": "Tile rendered with too much mossy green cover; name says dark underbrush but image shows moss carpet instead of dry needles + shadowed soil.",
-        "regeneratedAt": "2026-09-05T17:23:56+00:00"
+        "originalDiscardedAt": "2026-09-05T21:13:22+00:00",
+        "originalDiscardReason": "F2.5.1.a regen attempt 2 — 1:1 + verbatim magenta phrase",
+        "regeneratedAt": "2026-09-05T21:14:30+00:00",
+        "previousVariantId": "stage1-bosque/pino_underbrush_dark"
       }
     },
     {
@@ -292,9 +293,10 @@
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage3-rio/raw/roca_chorrera_humeda.png",
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage3-rio/roca_chorrera_humeda.png",
       "regeneratedFrom": {
-        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
-        "originalDiscardReason": "minimax returned full-bleed rock with no magenta bg; postprocess mis-cropped to a vertical strip instead of a 128x64 iso diamond.",
-        "regeneratedAt": "2026-09-05T17:23:56+00:00"
+        "originalDiscardedAt": "2026-09-05T21:16:21+00:00",
+        "originalDiscardReason": "F2.5.1.a regen attempt 2 — retry (center α=193 < 200)",
+        "regeneratedAt": "2026-09-05T21:17:26+00:00",
+        "previousVariantId": "stage3-rio/roca_chorrera_humeda"
       }
     },
     {
@@ -305,48 +307,38 @@
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/raw/cement_pad_crack.png",
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/cement_pad_crack.png",
       "regeneratedFrom": {
-        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
-        "originalDiscardReason": "Tile rendered with green moss on the concrete - should be pure cracked grey concrete, no vegetation (ASSET-005 anti-glorification).",
-        "regeneratedAt": "2026-09-05T17:23:56+00:00"
+        "originalDiscardedAt": "2026-09-05T21:17:47+00:00",
+        "originalDiscardReason": "F2.5.1.a regen attempt 2 — 1:1 + verbatim magenta phrase",
+        "regeneratedAt": "2026-09-05T21:19:48+00:00",
+        "previousVariantId": "stage4-vertedero/cement_pad_crack"
       }
     },
     {
       "stageId": "stage4-vertedero",
       "stageName": "vertedero",
       "variant": "plastic_debris_mixed",
-      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: El macrovertedero de Zarra (real, proyecto de residuos). En el juego es operado por **TRECO GESTIÓN DE RESIDUOS S.L.** (empresa real según disclaimer).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - **Montañas de basura**: capas acumuladas de residuos mezclados\n  - **Piscinas de lixiviados**: grandes estanques negros/marrones con líquido percolado\n  - **Chimenea de incineración**: torre alta con humo continuo\n  - **Carretera interior**: acceso de camiones pesados\n  - **Vallado perimetral**: vallas metálicas con señalización\n  - **Plantas industriales**: naves de procesamiento, planta de transferencia\n  - **Edificios administrativos**: oficinas, báscula de pesaje, parking de camiones\n  - **Maquinaria pesada**: excavadoras, compactadoras, cisternas\n\nCOLOR PALETTE:   - Predominio gris-marrón (no verde como bosque ni azul como río)\n  - Cielo más sucio (gris-pollution)\n  - Contraste con texto rojo de señales de peligro\n\nVARIANT-SPECIFIC NOTE: Mixed shredded plastic debris pile, dirty dull grey-brown bags and packaging fragments, no living vegetation at all, weathered and stained, ugly industrial trash\n\nNEGATIVE CONSTRAINTS: no green vegetation, no blue sky, no natural beauty, oppressive grey-brown industrial palette, dirty and decayed feel, dump not resort, no aesthetic charm\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no living vegetation, no grass, no plants, no green moss, no trees, no natural beauty; only dirty shredded plastic bags and packaging debris in dull grey-brown tones, industrial trash pile",
+      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: El macrovertedero de Zarra (real, proyecto de residuos). En el juego es operado por **TRECO GESTIÓN DE RESIDUOS S.L.** (empresa real según disclaimer).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - **Montañas de basura**: capas acumuladas de residuos mezclados\n  - **Piscinas de lixiviados**: grandes estanques negros/marrones con líquido percolado\n  - **Chimenea de incineración**: torre alta con humo continuo\n  - **Carretera interior**: acceso de camiones pesados\n  - **Vallado perimetral**: vallas metálicas con señalización\n  - **Plantas industriales**: naves de procesamiento, planta de transferencia\n  - **Edificios administrativos**: oficinas, báscula de pesaje, parking de camiones\n  - **Maquinaria pesada**: excavadoras, compactadoras, cisternas\n\nCOLOR PALETTE:   - Predominio gris-marrón (no verde como bosque ni azul como río)\n  - Cielo más sucio (gris-pollution)\n  - Contraste con texto rojo de señales de peligro\n\nVARIANT-SPECIFIC NOTE: Mixed shredded plastic debris pile, dirty dull grey-brown bags and packaging fragments, no living vegetation at all, weathered and stained, ugly industrial trash\n\nNEGATIVE CONSTRAINTS: no green vegetation, no blue sky, no natural beauty, oppressive grey-brown industrial palette, dirty and decayed feel, dump not resort, no aesthetic charm\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no living vegetation, no grass, no plants, no green moss, no trees, no natural beauty; only dirty shredded plastic bags and packaging debris in dull grey-brown tones, industrial trash pile; ONLY concrete/grey-brown, no living plants at all",
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/raw/plastic_debris_mixed.png",
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/plastic_debris_mixed.png",
       "regeneratedFrom": {
-        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
-        "originalDiscardReason": "minimax rendered lush GREEN vegetation instead of dull dirty plastic debris. Fails ASSET-005 (no green, no natural beauty).",
-        "regeneratedAt": "2026-09-05T17:23:56+00:00"
+        "originalDiscardedAt": "2026-09-05T21:20:04+00:00",
+        "originalDiscardReason": "F2.5.1.a regen attempt 2 — anti-glorification + verbatim magenta phrase",
+        "regeneratedAt": "2026-09-05T21:21:02+00:00",
+        "previousVariantId": "stage4-vertedero/plastic_debris_mixed"
       }
     },
     {
       "stageId": "stage4-vertedero",
       "stageName": "vertedero",
       "variant": "weeds_through_pavement",
-      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: El macrovertedero de Zarra (real, proyecto de residuos). En el juego es operado por **TRECO GESTIÓN DE RESIDUOS S.L.** (empresa real según disclaimer).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - **Montañas de basura**: capas acumuladas de residuos mezclados\n  - **Piscinas de lixiviados**: grandes estanques negros/marrones con líquido percolado\n  - **Chimenea de incineración**: torre alta con humo continuo\n  - **Carretera interior**: acceso de camiones pesados\n  - **Vallado perimetral**: vallas metálicas con señalización\n  - **Plantas industriales**: naves de procesamiento, planta de transferencia\n  - **Edificios administrativos**: oficinas, báscula de pesaje, parking de camiones\n  - **Maquinaria pesada**: excavadoras, compactadoras, cisternas\n\nCOLOR PALETTE:   - Predominio gris-marrón (no verde como bosque ni azul como río)\n  - Cielo más sucio (gris-pollution)\n  - Contraste con texto rojo de señales de peligro\n\nVARIANT-SPECIFIC NOTE: Sparse dead and dying weeds forcing through cracked industrial pavement, dry grey-brown struggling stalks, almost no green left, depressed struggling life\n\nNEGATIVE CONSTRAINTS: no green vegetation, no blue sky, no natural beauty, oppressive grey-brown industrial palette, dirty and decayed feel, dump not resort, no aesthetic charm\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no lush green weeds, no healthy green foliage, no flowers; only sparse dry grey-brown dying weed stalks pushing through cracked pavement, minimal colour, oppressive industrial mood",
+      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: El macrovertedero de Zarra (real, proyecto de residuos). En el juego es operado por **TRECO GESTIÓN DE RESIDUOS S.L.** (empresa real según disclaimer).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - **Montañas de basura**: capas acumuladas de residuos mezclados\n  - **Piscinas de lixiviados**: grandes estanques negros/marrones con líquido percolado\n  - **Chimenea de incineración**: torre alta con humo continuo\n  - **Carretera interior**: acceso de camiones pesados\n  - **Vallado perimetral**: vallas metálicas con señalización\n  - **Plantas industriales**: naves de procesamiento, planta de transferencia\n  - **Edificios administrativos**: oficinas, báscula de pesaje, parking de camiones\n  - **Maquinaria pesada**: excavadoras, compactadoras, cisternas\n\nCOLOR PALETTE:   - Predominio gris-marrón (no verde como bosque ni azul como río)\n  - Cielo más sucio (gris-pollution)\n  - Contraste con texto rojo de señales de peligro\n\nVARIANT-SPECIFIC NOTE: Sparse dead and dying weeds forcing through cracked industrial pavement, dry grey-brown struggling stalks, almost no green left, depressed struggling life\n\nNEGATIVE CONSTRAINTS: no green vegetation, no blue sky, no natural beauty, oppressive grey-brown industrial palette, dirty and decayed feel, dump not resort, no aesthetic charm\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no lush green weeds, no healthy green foliage, no flowers; only sparse dry grey-brown dying weed stalks pushing through cracked pavement, minimal colour, oppressive industrial mood; ONLY concrete/grey-brown, no living plants at all",
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/raw/weeds_through_pavement.png",
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/weeds_through_pavement.png",
       "regeneratedFrom": {
-        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
-        "originalDiscardReason": "Has dominant green tones. Name allows weeds but the ASSET-005 palette expectation is grey-brown; user flagged as debatable.",
-        "regeneratedAt": "2026-09-05T17:23:56+00:00"
-      }
-    },
-    {
-      "stageId": "stage5-castillo",
-      "stageName": "castillo",
-      "variant": "sendero_subida_penon",
-      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Cerro de Agras (Cofrentes), 394 m snm, sobre chimenea volcánica basáltica.\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Construido sobre roca basáltica del volcán Cerro de Agras (origem volcánico)\n  - Planta rectangular, 800×600 (medidas antiguas, hoy día aprox), 8 cubos en perímetro\n  - Torre del Homenaje cuadrada, 4 niveles, con reloj (Patrimonio)\n  - 2 cubos de entrada (semicirculares) con arco de medio punto + rampa de acceso\n  - Barbacana al norte\n  - Puerta en recodo al sur\n  - Patio de armas rectangular con aljibe subterráneo cubierto con bóvedas\n  - S. XII origen islámico (1147-1172 aprox)\n\nCOLOR PALETTE:   - Predominio blanco-crema (castillo) + marrón-rojizo (peñón) + azul (cielo)\n  - Cálido, épico, \"último round\"\n\nVARIANT-SPECIFIC NOTE: Bare dirt and stone footpath climbing up the dark volcanic basalt penon, low stone steps carved into the rock, NO forest or trees lining the path\n\nREFERENCE PHOTOS available: castillo_vista_carretera.jpg\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no trees lining the path, no forest, no lush green vegetation, no dense pines; only bare dirt and stone steps climbing dark volcanic basalt rock with minimal scrub",
-      "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/raw/sendero_subida_penon.png",
-      "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/sendero_subida_penon.png",
-      "regeneratedFrom": {
-        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
-        "originalDiscardReason": "Rendered as green forest; should be a dirt/steps path climbing dark volcanic basalt penon.",
-        "regeneratedAt": "2026-09-05T17:23:56+00:00"
+        "originalDiscardedAt": "2026-09-05T21:21:06+00:00",
+        "originalDiscardReason": "F2.5.1.a regen attempt 2 — anti-glorification + verbatim magenta phrase",
+        "regeneratedAt": "2026-09-05T21:24:59+00:00",
+        "previousVariantId": "stage4-vertedero/weeds_through_pavement"
       }
     },
     {
@@ -357,9 +349,24 @@
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/raw/pino_penon_mediterraneo.png",
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/pino_penon_mediterraneo.png",
       "regeneratedFrom": {
-        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
-        "originalDiscardReason": "Too dense pine cover; should be sparse individual pines on bare dark volcanic rock.",
-        "regeneratedAt": "2026-09-05T17:23:56+00:00"
+        "originalDiscardedAt": "2026-09-05T21:25:07+00:00",
+        "originalDiscardReason": "F2.5.1.a regen attempt 2 — 1:1 + verbatim magenta phrase",
+        "regeneratedAt": "2026-09-05T21:28:11+00:00",
+        "previousVariantId": "stage5-castillo/pino_penon_mediterraneo"
+      }
+    },
+    {
+      "stageId": "stage5-castillo",
+      "stageName": "castillo",
+      "variant": "sendero_subida_penon",
+      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Cerro de Agras (Cofrentes), 394 m snm, sobre chimenea volcánica basáltica.\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Construido sobre roca basáltica del volcán Cerro de Agras (origem volcánico)\n  - Planta rectangular, 800×600 (medidas antiguas, hoy día aprox), 8 cubos en perímetro\n  - Torre del Homenaje cuadrada, 4 niveles, con reloj (Patrimonio)\n  - 2 cubos de entrada (semicirculares) con arco de medio punto + rampa de acceso\n  - Barbacana al norte\n  - Puerta en recodo al sur\n  - Patio de armas rectangular con aljibe subterráneo cubierto con bóvedas\n  - S. XII origen islámico (1147-1172 aprox)\n\nCOLOR PALETTE:   - Predominio blanco-crema (castillo) + marrón-rojizo (peñón) + azul (cielo)\n  - Cálido, épico, \"último round\"\n\nVARIANT-SPECIFIC NOTE: Bare dirt and stone footpath climbing up the dark volcanic basalt penon, low stone steps carved into the rock, NO forest or trees lining the path\n\nREFERENCE PHOTOS available: castillo_vista_carretera.jpg\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no trees lining the path, no forest, no lush green vegetation, no dense pines; only bare dirt and stone steps climbing dark volcanic basalt rock with minimal scrub",
+      "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/raw/sendero_subida_penon.png",
+      "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/sendero_subida_penon.png",
+      "regeneratedFrom": {
+        "originalDiscardedAt": "2026-09-05T21:28:15+00:00",
+        "originalDiscardReason": "F2.5.1.a regen attempt 2 — 1:1 + verbatim magenta phrase",
+        "regeneratedAt": "2026-09-05T21:29:15+00:00",
+        "previousVariantId": "stage5-castillo/sendero_subida_penon"
       }
     }
   ],
