@@ -58,37 +58,37 @@ Chain strategy: stacked-to-main
 
 ## Phase F2.5.2 — Asset generation (terrain-faithful, autonomous)
 
-- [ ] **F2.5.2.1** — Create `tools/generate-iso-tiles.py` (prompt builder + driver)
+- [x] **F2.5.2.1** — Create `tools/generate-iso-tiles.py` (prompt builder + driver)
   - **Files**: `tools/generate-iso-tiles.py` (new), `tools/variants.json` (new — per-variant `{variant_note}` only) · **LOC**: +150 · **Depends**: none
   - **Verify**: `python3 tools/generate-iso-tiles.py --dry-run` prints 40 prompts (5 stages × 8 variants) to stdout; zero calls to `minimax_generate_image`; prompts contain the NOTES.md location string and palette bullets for each stage (ASSET-005).
   - **Deliverable**: pure-Python script using only stdlib; parser for the 5 NOTES.md files; `VERTEDERO_NEGATIVE` injected only for stage 4.
 
-- [ ] **F2.5.2.2** — Generate 8 tiles for `stage1-bosque`
+- [x] **F2.5.2.2** — Generate 8 tiles for `stage1-bosque`
   - **Files**: `assets/tiles/stage1-bosque/raw/*.png` (8 new, ~80 KB each) · **Depends**: F2.5.2.1
   - **Verify**: Playwright loads each PNG, asserts `naturalWidth === 128 && naturalHeight === 64`; assert `getImageData(0,0).data` matches `#FF00FF` for the 4 corner pixels (ASSET-001, ASSET-005).
   - **Deliverable**: 8 raw PNGs matching `pino_clear_grass_rojizo`, `pino_underbrush_dark`, `encina_redonda_sombra`, `suelo_arcilloso_rojizo`, `trocha_forestal_compactada`, `matorral_coscoja_romero`, `arroyo_barranco_edge`, `hojarasca_pino_seca`.
 
-- [ ] **F2.5.2.3** — Generate 8 tiles for `stage2-pueblo`
+- [x] **F2.5.2.3** — Generate 8 tiles for `stage2-pueblo`
   - **Files**: `assets/tiles/stage2-pueblo/raw/*.png` (8 new) · **Depends**: F2.5.2.2
   - **Verify**: Same Playwright shape assertion as F2.5.2.2.
   - **Deliverable**: 8 raw PNGs (`cal_blanca_pared`, `teja_arabe_roja`, `adoquin_calle_empedrada`, `asfalto_N330_circulado`, `acera_baldosa_hidraulica`, `sombra_calle_estrecha`, `balcon_hierro_forjado`, `porton_madera_pueblo`).
 
-- [ ] **F2.5.2.4** — Generate 8 tiles for `stage3-rio`
+- [x] **F2.5.2.4** — Generate 8 tiles for `stage3-rio`
   - **Files**: `assets/tiles/stage3-rio/raw/*.png` (8 new) · **Depends**: F2.5.2.3
   - **Verify**: Same Playwright shape assertion.
   - **Deliverable**: 8 raw PNGs (`agua_cristalina_verde_azul`, `cortado_vertical_karstico`, `roca_chorrera_humeda`, `sedimento_aluvial_rio`, `chopo_ribera_densa`, `canto_rodado_orilla`, `musgo_humedo_roca`, `ladera_matorral_seca`).
 
-- [ ] **F2.5.2.5** — Generate 8 tiles for `stage4-vertedero` (USER GATE)
+- [x] **F2.5.2.5** — Generate 8 tiles for `stage4-vertedero` (USER GATE)
   - **Files**: `assets/tiles/stage4-vertedero/raw/*.png` (8 new) · **Depends**: F2.5.2.4
   - **Verify**: Playwright loads 8 PNGs + asserts NO green vegetation and NO blue sky pixels (`#00FF00` and `#0000FF` counts = 0 across all 8 tiles); `VERTEDERO_NEGATIVE` appears in the saved prompt log.
   - **Deliverable**: 8 raw PNGs (`cement_pad_crack`, `gravel_dust_industrial`, `dirt_oily_contaminated`, `plastic_debris_mixed`, `container_lixiviado_stain`, `metal_scrap_rust`, `asphalt_cracked_heavy_truck`, `weeds_through_pavement`) — oppressive grey-brown palette (ASSET-005 anti-glorification).
 
-- [ ] **F2.5.2.6** — Generate 8 tiles for `stage5-castillo`
+- [x] **F2.5.2.6** — Generate 8 tiles for `stage5-castillo`
   - **Files**: `assets/tiles/stage5-castillo/raw/*.png` (8 new) · **Depends**: F2.5.2.5
   - **Verify**: Same Playwright shape assertion.
   - **Deliverable**: 8 raw PNGs (`peñon_basalto_volcanico`, `cal_castillo_blanca`, `torre_homenaje_reloj`, `mamposteria_antigua_ocre`, `patio_armas_adoquines`, `sendero_subida_peñon`, `pino_peñon_mediterraneo`, `aljibe_boveda_subterraneo`).
 
-- [ ] **F2.5.2.7** — Run `tools/postprocess_v4.py` on all 40 raw tiles (5 batches)
+- [x] **F2.5.2.7** — Run `tools/postprocess_v4.py` on all 40 raw tiles (5 batches)
   - **Files**: `assets/tiles/stage{1-5}-*/*.png` (40 chroma-keyed) · **Depends**: F2.5.2.2–F2.5.2.6
   - **Verify**: Playwright loads each processed tile; assert NO `#FF00FF` pixel anywhere (corner + center samples); alpha at 4 corners = 0; alpha at center = 255 (ASSET-002).
   - **Deliverable**: 40 transparent PNGs under `assets/tiles/stage{1-5}-{name}/{variant}.png` ready for `PIXI.Assets.load`.
@@ -102,17 +102,17 @@ Chain strategy: stacked-to-main
 
 ## Phase F2.5.3 — Integration (TOUCH main.js, minimal)
 
-- [ ] **F2.5.3.1** — Modify `src/main.js`: wire `IsoWorld`, swap camera transform
+- [x] **F2.5.3.1** — Modify `src/main.js`: wire `IsoWorld`, swap camera transform
   - **Files**: `src/main.js` (modified), `index.html` (cache-bust `?v=6` → `?v=7`) · **LOC**: +30 / −5 · **Depends**: F2.5.1.3, F2.5.2.7
   - **Verify**: Playwright navigates to `http://localhost:8000/`; `console.error` count = 0; `console.warn` count = 0; screenshot saved to `tests/out/iso-world.png` shows iso Diablo-2 view with 10×10 grass plane + 4 sprites at iso corners + crosshair on HUD (CAM-002, ASSET-004).
   - **Deliverable**: `loadTilemap()` sibling to `loadSprites()`; `bg` placeholder replaced with `isoWorld.container`; `world.x = -camera.getCameraX()` replaced with `world.position.set(-csx, -csy)`.
 
-- [ ] **F2.5.3.2** — Define `DEMO_PATH_ISO` (monotonic x+y)
+- [x] **F2.5.3.2** — Define `DEMO_PATH_ISO` (monotonic x+y)
   - **Files**: `src/main.js` (modified) · **LOC**: +10 · **Depends**: F2.5.3.1
   - **Verify**: Playwright records 10 frames at 1-second intervals while the demo runs; for each frame compute `camera.getCameraX() + camera.getCameraY()` and assert the sequence is non-decreasing (CAM-001 monotonic depth).
   - **Deliverable**: `DEMO_PATH_ISO = [{t:0,x:0,y:0}, {t:30,x:9,y:9}]`; sum 0 → 18.
 
-- [ ] **F2.5.3.3** — Crosshair sanity check (player.js unchanged, but verify)
+- [x] **F2.5.3.3** — Crosshair sanity check (player.js unchanged, but verify)
   - **Files**: none (verify-only) · **Depends**: F2.5.3.2
   - **Verify**: Playwright moves the mouse across the canvas at 3 different positions; in each frame the crosshair `hud` child reads the mouse position in screen-space (not transformed by world matrix). Confirms `src/player.js` needs zero edits (CAM-002 HUD invariant).
   - **Deliverable**: documented assumption — if crosshair drifts, return to F2.5.3.1 to confirm `hud` is a sibling of `world`, not a child.
