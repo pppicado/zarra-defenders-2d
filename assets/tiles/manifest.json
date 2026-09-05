@@ -1,6 +1,6 @@
 {
   "schema": "tile-manifest/v1",
-  "updatedAt": "2026-09-05T21:19:48+00:00",
+  "updatedAt": "2026-09-05T21:21:02+00:00",
   "totals": {
     "active": 40,
     "discarded": 0,
@@ -274,19 +274,6 @@
     {
       "stageId": "stage4-vertedero",
       "stageName": "vertedero",
-      "variant": "plastic_debris_mixed",
-      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: El macrovertedero de Zarra (real, proyecto de residuos). En el juego es operado por **TRECO GESTIÓN DE RESIDUOS S.L.** (empresa real según disclaimer).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - **Montañas de basura**: capas acumuladas de residuos mezclados\n  - **Piscinas de lixiviados**: grandes estanques negros/marrones con líquido percolado\n  - **Chimenea de incineración**: torre alta con humo continuo\n  - **Carretera interior**: acceso de camiones pesados\n  - **Vallado perimetral**: vallas metálicas con señalización\n  - **Plantas industriales**: naves de procesamiento, planta de transferencia\n  - **Edificios administrativos**: oficinas, báscula de pesaje, parking de camiones\n  - **Maquinaria pesada**: excavadoras, compactadoras, cisternas\n\nCOLOR PALETTE:   - Predominio gris-marrón (no verde como bosque ni azul como río)\n  - Cielo más sucio (gris-pollution)\n  - Contraste con texto rojo de señales de peligro\n\nVARIANT-SPECIFIC NOTE: Mixed shredded plastic debris pile, dirty dull grey-brown bags and packaging fragments, no living vegetation at all, weathered and stained, ugly industrial trash\n\nNEGATIVE CONSTRAINTS: no green vegetation, no blue sky, no natural beauty, oppressive grey-brown industrial palette, dirty and decayed feel, dump not resort, no aesthetic charm\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no living vegetation, no grass, no plants, no green moss, no trees, no natural beauty; only dirty shredded plastic bags and packaging debris in dull grey-brown tones, industrial trash pile",
-      "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/raw/plastic_debris_mixed.png",
-      "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/plastic_debris_mixed.png",
-      "regeneratedFrom": {
-        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
-        "originalDiscardReason": "minimax rendered lush GREEN vegetation instead of dull dirty plastic debris. Fails ASSET-005 (no green, no natural beauty).",
-        "regeneratedAt": "2026-09-05T17:23:56+00:00"
-      }
-    },
-    {
-      "stageId": "stage4-vertedero",
-      "stageName": "vertedero",
       "variant": "weeds_through_pavement",
       "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: El macrovertedero de Zarra (real, proyecto de residuos). En el juego es operado por **TRECO GESTIÓN DE RESIDUOS S.L.** (empresa real según disclaimer).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - **Montañas de basura**: capas acumuladas de residuos mezclados\n  - **Piscinas de lixiviados**: grandes estanques negros/marrones con líquido percolado\n  - **Chimenea de incineración**: torre alta con humo continuo\n  - **Carretera interior**: acceso de camiones pesados\n  - **Vallado perimetral**: vallas metálicas con señalización\n  - **Plantas industriales**: naves de procesamiento, planta de transferencia\n  - **Edificios administrativos**: oficinas, báscula de pesaje, parking de camiones\n  - **Maquinaria pesada**: excavadoras, compactadoras, cisternas\n\nCOLOR PALETTE:   - Predominio gris-marrón (no verde como bosque ni azul como río)\n  - Cielo más sucio (gris-pollution)\n  - Contraste con texto rojo de señales de peligro\n\nVARIANT-SPECIFIC NOTE: Sparse dead and dying weeds forcing through cracked industrial pavement, dry grey-brown struggling stalks, almost no green left, depressed struggling life\n\nNEGATIVE CONSTRAINTS: no green vegetation, no blue sky, no natural beauty, oppressive grey-brown industrial palette, dirty and decayed feel, dump not resort, no aesthetic charm\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no lush green weeds, no healthy green foliage, no flowers; only sparse dry grey-brown dying weed stalks pushing through cracked pavement, minimal colour, oppressive industrial mood",
       "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/raw/weeds_through_pavement.png",
@@ -360,6 +347,19 @@
         "originalDiscardedAt": "2026-09-05T21:17:47+00:00",
         "originalDiscardReason": "F2.5.1.a regen attempt 2 — 1:1 + verbatim magenta phrase",
         "regeneratedAt": "2026-09-05T21:19:48+00:00"
+      }
+    },
+    {
+      "stageId": "stage4-vertedero",
+      "stageName": "vertedero",
+      "variant": "plastic_debris_mixed",
+      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: El macrovertedero de Zarra (real, proyecto de residuos). En el juego es operado por **TRECO GESTIÓN DE RESIDUOS S.L.** (empresa real según disclaimer).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - **Montañas de basura**: capas acumuladas de residuos mezclados\n  - **Piscinas de lixiviados**: grandes estanques negros/marrones con líquido percolado\n  - **Chimenea de incineración**: torre alta con humo continuo\n  - **Carretera interior**: acceso de camiones pesados\n  - **Vallado perimetral**: vallas metálicas con señalización\n  - **Plantas industriales**: naves de procesamiento, planta de transferencia\n  - **Edificios administrativos**: oficinas, báscula de pesaje, parking de camiones\n  - **Maquinaria pesada**: excavadoras, compactadoras, cisternas\n\nCOLOR PALETTE:   - Predominio gris-marrón (no verde como bosque ni azul como río)\n  - Cielo más sucio (gris-pollution)\n  - Contraste con texto rojo de señales de peligro\n\nVARIANT-SPECIFIC NOTE: Mixed shredded plastic debris pile, dirty dull grey-brown bags and packaging fragments, no living vegetation at all, weathered and stained, ugly industrial trash\n\nNEGATIVE CONSTRAINTS: no green vegetation, no blue sky, no natural beauty, oppressive grey-brown industrial palette, dirty and decayed feel, dump not resort, no aesthetic charm\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no living vegetation, no grass, no plants, no green moss, no trees, no natural beauty; only dirty shredded plastic bags and packaging debris in dull grey-brown tones, industrial trash pile; ONLY concrete/grey-brown, no living plants at all",
+      "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/raw/plastic_debris_mixed.png",
+      "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage4-vertedero/plastic_debris_mixed.png",
+      "regeneratedFrom": {
+        "originalDiscardedAt": "2026-09-05T21:20:04+00:00",
+        "originalDiscardReason": "F2.5.1.a regen attempt 2 — anti-glorification + verbatim magenta phrase",
+        "regeneratedAt": "2026-09-05T21:21:02+00:00"
       }
     }
   ],
