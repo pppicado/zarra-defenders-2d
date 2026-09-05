@@ -14,3 +14,13 @@ Thumbs.db
 # Backups (dejamos los .bak fuera del repo, son respaldo temporal)
 *.bak
 *.tmp
+
+# Raw AI-generated tiles before postprocess (regenerable from tools/generate-iso-tiles.py + minimax MCP)
+assets/tiles/*/raw/
+
+# SDD runtime artifacts
+.atl/
+.playwright-mcp/
+
+# Local visual review screenshots (regenerable)
+tests/out/*.png

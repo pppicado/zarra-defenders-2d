@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>F2.5 tile gallery — visual review</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      background: #222;
+      color: #eee;
+      font-family: -apple-system, sans-serif;
+    }
+    h1 { font-size: 18px; margin: 0 0 12px; }
+    h2 { font-size: 14px; margin: 16px 0 6px; color: #fbbf24; }
+    .stage {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+    .tile {
+      background: #444;
+      border: 1px solid #666;
+      padding: 4px;
+      text-align: center;
+    }
+    .tile img {
+      display: block;
+      width: 100%;
+      height: auto;
+      image-rendering: pixelated;
+    }
+    .tile .name {
+      font-size: 10px;
+      color: #ddd;
+      margin-top: 4px;
+      font-family: monospace;
+    }
+    .check {
+      background: #0f3a0f;
+      border-color: #4ade80;
+    }
+  </style>
+</head>
+<body>
+  <h1>F2.5 tile gallery — visual review (post-processed 128x64 PNGs)</h1>
+  <div id="gallery"></div>
+  <script>
+    const stages = [
+      ['stage1-bosque', 'Stage 1 — Bosque mediterráneo'],
+      ['stage2-pueblo', 'Stage 2 — Pueblo de Cofrentes'],
+      ['stage3-rio', 'Stage 3 — Río Cabriel'],
+      ['stage4-vertedero', 'Stage 4 — Vertedero (anti-glorification gate)'],
+      ['stage5-castillo', 'Stage 5 — Castillo de Cofrentes'],
+    ];
+    const gallery = document.getElementById('gallery');
+    for (const [id, label] of stages) {
+      const h2 = document.createElement('h2');
+      h2.textContent = label;
+      gallery.appendChild(h2);
+      const grid = document.createElement('div');
+      grid.className = 'stage';
+      // Hardcoded variant list (must match tools/variants.json + manifest)
+      const variants = {
+        'stage1-bosque': ['pino_clear_grass_rojizo','pino_underbrush_dark','encina_redonda_sombra','suelo_arcilloso_rojizo','trocha_forestal_compactada','matorral_coscoja_romero','arroyo_barranco_edge','hojarasca_pino_seca'],
+        'stage2-pueblo': ['cal_blanca_pared','teja_arabe_roja','adoquin_calle_empedrada','asfalto_N330_circulado','acera_baldosa_hidraulica','sombra_calle_estrecha','balcon_hierro_forjado','porton_madera_pueblo'],
+        'stage3-rio': ['agua_cristalina_verde_azul','cortado_vertical_karstico','roca_chorrera_humeda','sedimento_aluvial_rio','chopo_ribera_densa','canto_rodado_orilla','musgo_humedo_roca','ladera_matorral_seca'],
+        'stage4-vertedero': ['cement_pad_crack','gravel_dust_industrial','dirt_oily_contaminated','plastic_debris_mixed','container_lixiviado_stain','metal_scrap_rust','asphalt_cracked_heavy_truck','weeds_through_pavement'],
+        'stage5-castillo': ['penon_basalto_volcanico','cal_castillo_blanca','torre_homenaje_reloj','mamposteria_antigua_ocre','patio_armas_adoquines','sendero_subida_penon','pino_penon_mediterraneo','aljibe_boveda_subterraneo'],
+      }[id];
+      for (const v of variants) {
+        const tile = document.createElement('div');
+        tile.className = 'tile check';
+        tile.innerHTML = `<img src="../assets/tiles/${id}/${v}.png" alt="${v}"><div class="name">${v}</div>`;
+        grid.appendChild(tile);
+      }
+      gallery.appendChild(grid);
+    }
+    window.__galleryReady = true;
+  </script>
+</body>
+</html>
