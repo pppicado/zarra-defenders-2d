@@ -1,0 +1,53 @@
+{
+  "_comment": "Per-variant one-liner that gets injected into the prompt for each tile. Names match assets/tiles/stage{N}-{name}/{variant}.png exactly.",
+  "stage1-bosque": {
+    "pino_clear_grass_rojizo":     "Mediterranean pine clearing on reddish clay soil, sparse pine needles, low tufts of dry grass",
+    "pino_underbrush_dark":        "Dark underbrush zone under pine canopy, shadowed soil, scattered twigs",
+    "encina_redonda_sombra":       "Round holm oak (encina) shadow on reddish soil, dry leaf litter around the canopy projection",
+    "suelo_arcilloso_rojizo":      "Bare reddish clay soil between trees, dry and cracked, no vegetation",
+    "trocha_forestal_compactada":  "Forest track compacted by occasional tractors, dirt and pine-needle mix, light ruts",
+    "matorral_coscoja_romero":     "Mediterranean scrub patch with coscoja (kermes oak) and romero (rosemary) bushes",
+    "arroyo_barranco_edge":        "Edge of a seasonal arroyo (ravine), damp sand + small stones + grass tufts",
+    "hojarasca_pino_seca":         "Dry pine needle leaf litter covering the ground, orange-brown, scattered pine cones"
+  },
+  "stage2-pueblo": {
+    "cal_blanca_pared":            "White lime-washed wall base (cal blanca) of a Cofrentes village house, plaster texture",
+    "teja_arabe_roja":             "Red Arabic roof tiles (teja árabe), terracotta, slight weathering",
+    "adoquin_calle_empedrada":     "Cobblestone paving of the narrow calle principal, irregular stones, dry",
+    "asfalto_N330_circulado":      "N-330 asphalt road segment, with painted road markings (circulado / paso)",
+    "acera_baldosa_hidraulica":    "Hydraulic-tile sidewalk (baldosa hidráulica), geometric pattern, worn",
+    "sombra_calle_estrecha":       "Deep shadow cast by adjacent buildings on a narrow calle, light blue-grey",
+    "balcon_hierro_forjado":       "Wrought-iron balcony (balcón de hierro forjado) with simple geometric railing",
+    "porton_madera_pueblo":        "Heavy wooden village gate (portón de madera), aged planks, iron studs"
+  },
+  "stage3-rio": {
+    "agua_cristalina_verde_azul":  "Crystal-clear river water with green-blue tint, shallow ripples over pebbles",
+    "cortado_vertical_karstico":   "Vertical karst cliff face (cortado vertical), light limestone, fractured",
+    "roca_chorrera_humeda":        "Wet rock face of a chorrera (waterfall), dark and glistening, mossy",
+    "sedimento_aluvial_rio":       "Alluvial sediment on the river bank, fine gravel + silt + driftwood traces",
+    "chopo_ribera_densa":          "Dense riparian poplar (chopo) grove, dappled shade on the ground",
+    "canto_rodado_orilla":         "Rounded pebbles (cantos rodados) on the river edge, mixed grey and ochre",
+    "musgo_humedo_roca":           "Damp moss growing on a river rock, vivid green against wet stone",
+    "ladera_matorral_seca":        "Dry scrubby slope above the river, matorral mediterráneo, sun-bleached"
+  },
+  "stage4-vertedero": {
+    "cement_pad_crack":            "Cracked concrete industrial pad, dirty grey, rebar stains, no vegetation, no decoration",
+    "gravel_dust_industrial":      "Industrial gravel and dust, compacted, truck tire tracks, no grass",
+    "dirt_oily_contaminated":      "Oily contaminated dirt, dark brown-black, iridescent patches, no life",
+    "plastic_debris_mixed":        "Mixed plastic debris, shredded bags and packaging, dull and dirty, no colour pop",
+    "container_lixiviado_stain":   "Container stained by leachate (lixiviado) runoff, dark crust, rust streaks",
+    "metal_scrap_rust":            "Rusty metal scrap heap, brown-orange oxidation, no shine, no green",
+    "asphalt_cracked_heavy_truck": "Heavy-truck-cracked asphalt, deep fissures, oil drips, industrial weight",
+    "weeds_through_pavement":      "Sparse dead weeds forcing through cracked pavement, dry and grey, struggling"
+  },
+  "stage5-castillo": {
+    "penon_basalto_volcanico":     "Volcanic basalt rock of the Cerro de Agras peñón, dark brown-red, rugged",
+    "cal_castillo_blanca":         "White lime (cal) wall of the Castillo de Cofrentes, bright sun-bleached",
+    "torre_homenaje_reloj":        "Torre del Homenaje base with clock tower projection, masonry blocks",
+    "mamposteria_antigua_ocre":    "Ancient ochre masonry, weathered stonework, irregular blocks",
+    "patio_armas_adoquines":       "Patio de Armas paved with adoquines (cobblestones), worn by centuries",
+    "sendero_subida_penon":        "Footpath climbing up the peñón, dirt + steps + low vegetation",
+    "pino_penon_mediterraneo":     "Mediterranean pine (pino) growing on the rocky peñón, sparse",
+    "aljibe_boveda_subterraneo":   "Underground aljibe (cistern) vaulted ceiling hint, masonry ribs, dim"
+  }
+}
