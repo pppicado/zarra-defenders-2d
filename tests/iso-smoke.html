@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>iso-smoke — F2.5.1 verification</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #111;
+      color: #eee;
+      font-family: monospace;
+    }
+    #viewport {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #status {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      padding: 6px 10px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 4px;
+      font-size: 12px;
+      z-index: 10;
+    }
+    .ok   { color: #4ade80; }
+    .fail { color: #f87171; }
+  </style>
+</head>
+<body>
+  <div id="status">iso-smoke loading…</div>
+  <div id="viewport"></div>
+  <!-- Pixi.js v7 (matches index.html) -->
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js"></script>
+  <script type="module" src="./iso-smoke.js"></script>
+</body>
+</html>
