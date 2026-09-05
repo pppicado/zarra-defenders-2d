@@ -1,0 +1,74 @@
+# openspec/config.yaml
+# Zarra Defenders 2D — SDD configuration
+# Detected by sdd-init on 2026-09-05
+
+schema: spec-driven
+
+context: |
+  Greenfield web game: 2D pedagogical rail shooter about TRECO GESTIÓN DE RESIDUOS S.L.
+  in Valle de Ayora, Spain. Project just shipped Fase 1+2 (bootstrap + camera + crosshair)
+  at commit d533567 (tag v0.1). Next change: F2.5 — isometric tile system (Diablo-2 style).
+  Stack: vanilla HTML5 + ES modules, NO build step, Pixi.js v7.4.0 via CDN.
+  Local dev: Python `http.server`. No automated test runner — verification is manual
+  playthrough + Playwright headless screenshot + console-error capture.
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Bilingual artifact default: English for code, comments, UI strings, and specs
+    - Spanish only for player-facing pedagogy cards (already in docs/pedagogy-data.json)
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Each delta spec lives under specs/{domain}/spec.md
+  design:
+    - Include sequence diagrams for camera/world/interaction flows
+    - Document architecture decisions with rationale (ADR-style inline)
+    - Reference existing Phase 1+2 modules (rail-camera.js, input.js, player.js, main.js)
+      before adding new ones
+  tasks:
+    - Group by phase, use hierarchical numbering (F2.5.1, F2.5.2, ...)
+    - Keep tasks completable in one work session
+    - Pair each implementation task with a Playwright verification step
+  apply:
+    guidelines:
+      - Follow existing code patterns (ES modules, PIXI.Application v7, anchor(0.5, 1.0)
+        for sprites, scaleMode NEAREST on baseTexture)
+      - Reuse existing `world` / `hud` containers in src/main.js — do not restructure
+      - New sprites go to assets/sprites/ following the {category}_{name}.png convention
+      - Do NOT modify src/main.js, src/rail-camera.js, src/input.js, src/player.js,
+        styles/main.css, or index.html without explicit change-scope approval
+    tdd: false                 # No automated test runner in this project (Standard Mode)
+    test_command: ""           # Verification is Playwright headless + visual, not unit tests
+  verify:
+    test_command: ""
+    build_command: ""          # No build step — `python3 -m http.server 8000` from project root
+    coverage_threshold: 0
+    verification_path: "Playwright headless screenshot + console-error capture +
+                        manual visual review against the reference PNG zarra-v01-final.png"
+  archive:
+    - Warn before merging destructive deltas
+    - Keep archived changes as audit trail under openspec/changes/archive/YYYY-MM-DD-{name}/
+
+# Stack-specific conventions (captured at init time)
+stack:
+  runtime:
+    - "HTML5 + ES modules (no bundler)"
+    - "Pixi.js v7.4.0 (loaded from jsDelivr CDN)"
+    - "Python http.server for local dev (see start_server.sh)"
+  module_system: "ES modules via <script type=\"module\">"
+  asset_pipeline:
+    sprites_dir: "assets/sprites/{category}_{name}.png"
+    backgrounds_dir: "assets/backgrounds/"
+    ui_dir: "assets/ui/"
+    pipeline_tool: "tools/postprocess_v4.py (alpha channel)"
+  code_layout:
+    entry: "src/main.js"
+    modules: ["rail-camera.js", "input.js", "player.js"]
+    styles: "styles/main.css"
+  conventions:
+    - "Sprite anchor: (0.5, 1.0) — center horizontal, bottom vertical (ground contact)"
+    - "Pixi scaleMode: NEAREST on baseTexture (pixel-perfect, no AA)"
+    - "Container structure: app.stage -> { world (camera-driven), hud (screen-space), ui (modals) }"
+    - "Camera offset: world.x = -camera.getCameraX() (move world opposite to camera)"
+    - "World coordinates in pixels; demo world is 1920 wide"
