@@ -1,6 +1,6 @@
 {
   "schema": "tile-manifest/v1",
-  "updatedAt": "2026-09-05T21:29:15+00:00",
+  "updatedAt": "2026-09-05T21:29:23+00:00",
   "totals": {
     "active": 40,
     "discarded": 0,
@@ -281,7 +281,8 @@
       "regeneratedFrom": {
         "originalDiscardedAt": "2026-09-05T21:13:22+00:00",
         "originalDiscardReason": "F2.5.1.a regen attempt 2 — 1:1 + verbatim magenta phrase",
-        "regeneratedAt": "2026-09-05T21:14:30+00:00"
+        "regeneratedAt": "2026-09-05T21:14:30+00:00",
+        "previousVariantId": "stage1-bosque/pino_underbrush_dark"
       }
     },
     {
@@ -294,7 +295,8 @@
       "regeneratedFrom": {
         "originalDiscardedAt": "2026-09-05T21:16:21+00:00",
         "originalDiscardReason": "F2.5.1.a regen attempt 2 — retry (center α=193 < 200)",
-        "regeneratedAt": "2026-09-05T21:17:26+00:00"
+        "regeneratedAt": "2026-09-05T21:17:26+00:00",
+        "previousVariantId": "stage3-rio/roca_chorrera_humeda"
       }
     },
     {
@@ -307,7 +309,8 @@
       "regeneratedFrom": {
         "originalDiscardedAt": "2026-09-05T21:17:47+00:00",
         "originalDiscardReason": "F2.5.1.a regen attempt 2 — 1:1 + verbatim magenta phrase",
-        "regeneratedAt": "2026-09-05T21:19:48+00:00"
+        "regeneratedAt": "2026-09-05T21:19:48+00:00",
+        "previousVariantId": "stage4-vertedero/cement_pad_crack"
       }
     },
     {
@@ -320,7 +323,8 @@
       "regeneratedFrom": {
         "originalDiscardedAt": "2026-09-05T21:20:04+00:00",
         "originalDiscardReason": "F2.5.1.a regen attempt 2 — anti-glorification + verbatim magenta phrase",
-        "regeneratedAt": "2026-09-05T21:21:02+00:00"
+        "regeneratedAt": "2026-09-05T21:21:02+00:00",
+        "previousVariantId": "stage4-vertedero/plastic_debris_mixed"
       }
     },
     {
@@ -333,7 +337,8 @@
       "regeneratedFrom": {
         "originalDiscardedAt": "2026-09-05T21:21:06+00:00",
         "originalDiscardReason": "F2.5.1.a regen attempt 2 — anti-glorification + verbatim magenta phrase",
-        "regeneratedAt": "2026-09-05T21:24:59+00:00"
+        "regeneratedAt": "2026-09-05T21:24:59+00:00",
+        "previousVariantId": "stage4-vertedero/weeds_through_pavement"
       }
     },
     {
@@ -346,7 +351,8 @@
       "regeneratedFrom": {
         "originalDiscardedAt": "2026-09-05T21:25:07+00:00",
         "originalDiscardReason": "F2.5.1.a regen attempt 2 — 1:1 + verbatim magenta phrase",
-        "regeneratedAt": "2026-09-05T21:28:11+00:00"
+        "regeneratedAt": "2026-09-05T21:28:11+00:00",
+        "previousVariantId": "stage5-castillo/pino_penon_mediterraneo"
       }
     },
     {
@@ -359,7 +365,8 @@
       "regeneratedFrom": {
         "originalDiscardedAt": "2026-09-05T21:28:15+00:00",
         "originalDiscardReason": "F2.5.1.a regen attempt 2 — 1:1 + verbatim magenta phrase",
-        "regeneratedAt": "2026-09-05T21:29:15+00:00"
+        "regeneratedAt": "2026-09-05T21:29:15+00:00",
+        "previousVariantId": "stage5-castillo/sendero_subida_penon"
       }
     }
   ],
