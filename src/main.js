@@ -24,6 +24,8 @@
 import { RailCamera } from './rail-camera.js'
 import { Input } from './input.js'
 import { Player } from './player.js'
+import { IsoWorld } from './iso/world.js'
+import { Tilemap } from './iso/tilemap.js'
 
 // ============================================================
 // Configuración del stage demo (Fase 1: solo validación de cámara)
@@ -40,6 +42,15 @@ const DEMO_PATH = [
 ]
 
 /**
+ * F2.5: rail camera reinterpreta (x, y) como coordenadas iso (CAM-001).
+ * Monotonic non-decreasing depth (gx + gy): 0 → 18 over 30s.
+ */
+const DEMO_PATH_ISO = [
+  { t: 0,  x: 0, y: 0 },
+  { t: 30, x: 9, y: 9 },
+]
+
+/**
  * Sprites del mundo demo (Fase 1):
  * - 1 castillo al fondo derecha (referencia visual principal)
  * - 3 pinos dispersos (mismo sprite, distintas posiciones)
@@ -50,6 +61,18 @@ const DEMO_SPRITES = [
   { id: 'trees_pino',              x: 600,  y: 400, scale: 0.9 },
   { id: 'trees_pino',              x: 1200, y: 400, scale: 1.1 },
   { id: 'buildings_castillo_cofrentes', x: 1500, y: 380, scale: 1.2 }
+]
+
+/**
+ * F2.5: 4 sprites standing at iso corners over a 10×10 tile plane.
+ * Each `{isoX, isoY}` is a tile coord; anchor (0.5, 1.0) places feet at the
+ * projected screen position. Pinos at iso (1,1), (8,1), (1,8); castillo at (8,8).
+ */
+const DEMO_SPRITES_ISO = [
+  { id: 'trees_pino',                  isoX: 1, isoY: 1, scale: 1.0 },
+  { id: 'trees_pino',                  isoX: 8, isoY: 1, scale: 0.9 },
+  { id: 'trees_pino',                  isoX: 1, isoY: 8, scale: 1.1 },
+  { id: 'buildings_castillo_cofrentes', isoX: 8, isoY: 8, scale: 1.2 },
 ]
 
 // ============================================================
@@ -95,23 +118,39 @@ async function bootstrap() {
   hud.name = 'hud'
   app.stage.addChild(hud)
 
-  // --- Background del mundo (color sólido placeholder) ---
-  // En Fases futuras: imagen de bg pixel art generada con minimax
-  const bg = new PIXI.Graphics()
-  bg.beginFill(0x1a3a1a)            // verde oscuro bosque como placeholder
-  bg.drawRect(0, 0, 2000, 720)
-  bg.endFill()
-  world.addChild(bg)
+  // --- F2.5: IsoWorld reemplaza el bg placeholder. Carga tilemap + monta en world. ---
+  const isoWorld = new IsoWorld({
+    viewportWidth: wrapper.clientWidth,
+    viewportHeight: wrapper.clientHeight,
+  })
+  world.addChild(isoWorld.container)
 
-  // --- Carga de sprites ---
-  const sprites = await loadSprites(app, DEMO_SPRITES)
-  for (const sprite of sprites) {
-    world.addChild(sprite)
+  // Carga del tilemap activo (stage1-bosque = demo inicial; el resto se enchufa en F4+).
+  const tilemap = new Tilemap('stage1-bosque', wrapper.clientWidth, wrapper.clientHeight)
+  await tilemap.load(async (variant) => {
+    const url = `assets/tiles/stage1-bosque/${variant}.png`
+    const tex = await PIXI.Assets.load(url)
+    tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
+    return tex
+  })
+  isoWorld.registerTilemap(tilemap)
+  isoWorld.setStage('stage1-bosque')
+
+  // --- Carga de sprites isométricos ---
+  const sprites = await loadSprites(app, DEMO_SPRITES_ISO)
+  // IsoWorld.update() reposiciona los sprites cada frame; los agregamos a su spriteLayer.
+  const verticalSprites = sprites.map((sprite, i) => ({
+    gx: DEMO_SPRITES_ISO[i].isoX,
+    gy: DEMO_SPRITES_ISO[i].isoY,
+    sprite,
+  }))
+  for (const { sprite } of verticalSprites) {
+    isoWorld.spriteLayer.addChild(sprite)
   }
 
   // --- Cámara ---
   const camera = new RailCamera({
-    waypoints: DEMO_PATH,
+    waypoints: DEMO_PATH_ISO,
     loop: true
   })
 
@@ -132,8 +171,9 @@ async function bootstrap() {
     // Update cámara
     camera.update(dt)
 
-    // Aplicar cámara al mundo (todos los sprites se mueven en sentido contrario)
-    world.x = -camera.getCameraX()
+    // F2.5: IsoWorld aplica el transform de cámara al world container.
+    // hud/ui siguen siendo siblings de world y NO se mueven (CAM-002).
+    isoWorld.update(camera, verticalSprites)
   })
 
   console.log('[ZarraDefenders2D] Bootstrap OK. Cámara rail activa.')
