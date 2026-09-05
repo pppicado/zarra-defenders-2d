@@ -1,6 +1,6 @@
 {
   "schema": "tile-manifest/v1",
-  "updatedAt": "2026-09-05T21:14:30+00:00",
+  "updatedAt": "2026-09-05T21:17:26+00:00",
   "totals": {
     "active": 40,
     "discarded": 0,
@@ -272,19 +272,6 @@
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/aljibe_boveda_subterraneo.png"
     },
     {
-      "stageId": "stage3-rio",
-      "stageName": "rio",
-      "variant": "roca_chorrera_humeda",
-      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Tramo del río Cabriel a su paso por Cofrentes (confluencia con Júcar), dentro del Parque Natural de las Hoces del Cabriel + Reserva de la Biosfera Valle del Cabriel.\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Longitud total: 277.6 km (nace en Frías de Albarracín, Teruel)\n  - Cuenca: 4754.2 km²\n  - Caudal medio: 20.92 m³/s\n  - Nace a 1620 m de altitud en Barranco del Agua, Montes Universales\n  - Desemboca en el Júcar en Cofrentes (Valencia)\n  - Embalses principales en su recorrido: Víllora, Contreras (entre Minglanilla y Villargordo del Cabriel)\n  - Calidad del agua: mejor de Europa según datos (poblaciones escasas en cuenca)\n  - Hoces del Cabriel (gargantas/cañones) — paisaje kárstico espectacular\n\nCOLOR PALETTE:   - (no palette documented; default to natural terrain)\n\nVARIANT-SPECIFIC NOTE: Bare wet rock face of a chorrera (waterfall cascade) on dark karst stone, glistening wet sheen, water streaks running down the rock, NO vegetation at all\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no moss, no lichen, no green plants, no grass, no shrubs, no ferns, no vegetation of any kind; only bare wet dark rock with water sheen and mineral streaks",
-      "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage3-rio/raw/roca_chorrera_humeda.png",
-      "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage3-rio/roca_chorrera_humeda.png",
-      "regeneratedFrom": {
-        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
-        "originalDiscardReason": "minimax returned full-bleed rock with no magenta bg; postprocess mis-cropped to a vertical strip instead of a 128x64 iso diamond.",
-        "regeneratedAt": "2026-09-05T17:23:56+00:00"
-      }
-    },
-    {
       "stageId": "stage4-vertedero",
       "stageName": "vertedero",
       "variant": "cement_pad_crack",
@@ -360,6 +347,19 @@
         "originalDiscardedAt": "2026-09-05T21:13:22+00:00",
         "originalDiscardReason": "F2.5.1.a regen attempt 2 — 1:1 + verbatim magenta phrase",
         "regeneratedAt": "2026-09-05T21:14:30+00:00"
+      }
+    },
+    {
+      "stageId": "stage3-rio",
+      "stageName": "rio",
+      "variant": "roca_chorrera_humeda",
+      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Tramo del río Cabriel a su paso por Cofrentes (confluencia con Júcar), dentro del Parque Natural de las Hoces del Cabriel + Reserva de la Biosfera Valle del Cabriel.\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Longitud total: 277.6 km (nace en Frías de Albarracín, Teruel)\n  - Cuenca: 4754.2 km²\n  - Caudal medio: 20.92 m³/s\n  - Nace a 1620 m de altitud en Barranco del Agua, Montes Universales\n  - Desemboca en el Júcar en Cofrentes (Valencia)\n  - Embalses principales en su recorrido: Víllora, Contreras (entre Minglanilla y Villargordo del Cabriel)\n  - Calidad del agua: mejor de Europa según datos (poblaciones escasas en cuenca)\n  - Hoces del Cabriel (gargantas/cañones) — paisaje kárstico espectacular\n\nCOLOR PALETTE:   - (no palette documented; default to natural terrain)\n\nVARIANT-SPECIFIC NOTE: Bare wet rock face of a chorrera (waterfall cascade) on dark karst stone, glistening wet sheen, water streaks running down the rock, NO vegetation at all\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no moss, no lichen, no green plants, no grass, no shrubs, no ferns, no vegetation of any kind; only bare wet dark rock with water sheen and mineral streaks",
+      "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage3-rio/raw/roca_chorrera_humeda.png",
+      "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage3-rio/roca_chorrera_humeda.png",
+      "regeneratedFrom": {
+        "originalDiscardedAt": "2026-09-05T21:16:21+00:00",
+        "originalDiscardReason": "F2.5.1.a regen attempt 2 — retry (center α=193 < 200)",
+        "regeneratedAt": "2026-09-05T21:17:26+00:00"
       }
     }
   ],
