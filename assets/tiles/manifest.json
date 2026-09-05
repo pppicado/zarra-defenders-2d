@@ -1,6 +1,6 @@
 {
   "schema": "tile-manifest/v1",
-  "updatedAt": "2026-09-05T21:24:59+00:00",
+  "updatedAt": "2026-09-05T21:28:11+00:00",
   "totals": {
     "active": 40,
     "discarded": 0,
@@ -285,19 +285,6 @@
       }
     },
     {
-      "stageId": "stage5-castillo",
-      "stageName": "castillo",
-      "variant": "pino_penon_mediterraneo",
-      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Cerro de Agras (Cofrentes), 394 m snm, sobre chimenea volcánica basáltica.\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Construido sobre roca basáltica del volcán Cerro de Agras (origem volcánico)\n  - Planta rectangular, 800×600 (medidas antiguas, hoy día aprox), 8 cubos en perímetro\n  - Torre del Homenaje cuadrada, 4 niveles, con reloj (Patrimonio)\n  - 2 cubos de entrada (semicirculares) con arco de medio punto + rampa de acceso\n  - Barbacana al norte\n  - Puerta en recodo al sur\n  - Patio de armas rectangular con aljibe subterráneo cubierto con bóvedas\n  - S. XII origen islámico (1147-1172 aprox)\n\nCOLOR PALETTE:   - Predominio blanco-crema (castillo) + marrón-rojizo (peñón) + azul (cielo)\n  - Cálido, épico, \"último round\"\n\nVARIANT-SPECIFIC NOTE: Sparse individual Mediterranean pine trees growing directly out of dark volcanic basalt rock on the penon, large gaps of bare rock between trees, very low density\n\nREFERENCE PHOTOS available: castillo_vista_carretera.jpg\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no dense pine forest, no continuous canopy, no closed tree cover; only sparse scattered individual pines with large bare volcanic rock gaps between them",
-      "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/raw/pino_penon_mediterraneo.png",
-      "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/pino_penon_mediterraneo.png",
-      "regeneratedFrom": {
-        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
-        "originalDiscardReason": "Too dense pine cover; should be sparse individual pines on bare dark volcanic rock.",
-        "regeneratedAt": "2026-09-05T17:23:56+00:00"
-      }
-    },
-    {
       "stageId": "stage1-bosque",
       "stageName": "bosque",
       "variant": "pino_underbrush_dark",
@@ -360,6 +347,19 @@
         "originalDiscardedAt": "2026-09-05T21:21:06+00:00",
         "originalDiscardReason": "F2.5.1.a regen attempt 2 — anti-glorification + verbatim magenta phrase",
         "regeneratedAt": "2026-09-05T21:24:59+00:00"
+      }
+    },
+    {
+      "stageId": "stage5-castillo",
+      "stageName": "castillo",
+      "variant": "pino_penon_mediterraneo",
+      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Cerro de Agras (Cofrentes), 394 m snm, sobre chimenea volcánica basáltica.\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Construido sobre roca basáltica del volcán Cerro de Agras (origem volcánico)\n  - Planta rectangular, 800×600 (medidas antiguas, hoy día aprox), 8 cubos en perímetro\n  - Torre del Homenaje cuadrada, 4 niveles, con reloj (Patrimonio)\n  - 2 cubos de entrada (semicirculares) con arco de medio punto + rampa de acceso\n  - Barbacana al norte\n  - Puerta en recodo al sur\n  - Patio de armas rectangular con aljibe subterráneo cubierto con bóvedas\n  - S. XII origen islámico (1147-1172 aprox)\n\nCOLOR PALETTE:   - Predominio blanco-crema (castillo) + marrón-rojizo (peñón) + azul (cielo)\n  - Cálido, épico, \"último round\"\n\nVARIANT-SPECIFIC NOTE: Sparse individual Mediterranean pine trees growing directly out of dark volcanic basalt rock on the penon, large gaps of bare rock between trees, very low density\n\nREFERENCE PHOTOS available: castillo_vista_carretera.jpg\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no dense pine forest, no continuous canopy, no closed tree cover; only sparse scattered individual pines with large bare volcanic rock gaps between them",
+      "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/raw/pino_penon_mediterraneo.png",
+      "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/pino_penon_mediterraneo.png",
+      "regeneratedFrom": {
+        "originalDiscardedAt": "2026-09-05T21:25:07+00:00",
+        "originalDiscardReason": "F2.5.1.a regen attempt 2 — 1:1 + verbatim magenta phrase",
+        "regeneratedAt": "2026-09-05T21:28:11+00:00"
       }
     }
   ],
