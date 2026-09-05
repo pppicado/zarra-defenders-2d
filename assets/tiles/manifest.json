@@ -1,6 +1,6 @@
 {
   "schema": "tile-manifest/v1",
-  "updatedAt": "2026-09-05T17:23:56+00:00",
+  "updatedAt": "2026-09-05T21:14:30+00:00",
   "totals": {
     "active": 40,
     "discarded": 0,
@@ -272,19 +272,6 @@
       "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage5-castillo/aljibe_boveda_subterraneo.png"
     },
     {
-      "stageId": "stage1-bosque",
-      "stageName": "bosque",
-      "variant": "pino_underbrush_dark",
-      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Zonas boscosas del término municipal de Cofrentes y municipios del Valle de Ayora (Ayora, Jalance, Jarafuel, Teresa de Cofrentes).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Pinos mediterráneos en ladera (silueta característica)\n  - Encinas dispersas (silueta redondeada)\n  - Suelo rojizo-arcilloso entre pinos\n  - Cielo azul intenso con sol fuerte (luz cálida)\n  - Vegetación densa pero con claros para enemigos\n\nCOLOR PALETTE:   - (no palette documented; default to natural terrain)\n\nVARIANT-SPECIFIC NOTE: Dark forest underbrush zone under pine canopy, dark soil in deep shadow, dry fallen pine needles and twigs scattered on the ground\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no moss carpet, no green moss, no lush green undergrowth, no ferns, no grass tufts; only dark brown shadowed soil with dry pine needles and twigs",
-      "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage1-bosque/raw/pino_underbrush_dark.png",
-      "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage1-bosque/pino_underbrush_dark.png",
-      "regeneratedFrom": {
-        "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
-        "originalDiscardReason": "Tile rendered with too much mossy green cover; name says dark underbrush but image shows moss carpet instead of dry needles + shadowed soil.",
-        "regeneratedAt": "2026-09-05T17:23:56+00:00"
-      }
-    },
-    {
       "stageId": "stage3-rio",
       "stageName": "rio",
       "variant": "roca_chorrera_humeda",
@@ -360,6 +347,19 @@
         "originalDiscardedAt": "2026-09-05T17:17:25+00:00",
         "originalDiscardReason": "Too dense pine cover; should be sparse individual pines on bare dark volcanic rock.",
         "regeneratedAt": "2026-09-05T17:23:56+00:00"
+      }
+    },
+    {
+      "stageId": "stage1-bosque",
+      "stageName": "bosque",
+      "variant": "pino_underbrush_dark",
+      "prompt": "Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.\n\nLOCATION: Zonas boscosas del término municipal de Cofrentes y municipios del Valle de Ayora (Ayora, Jalance, Jarafuel, Teresa de Cofrentes).\n\nDISTINCTIVE TERRAIN FEATURES (must reflect):   - Pinos mediterráneos en ladera (silueta característica)\n  - Encinas dispersas (silueta redondeada)\n  - Suelo rojizo-arcilloso entre pinos\n  - Cielo azul intenso con sol fuerte (luz cálida)\n  - Vegetación densa pero con claros para enemigos\n\nCOLOR PALETTE:   - (no palette documented; default to natural terrain)\n\nVARIANT-SPECIFIC NOTE: Dark forest underbrush zone under pine canopy, dark soil in deep shadow, dry fallen pine needles and twigs scattered on the ground\n\nPER-VARIANT NEGATIVE CONSTRAINTS: no moss carpet, no green moss, no lush green undergrowth, no ferns, no grass tufts; only dark brown shadowed soil with dry pine needles and twigs",
+      "rawPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage1-bosque/raw/pino_underbrush_dark.png",
+      "outPath": "/projects/personal/zarra-defenders-2d/assets/tiles/stage1-bosque/pino_underbrush_dark.png",
+      "regeneratedFrom": {
+        "originalDiscardedAt": "2026-09-05T21:13:22+00:00",
+        "originalDiscardReason": "F2.5.1.a regen attempt 2 — 1:1 + verbatim magenta phrase",
+        "regeneratedAt": "2026-09-05T21:14:30+00:00"
       }
     }
   ],
