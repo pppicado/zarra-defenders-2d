@@ -83,14 +83,17 @@ Single-PR per preflight. No chained work units. Internal sequencing below.
 
 ## Acceptance Criteria
 
-- [ ] 40 tiles regenerados: 64×64 px, corners α=0, center α>200, NO magenta fringe
-- [ ] Engine: square iso renderiza con rotación 45° correcta, sin errores
-- [ ] Galería: 40 tiles + 21 sprites + rotation toggle + mini-demo + 0 console errors
-- [ ] Manifest: `totals.active === 40`, `discarded.length === 40`
-- [ ] `_discarded/diamond-r2/` con 40 PNGs viejos preservados
-- [ ] Game playable, sprites visibles sobre tiles
-- [ ] Paths locked intactos: `src/main.js`, `src/rail-camera.js`, `src/input.js`, `src/player.js`, `index.html`, `styles/main.css`
-- [ ] Branch `feat/fase-2-5-2-square-iso` lista para PR
+> Reconciled at archive time (2026-09-06) from `verify-report` (Engram #155, verdict PASS,
+> 0 CRITICAL / 0 WARNING). Each box below cites the verify test that proves it.
+
+- [x] 40 tiles regenerados: 64×64 px, corners α=0, center α>200, NO magenta fringe — verify test 7 (40 PNGs × 64×64 via Pillow) + ASSET-002 matrix
+- [x] Engine: square iso renderiza con rotación 45° correcta, sin errores — verify tests 10/11 (`world.js:44` `_worldLayer.rotation = Math.PI/4`; `iso-math.js` symmetric halves) + test 6 (0 console errors)
+- [x] Galería: 40 tiles + 21 sprites + rotation toggle + mini-demo + 0 console errors — verify tests 1/3/4/5/8 (61 figures, toggle round-trip, `__miniDemoOK === true`)
+- [x] Manifest: `totals.active === 40` — verify test 2. **NOT met as originally written**: the criterion also demanded `discarded.length === 40`; actual is `discarded.length === 0` because the 40 F2.5.1 diamonds were archived filesystem-only under `_discarded/diamond-r2/` per orchestrator instruction during apply (task F2.5.2.3.1). Recorded as known spec-vs-implementation drift — see `verify-report` SUGGESTION #1 and the F2.5.2 archive report.
+- [x] `_discarded/diamond-r2/` con 40 PNGs viejos preservados — verify test 15 (`ls | wc -l` → 40; 40 files git-tracked)
+- [x] Game playable, sprites visibles sobre tiles — verify test 6 (title + canvas 1280×720, 0 errors / 0 warnings)
+- [x] Paths locked intactos: `src/main.js`, `src/rail-camera.js`, `src/input.js`, `src/player.js`, `index.html`, `styles/main.css` — verify test 14 (empty `git diff main..HEAD` on locked paths)
+- [x] Branch `feat/fase-2-5-2-square-iso` lista para PR — PR #6 opened, merged to `main` at `a36194b`, PR closed
 
 ---
 
