@@ -151,7 +151,14 @@
     if (!opts.sprite) fig.classList.add('tile-card')
     if (opts.sprite) fig.classList.add('sprite')
     const img = document.createElement('img')
-    img.src = `../${toServeUrl(opts.outPath || entry.outPath)}`
+    // Sprites use a fixed relative path; tile entries come from manifest outPath.
+    let imgSrc
+    if (opts.sprite) {
+      imgSrc = `../assets/sprites/${opts.sprite}`
+    } else {
+      imgSrc = `../${toServeUrl(entry.outPath)}`
+    }
+    img.src = imgSrc
     img.alt = opts.sprite
       ? `${opts.sprite}`
       : `${entry.stageId}/${entry.variant}`
