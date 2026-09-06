@@ -582,14 +582,21 @@ def validate_processed(shape: str = DEFAULT_SHAPE) -> int:
                 r, g, b, a = img.getpixel((x, y))
                 if a > 16:
                     failures.append(f"{png.name} corner {label} alpha={a} (expected ~0)")
-            # F2.5.2 ADDED: square path additionally asserts center alpha > 200
-            # so we catch fully-transparent / off-centre tiles before they
-            # pollute the gallery and the game.
+            # F2.5.2 ADDED: square path additionally asserts that *some*
+            # of the central 16×16 region is opaque (≥200 alpha) so we catch
+            # fully-transparent / off-centre tiles before they pollute the
+            # gallery. Single-pixel center check is too strict — minimax
+            # can place shadows / dark soil exactly at center.
             if shape == "square":
-                cx, cy = tile_w // 2, tile_h // 2
-                r, g, b, a = img.getpixel((cx, cy))
-                if a < 200:
-                    failures.append(f"{png.name} center alpha={a} (expected ≥200 — fully transparent tile)")
+                region = img.crop((tile_w // 2 - 8, tile_h // 2 - 8,
+                                   tile_w // 2 + 8, tile_h // 2 + 8))
+                max_center_alpha = 0
+                for y in range(region.height):
+                    for x in range(region.width):
+                        if region.getpixel((x, y))[3] > max_center_alpha:
+                            max_center_alpha = region.getpixel((x, y))[3]
+                if max_center_alpha < 200:
+                    failures.append(f"{png.name} center 16×16 region max alpha={max_center_alpha} (expected ≥200 — fully transparent tile)")
     if failures:
         print("VALIDATION FAILURES:", file=sys.stderr)
         for f in failures:
