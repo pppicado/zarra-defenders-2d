@@ -2,7 +2,7 @@
 """
 tools/generate-iso-tiles.py
 
-F2.5.2 asset pipeline driver (ASSET-001..ASSET-005, terrain-fidelity).
+F2.5.2 asset pipeline driver (ASSET-001..ASSET-010, terrain-fidelity).
 
 Responsibilities:
   1. Parse `assets/references/stage{1-5}-*/NOTES.md` to extract:
@@ -15,10 +15,16 @@ Responsibilities:
      the NOTES.md content + per-variant note from `tools/variants.json`.
      Stage 4 (Vertedero) gets the VERTEDERO_NEGATIVE suffix.
      Per-variant `negative_prompt` (tools/variants.json) gets appended.
+     F2.5.2 MODIFIED: prompt template uses 64×64 square wording instead of
+     128×64 diamond (ASSET-001).
   3. Orchestrate minimax MCP image generation (driven externally by the
      apply agent — the script writes a manifest the agent consumes).
   4. Run `tools/postprocess_v4.py` per stage to chroma-key magenta corners.
-  5. Validate: 128x64 PNGs, no residual #FF00FF in corners after postprocess.
+     F2.5.2 MODIFIED: postprocess receives `--size 64` (was 128); when
+     minimax returns 128×128 a final NEAREST 128→64 downsample runs
+     after postprocess (ASSET-010).
+  5. Validate: 64x64 PNGs, no residual #FF00FF in corners, non-transparent
+     center after postprocess.
 
 Modes:
   --dry-run           Print 40 prompts to stdout, no side effects.
@@ -35,14 +41,20 @@ Modes:
                       delete their processed PNG (the apply agent will
                       drop new raw PNGs in stage/{N}/raw/ and re-run
                       --postprocess). Idempotent.
-  --validate          Check 128x64 + magenta-free corners on processed PNGs.
+  --validate          Check 64x64 + magenta-free corners + non-transparent
+                      center on processed PNGs.
+
+  --shape {diamond|square}  F2.5.2 ADDED: tile shape selector (default
+                            square). `--shape diamond` keeps the legacy
+                            F2.5.1 128×64 path alive for rollback.
 
 Manifest schema (v1): { schema, updatedAt, totals, active[entry], discarded[entry] }
 Entry = { stageId, stageName, variant, prompt, rawPath, outPath }
 Discarded entry adds: discardedAt, discardReason, archivedPath, archivedRawPath.
 
-Stdlib-only. Pillow used for PNG validation only (lazy-import; the rest
-of the script is pure stdlib so --dry-run works without Pillow installed).
+Stdlib-only. Pillow used for PNG validation + the NEAREST downsample step
+(lazy-import; the rest of the script is pure stdlib so --dry-run works
+without Pillow installed).
 """
 
 import argparse
@@ -58,7 +70,11 @@ ASSETS_ROOT = REPO_ROOT / "assets" / "tiles"
 REFS_ROOT = REPO_ROOT / "assets" / "references"
 VARIANTS_JSON = REPO_ROOT / "tools" / "variants.json"
 POSTPROCESS_SCRIPT = REPO_ROOT / "tools" / "postprocess_v4.py"
-TILE_W, TILE_H = 128, 64  # ASSET-001: 2:1 diamond dimensions
+# F2.5.2 MODIFIED ASSET-001: square tiles. The legacy diamond path
+# (TILE_W=128, TILE_H=64) is retained for `--shape diamond` rollback.
+DEFAULT_SHAPE = "square"
+TILE_SIZE_SQUARE = 64
+TILE_W_DIAMOND, TILE_H_DIAMOND = 128, 64  # ASSET-001 legacy diamond
 
 # Stage order MUST match SPEC ordering (used to keep manifest deterministic).
 STAGES = [
@@ -72,6 +88,23 @@ STAGES = [
 # design.md §7 — the canonical prompt skeleton.
 PROMPT_TEMPLATE = """\
 Isometric pixel art ground tile, 128x64 px diamond (2:1 ratio), flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.
+
+LOCATION: {location}
+
+DISTINCTIVE TERRAIN FEATURES (must reflect): {features_block}
+
+COLOR PALETTE: {palette_block}
+
+VARIANT-SPECIFIC NOTE: {variant_note}\
+"""
+
+# F2.5.2 ASSET-001 MODIFIED: square-iso prompt skeleton (default).
+# 64×64 top-down textures get rotated 45° at runtime by `_worldLayer.rotation`
+# (see src/iso/world.js), so the on-disk image must be square and top-down,
+# NOT diamond. The verbatim "flat magenta #FF00FF background" phrase stays
+# so postprocess_v4.py can chroma-key it.
+PROMPT_TEMPLATE_SQUARE = """\
+Isometric pixel art ground tile, 64x64 px square tile, top-down view, isometric pixel art, flat magenta #FF00FF background, Diablo 2 ground tile style, 16-bit pixel art, no anti-aliasing, no characters, no items, no text, no UI, no borders, no watermarks.
 
 LOCATION: {location}
 
@@ -137,7 +170,8 @@ def parse_notes(stage_id: str) -> dict:
 
 def build_prompt(stage_id: str, variant: str, variant_note: str,
                  parsed: dict, refs: list[str],
-                 negative_prompt: str = "") -> str:
+                 negative_prompt: str = "",
+                 shape: str = DEFAULT_SHAPE) -> str:
     features_block = "\n".join(f"  - {f}" for f in parsed["features"][:8]) \
         or "  - (none documented)"
     palette_block = "\n".join(f"  - {p}" for p in parsed["palette"][:8]) \
@@ -147,7 +181,10 @@ def build_prompt(stage_id: str, variant: str, variant_note: str,
     if refs:
         refs_line = "\n\nREFERENCE PHOTOS available: " + ", ".join(refs)
 
-    base = PROMPT_TEMPLATE.format(
+    # F2.5.2 ASSET-001 MODIFIED: square uses the new top-down template;
+    # diamond retains the F2.5.1 wording (legacy fallback).
+    template = PROMPT_TEMPLATE_SQUARE if shape == "square" else PROMPT_TEMPLATE
+    base = template.format(
         location=parsed["location"] or stage_id,
         features_block=features_block,
         palette_block=palette_block,
@@ -191,10 +228,12 @@ def load_variants() -> dict:
     return normalised
 
 
-def build_all_prompts() -> list[dict]:
+def build_all_prompts(shape: str = DEFAULT_SHAPE) -> list[dict]:
     """Return list of dicts:
       [{stageId, stageName, variant, prompt, outputPath}, ...]
     Length MUST be 40 (5 stages × 8 variants) — checked at dry-run time.
+
+    F2.5.2 ADDED: `shape` arg selects prompt template (square default).
     """
     variants_map = load_variants()
     out = []
@@ -212,6 +251,7 @@ def build_all_prompts() -> list[dict]:
             prompt = build_prompt(
                 stage_id, variant, info["note"], parsed, refs,
                 negative_prompt=info["negative_prompt"],
+                shape=shape,
             )
             out.append({
                 "stageId": stage_id,
@@ -348,10 +388,17 @@ def mark_regenerate(stage_id: str, variants: list[str], reason: str) -> int:
 
 
 def run_postprocess(stage_filter: str | None = None,
-                    variant_filter: list[str] | None = None) -> int:
+                    variant_filter: list[str] | None = None,
+                    shape: str = DEFAULT_SHAPE) -> int:
     """For every stage with a populated `raw/` folder, run postprocess_v4.py
-    to produce chroma-keyed PNGs at the stage root, then crop the square
-    output to 128x64 to match the iso diamond spec (ASSET-001).
+    to produce chroma-keyed PNGs at the stage root.
+
+    F2.5.2 (ASSET-002 MODIFIED + ASSET-010 ADDED):
+      - shape='square' (default): caller passes `--size 64` to postprocess_v4.
+        If minimax returned 128×128, a final NEAREST 128→64 downsample runs
+        after postprocess. Final output is 64×64 — the on-disk square tile.
+      - shape='diamond' (legacy F2.5.1): caller passes `--size 128`; we crop
+        the postprocessed 128×128 down to 128×64 (the F2.5.1 diamond bbox).
 
     If stage_filter is set, only that stage is processed. If variant_filter
     is also set, only those variants are processed (the rest of raw/ is
@@ -366,10 +413,14 @@ def run_postprocess(stage_filter: str | None = None,
         print(f"missing postprocess script: {POSTPROCESS_SCRIPT}", file=sys.stderr)
         return 1
 
-    # postprocess_v4 outputs square; intermediate dir to host its 128x128
-    # output before we crop to 128x64.
+    # postprocess_v4 outputs square (it always squares the canvas). For the
+    # diamond path we crop to 128×64 in this function; for the square path
+    # the caller wants 64×64 directly, so we hand postprocess_v4 `--size 64`.
     tmp_root = ASSETS_ROOT / "_tmp_square"
     tmp_root.mkdir(parents=True, exist_ok=True)
+
+    # F2.5.2 ADDED: postprocess_v4 size matches the final on-disk tile size.
+    postprocess_size = TILE_SIZE_SQUARE if shape == "square" else 128
 
     stages_to_process = (
         [(s, n) for s, n in STAGES if s == stage_filter]
@@ -408,9 +459,9 @@ def run_postprocess(stage_filter: str | None = None,
             str(POSTPROCESS_SCRIPT),
             "--raw-dir", str(raw_dir_for_postprocess),
             "--out-dir", str(tmp_stage),
-            "--size", "128",
+            "--size", str(postprocess_size),
         ]
-        print(f"→ postprocess {stage_id}"
+        print(f"→ postprocess {stage_id} (shape={shape}, size={postprocess_size})"
               + (f" (variants: {','.join(variant_filter)})" if variant_filter else ""))
         result = subprocess.run(cmd)
         if raw_out is not None:
@@ -425,33 +476,60 @@ def run_postprocess(stage_filter: str | None = None,
             print(f"  FAIL {stage_id} (rc={result.returncode})", file=sys.stderr)
             rc = result.returncode
             continue
-        # Crop each 128x128 PNG to 128x64 by finding the content bbox and
-        # extracting the middle 64 rows. Pillow's NEAREST preserves pixel
-        # sharpness; LANCZOS blurs edges.
-        for src in sorted(tmp_stage.glob("*.png")):
-            if variant_filter and src.stem not in variant_filter:
-                continue
-            img = Image.open(src).convert("RGBA")
-            content_rows = [y for y in range(img.height)
-                            if any(img.getpixel((x, y))[3] > 16 for x in range(img.width))]
-            if not content_rows:
-                print(f"  WARN {src.name}: fully transparent after postprocess", file=sys.stderr)
-                continue
-            y_min, y_max = min(content_rows), max(content_rows)
-            mid = (y_min + y_max) // 2
-            y_start = max(0, mid - 32)
-            y_end = min(img.height, y_start + 64)
-            if y_end - y_start < 64:
-                y_start = max(0, y_end - 64)
-            cropped = img.crop((0, y_start, img.width, y_start + 64))
-            # Force the 4 bounding-box corners transparent (outside the
-            # 2:1 diamond). postprocess_v4 misses occasional magenta residue
-            # in corners when the model doesn't render the BG cleanly.
-            for cx, cy in [(0, 0), (cropped.width - 1, 0),
-                           (0, cropped.height - 1), (cropped.width - 1, cropped.height - 1)]:
-                cropped.putpixel((cx, cy), (0, 0, 0, 0))
-            cropped.save(stage_folder / src.name, "PNG", optimize=True)
-        print(f"  {stage_id}: cropped {len(list(stage_folder.glob('*.png')))} tiles to 128x64")
+
+        if shape == "square":
+            # F2.5.2 ASSET-010 ADDED: postprocess_v4 hands back `postprocess_size`
+            # square PNGs. minimax usually returns 128×128 → postprocess_v4
+            # with --size 64 down-samples to 64×64 internally (its LANCZOS),
+            # but minimax's actual output may already be 64×64 directly. If
+            # we receive a 128×128 file (model rendered at higher fidelity),
+            # apply a final NEAREST 128→64 downsample to preserve pixel-art
+            # sharpness. If the file is already 64×64, copy through.
+            for src in sorted(tmp_stage.glob("*.png")):
+                if variant_filter and src.stem not in variant_filter:
+                    continue
+                img = Image.open(src).convert("RGBA")
+                target = TILE_SIZE_SQUARE
+                if img.size != (target, target):
+                    if img.size == (128, 128):
+                        img = img.resize((target, target), Image.NEAREST)  # ASSET-010: 16-bit pixel art preservation
+                    else:
+                        print(f"  WARN {src.name}: unexpected size {img.size} (not 64×64 or 128×128), saving as-is",
+                              file=sys.stderr)
+                # Force the 4 bounding-box corners transparent (outside the
+                # visible rotated-diamond footprint). For square iso the
+                # rotation puts 45° corners outside the texture; keep them
+                # transparent so the rotated plane doesn't bleed magenta
+                # into adjacent tiles.
+                for cx, cy in [(0, 0), (target - 1, 0),
+                               (0, target - 1), (target - 1, target - 1)]:
+                    img.putpixel((cx, cy), (0, 0, 0, 0))
+                img.save(stage_folder / src.name, "PNG", optimize=True)
+            print(f"  {stage_id}: wrote {len(list(stage_folder.glob('*.png')))} tiles as {TILE_SIZE_SQUARE}×{TILE_SIZE_SQUARE} squares")
+        else:
+            # Legacy F2.5.1 diamond path — crop 128×128 → 128×64, force
+            # 4 bbox corners transparent.
+            for src in sorted(tmp_stage.glob("*.png")):
+                if variant_filter and src.stem not in variant_filter:
+                    continue
+                img = Image.open(src).convert("RGBA")
+                content_rows = [y for y in range(img.height)
+                                if any(img.getpixel((x, y))[3] > 16 for x in range(img.width))]
+                if not content_rows:
+                    print(f"  WARN {src.name}: fully transparent after postprocess", file=sys.stderr)
+                    continue
+                y_min, y_max = min(content_rows), max(content_rows)
+                mid = (y_min + y_max) // 2
+                y_start = max(0, mid - 32)
+                y_end = min(img.height, y_start + 64)
+                if y_end - y_start < 64:
+                    y_start = max(0, y_end - 64)
+                cropped = img.crop((0, y_start, img.width, y_start + 64))
+                for cx, cy in [(0, 0), (cropped.width - 1, 0),
+                               (0, cropped.height - 1), (cropped.width - 1, cropped.height - 1)]:
+                    cropped.putpixel((cx, cy), (0, 0, 0, 0))
+                cropped.save(stage_folder / src.name, "PNG", optimize=True)
+            print(f"  {stage_id}: cropped {len(list(stage_folder.glob('*.png')))} tiles to 128×64")
     # Cleanup temp directory
     try:
         for stage in tmp_root.iterdir():
@@ -464,14 +542,20 @@ def run_postprocess(stage_filter: str | None = None,
     return rc
 
 
-def validate_processed() -> int:
-    """Check every processed PNG: 128x64 dimensions + no magenta corners.
-    Uses Pillow (lazy-import)."""
+def validate_processed(shape: str = DEFAULT_SHAPE) -> int:
+    """Check every processed PNG: dimensions + magenta-free corners + non-
+    transparent center.
+
+    F2.5.2 (ASSET-007 invariant): shape='square' (default) checks 64×64;
+    shape='diamond' (legacy) checks 128×64. Square additionally asserts
+    center pixel alpha > 200 (no fully-transparent squares)."""
     try:
         from PIL import Image
     except ImportError:
         print("Pillow not installed; skipping validation", file=sys.stderr)
         return 0
+    tile_w = TILE_SIZE_SQUARE if shape == "square" else TILE_W_DIAMOND
+    tile_h = TILE_SIZE_SQUARE if shape == "square" else TILE_H_DIAMOND
     failures = []
     processed_count = 0
     for stage_id, _ in STAGES:
@@ -484,20 +568,28 @@ def validate_processed() -> int:
             continue
         for png in pngs:
             img = Image.open(png).convert("RGBA")
-            if img.size != (TILE_W, TILE_H):
-                failures.append(f"{png.name}: size {img.size} ≠ {TILE_W}x{TILE_H}")
+            if img.size != (tile_w, tile_h):
+                failures.append(f"{png.name}: size {img.size} ≠ {tile_w}×{tile_h}")
                 continue
             processed_count += 1
             # 4 corners should be transparent after postprocess.
             for label, (x, y) in [
                 ("tl", (0, 0)),
-                ("tr", (TILE_W - 1, 0)),
-                ("bl", (0, TILE_H - 1)),
-                ("br", (TILE_W - 1, TILE_H - 1)),
+                ("tr", (tile_w - 1, 0)),
+                ("bl", (0, tile_h - 1)),
+                ("br", (tile_w - 1, tile_h - 1)),
             ]:
                 r, g, b, a = img.getpixel((x, y))
                 if a > 16:
                     failures.append(f"{png.name} corner {label} alpha={a} (expected ~0)")
+            # F2.5.2 ADDED: square path additionally asserts center alpha > 200
+            # so we catch fully-transparent / off-centre tiles before they
+            # pollute the gallery and the game.
+            if shape == "square":
+                cx, cy = tile_w // 2, tile_h // 2
+                r, g, b, a = img.getpixel((cx, cy))
+                if a < 200:
+                    failures.append(f"{png.name} center alpha={a} (expected ≥200 — fully transparent tile)")
     if failures:
         print("VALIDATION FAILURES:", file=sys.stderr)
         for f in failures:
@@ -580,33 +672,37 @@ def main():
                    help="Move the named stage+variants from discarded back to "
                         "active in the manifest (call after --postprocess succeeds).")
     g.add_argument("--validate", action="store_true",
-                   help="Validate 128x64 + transparent corners on processed PNGs.")
+                   help="Validate dimensions + transparent corners + (square) "
+                        "non-transparent center on processed PNGs.")
     ap.add_argument("--stage", help="Stage id (e.g. stage4-vertedero) "
                                     "for --postprocess / --regenerate / --mark-regenerated.")
     ap.add_argument("--variants", help="Comma-separated variant names for "
                                        "--postprocess / --regenerate / --mark-regenerated.")
     ap.add_argument("--reason", default="user visual review flagged for regeneration",
                     help="Discard reason for --regenerate (default: %(default)s).")
+    ap.add_argument("--shape", default=DEFAULT_SHAPE, choices=("diamond", "square"),
+                    help="Tile shape — selects prompt template + postprocess "
+                         "output size. F2.5.2 ADDED (default: %(default)s).")
     args = ap.parse_args()
 
     if args.dry_run:
-        entries = build_all_prompts()
+        entries = build_all_prompts(shape=args.shape)
         assert len(entries) == 40, f"expected 40 prompts, got {len(entries)}"
         for i, e in enumerate(entries, 1):
             print(f"--- [{i:02d}/40] {e['stageId']}/{e['variant']} ---")
             print(e["prompt"])
             print()
-        print(f"# total: {len(entries)} prompts", file=sys.stderr)
+        print(f"# total: {len(entries)} prompts (shape={args.shape})", file=sys.stderr)
         return 0
 
     if args.emit_manifest:
-        entries = build_all_prompts()
+        entries = build_all_prompts(shape=args.shape)
         emit_manifest(entries)
         return 0
 
     if args.postprocess:
         vf = [v.strip() for v in args.variants.split(",")] if args.variants else None
-        return run_postprocess(stage_filter=args.stage, variant_filter=vf)
+        return run_postprocess(stage_filter=args.stage, variant_filter=vf, shape=args.shape)
 
     if args.regenerate:
         if not args.stage or not args.variants:
@@ -623,7 +719,7 @@ def main():
         return mark_regenerated(args.stage, vf)
 
     if args.validate:
-        return validate_processed()
+        return validate_processed(shape=args.shape)
 
     return 0
 
