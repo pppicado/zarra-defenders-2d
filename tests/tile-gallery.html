@@ -91,19 +91,65 @@
   details summary { cursor: pointer; color: #aaa; font-size: 13px; }
   details[open] summary { color: #eee; }
 
-  /* F2.5.2 mini-iso-demo canvas */
+  /* F2.5.4 — full level demo */
   #mini-demo-canvas-wrap {
-    background: #0a0a0a;
+    background: #000;
     border: 2px solid #555;
     border-radius: 4px;
-    padding: 8px;
+    padding: 0;
     display: inline-block;
     margin: 8px 0;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.6);
   }
   #mini-demo-canvas-wrap canvas {
     display: block;
     image-rendering: pixelated;
-    background: #000;
+    cursor: grab;
+  }
+  #mini-demo-canvas-wrap canvas:active { cursor: grabbing; }
+  #demo-hud {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    color: #fbbf24;
+    font-family: monospace;
+    font-size: 11px;
+    background: rgba(0,0,0,0.7);
+    padding: 6px 10px;
+    border-radius: 4px;
+    pointer-events: none;
+    line-height: 1.5;
+  }
+  #demo-hud b { color: #4ade80; }
+  #demo-controls {
+    margin: 8px 0;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  #demo-controls button {
+    background: #1f2937;
+    color: #fbbf24;
+    border: 1px solid #555;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 12px;
+  }
+  #demo-controls button:hover { background: #374151; }
+  #demo-controls button.active { background: #4ade80; color: #000; border-color: #4ade80; }
+  #demo-controls label { color: #aaa; font-size: 12px; margin-left: 12px; }
+  #demo-controls select {
+    background: #1f2937;
+    color: #fbbf24;
+    border: 1px solid #555;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: monospace;
   }
   .demo-error {
     color: #f87171;
@@ -147,10 +193,43 @@
 </div>
 
 <div id="mini-demo-section">
-  <h2>Mini iso-demo</h2>
-  <p class="note">Real <code>IsoWorld</code> + <code>Tilemap('stage1-bosque')</code> + 4 demo sprites (3 pinos + 1 castillo) with idle bobbing. The engine runs end-to-end here.</p>
+  <h2>Full level demo — Sendero del bosque mediterráneo</h2>
+  <p class="note">
+    Real <code>IsoWorld</code> + <code>Tilemap</code> with bioma-aware variant picker.
+    Tiles: 8 variants × 3 alts = 24 textures from stage1-bosque; sprites: trees (pinos, encinas), buildings (casa, castillo), enemies (topadora, dron, plantas TRECO).
+    Drag to pan camera. WASD/arrows also pan. Toggle animations: bobbing (idle), wind (trees), enemy patrol.
+  </p>
+  <div id="demo-controls">
+    <button id="btn-reset" title="Reset camera to center">↺ Reset</button>
+    <button id="btn-bobbing" class="active" title="Idle bobbing on sprites">↕ Bobbing</button>
+    <button id="btn-wind" class="active" title="Wind sway on trees">≋ Wind</button>
+    <button id="btn-enemies" class="active" title="Enemy patrol animation">⚔ Enemies</button>
+    <button id="btn-autopan" title="Auto-pan camera around scene">▶ Auto-pan</button>
+    <label>Stage:
+      <select id="stage-select">
+        <option value="stage1-bosque">1 — Bosque</option>
+        <option value="stage2-pueblo">2 — Pueblo</option>
+        <option value="stage3-rio">3 — Río</option>
+        <option value="stage4-vertedero">4 — Vertedero</option>
+        <option value="stage5-castillo">5 — Castillo</option>
+      </select>
+    </label>
+    <label>Tile alt:
+      <select id="alt-select">
+        <option value="1">1 — Sunlight upper-left</option>
+        <option value="2">2 — Sunlight upper-right</option>
+        <option value="3">3 — Overcast diffuse</option>
+      </select>
+    </label>
+  </div>
   <div id="mini-demo-canvas-wrap">
-    <canvas id="mini-demo-canvas" width="480" height="270"></canvas>
+    <canvas id="mini-demo-canvas" width="1024" height="640"></canvas>
+    <div id="demo-hud">
+      <div>camera <b id="hud-cam">5, 5</b></div>
+      <div>tiles <b id="hud-tiles">0</b></div>
+      <div>sprites <b id="hud-sprites">0</b></div>
+      <div>fps <b id="hud-fps">--</b></div>
+    </div>
   </div>
   <div id="demo-error" class="demo-error"></div>
 </div>
@@ -307,92 +386,452 @@
   }
   document.getElementById('sprites-count').textContent = String(SPRITE_IDS.length)
 
-  // ---- F2.5.2 GAL-003: mini-iso-demo canvas (real IsoWorld + sprites) ----
-  // The page is served from /tests/, so PIXI + the source modules load via ../src/.
+  // ---- F2.5.4 GAL-003: full level demo with bioma-aware tile picker, multiple sprites,
+  //      camera controls (drag + WASD/arrows + auto-pan), wind + bobbing + enemy animations.
   async function startMiniDemo() {
     const errorEl = document.getElementById('demo-error')
     try {
       if (typeof PIXI === 'undefined') {
         throw new Error('PIXI global not loaded (cdn script missing or blocked)')
       }
-      // Dynamic-import the source modules — same paths main.js uses.
-      const { isoToScreen } = await import('../src/iso/iso-math.js')
-      const { Tilemap } = await import('../src/iso/tilemap.js')
-      const { IsoWorld } = await import('../src/iso/world.js')
+      const { Tilemap, computeCullRange } = await import('../src/iso/tilemap.js')
+      const worldModule = await import('../src/iso/world.js')
+      const { IsoWorld } = worldModule
+      const isoMath = await import('../src/iso/iso-math.js')
+      const { isoToScreen } = isoMath
 
+      // ---- State -----------------------------------------------------------
+      const state = {
+        stageId: 'stage1-bosque',
+        alt: 1,
+        camIsoX: 7,
+        camIsoY: 6,
+        targetCamX: 7,
+        targetCamY: 6,
+        flags: { bobbing: true, wind: true, enemies: true, autopan: false },
+        keys: new Set(),
+        sprites: [],
+        drag: null,
+      }
+      // Per-stage default camera positions to center the layout in the viewport
+      const CAM_DEFAULTS = {
+        'stage1-bosque': { x: 7, y: 6 },
+        'stage2-pueblo':  { x: 9, y: 6 },
+        'stage3-rio':     { x: 8, y: 6 },
+        'stage4-vertedero': { x: 8, y: 6 },
+        'stage5-castillo':   { x: 9, y: 7 },
+      }
+
+      // ---- PIXI app --------------------------------------------------------
       const canvas = document.getElementById('mini-demo-canvas')
       const app = new PIXI.Application({
         view: canvas,
-        width: 480,
-        height: 270,
-        backgroundColor: 0x0a0a0a,
+        width: 1024,
+        height: 640,
+        backgroundColor: 0x87ceeb, // sky blue
         antialias: false,
         resolution: 1,
         autoDensity: false,
       })
+      // Expose for headless inspection
+      window.__pixiApp = app
 
+      // ---- HUD -------------------------------------------------------------
+      const hud = {
+        cam: document.getElementById('hud-cam'),
+        tiles: document.getElementById('hud-tiles'),
+        sprites: document.getElementById('hud-sprites'),
+        fps: document.getElementById('hud-fps'),
+      }
+      let hudCounter = 0
+
+      // ---- Bioma-aware variant picker -------------------------------------
+      // For stage1-bosque (Mediterranean pine forest), each tile (gx,gy) picks a
+      // variant based on a deterministic noise + a "sendero" path that winds
+      // through the scene.
+      const STAGE1_BIOMA = {
+        sendero: 'trocha_forestal_compactada',
+        hojarasca: 'hojarasca_pino_seca',
+        pinos: 'pino_underbrush_dark',
+        claros: 'pino_clear_grass_rojizo',
+        suelo: 'suelo_arcilloso_rojizo',
+        arroyo: 'arroyo_barranco_edge',
+        matorral: 'matorral_coscoja_romero',
+        encina: 'encina_redonda_sombra',
+      }
+      // Distance from a winding path that snakes diagonally through the scene.
+      // Returns a "sendero closeness" 0..1 — 1 = on the path.
+      function senderoCloseness(gx, gy) {
+        const dx = gx - gy * 0.6 - 2
+        const dy = gy + gx * 0.3 - 4
+        const d = Math.sqrt(dx * dx + dy * dy)
+        return Math.max(0, 1 - d / 2.5)
+      }
+      // Hash pseudo-random per (gx,gy) for stable per-tile randomness.
+      function hash(gx, gy) {
+        const s = Math.sin(gx * 12.9898 + gy * 78.233) * 43758.5453
+        return s - Math.floor(s)
+      }
+      function pickVariantBosque(gx, gy, pool) {
+        // Sendero zone overrides everything.
+        const closeness = senderoCloseness(gx, gy)
+        if (closeness > 0.85) return STAGE1_BIOMA.sendero
+        // Arroyo band along y = gx * 0.4 + 6
+        if (Math.abs(gy - gx * 0.4 - 6) < 0.7 && hash(gx, gy) > 0.4) return STAGE1_BIOMA.arroyo
+        // Hash-based zones — clusters of pinos / claros / suelo
+        const r = hash(gx, gy)
+        if (closeness > 0.5) return r > 0.3 ? STAGE1_BIOMA.hojarasca : STAGE1_BIOMA.suelo
+        if (r < 0.35) return STAGE1_BIOMA.pinos
+        if (r < 0.55) return STAGE1_BIOMA.encina
+        if (r < 0.75) return STAGE1_BIOMA.matorral
+        if (r < 0.9) return STAGE1_BIOMA.hojarasca
+        return STAGE1_BIOMA.claros
+      }
+      // For other stages: deterministic hash-pick (until we add biome pickers).
+      function pickVariantOther(gx, gy, pool) {
+        return pool[Math.abs(gx * 7 + gy * 13) % pool.length]
+      }
+
+      // ---- IsoWorld + Tilemap ---------------------------------------------
       const isoWorld = new IsoWorld({
-        viewportWidth: 480,
-        viewportHeight: 270,
+        viewportWidth: 1024,
+        viewportHeight: 640,
       })
 
-      const tilemap = new Tilemap('stage1-bosque', 480, 270)
-      // F2.5.3: load alt 1 of each variant for the mini-iso-demo.
-      await tilemap.load(async (variant) => {
-        const tex = await PIXI.Assets.load(`../assets/tiles/stage1-bosque/${variant}_alt1.png`)
-        tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
-        return tex
-      })
-      isoWorld.registerTilemap(tilemap)
-      isoWorld.setStage('stage1-bosque')
-      app.stage.addChild(isoWorld.container)
-
-      // 4 demo sprites — 3 pinos + 1 castillo — vertically anchored.
-      const SPRITE_DEFS = [
-        { id: 'trees_pino.png', gx: 5, gy: 4, scale: 0.7 },
-        { id: 'trees_pino.png', gx: 6, gy: 4, scale: 0.7 },
-        { id: 'trees_pino.png', gx: 5, gy: 5, scale: 0.7 },
-        { id: 'buildings_castillo_cofrentes.png', gx: 7, gy: 5, scale: 1.1 },
-      ]
-      const sprites = []
-      for (const def of SPRITE_DEFS) {
-        try {
-          const tex = await PIXI.Assets.load(`../assets/sprites/${def.id}`)
+      let tilemap = null
+      async function loadTilemapFor(stageId, alt) {
+        if (tilemap) {
+          isoWorld.unregisterTilemap?.(tilemap) // optional API
+          tilemap.destroy()
+          isoWorld._tilemaps.delete(stageId)
+        }
+        tilemap = new Tilemap(stageId, 1024, 640)
+        await tilemap.load(async (variant) => {
+          const tex = await PIXI.Assets.load(`../assets/tiles/${stageId}/${variant}_alt${alt}.png`)
           tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
-          const sprite = new PIXI.Sprite(tex)
-          sprite.anchor.set(0.5, 1.0)
-          sprite.scale.set(def.scale)
-          sprites.push({ ...def, sprite, baseY: 0 })
-        } catch (e) {
-          console.warn(`[mini-demo] could not load sprite ${def.id}:`, e)
+          return tex
+        })
+        isoWorld.registerTilemap(tilemap)
+        isoWorld.setStage(stageId)
+        // Force a fresh render of the new tile layer
+        if (tilemap._container) {
+          tilemap._container.removeChildren().forEach(c => c.destroy())
+          tilemap.activeTiles.clear()
         }
       }
-
-      // Wire sprites to IsoWorld's spriteLayer
-      const verticalSprites = sprites.map((s) => ({
-        gx: s.gx, gy: s.gy, sprite: s.sprite,
-      }))
-      for (const { sprite } of verticalSprites) {
-        isoWorld.spriteLayer.addChild(sprite)
+      await loadTilemapFor(state.stageId, state.alt)
+      // Replace cullAndRender's picker on the fly via the third arg of update().
+      // IsoWorld.update(camera, verticalSprites) calls Tilemap.cullAndRender(layer, range, pickVariantFlat).
+      // We pass our own picker via the third argument using isoWorld's internal API.
+      function biomePicker(gx, gy, pool) {
+        if (state.stageId === 'stage1-bosque') return pickVariantBosque(gx, gy, pool)
+        return pickVariantOther(gx, gy, pool)
       }
 
-      // Anchor camera around (5, 5) so all 4 sprites are visible.
-      const camIsoX = 5, camIsoY = 5
-      const dummyCamera = { getCameraX: () => camIsoX, getCameraY: () => camIsoY }
+      app.stage.addChild(isoWorld.container)
 
+      // ---- Sprites ---------------------------------------------------------
+      // Stage-aware sprite layouts: each stage gets a thematic scene.
+      const SCENE_LAYOUTS = {
+        'stage1-bosque': () => [
+          // Sendero central con pinos
+          { id: 'trees_pino.png', gx: 4, gy: 6, scale: 0.7, layer: 'tree' },
+          { id: 'trees_pino.png', gx: 5, gy: 7, scale: 0.7, layer: 'tree' },
+          { id: 'trees_pino.png', gx: 6, gy: 6, scale: 0.7, layer: 'tree' },
+          { id: 'trees_pino.png', gx: 7, gy: 7, scale: 0.7, layer: 'tree' },
+          { id: 'trees_pino.png', gx: 8, gy: 6, scale: 0.7, layer: 'tree' },
+          { id: 'trees_pino.png', gx: 9, gy: 7, scale: 0.7, layer: 'tree' },
+          // Encinas más anchas (sombra redonda)
+          { id: 'trees_encina.png', gx: 3, gy: 4, scale: 0.85, layer: 'tree' },
+          { id: 'trees_encina.png', gx: 12, gy: 4, scale: 0.85, layer: 'tree' },
+          { id: 'trees_encina.png', gx: 13, gy: 6, scale: 0.85, layer: 'tree' },
+          // Almendros aislados
+          { id: 'trees_almendro.png', gx: 2, gy: 9, scale: 0.7, layer: 'tree' },
+          { id: 'trees_almendro.png', gx: 11, gy: 9, scale: 0.7, layer: 'tree' },
+          // Pinos en las esquinas
+          { id: 'trees_pino.png', gx: 1, gy: 6, scale: 0.65, layer: 'tree' },
+          { id: 'trees_pino.png', gx: 14, gy: 8, scale: 0.65, layer: 'tree' },
+          // Rocks + props
+          { id: 'props_roca.png', gx: 3, gy: 7, scale: 0.45, layer: 'prop' },
+          { id: 'props_roca.png', gx: 10, gy: 5, scale: 0.55, layer: 'prop' },
+          { id: 'props_roca.png', gx: 6, gy: 9, scale: 0.5, layer: 'prop' },
+          { id: 'props_valla.png', gx: 5, gy: 4, scale: 0.55, layer: 'prop' },
+          { id: 'props_cartel.png', gx: 7, gy: 8, scale: 0.5, layer: 'prop' },
+        ],
+        'stage2-pueblo': () => [
+          { id: 'buildings_casa_ayora.png', gx: 4, gy: 5, scale: 0.95, layer: 'building' },
+          { id: 'buildings_casa_ayora.png', gx: 7, gy: 6, scale: 0.95, layer: 'building' },
+          { id: 'buildings_castillo_cofrentes.png', gx: 10, gy: 5, scale: 1.15, layer: 'building' },
+          { id: 'buildings_torre_central.png', gx: 13, gy: 8, scale: 1.0, layer: 'building' },
+          { id: 'buildings_casa_ayora.png', gx: 12, gy: 4, scale: 0.9, layer: 'building' },
+          { id: 'props_cartel.png', gx: 6, gy: 7, scale: 0.5, layer: 'prop' },
+          { id: 'props_valla.png', gx: 8, gy: 4, scale: 0.55, layer: 'prop' },
+          { id: 'props_roca.png', gx: 9, gy: 8, scale: 0.4, layer: 'prop' },
+          { id: 'trees_pino.png', gx: 2, gy: 8, scale: 0.6, layer: 'tree' },
+          { id: 'trees_encina.png', gx: 14, gy: 5, scale: 0.75, layer: 'tree' },
+        ],
+        'stage3-rio': () => [
+          { id: 'trees_pino.png', gx: 4, gy: 5, scale: 0.75, layer: 'tree' },
+          { id: 'trees_encina.png', gx: 8, gy: 4, scale: 0.8, layer: 'tree' },
+          { id: 'props_roca.png', gx: 6, gy: 7, scale: 0.7, layer: 'prop' },
+          { id: 'props_roca.png', gx: 9, gy: 8, scale: 0.7, layer: 'prop' },
+          { id: 'props_roca.png', gx: 11, gy: 6, scale: 0.65, layer: 'prop' },
+          { id: 'props_roca.png', gx: 5, gy: 9, scale: 0.5, layer: 'prop' },
+          { id: 'props_valla.png', gx: 12, gy: 8, scale: 0.5, layer: 'prop' },
+        ],
+        'stage4-vertedero': () => [
+          // Enemigos TRECO esparcidos
+          { id: 'enemies_camion_treco.png', gx: 4, gy: 4, scale: 0.95, layer: 'enemy' },
+          { id: 'enemies_topadora.png', gx: 9, gy: 6, scale: 0.85, layer: 'enemy' },
+          { id: 'enemies_trailer.png', gx: 13, gy: 5, scale: 0.85, layer: 'enemy' },
+          { id: 'enemies_plataforma_solar.png', gx: 3, gy: 9, scale: 0.8, layer: 'enemy' },
+          { id: 'enemies_incineradora.png', gx: 11, gy: 9, scale: 0.95, layer: 'enemy' },
+          { id: 'enemies_bidon_lixiviado.png', gx: 7, gy: 8, scale: 0.55, layer: 'enemy' },
+          { id: 'enemies_tubo_lixiviado.png', gx: 5, gy: 6, scale: 0.5, layer: 'enemy' },
+          { id: 'enemies_valla_publicitaria.png', gx: 14, gy: 7, scale: 0.75, layer: 'enemy' },
+          { id: 'enemies_bolsa_plastico.png', gx: 8, gy: 4, scale: 0.4, layer: 'enemy' },
+          { id: 'enemies_dron_fumigador.png', gx: 12, gy: 7, scale: 0.5, layer: 'enemy' },
+        ],
+        'stage5-castillo': () => [
+          { id: 'buildings_castillo_cofrentes.png', gx: 8, gy: 7, scale: 1.3, layer: 'building' },
+          { id: 'buildings_torre_central.png', gx: 5, gy: 5, scale: 1.05, layer: 'building' },
+          { id: 'trees_pino.png', gx: 4, gy: 8, scale: 0.7, layer: 'tree' },
+          { id: 'trees_pino.png', gx: 11, gy: 8, scale: 0.7, layer: 'tree' },
+          { id: 'trees_encina.png', gx: 13, gy: 5, scale: 0.8, layer: 'tree' },
+          { id: 'props_roca.png', gx: 6, gy: 9, scale: 0.55, layer: 'prop' },
+          { id: 'props_roca.png', gx: 10, gy: 6, scale: 0.55, layer: 'prop' },
+          { id: 'props_valla.png', gx: 14, gy: 8, scale: 0.5, layer: 'prop' },
+        ],
+      }
+
+      async function loadSpritesFor(stageId) {
+        // Clear existing
+        for (const s of state.sprites) {
+          isoWorld.spriteLayer.removeChild(s.sprite)
+          s.sprite.destroy()
+        }
+        state.sprites = []
+
+        const layoutFn = SCENE_LAYOUTS[stageId] || SCENE_LAYOUTS['stage1-bosque']
+        const defs = layoutFn()
+        for (const def of defs) {
+          try {
+            const tex = await PIXI.Assets.load(`../assets/sprites/${def.id}`)
+            tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
+            const sprite = new PIXI.Sprite(tex)
+            sprite.anchor.set(0.5, 1.0)
+            sprite.scale.set(def.scale)
+            isoWorld.spriteLayer.addChild(sprite)
+            state.sprites.push({
+              ...def,
+              sprite,
+              baseGx: def.gx,
+              baseGy: def.gy,
+              phase: hash(def.gx, def.gy) * Math.PI * 2,
+            })
+          } catch (e) {
+            console.warn(`[mini-demo] could not load sprite ${def.id}:`, e)
+          }
+        }
+      }
+      await loadSpritesFor(state.stageId)
+
+      // ---- Camera controls -------------------------------------------------
+      const dummyCamera = {
+        getCameraX: () => state.camIsoX,
+        getCameraY: () => state.camIsoY,
+      }
+
+      // Drag-to-pan
+      canvas.addEventListener('pointerdown', (e) => {
+        state.drag = { x: e.clientX, y: e.clientY, camX: state.camIsoX, camY: state.camIsoY }
+        canvas.setPointerCapture(e.pointerId)
+      })
+      canvas.addEventListener('pointermove', (e) => {
+        if (!state.drag) return
+        // Convert pixel delta to iso delta using the same tile math.
+        // Drag right => camera moves right (gx+). Drag down => camera moves down (gy+).
+        // 1 tileSize ≈ 64px on this viewport (computeTileSize → 64 for 800×500).
+        const tileSize = isoWorld.tileSize
+        const dx = (e.clientX - state.drag.x) / tileSize
+        const dy = (e.clientY - state.drag.y) / tileSize
+        state.targetCamX = state.drag.camX + (dx + dy) * 0.5
+        state.targetCamY = state.drag.camY + (dy - dx) * 0.5
+      })
+      canvas.addEventListener('pointerup', (e) => {
+        state.drag = null
+        canvas.releasePointerCapture(e.pointerId)
+      })
+      canvas.addEventListener('pointercancel', () => { state.drag = null })
+
+      // Keyboard
+      window.addEventListener('keydown', (e) => {
+        state.keys.add(e.key.toLowerCase())
+        if (state.keys.size > 0) state.flags.autopan = false
+      })
+      window.addEventListener('keyup', (e) => {
+        state.keys.delete(e.key.toLowerCase())
+      })
+
+      // ---- Ticker ----------------------------------------------------------
       let t0 = performance.now()
+      let lastFrame = t0
+      let fpsAccum = 0
+      let fpsCount = 0
+
       app.ticker.add(() => {
         const now = performance.now()
         const t = (now - t0) / 1000
-        // Idle bobbing on the sprite layer (additive on top of iso position)
-        for (const s of sprites) {
-          s.sprite.y = Math.sin(t * 1.5 + s.gx * 0.4 + s.gy * 0.7) * 3
+        const dt = (now - lastFrame) / 1000
+        lastFrame = now
+
+        // FPS
+        if (dt > 0) { fpsAccum += 1 / dt; fpsCount++ }
+        if (fpsCount > 30) { hud.fps.textContent = fpsAccum.toFixed(0); fpsAccum = 0; fpsCount = 0 }
+
+        // Camera input: WASD / arrows
+        const speed = 6 * dt // tiles per second
+        let kx = 0, ky = 0
+        for (const k of state.keys) {
+          if (k === 'w' || k === 'arrowup') ky -= 1
+          if (k === 's' || k === 'arrowdown') ky += 1
+          if (k === 'a' || k === 'arrowleft') kx -= 1
+          if (k === 'd' || k === 'arrowright') kx += 1
         }
-        isoWorld.update(dummyCamera, verticalSprites)
+        if (kx !== 0 || ky !== 0) {
+          state.targetCamX += kx * speed
+          state.targetCamY += ky * speed
+        }
+
+        // Auto-pan: gentle orbit around the stage's default camera position
+        if (state.flags.autopan) {
+          const def = CAM_DEFAULTS[state.stageId] || { x: 7, y: 7 }
+          state.targetCamX = def.x + Math.cos(t * 0.18) * 3
+          state.targetCamY = def.y + Math.sin(t * 0.18) * 3
+        }
+
+        // Smooth camera
+        state.camIsoX += (state.targetCamX - state.camIsoX) * 0.18
+        state.camIsoY += (state.targetCamY - state.camIsoY) * 0.18
+
+        // Animate sprites
+        for (const s of state.sprites) {
+          // Bobbing (idle)
+          if (state.flags.bobbing) {
+            s.sprite.y = Math.sin(t * 1.4 + s.phase) * 2.5
+          } else {
+            s.sprite.y = 0
+          }
+          // Wind sway (trees only) — horizontal jitter via x
+          if (state.flags.wind && s.layer === 'tree') {
+            const sway = Math.sin(t * 0.9 + s.phase) * 1.2
+            // Override the iso-position by re-setting sprite.position via screenToIso
+            const screen = isoWorld.isoToScreen(s.baseGx, s.baseGy)
+            s.sprite.x = screen.sx + sway
+            s.sprite.y = screen.sy + (state.flags.bobbing ? Math.sin(t * 1.4 + s.phase) * 2.5 : 0)
+          } else {
+            const screen = isoWorld.isoToScreen(s.baseGx, s.baseGy)
+            s.sprite.x = screen.sx
+            if (!state.flags.bobbing) s.sprite.y = screen.sy
+          }
+          // Enemy patrol (simple back-and-forth horizontal)
+          if (state.flags.enemies && s.layer === 'enemy') {
+            const patrol = Math.sin(t * 0.6 + s.phase) * 0.5
+            s.baseGx += (patrol - (s._lastPatrol ?? patrol)) * 0.05
+            s._lastPatrol = patrol
+            const screen = isoWorld.isoToScreen(s.baseGx, s.baseGy)
+            s.sprite.x = screen.sx
+            if (!state.flags.bobbing) s.sprite.y = screen.sy
+          }
+        }
+
+        // Run engine with biome picker
+        customUpdate(dummyCamera, state.sprites.map(s => ({
+          gx: s.baseGx, gy: s.baseGy, sprite: s.sprite,
+          offset: s.layer === 'building' ? 900 : (s.layer === 'tree' ? 700 : 500),
+        })))
+
+        // HUD (throttled to every 6 frames)
+        if (++hudCounter % 6 === 0) {
+          hud.cam.textContent = `${state.camIsoX.toFixed(1)}, ${state.camIsoY.toFixed(1)}`
+          hud.tiles.textContent = String(tilemap.activeTiles?.size ?? 0)
+          hud.sprites.textContent = String(state.sprites.length)
+        }
       })
 
+      // ---- Controls wiring ------------------------------------------------
+      const btnReset = document.getElementById('btn-reset')
+      btnReset.addEventListener('click', () => {
+        const def = CAM_DEFAULTS[state.stageId] || { x: 7, y: 7 }
+        state.targetCamX = def.x; state.targetCamY = def.y
+        state.flags.autopan = false
+        btnAutopan.classList.remove('active')
+      })
+
+      const btnBobbing = document.getElementById('btn-bobbing')
+      btnBobbing.addEventListener('click', () => {
+        state.flags.bobbing = !state.flags.bobbing
+        btnBobbing.classList.toggle('active')
+      })
+
+      const btnWind = document.getElementById('btn-wind')
+      btnWind.addEventListener('click', () => {
+        state.flags.wind = !state.flags.wind
+        btnWind.classList.toggle('active')
+      })
+
+      const btnEnemies = document.getElementById('btn-enemies')
+      btnEnemies.addEventListener('click', () => {
+        state.flags.enemies = !state.flags.enemies
+        btnEnemies.classList.toggle('active')
+      })
+
+      const btnAutopan = document.getElementById('btn-autopan')
+      btnAutopan.addEventListener('click', () => {
+        state.flags.autopan = !state.flags.autopan
+        btnAutopan.classList.toggle('active')
+      })
+
+      const stageSelect = document.getElementById('stage-select')
+      stageSelect.addEventListener('change', async (e) => {
+        state.stageId = e.target.value
+        await loadTilemapFor(state.stageId, state.alt)
+        await loadSpritesFor(state.stageId)
+        const def = CAM_DEFAULTS[state.stageId] || { x: 7, y: 7 }
+        state.targetCamX = def.x; state.targetCamY = def.y
+      })
+
+      const altSelect = document.getElementById('alt-select')
+      altSelect.addEventListener('change', async (e) => {
+        state.alt = parseInt(e.target.value, 10)
+        await loadTilemapFor(state.stageId, state.alt)
+      })
+
+      // Override pickVariantFlat by re-running cullAndRender ourselves with our picker.
+      // We do this by hooking before the isoWorld.update ticker's pickVariantFlat call.
+      function customUpdate(camera, verticalSprites = []) {
+        const camIsoX = camera.getCameraX(), camIsoY = camera.getCameraY()
+        const sum = camIsoX + camIsoY
+        if (sum < isoWorld._lastCameraSum) {
+          console.warn(`[IsoWorld] camera depth regressed: ${isoWorld._lastCameraSum} → ${sum}`)
+        }
+        isoWorld._lastCameraSum = sum
+        const { sx: csx, sy: csy } = isoToScreen(camIsoX, camIsoY, isoWorld.tileSize, isoWorld.tileWorldOrigin)
+        isoWorld.container.position.set(isoWorld._viewOrigin.x - csx, isoWorld._viewOrigin.y - csy)
+        if (tilemap) {
+          const range = computeCullRange(camIsoX, camIsoY, isoWorld.viewportWidth, isoWorld.viewportHeight, isoWorld.tileSize, isoWorld.tileWorldOrigin)
+          tilemap.cullAndRender(isoWorld.tileLayer, range, biomePicker)
+        }
+        for (const { gx, gy, sprite, offset = 0 } of verticalSprites) {
+          const { sx, sy } = isoToScreen(gx, gy, isoWorld.tileSize, isoWorld.tileWorldOrigin)
+          sprite.position.set(sx, sy)
+          sprite.zIndex = (gx + gy) * 1000 + offset
+        }
+      }
+
       window.__miniDemoOK = true
-      console.log(`[mini-demo] running — ${sprites.length} sprites + ${tilemap.loadedVariants.length} tile variants`)
+      window.__miniDemo = { state, app, isoWorld, tilemap, loadTilemapFor, loadSpritesFor }
+      console.log(`[mini-demo] running — ${state.sprites.length} sprites + ${tilemap.loadedVariants.length} tile variants (stage=${state.stageId}, alt=${state.alt})`)
     } catch (err) {
       console.error('[mini-demo] failed:', err)
       errorEl.textContent = `Mini iso-demo failed: ${err.message}`

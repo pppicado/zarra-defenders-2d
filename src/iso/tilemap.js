@@ -9,7 +9,11 @@
 
 import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin } from './iso-math.js'
 
-const MAX_VISIBLE_TILES = 100
+// F2.5.4: bumped from 100 to 400 to support a 4x larger world (4 stages of
+// viewport tiles visible at any time). The hard cap protects against an
+// accidental `computeCullRange` regression that would otherwise try to mount
+// thousands of tiles per frame.
+const MAX_VISIBLE_TILES = 400
 const CULL_OVERSHOOT = 1
 
 // Z-offset bands (design.md §3).
