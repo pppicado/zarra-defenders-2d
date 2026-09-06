@@ -23,6 +23,10 @@ export class IsoWorld {
     this.viewportHeight = opts.viewportHeight
     this.tileSize = opts.tileSize ?? computeTileSize(opts.viewportWidth, opts.viewportHeight)
     this.tileWorldOrigin = opts.tileWorldOrigin ?? computeWorldOrigin(opts.viewportWidth, opts.viewportHeight)
+    // F2.5.1: viewOrigin is the world-container anchor (viewport center), distinct
+    // from tileWorldOrigin (HUD-strip tile origin used by isoToScreen/screenToIso).
+    // CAM-002 requires the camera-projected iso position to land at viewport center.
+    this._viewOrigin = { x: opts.viewportWidth / 2, y: opts.viewportHeight / 2 }
 
     this.container = new PIXI.Container()
     this.container.name = 'isoWorld'
@@ -81,7 +85,9 @@ export class IsoWorld {
     this._lastCameraSum = sum
 
     const { sx: csx, sy: csy } = isoToScreen(camIsoX, camIsoY, this.tileSize, this.tileWorldOrigin)
-    this.container.position.set(-csx, -csy)  // CAM-002
+    // CAM-002: world container anchor is viewOrigin (viewport center), NOT tileWorldOrigin.
+    // camera-projected iso position lands at viewOrigin instead of the HUD strip.
+    this.container.position.set(this._viewOrigin.x - csx, this._viewOrigin.y - csy)
 
     if (this._activeTilemap) {
       const range = computeCullRange(camIsoX, camIsoY, this.viewportWidth, this.viewportHeight, this.tileSize, this.tileWorldOrigin)
