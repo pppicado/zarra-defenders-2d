@@ -126,9 +126,10 @@ async function bootstrap() {
   world.addChild(isoWorld.container)
 
   // Carga del tilemap activo (stage1-bosque = demo inicial; el resto se enchufa en F4+).
+  // F2.5.3: tiles tienen sufijo _alt1.png (3 lighting alts por variant).
   const tilemap = new Tilemap('stage1-bosque', wrapper.clientWidth, wrapper.clientHeight)
   await tilemap.load(async (variant) => {
-    const url = `assets/tiles/stage1-bosque/${variant}.png`
+    const url = `assets/tiles/stage1-bosque/${variant}_alt1.png`
     const tex = await PIXI.Assets.load(url)
     tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
     return tex
