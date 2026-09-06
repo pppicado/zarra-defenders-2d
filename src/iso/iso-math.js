@@ -1,20 +1,22 @@
 /**
  * src/iso/iso-math.js
  *
- * Pure isometric ↔ screen transforms (F2.5.4 square iso falso).
+ * Pure isometric ↔ screen transforms (F2.5.6 square iso — NO tile rotation).
  * Zero Pixi imports by design (TILE-001): exercisable from DevTools,
  * reusable by hit-detection (F3) and hand+pen (F3).
  *
- * Conventions (F2.5.4 MODIFIED TILE-001):
- *   separation between adjacent tile centers = tileSize / sqrt(2)
- *   so that after each tile (a `tileSize × tileSize` PNG) is rotated 45°
- *   by `_worldLayer.rotation`, the rotated diamonds touch without overlap.
- *   isoToScreen(0, 0) === tileWorldOrigin
+ * Conventions (F2.5.6 MODIFIED TILE-001):
+ *   - Each tile is a `tileSize × tileSize` square PNG, NOT rotated at runtime.
+ *   - Tiles are arranged in a dimetric (2:1) grid so the corners of
+ *     adjacent tiles touch exactly: `sx = origin.x + (gx - gy) * tileSize/2`,
+ *     `sy = origin.y + (gx + gy) * tileSize/2`.
+ *   - isoToScreen(0, 0) === tileWorldOrigin.
  *
- * The on-disk texture is a square PNG; the visible diamond is created
- * by setting `_worldLayer.rotation = π/4` on the IsoWorld wrapper
- * (see src/iso/world.js). Iso math here works in pre-rotation world
- * space — square coordinates — so position/zIndex math stays untouched.
+ * Why "square iso" without rotation: previous attempts rotated each tile
+ * 45° around `_worldLayer`, which produced visible BLUE GAPS between
+ * rotated diamonds (the rotated diamond's diagonal corners are at
+ * `tileSize/√2` from center, not `tileSize/2`). Storing tiles as top-down
+ * squares in a dimetric grid gives the same isometric look with no gaps.
  */
 
 /**
@@ -26,14 +28,13 @@
  * @returns {{sx:number, sy:number}}
  */
 export function isoToScreen(isoX, isoY, tileSize, tileWorldOrigin) {
-  // F2.5.4: square iso falso — separation between adjacent tile centers in
-  // world-space is `tileSize / sqrt(2)` so that after each tile is rendered
-  // as a square `tileSize × tileSize` PNG and rotated 45° by `_worldLayer`,
-  // the rotated diamonds touch without overlap.
-  const k = tileSize / Math.SQRT2
+  // F2.5.6: square iso — tile is `tileSize × tileSize`, no rotation.
+  // Half-offset in each axis produces the standard 2:1 dimetric grid.
+  const hw = tileSize / 2
+  const hh = tileSize / 2
   return {
-    sx: tileWorldOrigin.x + (isoX - isoY) * k,
-    sy: tileWorldOrigin.y + (isoX + isoY) * k,
+    sx: tileWorldOrigin.x + (isoX - isoY) * hw,
+    sy: tileWorldOrigin.y + (isoX + isoY) * hh,
   }
 }
 
@@ -46,13 +47,13 @@ export function isoToScreen(isoX, isoY, tileSize, tileWorldOrigin) {
  * @returns {{isoX:number, isoY:number}}
  */
 export function screenToIso(sx, sy, tileSize, tileWorldOrigin) {
-  // F2.5.4: must match isoToScreen's `k = tileSize / sqrt(2)`.
-  const k = tileSize / Math.SQRT2
+  const hw = tileSize / 2
+  const hh = tileSize / 2
   const lx = sx - tileWorldOrigin.x
   const ly = sy - tileWorldOrigin.y
   return {
-    isoX: (lx / k + ly / k) / 2,
-    isoY: (ly / k - lx / k) / 2,
+    isoX: (lx / hw + ly / hh) / 2,
+    isoY: (ly / hh - lx / hw) / 2,
   }
 }
 
@@ -89,6 +90,5 @@ export function computeWorldOrigin(viewportWidth, viewportHeight) {
  * @returns {{tileHalfWidth:number, tileHalfHeight:number}}
  */
 export function getTileHalf(tileSize) {
-  // F2.5.4: square iso falso — center-to-center separation is `tileSize / sqrt(2)`.
-  return { tileHalfWidth: tileSize / Math.SQRT2, tileHalfHeight: tileSize / Math.SQRT2 }
+  return { tileHalfWidth: tileSize / 2, tileHalfHeight: tileSize / 2 }
 }

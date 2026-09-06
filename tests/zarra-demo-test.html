@@ -174,28 +174,9 @@
   <button id="iso-btn" type="button">Isométrica 45°</button>
 </div>
 
-<div id="accepted-section">
-  <h2>Accepted — 40 variants × 3 alts = <span id="accepted-count">0</span> tiles</h2>
-  <div id="accepted-groups"></div>
-</div>
 
-<div id="sprites-section">
-  <h2>Sprites (<span id="sprites-count">0</span>)</h2>
-  <p class="note">All 21 <code>assets/sprites/*.png</code> — the "cannot see" complaint from F2.5.1 review.</p>
-  <div id="sprites-grid" class="grid"></div>
-</div>
 
-<div id="discarded-section">
-  <details>
-    <summary><h2 style="display:inline-block">Discarded (<span id="discarded-count">0</span>)</h2></summary>
-    <div id="discarded-grid" class="grid" style="margin-top:8px"></div>
-  </details>
-</div>
 
-<div id="playwright-section">
-  <h2>Últimas pruebas de Playwright (<span id="playwright-count">10</span> capturas)</h2>
-  <p class="note">Headless Playwright screenshots del full level demo en distintos estados (stage, alt, cámara, animaciones). Se actualizan en cada ronda de pruebas automatizadas.</p>
-  <div id="playwright-grid" class="grid" style="grid-template-columns: repeat(2, 1fr); gap: 16px;"></div>
 </div>
 
 <div id="mini-demo-section">
@@ -440,13 +421,9 @@
       const { isoToScreen } = isoMath
 
       // ---- State -----------------------------------------------------------
-      // F2.5.6: read ?stage= and ?alt= from URL for headless capture scripts
-      const _urlParams = new URLSearchParams(window.location.search)
-      const _initStage = _urlParams.get('stage') || 'stage1-bosque'
-      const _initAlt = parseInt(_urlParams.get('alt') || '1', 10)
       const state = {
-        stageId: _initStage,
-        alt: _initAlt,
+        stageId: 'stage1-bosque',
+        alt: 1,
         camIsoX: 7,
         camIsoY: 6,
         targetCamX: 7,

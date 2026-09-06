@@ -32,16 +32,14 @@ export class IsoWorld {
     this.container.name = 'isoWorld'
     this.container.sortableChildren = false  // explicit zIndex (ADR #1)
 
-    // F2.5.2 (TILE-003): "square iso falso" — _worldLayer is a wrapper
-    // container rotated 45° that holds the tile + sprite layers. The on-
-    // disk PNGs are top-down squares; rotation transforms them into
-    // apparent diamonds at runtime. Keeping the world math in pre-
-    // rotation space means zIndex/cull/isoToScreen signatures are
-    // untouched. If a future F8 polish enables `cullArea`, the rotation
-    // must be undone before setCullArea — documented in design.md.
+    // F2.5.6: tiles are SQUARE PNGs in a dimetric grid, NOT rotated.
+    // The `_worldLayer` wrapper exists for future layering needs (e.g.
+    // parallax background, ambient effects) but no longer applies a 45°
+    // rotation — rotation caused visible BLUE GAPS between tiles because
+    // the rotated diamond's corners don't tile without overlap.
     this._worldLayer = new PIXI.Container()
-    this._worldLayer.name = 'worldRotated'
-    this._worldLayer.rotation = Math.PI / 4  // 45°
+    this._worldLayer.name = 'worldLayer'
+    this._worldLayer.rotation = 0
     this._worldLayer.sortableChildren = false
     this.container.addChild(this._worldLayer)
 
@@ -49,12 +47,9 @@ export class IsoWorld {
     this._tileLayer.name = 'tiles'; this._tileLayer.sortableChildren = false
     this._worldLayer.addChild(this._tileLayer)
 
-    // F2.5.4 (TILE-002 + DESIGN ADR-9): sprites live in the unrotated world
-    // container, not inside `_worldLayer`. If they inherited the 45° rotation
-    // from the tile wrapper, vertical sprites (trees, buildings) would tilt
-    // sideways. To compensate, `update()` projects sprite positions through
-    // the rotated-world matrix instead of straight isoToScreen — see the
-    // sprite-position block below.
+    // F2.5.6: sprites live in the world container (not inside `_worldLayer`)
+    // so they render upright regardless of any future world-layer effects.
+    // Their base lands on the front edge of each tile (see update() below).
     this._spriteLayer = new PIXI.Container()
     this._spriteLayer.name = 'verticalSprites'; this._spriteLayer.sortableChildren = false
     this.container.addChild(this._spriteLayer)
@@ -114,13 +109,11 @@ export class IsoWorld {
     }
 
     for (const { gx, gy, sprite, offset = Z_BANDS.decoration } of verticalSprites) {
-      // F2.5.4 (ADR-9): sprites live in the unrotated world container, so we
-      // must compensate for the 45° rotation of the tile layer. The sprite's
-      // base (anchor y=1.0) needs to land at the FRONT (south point) of the
-      // rotated tile diamond, which is `tileSize/√2` below the tile's
-      // unrotated center in world-space.
+      // F2.5.6: tile is a `tileSize × tileSize` square (no rotation). Sprite
+      // base (anchor y=1.0) lands at the FRONT edge of the tile, which is
+      // `tileSize/2` below the tile's center in world-space.
       const { sx: csx, sy: csy } = isoToScreen(gx, gy, this.tileSize, this.tileWorldOrigin)
-      const frontOffset = this.tileSize / Math.SQRT2  // south point of rotated diamond
+      const frontOffset = this.tileSize / 2
       sprite.position.set(csx, csy + frontOffset)
       sprite.zIndex = computeZIndex(gx, gy, offset)
     }
