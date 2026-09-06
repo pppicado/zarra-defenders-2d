@@ -1,83 +1,107 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>F2.5 tile gallery — visual review</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 16px;
-      background: #222;
-      color: #eee;
-      font-family: -apple-system, sans-serif;
-    }
-    h1 { font-size: 18px; margin: 0 0 12px; }
-    h2 { font-size: 14px; margin: 16px 0 6px; color: #fbbf24; }
-    .stage {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin-bottom: 24px;
-    }
-    .tile {
-      background: #444;
-      border: 1px solid #666;
-      padding: 4px;
-      text-align: center;
-    }
-    .tile img {
-      display: block;
-      width: 100%;
-      height: auto;
-      image-rendering: pixelated;
-    }
-    .tile .name {
-      font-size: 10px;
-      color: #ddd;
-      margin-top: 4px;
-      font-family: monospace;
-    }
-    .check {
-      background: #0f3a0f;
-      border-color: #4ade80;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>F2.5.1 tile gallery — manifest-driven</title>
+<link rel="icon" href="data:,">
+<style>
+  body { margin: 0; padding: 16px; background: #222; color: #eee; font-family: -apple-system, sans-serif; }
+  h1 { font-size: 18px; margin: 0 0 6px; }
+  h2 { font-size: 14px; margin: 24px 0 8px; border-bottom: 1px solid #444; padding-bottom: 6px; }
+  p.note { font-size: 12px; color: #aaa; margin: 0 0 12px; }
+  .grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+  figure { margin: 0; background: #1a1a1a; padding: 6px; border: 2px solid #1a1a1a; border-radius: 4px; text-align: center; }
+  figure.regen { border: 2px solid orange; }
+  figure.discarded { opacity: 0.55; }
+  figure img { width: 100%; image-rendering: pixelated; display: block; background: linear-gradient(45deg, #333 25%, transparent 25%, transparent 75%, #333 75%, #333), linear-gradient(45deg, #333 25%, transparent 25%, transparent 75%, #333 75%, #333); background-size: 8px 8px; background-position: 0 0, 4px 4px; }
+  figcaption { font-size: 10px; padding-top: 4px; word-break: break-all; }
+  .placeholder { color: #888; font-style: italic; padding: 8px 0; }
+  .err { color: #f87171; padding: 12px; border: 1px solid #7f1d1d; background: #1a1a1a; border-radius: 4px; }
+</style>
 </head>
 <body>
-  <h1>F2.5 tile gallery — visual review (post-processed 128x64 PNGs)</h1>
-  <div id="gallery"></div>
-  <script>
-    const stages = [
-      ['stage1-bosque', 'Stage 1 — Bosque mediterráneo'],
-      ['stage2-pueblo', 'Stage 2 — Pueblo de Cofrentes'],
-      ['stage3-rio', 'Stage 3 — Río Cabriel'],
-      ['stage4-vertedero', 'Stage 4 — Vertedero (anti-glorification gate)'],
-      ['stage5-castillo', 'Stage 5 — Castillo de Cofrentes'],
-    ];
-    const gallery = document.getElementById('gallery');
-    for (const [id, label] of stages) {
-      const h2 = document.createElement('h2');
-      h2.textContent = label;
-      gallery.appendChild(h2);
-      const grid = document.createElement('div');
-      grid.className = 'stage';
-      // Hardcoded variant list (must match tools/variants.json + manifest)
-      const variants = {
-        'stage1-bosque': ['pino_clear_grass_rojizo','pino_underbrush_dark','encina_redonda_sombra','suelo_arcilloso_rojizo','trocha_forestal_compactada','matorral_coscoja_romero','arroyo_barranco_edge','hojarasca_pino_seca'],
-        'stage2-pueblo': ['cal_blanca_pared','teja_arabe_roja','adoquin_calle_empedrada','asfalto_N330_circulado','acera_baldosa_hidraulica','sombra_calle_estrecha','balcon_hierro_forjado','porton_madera_pueblo'],
-        'stage3-rio': ['agua_cristalina_verde_azul','cortado_vertical_karstico','roca_chorrera_humeda','sedimento_aluvial_rio','chopo_ribera_densa','canto_rodado_orilla','musgo_humedo_roca','ladera_matorral_seca'],
-        'stage4-vertedero': ['cement_pad_crack','gravel_dust_industrial','dirt_oily_contaminated','plastic_debris_mixed','container_lixiviado_stain','metal_scrap_rust','asphalt_cracked_heavy_truck','weeds_through_pavement'],
-        'stage5-castillo': ['penon_basalto_volcanico','cal_castillo_blanca','torre_homenaje_reloj','mamposteria_antigua_ocre','patio_armas_adoquines','sendero_subida_penon','pino_penon_mediterraneo','aljibe_boveda_subterraneo'],
-      }[id];
-      for (const v of variants) {
-        const tile = document.createElement('div');
-        tile.className = 'tile check';
-        tile.innerHTML = `<img src="../assets/tiles/${id}/${v}.png" alt="${v}"><div class="name">${v}</div>`;
-        grid.appendChild(tile);
-      }
-      gallery.appendChild(grid);
+<h1>F2.5.1 tile gallery — manifest-driven</h1>
+<p class="note">Reads <code>assets/tiles/manifest.json</code> at runtime. Regenerated tiles (F2.5.1.a) get an orange border.</p>
+<div id="accepted-section">
+  <h2>Accepted (<span id="accepted-count">0</span>)</h2>
+  <div id="accepted-grid" class="grid"></div>
+</div>
+<div id="discarded-section">
+  <h2>Discarded (<span id="discarded-count">0</span>)</h2>
+  <div id="discarded-grid" class="grid"></div>
+</div>
+<div id="error" class="err" style="display:none"></div>
+
+<script type="module">
+  const REPO_PREFIX = '/projects/personal/zarra-defenders-2d/'
+
+  // outPath in the manifest is absolute (e.g. "/projects/personal/zarra-defenders-2d/assets/...")
+  // The gallery is served at http://localhost:8000/tests/tile-gallery.html, so we strip the
+  // repo prefix to get a path relative to the server root.
+  function toServeUrl(outPath) {
+    if (outPath.startsWith(REPO_PREFIX)) return outPath.slice(REPO_PREFIX.length)
+    return outPath.replace(/^\/+/, '')
+  }
+
+  function renderFigure(entry, opts = {}) {
+    const fig = document.createElement('figure')
+    const regenAt = entry.regeneratedFrom && entry.regeneratedFrom.regeneratedAt
+    if (regenAt) fig.className = 'regen'
+    if (opts.discarded) fig.classList.add('discarded')
+    const img = document.createElement('img')
+    img.src = `../${toServeUrl(entry.outPath)}`
+    img.alt = `${entry.stageId}/${entry.variant}`
+    img.loading = 'lazy'
+    fig.appendChild(img)
+    const cap = document.createElement('figcaption')
+    const tag = regenAt ? ' *' : ''
+    cap.textContent = `${entry.stageId}/${entry.variant}${tag}`
+    fig.appendChild(cap)
+    return fig
+  }
+
+  function renderEmpty(gridEl) {
+    const p = document.createElement('p')
+    p.className = 'placeholder'
+    p.textContent = 'No discarded tiles'
+    gridEl.replaceWith(p)
+    return p
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error')
+    el.textContent = msg
+    el.style.display = 'block'
+  }
+
+  try {
+    const res = await fetch('../assets/tiles/manifest.json')
+    if (!res.ok) throw new Error(`HTTP ${res.status} fetching manifest.json`)
+    const manifest = await res.json()
+
+    const active = Array.isArray(manifest.active) ? manifest.active : []
+    const discarded = Array.isArray(manifest.discarded) ? manifest.discarded : []
+
+    const acceptedGrid = document.getElementById('accepted-grid')
+    const discardedGrid = document.getElementById('discarded-grid')
+
+    for (const entry of active) acceptedGrid.appendChild(renderFigure(entry))
+    document.getElementById('accepted-count').textContent = String(active.length)
+
+    if (discarded.length === 0) {
+      renderEmpty(discardedGrid)
+    } else {
+      for (const entry of discarded) discardedGrid.appendChild(renderFigure(entry, { discarded: true }))
     }
-    window.__galleryReady = true;
-  </script>
+    document.getElementById('discarded-count').textContent = String(discarded.length)
+
+    console.log(`[tile-gallery] rendered ${active.length} accepted + ${discarded.length} discarded`)
+    window.__galleryReady = true
+  } catch (err) {
+    console.log(`[tile-gallery] failed to load manifest: ${err.message}`)
+    showError(`Failed to load manifest: ${err.message}`)
+    window.__galleryReady = true
+  }
+</script>
 </body>
 </html>
