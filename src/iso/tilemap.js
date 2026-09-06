@@ -88,6 +88,9 @@ export class Tilemap {
     if (this._destroyed) throw new Error(`Tilemap(${this.stageId}) destroyed`)
     if (!container) throw new Error('container required')
     this._container = container
+    // F2.5.7: pass the available variant pool so pickVariant can map (gx,gy)
+    // → variant without needing to re-enumerate the textures Map.
+    const pool = [...this.textures.keys()]
     const desired = this._enumerateCapped(range)
 
     for (const [key, tile] of this.activeTiles) {
@@ -97,7 +100,8 @@ export class Tilemap {
     }
     for (const [key, { gx, gy }] of desired) {
       if (this.activeTiles.has(key)) continue
-      const tex = this.textures.get(pickVariant(gx, gy))
+      const variant = pickVariant(gx, gy, pool)
+      const tex = this.textures.get(variant)
       if (!tex) continue
       const tile = new Tile(tex, gx, gy, this.tileSize, this.tileWorldOrigin)
       container.addChild(tile)

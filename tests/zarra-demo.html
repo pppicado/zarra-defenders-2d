@@ -865,9 +865,13 @@
           const range = computeCullRange(camIsoX, camIsoY, isoWorld.viewportWidth, isoWorld.viewportHeight, isoWorld.tileSize, isoWorld.tileWorldOrigin)
           tilemap.cullAndRender(isoWorld.tileLayer, range, biomePicker)
         }
+        // F2.5.7: sprite base lands on the south point of the rotated diamond
+        // (= tile center + tileSize/√2 below). South point is the same X
+        // as the center because 45° rotation around the center preserves X.
+        const southOffset = isoWorld.tileSize / Math.SQRT2
         for (const { gx, gy, sprite, offset = 0 } of verticalSprites) {
           const { sx, sy } = isoToScreen(gx, gy, isoWorld.tileSize, isoWorld.tileWorldOrigin)
-          sprite.position.set(sx, sy)
+          sprite.position.set(sx, sy + southOffset)
           sprite.zIndex = (gx + gy) * 1000 + offset
         }
       }
