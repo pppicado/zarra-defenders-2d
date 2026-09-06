@@ -21,13 +21,14 @@ function setStatus(text, ok) {
   el.textContent = text; el.className = ok ? 'ok' : 'fail'
 }
 
-/** 128×64 magenta canvas per variant (no PNG pipeline needed). */
+/** 64×64 magenta canvas per variant (no PNG pipeline needed).
+ *  F2.5.2 MODIFIED: square iso uses 64×64 PNGs (was 128×64 in F2.5.1). */
 function makeMockResolver() {
   const cache = new Map()
   return async (variant) => {
     if (cache.has(variant)) return cache.get(variant)
-    const c = document.createElement('canvas'); c.width = 128; c.height = 64
-    c.getContext('2d').fillStyle = '#FF00FF'; c.getContext('2d').fillRect(0, 0, 128, 64)
+    const c = document.createElement('canvas'); c.width = 64; c.height = 64
+    c.getContext('2d').fillStyle = '#FF00FF'; c.getContext('2d').fillRect(0, 0, 64, 64)
     const tex = PIXI.Texture.from(c)
     tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
     cache.set(variant, tex); return tex
@@ -40,7 +41,8 @@ async function run() {
   const failures = []
 
   // TILE-001 round-trip + origin identity + tileSize clamp
-  const tileSize = 128
+  // F2.5.2 MODIFIED: default tileSize = 64 (square iso; was 128 in F2.5.1)
+  const tileSize = 64
   const origin = computeWorldOrigin(W, H)
   const a = isoToScreen(3, 5, tileSize, origin)
   const b = screenToIso(a.sx, a.sy, tileSize, origin)

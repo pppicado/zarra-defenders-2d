@@ -1,14 +1,19 @@
 /**
  * src/iso/iso-math.js
  *
- * Pure isometric ↔ screen transforms (PLAN.md §13, 2:1 diamond).
+ * Pure isometric ↔ screen transforms (F2.5.2 square iso falso).
  * Zero Pixi imports by design (TILE-001): exercisable from DevTools,
  * reusable by hit-detection (F3) and hand+pen (F3).
  *
- * Conventions:
+ * Conventions (F2.5.2 MODIFIED TILE-001):
  *   tileHalfWidth  = tileSize / 2
- *   tileHalfHeight = tileSize / 4
+ *   tileHalfHeight = tileSize / 2   (was /4 in F2.5.1 — now symmetric)
  *   isoToScreen(0, 0) === tileWorldOrigin
+ *
+ * The on-disk texture is a square PNG; the visible diamond is created
+ * by setting `_worldLayer.rotation = π/4` on the IsoWorld wrapper
+ * (see src/iso/world.js). Iso math here works in pre-rotation world
+ * space — square coordinates — so position/zIndex math stays untouched.
  */
 
 /**
@@ -21,7 +26,7 @@
  */
 export function isoToScreen(isoX, isoY, tileSize, tileWorldOrigin) {
   const hw = tileSize / 2
-  const hh = tileSize / 4
+  const hh = tileSize / 2  // F2.5.2: square iso — symmetric halves
   return {
     sx: tileWorldOrigin.x + (isoX - isoY) * hw,
     sy: tileWorldOrigin.y + (isoX + isoY) * hh,
@@ -38,7 +43,7 @@ export function isoToScreen(isoX, isoY, tileSize, tileWorldOrigin) {
  */
 export function screenToIso(sx, sy, tileSize, tileWorldOrigin) {
   const hw = tileSize / 2
-  const hh = tileSize / 4
+  const hh = tileSize / 2  // F2.5.2: square iso — symmetric halves
   const lx = sx - tileWorldOrigin.x
   const ly = sy - tileWorldOrigin.y
   return {
@@ -80,5 +85,5 @@ export function computeWorldOrigin(viewportWidth, viewportHeight) {
  * @returns {{tileHalfWidth:number, tileHalfHeight:number}}
  */
 export function getTileHalf(tileSize) {
-  return { tileHalfWidth: tileSize / 2, tileHalfHeight: tileSize / 4 }
+  return { tileHalfWidth: tileSize / 2, tileHalfHeight: tileSize / 2 }  // F2.5.2: square
 }
