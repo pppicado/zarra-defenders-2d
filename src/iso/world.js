@@ -32,13 +32,26 @@ export class IsoWorld {
     this.container.name = 'isoWorld'
     this.container.sortableChildren = false  // explicit zIndex (ADR #1)
 
+    // F2.5.2 (TILE-003): "square iso falso" — _worldLayer is a wrapper
+    // container rotated 45° that holds the tile + sprite layers. The on-
+    // disk PNGs are top-down squares; rotation transforms them into
+    // apparent diamonds at runtime. Keeping the world math in pre-
+    // rotation space means zIndex/cull/isoToScreen signatures are
+    // untouched. If a future F8 polish enables `cullArea`, the rotation
+    // must be undone before setCullArea — documented in design.md.
+    this._worldLayer = new PIXI.Container()
+    this._worldLayer.name = 'worldRotated'
+    this._worldLayer.rotation = Math.PI / 4  // 45°
+    this._worldLayer.sortableChildren = false
+    this.container.addChild(this._worldLayer)
+
     this._tileLayer = new PIXI.Container()
     this._tileLayer.name = 'tiles'; this._tileLayer.sortableChildren = false
-    this.container.addChild(this._tileLayer)
+    this._worldLayer.addChild(this._tileLayer)
 
     this._spriteLayer = new PIXI.Container()
     this._spriteLayer.name = 'verticalSprites'; this._spriteLayer.sortableChildren = false
-    this.container.addChild(this._spriteLayer)
+    this._worldLayer.addChild(this._spriteLayer)
 
     this._tilemaps = new Map()
     this._activeTilemap = null
