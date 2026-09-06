@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>F2.5.2 tile gallery — square iso + sprites + mini-demo</title>
+<title>F2.5.3 tile gallery — 120 tiles with 3 alternatives each + sprites + mini-demo</title>
 <link rel="icon" href="data:,">
 <style>
   body {
@@ -34,6 +34,25 @@
   .toggle-bar .label { color: #aaa; font-size: 12px; }
 
   .grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+  .variant-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin: 4px 0 16px;
+    padding: 8px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 4px;
+  }
+  .variant-group-title {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    color: #9ca3af;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #333;
+    margin-bottom: 4px;
+    font-family: monospace;
+  }
   figure {
     margin: 0; background: #1a1a1a; padding: 6px;
     border: 2px solid #1a1a1a; border-radius: 4px; text-align: center;
@@ -54,10 +73,12 @@
     transform-origin: center;
   }
   /* GAL-002: CSS-only 45° rotation toggle */
-  body.iso-rotated .grid figure.tile-card img {
+  body.iso-rotated .grid figure.tile-card img,
+  body.iso-rotated .variant-group figure.tile-card img {
     transform: rotate(45deg) scale(0.7);
   }
-  body.iso-rotated .grid figure.sprite img {
+  body.iso-rotated .grid figure.sprite img,
+  body.iso-rotated .variant-group figure.sprite img {
     /* sprites stay unrotated — they're vertically-anchored in-game */
   }
   figcaption { font-size: 10px; padding-top: 4px; word-break: break-all; }
@@ -96,9 +117,9 @@
 </style>
 </head>
 <body>
-<h1>F2.5.2 tile gallery — square iso + sprites + mini-demo</h1>
+<h1>F2.5.3 tile gallery — 120 tiles (40 variants × 3 alts) + sprites + mini-demo</h1>
 <p class="note">
-  Reads <code>assets/tiles/manifest.json</code> at runtime. F2.5.1 regenerated tiles keep their orange border. F2.5.2 square tiles appear under the same <code>Accepted</code> grid; rotation toggle rotates all tile cards via CSS.
+  Reads <code>assets/tiles/manifest.json</code> at runtime. F2.5.3 regenerates all 40 variants with the v3 natural-variation prompt and adds 3 lighting alternatives (upper-left, upper-right, overcast) per variant. Variants are grouped into rows of 3 alts; the mini-iso-demo uses alt 1 of each variant.
 </p>
 
 <div class="toggle-bar">
@@ -108,8 +129,8 @@
 </div>
 
 <div id="accepted-section">
-  <h2>Accepted (<span id="accepted-count">0</span>)</h2>
-  <div id="accepted-grid" class="grid"></div>
+  <h2>Accepted — 40 variants × 3 alts = <span id="accepted-count">0</span> tiles</h2>
+  <div id="accepted-groups"></div>
 </div>
 
 <div id="sprites-section">
@@ -145,6 +166,9 @@
 
   function renderFigure(entry, opts = {}) {
     const fig = document.createElement('figure')
+    fig.dataset.stageId = entry.stageId || ''
+    fig.dataset.variant = entry.variant || ''
+    if (entry.alternative != null) fig.dataset.alternative = String(entry.alternative)
     const regenAt = entry.regeneratedFrom && entry.regeneratedFrom.regeneratedAt
     if (regenAt) fig.className = 'regen'
     if (opts.discarded) fig.classList.add('discarded')
@@ -161,18 +185,56 @@
     img.src = imgSrc
     img.alt = opts.sprite
       ? `${opts.sprite}`
-      : `${entry.stageId}/${entry.variant}`
+      : `${entry.stageId}/${entry.variant} alt${entry.alternative}`
     img.loading = 'lazy'
     fig.appendChild(img)
     const cap = document.createElement('figcaption')
     if (opts.sprite) {
       cap.textContent = opts.sprite.replace(/\.png$/, '')
+    } else if (entry.alternative != null) {
+      const tag = regenAt ? ' *' : ''
+      cap.textContent = `${entry.variant} alt${entry.alternative}${tag}`
     } else {
       const tag = regenAt ? ' *' : ''
       cap.textContent = `${entry.stageId}/${entry.variant}${tag}`
     }
     fig.appendChild(cap)
     return fig
+  }
+
+  // F2.5.3: render active tiles grouped by variant, 3 alts per row.
+  function renderActiveGrouped(gridEl, entries) {
+    // group by stage then variant
+    const byVariant = new Map()
+    for (const e of entries) {
+      const key = `${e.stageId}/${e.variant}`
+      if (!byVariant.has(key)) byVariant.set(key, [])
+      byVariant.get(key).push(e)
+    }
+    // sort variants by stage order then alphabetical
+    const stageOrder = ['stage1-bosque', 'stage2-pueblo', 'stage3-rio', 'stage4-vertedero', 'stage5-castillo']
+    const sortedKeys = Array.from(byVariant.keys()).sort((a, b) => {
+      const [sa, va] = a.split('/')
+      const [sb, vb] = b.split('/')
+      const ia = stageOrder.indexOf(sa)
+      const ib = stageOrder.indexOf(sb)
+      if (ia !== ib) return ia - ib
+      return va.localeCompare(vb)
+    })
+    for (const key of sortedKeys) {
+      const group = document.createElement('div')
+      group.className = 'variant-group'
+      const title = document.createElement('div')
+      title.className = 'variant-group-title'
+      title.textContent = key
+      group.appendChild(title)
+      // sort entries by alternative (alt1, alt2, alt3)
+      const alts = byVariant.get(key).slice().sort((x, y) => x.alternative - y.alternative)
+      for (const alt of alts) {
+        group.appendChild(renderFigure(alt))
+      }
+      gridEl.appendChild(group)
+    }
   }
 
   function renderEmpty(gridEl, msg = 'No items') {
@@ -209,10 +271,11 @@
     const active = Array.isArray(manifest.active) ? manifest.active : []
     const discarded = Array.isArray(manifest.discarded) ? manifest.discarded : []
 
-    const acceptedGrid = document.getElementById('accepted-grid')
+    const acceptedGrid = document.getElementById('accepted-groups')
     const discardedGrid = document.getElementById('discarded-grid')
 
-    for (const entry of active) acceptedGrid.appendChild(renderFigure(entry))
+    // F2.5.3: group by variant (3 alts per group)
+    renderActiveGrouped(acceptedGrid, active)
     document.getElementById('accepted-count').textContent = String(active.length)
 
     if (discarded.length === 0) {
@@ -274,8 +337,9 @@
       })
 
       const tilemap = new Tilemap('stage1-bosque', 480, 270)
+      // F2.5.3: load alt 1 of each variant for the mini-iso-demo.
       await tilemap.load(async (variant) => {
-        const tex = await PIXI.Assets.load(`../assets/tiles/stage1-bosque/${variant}.png`)
+        const tex = await PIXI.Assets.load(`../assets/tiles/stage1-bosque/${variant}_alt1.png`)
         tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
         return tex
       })
