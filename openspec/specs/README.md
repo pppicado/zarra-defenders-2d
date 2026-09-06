@@ -1,21 +1,32 @@
-# F2.5 — Isometric Tile System: Spec Index
+# Isometric Capabilities: Spec Index
 
-This change establishes the initial baseline for three new capabilities. Future changes will delta against the archived baseline.
+Baseline source of truth for the isometric stack. Future changes delta against these files;
+the per-change history lives under `openspec/changes/archive/`.
 
-| Spec file | Capability | Requirements | Status |
+| Spec file | Capability | Requirements | Last change |
 |---|---|---|---|
-| [iso-tile-system/spec.md](./iso-tile-system/spec.md) | Isometric tile grid, Z-order, viewport culling | TILE-001, TILE-002, TILE-003, TILE-004 | ADDED |
-| [iso-camera-integration/spec.md](./iso-camera-integration/spec.md) | Reinterpret `RailCamera` waypoints as iso coords; world transform | CAM-001, CAM-002, CAM-003 | ADDED |
-| [iso-asset-pipeline/spec.md](./iso-asset-pipeline/spec.md) | minimax MCP batch generation + chroma-key postprocess + bootstrap loader | ASSET-001, ASSET-002, ASSET-003, ASSET-004, ASSET-005 | ADDED |
+| [iso-tile-system/spec.md](./iso-tile-system/spec.md) | Isometric tile grid, Z-order, viewport culling | TILE-001, TILE-002, TILE-003, TILE-004 | F2.5.2 (TILE-001/002/003 MODIFIED) |
+| [iso-camera-integration/spec.md](./iso-camera-integration/spec.md) | Reinterpret `RailCamera` waypoints as iso coords; world transform | CAM-001, CAM-002, CAM-003 | F2.5 (ADDED) |
+| [iso-asset-pipeline/spec.md](./iso-asset-pipeline/spec.md) | minimax MCP batch generation + chroma-key postprocess + NEAREST downsample + bootstrap loader | ASSET-001 … ASSET-010 | F2.5.2 (ASSET-001/002/007 MODIFIED, ASSET-009/010 ADDED) |
+| [iso-gallery/spec.md](./iso-gallery/spec.md) | Dev-only asset review surface: tile/sprite cards, rotation toggle, mini-iso-demo | GAL-001, GAL-002, GAL-003 | F2.5.2 (ADDED) |
 
 ## Totals
 
-- **12 requirements** total
-- **~30 Given/When/Then scenarios** across the three specs
-- **Zero modifications** to existing camera, input, or player specs (F2.5 only adds new capabilities)
+- **20 requirements** total across 4 capabilities
+- Tile geometry is **square iso**: `tileHalfWidth = tileHalfHeight = tileSize / 2`, with the
+  45° look produced by `_worldLayer.rotation = Math.PI / 4` at the container level (on-disk PNGs stay top-down)
+- Tile set is **40 active** PNGs at 64×64 px (`manifest.totals.active === 40`)
+
+## Known drift
+
+- `ASSET-007` and `GAL-001` contain scenarios asserting `manifest.discarded.length === 40`.
+  The shipped `manifest.json` has `discarded: []` (length 0) — the 40 F2.5.1 diamond tiles are
+  archived filesystem-only under `assets/tiles/_discarded/diamond-r2/`. The load-bearing
+  invariant `totals.active === 40` holds. Resolve on the next asset-pipeline change by either
+  populating `discarded[]` or amending the scenario text.
 
 ## Cross-references
 
-- Locked decisions: see `proposal.md` §"Why" + §"Capabilities"
 - Iso math formulas: `PLAN.md` §13 (referenced by TILE-001)
 - Style/verification rules: `openspec/config.yaml` (Given/When/Then + RFC 2119 keywords)
+- Change history: `openspec/changes/archive/`
