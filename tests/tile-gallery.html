@@ -2,42 +2,142 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>F2.5.1 tile gallery — manifest-driven</title>
+<title>F2.5.2 tile gallery — square iso + sprites + mini-demo</title>
 <link rel="icon" href="data:,">
 <style>
-  body { margin: 0; padding: 16px; background: #222; color: #eee; font-family: -apple-system, sans-serif; }
+  body {
+    margin: 0;
+    padding: 16px;
+    background: #222;
+    color: #eee;
+    font-family: -apple-system, sans-serif;
+    transition: background 0.2s;
+  }
   h1 { font-size: 18px; margin: 0 0 6px; }
   h2 { font-size: 14px; margin: 24px 0 8px; border-bottom: 1px solid #444; padding-bottom: 6px; }
   p.note { font-size: 12px; color: #aaa; margin: 0 0 12px; }
+
+  /* F2.5.2 GAL-002: rotation toggle */
+  .toggle-bar {
+    display: flex; gap: 8px; align-items: center;
+    margin: 8px 0 16px; padding: 8px 12px;
+    background: #1a1a1a; border-radius: 4px;
+  }
+  .toggle-bar button {
+    background: #333; color: #eee; border: 1px solid #555;
+    padding: 6px 12px; border-radius: 3px; cursor: pointer;
+    font-size: 12px;
+  }
+  .toggle-bar button.active {
+    background: #4ade80; color: #111; border-color: #4ade80;
+  }
+  .toggle-bar .label { color: #aaa; font-size: 12px; }
+
   .grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
-  figure { margin: 0; background: #1a1a1a; padding: 6px; border: 2px solid #1a1a1a; border-radius: 4px; text-align: center; }
-  figure.regen { border: 2px solid orange; }
+  figure {
+    margin: 0; background: #1a1a1a; padding: 6px;
+    border: 2px solid #1a1a1a; border-radius: 4px; text-align: center;
+  }
+  figure.regen { border: 2px solid orange; }     /* F2.5.1 manifest regen */
+  figure.sprite { border: 2px solid #3b82f6; }   /* F2.5.2 sprite card */
   figure.discarded { opacity: 0.55; }
-  figure img { width: 100%; image-rendering: pixelated; display: block; background: linear-gradient(45deg, #333 25%, transparent 25%, transparent 75%, #333 75%, #333), linear-gradient(45deg, #333 25%, transparent 25%, transparent 75%, #333 75%, #333); background-size: 8px 8px; background-position: 0 0, 4px 4px; }
+  figure img {
+    width: 100%;
+    image-rendering: pixelated;
+    display: block;
+    background:
+      linear-gradient(45deg, #333 25%, transparent 25%, transparent 75%, #333 75%, #333),
+      linear-gradient(45deg, #333 25%, transparent 25%, transparent 75%, #333 75%, #333);
+    background-size: 8px 8px;
+    background-position: 0 0, 4px 4px;
+    transition: transform 0.2s;
+    transform-origin: center;
+  }
+  /* GAL-002: CSS-only 45° rotation toggle */
+  body.iso-rotated .grid figure.tile-card img {
+    transform: rotate(45deg) scale(0.7);
+  }
+  body.iso-rotated .grid figure.sprite img {
+    /* sprites stay unrotated — they're vertically-anchored in-game */
+  }
   figcaption { font-size: 10px; padding-top: 4px; word-break: break-all; }
   .placeholder { color: #888; font-style: italic; padding: 8px 0; }
-  .err { color: #f87171; padding: 12px; border: 1px solid #7f1d1d; background: #1a1a1a; border-radius: 4px; }
+  .err {
+    color: #f87171; padding: 12px; margin: 8px 0;
+    border: 1px solid #7f1d1d; background: #1a1a1a;
+    border-radius: 4px;
+  }
+  details summary { cursor: pointer; color: #aaa; font-size: 13px; }
+  details[open] summary { color: #eee; }
+
+  /* F2.5.2 mini-iso-demo canvas */
+  #mini-demo-canvas-wrap {
+    background: #0a0a0a;
+    border: 2px solid #555;
+    border-radius: 4px;
+    padding: 8px;
+    display: inline-block;
+    margin: 8px 0;
+  }
+  #mini-demo-canvas-wrap canvas {
+    display: block;
+    image-rendering: pixelated;
+    background: #000;
+  }
+  .demo-error {
+    color: #f87171;
+    padding: 16px;
+    border: 2px solid #7f1d1d;
+    background: #1a1a1a;
+    border-radius: 4px;
+    display: none;
+    margin: 8px 0;
+  }
 </style>
 </head>
 <body>
-<h1>F2.5.1 tile gallery — manifest-driven</h1>
-<p class="note">Reads <code>assets/tiles/manifest.json</code> at runtime. Regenerated tiles (F2.5.1.a) get an orange border.</p>
+<h1>F2.5.2 tile gallery — square iso + sprites + mini-demo</h1>
+<p class="note">
+  Reads <code>assets/tiles/manifest.json</code> at runtime. F2.5.1 regenerated tiles keep their orange border. F2.5.2 square tiles appear under the same <code>Accepted</code> grid; rotation toggle rotates all tile cards via CSS.
+</p>
+
+<div class="toggle-bar">
+  <span class="label">Vista:</span>
+  <button id="topdown-btn" class="active" type="button">Top-down (square)</button>
+  <button id="iso-btn" type="button">Isométrica 45°</button>
+</div>
+
 <div id="accepted-section">
   <h2>Accepted (<span id="accepted-count">0</span>)</h2>
   <div id="accepted-grid" class="grid"></div>
 </div>
-<div id="discarded-section">
-  <h2>Discarded (<span id="discarded-count">0</span>)</h2>
-  <div id="discarded-grid" class="grid"></div>
+
+<div id="sprites-section">
+  <h2>Sprites (<span id="sprites-count">0</span>)</h2>
+  <p class="note">All 21 <code>assets/sprites/*.png</code> — the "cannot see" complaint from F2.5.1 review.</p>
+  <div id="sprites-grid" class="grid"></div>
 </div>
+
+<div id="discarded-section">
+  <details>
+    <summary><h2 style="display:inline-block">Discarded (<span id="discarded-count">0</span>)</h2></summary>
+    <div id="discarded-grid" class="grid" style="margin-top:8px"></div>
+  </details>
+</div>
+
+<div id="mini-demo-section">
+  <h2>Mini iso-demo</h2>
+  <p class="note">Real <code>IsoWorld</code> + <code>Tilemap('stage1-bosque')</code> + 4 demo sprites (3 pinos + 1 castillo) with idle bobbing. The engine runs end-to-end here.</p>
+  <div id="mini-demo-canvas-wrap">
+    <canvas id="mini-demo-canvas" width="480" height="270"></canvas>
+  </div>
+  <div id="demo-error" class="demo-error"></div>
+</div>
+
 <div id="error" class="err" style="display:none"></div>
 
 <script type="module">
   const REPO_PREFIX = '/projects/personal/zarra-defenders-2d/'
-
-  // outPath in the manifest is absolute (e.g. "/projects/personal/zarra-defenders-2d/assets/...")
-  // The gallery is served at http://localhost:8000/tests/tile-gallery.html, so we strip the
-  // repo prefix to get a path relative to the server root.
   function toServeUrl(outPath) {
     if (outPath.startsWith(REPO_PREFIX)) return outPath.slice(REPO_PREFIX.length)
     return outPath.replace(/^\/+/, '')
@@ -48,22 +148,30 @@
     const regenAt = entry.regeneratedFrom && entry.regeneratedFrom.regeneratedAt
     if (regenAt) fig.className = 'regen'
     if (opts.discarded) fig.classList.add('discarded')
+    if (!opts.sprite) fig.classList.add('tile-card')
+    if (opts.sprite) fig.classList.add('sprite')
     const img = document.createElement('img')
-    img.src = `../${toServeUrl(entry.outPath)}`
-    img.alt = `${entry.stageId}/${entry.variant}`
+    img.src = `../${toServeUrl(opts.outPath || entry.outPath)}`
+    img.alt = opts.sprite
+      ? `${opts.sprite}`
+      : `${entry.stageId}/${entry.variant}`
     img.loading = 'lazy'
     fig.appendChild(img)
     const cap = document.createElement('figcaption')
-    const tag = regenAt ? ' *' : ''
-    cap.textContent = `${entry.stageId}/${entry.variant}${tag}`
+    if (opts.sprite) {
+      cap.textContent = opts.sprite.replace(/\.png$/, '')
+    } else {
+      const tag = regenAt ? ' *' : ''
+      cap.textContent = `${entry.stageId}/${entry.variant}${tag}`
+    }
     fig.appendChild(cap)
     return fig
   }
 
-  function renderEmpty(gridEl) {
+  function renderEmpty(gridEl, msg = 'No items') {
     const p = document.createElement('p')
     p.className = 'placeholder'
-    p.textContent = 'No discarded tiles'
+    p.textContent = msg
     gridEl.replaceWith(p)
     return p
   }
@@ -74,6 +182,18 @@
     el.style.display = 'block'
   }
 
+  // F2.5.2 GAL-002: rotation toggle wiring
+  const topdownBtn = document.getElementById('topdown-btn')
+  const isoBtn = document.getElementById('iso-btn')
+  function setRotated(rotated) {
+    document.body.classList.toggle('iso-rotated', rotated)
+    topdownBtn.classList.toggle('active', !rotated)
+    isoBtn.classList.toggle('active', rotated)
+  }
+  topdownBtn.addEventListener('click', () => setRotated(false))
+  isoBtn.addEventListener('click', () => setRotated(true))
+
+  // ---- Manifest-driven tile rendering ----
   try {
     const res = await fetch('../assets/tiles/manifest.json')
     if (!res.ok) throw new Error(`HTTP ${res.status} fetching manifest.json`)
@@ -89,19 +209,148 @@
     document.getElementById('accepted-count').textContent = String(active.length)
 
     if (discarded.length === 0) {
-      renderEmpty(discardedGrid)
+      renderEmpty(discardedGrid, 'No discarded tiles in manifest (diamonds archived in _discarded/diamond-r2/)')
     } else {
       for (const entry of discarded) discardedGrid.appendChild(renderFigure(entry, { discarded: true }))
     }
     document.getElementById('discarded-count').textContent = String(discarded.length)
-
-    console.log(`[tile-gallery] rendered ${active.length} accepted + ${discarded.length} discarded`)
-    window.__galleryReady = true
   } catch (err) {
-    console.log(`[tile-gallery] failed to load manifest: ${err.message}`)
     showError(`Failed to load manifest: ${err.message}`)
-    window.__galleryReady = true
   }
+
+  // ---- F2.5.2 GAL-001: Sprites section enumerates assets/sprites/*.png ----
+  // We can't `fetch` a directory listing — use a known manifest of sprite ids.
+  // Listed in the same order as `ls assets/sprites/` to keep parity.
+  const SPRITE_IDS = [
+    'buildings_casa_ayora', 'buildings_castillo_cofrentes', 'buildings_torre_central',
+    'enemies_bidon_lixiviado', 'enemies_bolsa_plastico', 'enemies_camion_treco',
+    'enemies_dron_fumigador', 'enemies_incineradora', 'enemies_planta_treco',
+    'enemies_plataforma_solar', 'enemies_sello_burocratico', 'enemies_topadora',
+    'enemies_trailer', 'enemies_tubo_lixiviado', 'enemies_valla_publicitaria',
+    'props_cartel', 'props_roca', 'props_valla',
+    'trees_almendro', 'trees_encina', 'trees_pino',
+  ]
+  const spritesGrid = document.getElementById('sprites-grid')
+  for (const id of SPRITE_IDS) {
+    const fig = renderFigure({ stageId: 'sprite', variant: id }, { sprite: `${id}.png` })
+    spritesGrid.appendChild(fig)
+  }
+  document.getElementById('sprites-count').textContent = String(SPRITE_IDS.length)
+
+  // ---- F2.5.2 GAL-003: mini-iso-demo canvas (real IsoWorld + sprites) ----
+  // The page is served from /tests/, so PIXI + the source modules load via ../src/.
+  async function startMiniDemo() {
+    const errorEl = document.getElementById('demo-error')
+    try {
+      if (typeof PIXI === 'undefined') {
+        throw new Error('PIXI global not loaded (cdn script missing or blocked)')
+      }
+      // Dynamic-import the source modules — same paths main.js uses.
+      const { isoToScreen } = await import('../src/iso/iso-math.js')
+      const { Tilemap } = await import('../src/iso/tilemap.js')
+      const { IsoWorld } = await import('../src/iso/world.js')
+
+      const canvas = document.getElementById('mini-demo-canvas')
+      const app = new PIXI.Application({
+        view: canvas,
+        width: 480,
+        height: 270,
+        backgroundColor: 0x0a0a0a,
+        antialias: false,
+        resolution: 1,
+        autoDensity: false,
+      })
+
+      const isoWorld = new IsoWorld({
+        viewportWidth: 480,
+        viewportHeight: 270,
+      })
+
+      const tilemap = new Tilemap('stage1-bosque', 480, 270)
+      await tilemap.load(async (variant) => {
+        const tex = await PIXI.Assets.load(`../assets/tiles/stage1-bosque/${variant}.png`)
+        tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
+        return tex
+      })
+      isoWorld.registerTilemap(tilemap)
+      isoWorld.setStage('stage1-bosque')
+      app.stage.addChild(isoWorld.container)
+
+      // 4 demo sprites — 3 pinos + 1 castillo — vertically anchored.
+      const SPRITE_DEFS = [
+        { id: 'trees_pino.png', gx: 5, gy: 4, scale: 0.7 },
+        { id: 'trees_pino.png', gx: 6, gy: 4, scale: 0.7 },
+        { id: 'trees_pino.png', gx: 5, gy: 5, scale: 0.7 },
+        { id: 'buildings_castillo_cofrentes.png', gx: 7, gy: 5, scale: 1.1 },
+      ]
+      const sprites = []
+      for (const def of SPRITE_DEFS) {
+        try {
+          const tex = await PIXI.Assets.load(`../assets/sprites/${def.id}`)
+          tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
+          const sprite = new PIXI.Sprite(tex)
+          sprite.anchor.set(0.5, 1.0)
+          sprite.scale.set(def.scale)
+          sprites.push({ ...def, sprite, baseY: 0 })
+        } catch (e) {
+          console.warn(`[mini-demo] could not load sprite ${def.id}:`, e)
+        }
+      }
+
+      // Wire sprites to IsoWorld's spriteLayer
+      const verticalSprites = sprites.map((s) => ({
+        gx: s.gx, gy: s.gy, sprite: s.sprite,
+      }))
+      for (const { sprite } of verticalSprites) {
+        isoWorld.spriteLayer.addChild(sprite)
+      }
+
+      // Anchor camera around (5, 5) so all 4 sprites are visible.
+      const camIsoX = 5, camIsoY = 5
+      const dummyCamera = { getCameraX: () => camIsoX, getCameraY: () => camIsoY }
+
+      let t0 = performance.now()
+      app.ticker.add(() => {
+        const now = performance.now()
+        const t = (now - t0) / 1000
+        // Idle bobbing on the sprite layer (additive on top of iso position)
+        for (const s of sprites) {
+          s.sprite.y = Math.sin(t * 1.5 + s.gx * 0.4 + s.gy * 0.7) * 3
+        }
+        isoWorld.update(dummyCamera, verticalSprites)
+      })
+
+      window.__miniDemoOK = true
+      console.log(`[mini-demo] running — ${sprites.length} sprites + ${tilemap.loadedVariants.length} tile variants`)
+    } catch (err) {
+      console.error('[mini-demo] failed:', err)
+      errorEl.textContent = `Mini iso-demo failed: ${err.message}`
+      errorEl.style.display = 'block'
+      window.__miniDemoOK = false
+      window.__miniDemoError = String(err.message || err)
+    }
+  }
+  // Load PIXI before starting the demo. /tests/tile-gallery.html serves from the
+  // python http.server, so we inject a fresh <script> tag pointing at the CDN.
+  function injectPixi() {
+    return new Promise((resolve, reject) => {
+      if (typeof PIXI !== 'undefined') { resolve(); return }
+      const s = document.createElement('script')
+      s.src = 'https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js'
+      s.onload = () => resolve()
+      s.onerror = () => reject(new Error('Failed to load pixi.js@7.4.0 from CDN'))
+      document.head.appendChild(s)
+    })
+  }
+  injectPixi().then(startMiniDemo).catch((e) => {
+    const errorEl = document.getElementById('demo-error')
+    errorEl.textContent = `Mini iso-demo failed: ${e.message}`
+    errorEl.style.display = 'block'
+    window.__miniDemoOK = false
+    window.__miniDemoError = String(e.message || e)
+  })
+
+  window.__galleryReady = true
 </script>
 </body>
 </html>
