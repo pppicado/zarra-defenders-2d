@@ -1,0 +1,329 @@
+{
+  "stage1-bosque/pino_clear_grass_rojizo": {
+    "content": "Mediterranean pine clearing on reddish clay soil, sparse pine needles, low tufts of dry grass",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage1-bosque/pino_underbrush_dark": {
+    "content": "Dark forest underbrush zone under pine canopy, dark soil in deep shadow, dry fallen pine needles and twigs scattered on the ground",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ],
+    "negative_prompt": "no moss carpet, no green moss, no lush green undergrowth, no ferns, no grass tufts; only dark brown shadowed soil with dry pine needles and twigs"
+  },
+  "stage1-bosque/encina_redonda_sombra": {
+    "content": "Round holm oak (encina) shadow on reddish soil, dry leaf litter around the canopy projection",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage1-bosque/suelo_arcilloso_rojizo": {
+    "content": "Bare reddish clay soil between trees, dry and cracked, no vegetation",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage1-bosque/trocha_forestal_compactada": {
+    "content": "Forest track compacted by occasional tractors, dirt and pine-needle mix, light ruts",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage1-bosque/matorral_coscoja_romero": {
+    "content": "Mediterranean scrub patch with coscoja (kermes oak) and romero (rosemary) bushes",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage1-bosque/arroyo_barranco_edge": {
+    "content": "Edge of a seasonal arroyo (ravine), damp sand + small stones + grass tufts",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage1-bosque/hojarasca_pino_seca": {
+    "content": "Dry pine needle leaf litter covering the ground, orange-brown, scattered pine cones",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage2-pueblo/cal_blanca_pared": {
+    "content": "White lime-washed wall base (cal blanca) of a Cofrentes village house, plaster texture",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage2-pueblo/teja_arabe_roja": {
+    "content": "Red Arabic roof tiles (teja arabe), terracotta, slight weathering",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage2-pueblo/adoquin_calle_empedrada": {
+    "content": "Cobblestone paving of the narrow calle principal, irregular stones, dry",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage2-pueblo/asfalto_N330_circulado": {
+    "content": "N-330 asphalt road segment, with painted road markings (circulado / paso)",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage2-pueblo/acera_baldosa_hidraulica": {
+    "content": "Hydraulic-tile sidewalk (baldosa hidraulica), geometric pattern, worn",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage2-pueblo/sombra_calle_estrecha": {
+    "content": "Deep shadow cast by adjacent buildings on a narrow calle, light blue-grey",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage2-pueblo/balcon_hierro_forjado": {
+    "content": "Wrought-iron balcony (balcon de hierro forjado) with simple geometric railing",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage2-pueblo/porton_madera_pueblo": {
+    "content": "Heavy wooden village gate (porton de madera), aged planks, iron studs",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage3-rio/agua_cristalina_verde_azul": {
+    "content": "Crystal-clear river water with green-blue tint, shallow ripples over pebbles",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage3-rio/cortado_vertical_karstico": {
+    "content": "Vertical karst cliff face (cortado vertical), light limestone, fractured",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage3-rio/roca_chorrera_humeda": {
+    "content": "Bare wet rock face of a chorrera (waterfall cascade) on dark karst stone, glistening wet sheen, water streaks running down the rock, NO vegetation at all",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ],
+    "negative_prompt": "no moss, no lichen, no green plants, no grass, no shrubs, no ferns, no vegetation of any kind; only bare wet dark rock with water sheen and mineral streaks"
+  },
+  "stage3-rio/sedimento_aluvial_rio": {
+    "content": "Alluvial sediment on the river bank, fine gravel + silt + driftwood traces",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage3-rio/chopo_ribera_densa": {
+    "content": "Dense riparian poplar (chopo) grove, dappled shade on the ground",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage3-rio/canto_rodado_orilla": {
+    "content": "Rounded pebbles (cantos rodados) on the river edge, mixed grey and ochre",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage3-rio/musgo_humedo_roca": {
+    "content": "Damp moss growing on a river rock, vivid green against wet stone",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage3-rio/ladera_matorral_seca": {
+    "content": "Dry scrubby slope above the river, matorral mediterraneo, sun-bleached",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage4-vertedero/cement_pad_crack": {
+    "content": "Pure cracked grey concrete industrial pad, dirty grey, rust and oil stains, rebar poking through cracks, NO vegetation at all",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ],
+    "negative_prompt": "no green moss, no plants, no grass, no weeds, no vegetation of any kind; only pure cracked grey concrete with rust and oil stains"
+  },
+  "stage4-vertedero/gravel_dust_industrial": {
+    "content": "Industrial gravel and dust, compacted, truck tire tracks, no grass",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage4-vertedero/dirt_oily_contaminated": {
+    "content": "Oily contaminated dirt, dark brown-black, iridescent patches, no life",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage4-vertedero/plastic_debris_mixed": {
+    "content": "Mixed shredded plastic debris pile, dirty dull grey-brown bags and packaging fragments, no living vegetation at all, weathered and stained, ugly industrial trash",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ],
+    "negative_prompt": "no living vegetation, no grass, no plants, no green moss, no trees, no natural beauty; only dirty shredded plastic bags and packaging debris in dull grey-brown tones, industrial trash pile; ONLY concrete/grey-brown, no living plants at all"
+  },
+  "stage4-vertedero/container_lixiviado_stain": {
+    "content": "Container stained by leachate (lixiviado) runoff, dark crust, rust streaks",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage4-vertedero/metal_scrap_rust": {
+    "content": "Rusty metal scrap heap, brown-orange oxidation, no shine, no green",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage4-vertedero/asphalt_cracked_heavy_truck": {
+    "content": "Heavy-truck-cracked asphalt, deep fissures, oil drips, industrial weight",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage4-vertedero/weeds_through_pavement": {
+    "content": "Sparse dead and dying weeds forcing through cracked industrial pavement, dry grey-brown struggling stalks, almost no green left, depressed struggling life",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ],
+    "negative_prompt": "no lush green weeds, no healthy green foliage, no flowers; only sparse dry grey-brown dying weed stalks pushing through cracked pavement, minimal colour, oppressive industrial mood; ONLY concrete/grey-brown, no living plants at all"
+  },
+  "stage5-castillo/penon_basalto_volcanico": {
+    "content": "Volcanic basalt rock of the Cerro de Agras penon, dark brown-red, rugged",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage5-castillo/cal_castillo_blanca": {
+    "content": "White lime (cal) wall of the Castillo de Cofrentes, bright sun-bleached",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage5-castillo/torre_homenaje_reloj": {
+    "content": "Torre del Homenaje base with clock tower projection, masonry blocks",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage5-castillo/mamposteria_antigua_ocre": {
+    "content": "Ancient ochre masonry, weathered stonework, irregular blocks",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage5-castillo/patio_armas_adoquines": {
+    "content": "Patio de Armas paved with adoquines (cobblestones), worn by centuries",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  },
+  "stage5-castillo/sendero_subida_penon": {
+    "content": "Bare dirt and stone footpath climbing up the dark volcanic basalt penon, low stone steps carved into the rock, NO forest or trees lining the path",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ],
+    "negative_prompt": "no trees lining the path, no forest, no lush green vegetation, no dense pines; only bare dirt and stone steps climbing dark volcanic basalt rock with minimal scrub"
+  },
+  "stage5-castillo/pino_penon_mediterraneo": {
+    "content": "Sparse individual Mediterranean pine trees growing directly out of dark volcanic basalt rock on the penon, large gaps of bare rock between trees, very low density",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ],
+    "negative_prompt": "no dense pine forest, no continuous canopy, no closed tree cover; only sparse scattered individual pines with large bare volcanic rock gaps between them"
+  },
+  "stage5-castillo/aljibe_boveda_subterraneo": {
+    "content": "Underground aljibe (cistern) vaulted ceiling hint, masonry ribs, dim",
+    "lighting_variants": [
+      "Sunlight from upper-left, casting short shadows",
+      "Sunlight from upper-right, longer shadows",
+      "Diffuse overcast lighting, no strong shadows"
+    ]
+  }
+}
