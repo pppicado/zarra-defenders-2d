@@ -1,18 +1,22 @@
 /**
  * src/iso/iso-math.js
  *
- * Pure isometric ↔ screen transforms (F2.5.9 iso classic + container rotation).
+ * Pure isometric ↔ screen transforms (F2.5.11 iso classic + per-tile rotation, full-diagonal step).
  * Zero Pixi imports by design (TILE-001): exercisable from DevTools,
  * reusable by hit-detection (F3) and hand+pen (F3).
  *
- * Conventions (F2.5.9 MODIFIED TILE-001):
- *   - Each tile is a `tileSize × tileSize` square PNG rotated 45° at runtime.
+ * Conventions (F2.5.11 MODIFIED TILE-001):
+ *   - Each tile is a `tileSize × tileSize` square PNG rotated 45° INDIVIDUALLY
+ *     in its own `Tile` constructor (rotation = π/4 around its own center).
+ *   - The `_worldLayer` does NOT rotate — rotating the layer shifts the
+ *     contents around the layer's (0,0), which breaks tessellation.
  *   - The grid of tile CENTERS follows the classic iso formula:
- *       sx = origin.x + (gx - gy) * (tileSize × √2 / 2)
- *       sy = origin.y + (gx + gy) * (tileSize × √2 / 2)
- *   - This puts centers on a perfect rhombic lattice. After rotating each
- *     tile 45° (via `_worldLayer.rotation = π/4`), the resulting diamonds
- *     tessellate perfectly — adjacent corners touch at exactly one point.
+ *       sx = origin.x + (gx - gy) * (tileSize × √2)
+ *       sy = origin.y + (gx + gy) * (tileSize × √2)
+ *   - Adjacent centers along the iso axes are separated by `tileSize × √2`
+ *     (= FULL diagonal of the rotated diamond). With each tile rotated 45°
+ *     around its own center, the resulting diamonds tessellate perfectly:
+ *     adjacent diamonds touch at exactly one point with no overlap and no gap.
  *   - isoToScreen(0, 0) === tileWorldOrigin.
  */
 
@@ -25,10 +29,10 @@
  * @returns {{sx:number, sy:number}}
  */
 export function isoToScreen(isoX, isoY, tileSize, tileWorldOrigin) {
-  // F2.5.9: classic iso formula with step = tileSize × √2 / 2.
-  // After rotation of each tile by 45° (via `_worldLayer`), adjacent diamonds
-  // tessellate perfectly. See test `iso-classic-rotated.png` for proof.
-  const step = (tileSize * Math.SQRT2) / 2
+  // F2.5.11: classic iso formula with step = tileSize × √2 (FULL diagonal).
+  // Combined with each tile's own rotation = π/4 (set in Tile constructor),
+  // adjacent diamonds tessellate perfectly.
+  const step = tileSize * Math.SQRT2
   return {
     sx: tileWorldOrigin.x + (isoX - isoY) * step,
     sy: tileWorldOrigin.y + (isoX + isoY) * step,
@@ -44,7 +48,7 @@ export function isoToScreen(isoX, isoY, tileSize, tileWorldOrigin) {
  * @returns {{isoX:number, isoY:number}}
  */
 export function screenToIso(sx, sy, tileSize, tileWorldOrigin) {
-  const step = (tileSize * Math.SQRT2) / 2
+  const step = tileSize * Math.SQRT2
   const lx = sx - tileWorldOrigin.x
   const ly = sy - tileWorldOrigin.y
   return {
@@ -86,6 +90,6 @@ export function computeWorldOrigin(viewportWidth, viewportHeight) {
  * @returns {{tileHalfWidth:number, tileHalfHeight:number}}
  */
 export function getTileHalf(tileSize) {
-  // F2.5.9: classic iso step = tileSize × √2 / 2.
-  return { tileHalfWidth: (tileSize * Math.SQRT2) / 2, tileHalfHeight: (tileSize * Math.SQRT2) / 2 }
+  // F2.5.11: full diagonal step = tileSize × √2.
+  return { tileHalfWidth: tileSize * Math.SQRT2, tileHalfHeight: tileSize * Math.SQRT2 }
 }

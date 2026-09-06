@@ -32,13 +32,13 @@ export class IsoWorld {
     this.container.name = 'isoWorld'
     this.container.sortableChildren = false  // explicit zIndex (ADR #1)
 
-    // F2.5.7: tiles are SQUARE PNGs rotated 45° at runtime by this layer,
-    // producing a diamond tessellation. The `isoToScreen` formula staggers
-    // every other row by `tileSize/2` horizontally so the rotated diamonds
-    // touch exactly (corners interlock between adjacent rows).
+    // F2.5.10: tiles are SQUARE PNGs rotated 45° INDIVIDUALLY by the Tile
+    // class (see src/iso/tilemap.js Tile constructor). The `_worldLayer`
+    // does NOT rotate — rotating the layer would move the tiles around the
+    // (0,0) world origin, not around their centers, breaking tessellation.
     this._worldLayer = new PIXI.Container()
     this._worldLayer.name = 'worldLayer'
-    this._worldLayer.rotation = Math.PI / 4  // 45°
+    this._worldLayer.rotation = 0
     this._worldLayer.sortableChildren = false
     this.container.addChild(this._worldLayer)
 
@@ -108,12 +108,11 @@ export class IsoWorld {
     }
 
     for (const { gx, gy, sprite, offset = Z_BANDS.decoration } of verticalSprites) {
-      // F2.5.7: tiles are SQUARE PNGs rotated 45° by `_worldLayer`. The sprite
-      // lives in the unrotated `container`, so we need to place it at the
-      // SCREEN-space south point of the rotated diamond. After 45° rotation,
-      // the south point of a tile centered at (csx, csy) is at
-      //   (csx, csy + tileSize/√2)  — the diagonal half-length below the center.
-      // (Csx doesn't move because the rotation axis is the center itself.)
+      // F2.5.10: tiles are SQUARE PNGs rotated 45° INDIVIDUALLY (Tile.rotation
+      // = π/4 around each tile's own center). The `_worldLayer` does not
+      // rotate, so the sprite (in `container`) is unaffected by any world
+      // transforms. The sprite base lands on the south point of the diamond
+      // (= tile center + tileSize/√2 below in screen-space).
       const { sx: csx, sy: csy } = isoToScreen(gx, gy, this.tileSize, this.tileWorldOrigin)
       const southOffset = this.tileSize / Math.SQRT2
       sprite.position.set(csx, csy + southOffset)

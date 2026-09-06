@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html><head><title>Diag</title>
+<style>body{margin:0;background:#fff}</style></head>
+<body>
+<canvas id="c" width="600" height="600"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js"></script>
+<script>
+(async () => {
+  const app = new PIXI.Application({ view: document.getElementById('c'), width: 600, height: 600, backgroundColor: 0xffffff });
+  
+  // Test: rotate a sprite (not graphics)
+  const tex = await PIXI.Assets.load('https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi-logo.svg');
+  console.log('texture loaded:', !!tex);
+  
+  // 3 sprites rotated
+  for (let i = 0; i < 3; i++) {
+    const sprite = new PIXI.Sprite(tex);
+    sprite.anchor.set(0.5);
+    sprite.x = 200 + i * 100;
+    sprite.y = 300;
+    sprite.rotation = Math.PI / 4;
+    sprite.tint = [0xff0000, 0x00ff00, 0x0000ff][i];
+    app.stage.addChild(sprite);
+  }
+  
+  app.render();
+  window.__testOK = true;
+  console.log('done');
+})();
+</script>
+</body></html>

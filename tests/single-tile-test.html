@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html><head>
+<title>Single tile test</title>
+<style>body{margin:0;background:#fff}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="600" height="600"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js"></script>
+<script type="module">
+import { isoToScreen } from '../src/iso/iso-math.js';
+
+(async () => {
+  const app = new PIXI.Application({ view: document.getElementById('c'), width: 600, height: 600, backgroundColor: 0xffffff });
+  
+  // Create a container that rotates 45°
+  const worldLayer = new PIXI.Container();
+  worldLayer.rotation = Math.PI / 4;
+  app.stage.addChild(worldLayer);
+  
+  // Draw a single tile with known color
+  const graphics = new PIXI.Graphics();
+  const TILE = 64;
+  // Draw a square 64x64 at origin (0,0) of the worldLayer
+  graphics.beginFill(0xff0000); // red
+  graphics.drawRect(-TILE/2, -TILE/2, TILE, TILE);
+  graphics.endFill();
+  
+  // Position using isoToScreen
+  const origin = { x: 300, y: 300 };
+  const screen = isoToScreen(0, 0, TILE, origin);
+  console.log('isoToScreen(0, 0, 64, {300,300}) =', screen);
+  graphics.position.set(screen.sx, screen.sy);
+  worldLayer.addChild(graphics);
+  
+  // Force render
+  app.render();
+  window.__testOK = true;
+  console.log('rendered single tile at', screen);
+})();
+</script>
+</body></html>
