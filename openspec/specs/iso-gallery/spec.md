@@ -122,3 +122,65 @@ The demo MUST validate end-to-end that the 21 sprites and 40 tiles render correc
 - WHEN the `Tile.sprite.texture` of any visible tile is inspected
 - THEN the texture MUST be one of the 40 cached assets under `assets/tiles/stage1-bosque/`
 - AND MUST NOT be a coloured rectangle or `<canvas>`-drawn fallback.
+
+---
+
+# Delta for `iso-gallery` (F2.5.15 — `fase-2.5.5-tessellation-tuning`)
+
+## Purpose
+
+Align the gallery's preview/demos with the F2.5.15 engine change: rotation is now PER-TILE (`Tile.rotation = π/4` around each sprite's own centre), not at the container level (`_worldLayer.rotation === 0`). The "Vista isométrica 45°" CSS toggle remains a preview-only effect on the static tile `<img>` cards; the live mini-iso-demo now reflects the per-tile rotation that the engine actually uses.
+
+## MODIFIED Requirements
+
+### Requirement: GAL-002 — Rotation toggle (45° vs top-down, F2.5.15 note)
+
+The gallery MUST expose a control (button or checkbox) labelled **"Vista isométrica 45°"** that toggles the display of every accepted tile between two modes:
+
+- **Vista top-down** (default) — the tile's PNG is rendered exactly as it exists on disk, with no transform. This is the canonical "what's in the file" view.
+- **Vista isométrica 45°** — every accepted tile `<img>` receives a CSS `transform: rotate(45deg)`, previewing how the texture looks when the engine rotates each `Tile` sprite individually by 45° around its own centre (F2.5.15). The preview is a CSS-only effect on the static gallery cards; it does NOT mirror the engine's `_worldLayer.rotation` (which is always `0`).
+
+The toggle MUST apply to every accepted tile card simultaneously (single global state). The default view on page load MUST be "Vista top-down" because the on-disk PNG is top-down and that is the most informative default for terrain review.
+
+(Previously F2.5.2: the preview text said "_tileLayer.rotation = Math.PI / 4 at the container level". F2.5.15 rotates per-tile; the container does not rotate. The CSS preview on the static `<img>` cards is unchanged — it still applies `rotate(45deg)` to each card — but the engine-side contract it documents is now per-tile.)
+
+### Requirement: GAL-003 — Mini-iso-demo canvas (live `IsoWorld` with demo sprites, F2.5.15 per-tile rotation)
+
+The gallery MUST embed a `<canvas>` (default size `480×270`) that renders a live mini isometric map using the project's actual `IsoWorld` module. The demo canvas MUST:
+
+- Instantiate `IsoWorld` and a `Tilemap` for `stage1-bosque`.
+- Mount exactly **4 demo sprites** — 3 pino sprites at iso positions on a 6×6 plane and 1 castillo sprite — animated with simple idle bobbing (vertical oscillation, amplitude ≈ 4 px, period ≈ 2 s).
+- Use the **accepted** 64×64 square tiles and the regenerated assets (NOT placeholders).
+- Render each `Tile` with `rotation = Math.PI / 4` set individually in the `Tile` constructor (F2.5.15). The `_worldLayer` and `_tileLayer` containers MUST both have `rotation === 0`; the diamond look comes from per-tile rotation, not from a container transform.
+
+The demo MUST validate end-to-end that the 21 sprites and 40 tiles render correctly in the real isometric context. If any sprite fails to load or any tile fails to render, the demo MUST surface a visible error badge (e.g., a red banner) rather than failing silently.
+
+#### Scenario: Mini-iso-demo instantiates IsoWorld with 40 cached tiles (F2.5.15)
+
+- GIVEN `IsoWorld` and `Tilemap('stage1-bosque')` mounted in the demo canvas
+- WHEN the demo's first frame renders
+- THEN the canvas shows a `6×6` iso plane with the Bosque variant tiles
+- AND `_worldLayer.rotation === 0` AND `_tileLayer.rotation === 0` (no container rotation)
+- AND every visible `Tile` sprite has `rotation === Math.PI / 4` (per-tile diamond rotation)
+
+#### Scenario: 4 demo sprites animate on the iso plane
+
+- GIVEN the demo with 3 pino sprites and 1 castillo sprite mounted on the iso plane
+- WHEN the animation loop runs at 60 fps for 4 seconds
+- THEN each sprite MUST be visible at its iso position
+- AND each sprite MUST be upright (no inherited 45° tilt from any container transform) — F2.5.4 fix retained under F2.5.15.
+
+#### Scenario: Mini-iso-demo fails loudly on missing asset
+
+- GIVEN any of the 40 tile textures or 4 demo sprite textures fails to resolve before the first frame
+- WHEN the demo tries to mount it
+- THEN a visible red error badge MUST appear inside or above the canvas
+- AND a `console.error` MUST fire (acceptable because this is a deliberate failure signal for the reviewer).
+
+## REMOVED Requirements
+
+None.
+
+## RENAMED Requirements
+
+None.

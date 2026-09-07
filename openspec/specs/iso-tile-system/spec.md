@@ -105,3 +105,80 @@ None.
 ## RENAMED Requirements
 
 None.
+
+---
+
+# Delta for `iso-tile-system` (F2.5.15 — `fase-2.5.5-tessellation-tuning`)
+
+## Purpose
+
+Replace the F2.5.2 square-iso ratio (`tileHalfWidth = tileHalfHeight = tileSize / 2` with a 45°-rotated container) with the classic iso formula and per-tile rotation. The system MUST produce perfect diamond tessellation: each tile's rotated diamond corners touch its 6 iso neighbours at exactly one point, with no overlap and no gap.
+
+## MODIFIED Requirements
+
+### Requirement: TILE-001 — Isometric coordinate transform (F2.5.15 — classic iso formula)
+
+The system MUST provide pure functions `isoToScreen(isoX, isoY, tileSize, tileWorldOrigin)` and `screenToIso(sx, sy, tileSize, tileWorldOrigin)` matching the F2.5.15 classic iso formula:
+
+- `step = tileSize / Math.SQRT2` (= `tileHalfWidth = tileHalfHeight = tileSize / √2`)
+- `sx = tileWorldOrigin.x + (isoX − isoY) * step`
+- `sy = tileWorldOrigin.y + (isoX + isoY) * step`
+- Inverse uses the same constants to recover `(isoX, isoY)`.
+
+`tileSize` MUST be proportional to the viewport (yielding ≥ 64 px on 1080p). The functions MUST be pure — no globals, no Pixi import — so they can be exercised from DevTools.
+
+(Previously F2.5.2: `tileHalfWidth = tileHalfHeight = tileSize / 2`. The F2.5.2 step was the half-width of the square PNG; with a 45°-rotated container that produced overlapping diamonds because the iso grid spacing was wrong.)
+
+#### Scenario: Round-trip identity on the grid (F2.5.15 classic iso)
+
+- GIVEN a tile at iso `(3, 5)`, viewport `1920×1080`, `tileSize = 64`
+- WHEN the renderer converts to screen and back
+- THEN the recovered iso coord equals `(3, 5)` within ±0.001
+- AND `step === tileSize / Math.SQRT2 ≈ 45.2548`
+
+#### Scenario: Free-aim screen-to-iso on a non-aligned click (F2.5.15)
+
+- GIVEN the camera at iso `(5, 5)`, click at screen `(640, 480)`, `tileSize = 64`
+- WHEN `screenToIso` runs with `step = tileSize / Math.SQRT2`
+- THEN the returned world coord is `(5.0, 5.0)`
+
+### Requirement: TILE-002 — Tile rendering (per-tile 45° rotation, unrotated container)
+
+Each tile MUST render as a `PIXI.Sprite` whose `texture.baseTexture` is exactly `64×64` px (square). The on-screen iso look MUST be produced by setting `this.rotation = Math.PI / 4` on each individual `Tile` instance (around its own centre via `anchor.set(0.5, 0.5)`); the `_worldLayer` container that holds the tilemap MUST NOT rotate (`_worldLayer.rotation === 0`). The PNG on disk stays top-down (unrotated). Each tile variant MUST be loaded exactly once via `PIXI.Assets.load` and cached so multiple instances share the same `PIXI.Texture`. The system MUST load all 40 tile PNGs during bootstrap before the first frame.
+
+(Previously F2.5.2: rotation was applied at the container level via `_worldLayer.rotation = Math.PI / 4`. The container approach had two problems: (1) tiles could not be rotated around their own centres, breaking free-aim hit detection; (2) anything added to the world container inherited the 45° tilt. F2.5.4 moved sprites out of `_worldLayer` to fix (2); F2.5.15 fixes (1) by rotating per-tile.)
+
+#### Scenario: 40 tiles cached at startup (F2.5.15)
+
+- GIVEN the bootstrap phase of `src/main.js`
+- WHEN `loadTilemap()` resolves
+- THEN `PIXI.Assets.cache` contains exactly 40 unique tile textures keyed by `{stage}_{variant}.png`
+
+#### Scenario: Apparent diamond via per-tile 45° rotation
+
+- GIVEN a tile sprite of `tileSize = 64` with a `64×64` base texture
+- AND the sprite's own `rotation === Math.PI / 4` (set in the `Tile` constructor)
+- AND the parent `_worldLayer.rotation === 0` (unrotated container)
+- WHEN the sprite is rendered
+- THEN the visible footprint on screen is a rotated square whose bounding box is ≈ `90 × 90` px (the rotated square of side 64 has a diagonal of `64·√2 ≈ 90.51`)
+
+#### Scenario: Container does NOT rotate
+
+- GIVEN the active `IsoWorld` instance after `setStage(...)` mounts a tilemap
+- WHEN `isoWorld._worldLayer.rotation` is inspected at runtime
+- THEN `isoWorld._worldLayer.rotation === 0` (unrotated)
+- AND the diamond look comes from `Tile.rotation === Math.PI / 4`, not from the container
+
+#### Scenario: On-disk texture is unrotated top-down
+
+- GIVEN any cached tile texture
+- WHEN its `baseTexture` is inspected via `PIXI.BaseTexture#source`
+- THEN the source image is `64×64` px with NO rotation transform applied at the texture level (rotation lives on the `Tile` sprite, not on the texture)
+
+## REMOVED Requirements
+
+None — the previous TILE-001 / TILE-002 text is superseded by the MODIFIED requirements above (same requirement IDs, new contract).
+
+## RENAMED Requirements
+
+None.
