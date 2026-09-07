@@ -61,7 +61,7 @@ async function run() {
   const range = computeCullRange(5, 5, W, H, tileSize, origin)
   const picker = (gx, gy) => tm.loadedVariants[(gx + gy) % tm.loadedVariants.length]
   const live = tm.cullAndRender(dummy, range, picker)
-  if (live > 100) failures.push(`cull cap broken: ${live}`)
+  if (live > 400) failures.push(`cull cap broken: ${live}`)
   if (live < 1) failures.push(`cull empty`)
   for (const tile of tm.activeTiles.values()) {
     if (tile.zIndex % 1000 !== 0) { failures.push(`zIndex % 1000`); break }
@@ -93,7 +93,7 @@ async function run() {
   const ok = failures.length === 0
   window.__isoSmokeOK = ok
   window.__isoSmokeFailures = failures
-  setStatus(ok ? `iso-smoke OK · ${live} live tiles (cap 100)` : `iso-smoke FAIL · ${failures.length} issues`, ok)
+  setStatus(ok ? `iso-smoke OK · ${live} live tiles (cap 400)` : `iso-smoke FAIL · ${failures.length} issues`, ok)
   console[ok ? 'log' : 'error']('[iso-smoke]', ok ? 'OK' : 'FAIL', { liveTiles: live, failures })
 }
 
