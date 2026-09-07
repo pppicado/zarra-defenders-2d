@@ -32,7 +32,7 @@ export class IsoWorld {
     this.container.name = 'isoWorld'
     this.container.sortableChildren = false  // explicit zIndex (ADR #1)
 
-    // F2.5.10: tiles are SQUARE PNGs rotated 45° INDIVIDUALLY by the Tile
+    // F2.5.15: tiles are SQUARE PNGs rotated 45° INDIVIDUALLY by the Tile
     // class (see src/iso/tilemap.js Tile constructor). The `_worldLayer`
     // does NOT rotate — rotating the layer would move the tiles around the
     // (0,0) world origin, not around their centers, breaking tessellation.

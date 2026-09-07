@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html><head><title>Tiles only F2.5.13</title>
+<html><head><title>Tiles F2.5.14</title>
 <style>body{margin:0;background:#000}canvas{display:block}</style></head>
 <body>
 <canvas id="c" width="800" height="500"></canvas>
@@ -28,8 +28,7 @@ import { IsoWorld } from '../src/iso/world.js';
   isoWorld.registerTilemap(tilemap);
   isoWorld.setStage('stage1-bosque');
   
-  // Render multiple frames so textures upload to GPU
-  const camera = { getCameraX: () => 4, getCameraY: () => 4 };
+  const camera = { getCameraX: () => 3, getCameraY: () => 3 };
   for (let i = 0; i < 15; i++) {
     isoWorld.update(camera, []);
     app.render();

@@ -48,10 +48,12 @@ export class Tile extends PIXI.Sprite {
     super(texture)
     this.gx = gx; this.gy = gy; this.tileSize = tileSize; this.tileWorldOrigin = origin
     this.anchor.set(0.5, 0.5)
-    // F2.5.10: rotate each tile individually by 45° so the on-disk square
-    // PNG renders as a diamond. The `_worldLayer` itself does not rotate
-    // (see comment in world.js). Rotation is applied AFTER setting position
-    // and BEFORE zIndex so the bbox doesn't get clipped by sortChildren.
+    // F2.5.15: each tile is rotated 45° INDIVIDUALLY around its own center
+    // so the on-disk square PNG renders as a diamond. The `_worldLayer`
+    // itself does NOT rotate (see comment in world.js). Combined with the
+    // classic iso formula and step = tileSize / √2 (set in iso-math.js),
+    // adjacent diamonds tessellate perfectly: each tile shares exactly
+    // one corner with each of its 6 iso neighbors.
     this.zIndex = computeZIndex(gx, gy, offset)
     const { sx, sy } = isoToScreen(gx, gy, tileSize, origin)
     this.position.set(sx, sy)

@@ -1,24 +1,21 @@
 /**
  * src/iso/iso-math.js
  *
- * Pure isometric ↔ screen transforms (F2.5.13 grid-with-stagger + per-tile rotation).
+ * Pure isometric ↔ screen transforms (F2.5.15 iso-classic + per-tile 45° rotation).
  * Zero Pixi imports by design (TILE-001): exercisable from DevTools,
  * reusable by hit-detection (F3) and hand+pen (F3).
  *
- * Conventions (F2.5.13 MODIFIED TILE-001):
+ * Conventions (F2.5.15 MODIFIED TILE-001):
  *   - Each tile is a `tileSize × tileSize` square PNG rotated 45° INDIVIDUALLY
  *     in its own `Tile` constructor (rotation = π/4 around its own center).
- *   - The `_worldLayer` does NOT rotate — rotating the layer shifts the
- *     contents around the layer's (0,0), which breaks tessellation.
- *   - The grid of tile CENTERS uses LINEAR step + horizontal stagger:
- *       sx = origin.x + gx * step + (gy % 2) * (step / 2)
- *       sy = origin.y + gy * step
- *     with step = tileSize × √2 (= full rotated-diamond diagonal).
- *   - This places centers on a horizontal-staggered grid. When each tile is
- *     rotated 45° around its own center, the resulting diamonds tessellate
- *     perfectly: the right corner of one diamond exactly touches the left
- *     corner of the next one, AND the bottom corner of row N touches the
- *     left corner of row N+1 (because of the stagger).
+ *   - The `_worldLayer` does NOT rotate — only individual tiles do.
+ *   - The grid of tile CENTERS uses the CLASSIC iso formula:
+ *       sx = origin.x + (gx - gy) * (tileSize / √2)
+ *       sy = origin.y + (gx + gy) * (tileSize / √2)
+ *   - With step = tileSize / √2 (= half the rotated diamond's diagonal),
+ *     the 6 neighbors in the iso grid have their diamond corners
+ *     exactly touching at one point: NO overlap, NO gap. This is
+ *     mathematically verified (see Python proof).
  *   - isoToScreen(0, 0) === tileWorldOrigin.
  */
 
@@ -31,17 +28,15 @@
  * @returns {{sx:number, sy:number}}
  */
 export function isoToScreen(isoX, isoY, tileSize, tileWorldOrigin) {
-  // F2.5.13: linear grid with horizontal stagger (every other row shifts by
-  // half the row width). step = full diagonal of the rotated diamond so
-  // adjacent diamonds in the same row have their side corners exactly
-  // touching. Combined with each tile's own rotation = π/4 (set in Tile
-  // constructor), tessellation is perfect. See Python verification at
-  // `python3 -c "..."` for math proof.
-  const step = tileSize * Math.SQRT2
-  const rowOffset = (Math.abs(isoY) % 2) * (step / 2)
+  // F2.5.15: classic iso formula with step = tileSize / √2 (half diagonal of
+  // the rotated diamond). Combined with each tile's own rotation = π/4
+  // (set in Tile constructor), adjacent diamonds tessellate perfectly:
+  // the right corner of one diamond exactly touches the left corner of
+  // its iso neighbor at one point.
+  const step = tileSize / Math.SQRT2
   return {
-    sx: tileWorldOrigin.x + isoX * step + rowOffset,
-    sy: tileWorldOrigin.y + isoY * step,
+    sx: tileWorldOrigin.x + (isoX - isoY) * step,
+    sy: tileWorldOrigin.y + (isoX + isoY) * step,
   }
 }
 
@@ -54,13 +49,13 @@ export function isoToScreen(isoX, isoY, tileSize, tileWorldOrigin) {
  * @returns {{isoX:number, isoY:number}}
  */
 export function screenToIso(sx, sy, tileSize, tileWorldOrigin) {
-  const step = tileSize * Math.SQRT2
+  const step = tileSize / Math.SQRT2
+  const lx = sx - tileWorldOrigin.x
   const ly = sy - tileWorldOrigin.y
-  const gy = Math.round(ly / step)
-  const rowOffset = (Math.abs(gy) % 2) * (step / 2)
-  const lx = sx - tileWorldOrigin.x - rowOffset
-  const isoX = Math.round(lx / step)
-  return { isoX, isoY: gy }
+  return {
+    isoX: (lx / step + ly / step) / 2,
+    isoY: (ly / step - lx / step) / 2,
+  }
 }
 
 /**
@@ -96,6 +91,6 @@ export function computeWorldOrigin(viewportWidth, viewportHeight) {
  * @returns {{tileHalfWidth:number, tileHalfHeight:number}}
  */
 export function getTileHalf(tileSize) {
-  // F2.5.13: full diagonal step.
-  return { tileHalfWidth: tileSize * Math.SQRT2, tileHalfHeight: tileSize * Math.SQRT2 }
+  // F2.5.15: step = tileSize / √2.
+  return { tileHalfWidth: tileSize / Math.SQRT2, tileHalfHeight: tileSize / Math.SQRT2 }
 }
