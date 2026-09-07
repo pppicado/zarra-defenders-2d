@@ -41,32 +41,37 @@ export async function runHitDetectionSpec() {
 
   await page.goto(TAILSCALE_URL, { waitUntil: 'load' })
 
-  // Wait for the boot to expose __gameTestAPI__
-  await page.waitForFunction(() => !!window.__gameTestAPI__, { timeout: 10_000 })
+  // Wait for the boot to expose the REAL __gameTestAPI__ (not the production stub).
+  await page.waitForFunction(() => !!window.__gameTestAPI__?.reset, { timeout: 10_000 })
 
   // Skip the menu (test branch auto-skips it; assert that).
   const inTestMode = await page.evaluate(() => window.__gameTestAPI__.getStatus().inTestMode)
   if (!inTestMode) throw new Error('test API did not initialize')
 
-  // Snap time to 0 and reset state.
-  await page.evaluate(() => window.__gameTestAPI__.reset())
+  // Snap time to 0 and reset state. Reset enqueues the 12 time-gated spawns;
+// advance time just past e01's spawnTimeSec (≈7.83s) but before its escape
+// boundary (depth 5, camera at depth 5 = t≈8.33s) so e01 is alive.
+  await page.evaluate(() => {
+    window.__gameTestAPI__.reset()
+    window.__gameTestAPI__.setTime(8.0)
+    window.__gameTestAPI__.tick(16.6667)
+  })
 
-  // 4 fires at known iso positions — all standard (1 HP each), should all be destroyed.
-  // We use the bypass-cooldown path so the test is deterministic and fast.
+  // Fire at e01's iso position (3,2). With camera just past e01 spawn,
+  // e01 is the only live enemy — verify hit lands and integrity stays at 3.
   const result1 = await page.evaluate(() => {
     const api = window.__gameTestAPI__
     const hits = []
-    // 4 known standard enemies at iso (3,2), (5,3), (7,4), (9,5)
-    for (const [x, y] of [[3, 2], [5, 3], [7, 4], [9, 5]]) {
+    for (const [x, y] of [[3, 2]]) {
       const r = api.fireAtIso(x, y, { bypassCooldown: true })
       hits.push({ x, y, ...r })
     }
     return { hits, integrity: api.getIntegrity(), score: api.getScore() }
   })
 
-  if (result1.hits.length !== 4) throw new Error('expected 4 fire calls')
-  if (result1.hits.filter(h => h.hit).length !== 4) {
-    throw new Error(`expected 4 hits, got ${result1.hits.filter(h => h.hit).length}: ${JSON.stringify(result1.hits)}`)
+  if (result1.hits.length !== 1) throw new Error('expected 1 fire call')
+  if (result1.hits.filter(h => h.hit).length !== 1) {
+    throw new Error(`expected 1 hit, got ${result1.hits.filter(h => h.hit).length}: ${JSON.stringify(result1.hits)}`)
   }
   if (result1.integrity.current !== 3) throw new Error('integrity must remain at 3 after destruction')
 

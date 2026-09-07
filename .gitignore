@@ -24,3 +24,8 @@ assets/tiles/*/raw/
 
 # Local visual review screenshots (regenerable)
 tests/out/*.png
+
+# F3 diagnostic scratch
+.scratch/
+node_modules/
+assets/sprites/_hand-attempts/

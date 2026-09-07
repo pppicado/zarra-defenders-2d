@@ -14,7 +14,7 @@ const TAILSCALE_URL = process.env.TEST_URL || 'http://100.116.137.66:8000/?test=
 async function captureSnapshot(page) {
   return await page.evaluate(() => ({
     seed: window.__gameTestAPI__.getSeed(),
-    time: window.__gameTestAPI__.getTime?.() ?? null,
+    time: window.__zarraModules__.camera.getTime(),
     integrity: window.__gameTestAPI__.getIntegrity(),
     score: window.__gameTestAPI__.getScore(),
     enemies: window.__gameTestAPI__.getEnemies(),
@@ -28,7 +28,7 @@ async function runOnce() {
   const page = await context.newPage()
   page.on('console', m => { if (m.type() === 'error') console.warn('[page]', m.text()) })
   await page.goto(TAILSCALE_URL, { waitUntil: 'load' })
-  await page.waitForFunction(() => !!window.__gameTestAPI__, { timeout: 10_000 })
+  await page.waitForFunction(() => !!window.__gameTestAPI__?.reset, { timeout: 10_000 })
 
   // Reset and capture initial state.
   await page.evaluate(() => window.__gameTestAPI__.reset())
@@ -43,7 +43,7 @@ async function runOnce() {
   // Pin the clock math: setTime(45) then tick(16.6667) -> elapsed = 45.0166667
   await page.evaluate(() => window.__gameTestAPI__.setTime(45))
   await page.evaluate(() => window.__gameTestAPI__.tick(16.6667))
-  const timeAfter = await page.evaluate(() => window.__gameTestAPI__.getTime?.() ?? null)
+  const timeAfter = await page.evaluate(() => window.__zarraModules__.camera.getTime())
 
   await browser.close()
   return { snap0, snap1, timeAfter }

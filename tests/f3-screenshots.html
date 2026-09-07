@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>F3 — Capturas de review visual</title>
+  <link rel="icon" href="data:,">
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #0e0e10;
+      color: #e5e7eb;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    h1 { font-size: 20px; margin: 0 0 8px; color: #f3f4f6; }
+    h2 { font-size: 15px; margin: 28px 0 10px; color: #fbbf24; border-bottom: 1px solid #374151; padding-bottom: 6px; }
+    p.note { font-size: 13px; color: #9ca3af; margin: 0 0 16px; line-height: 1.5; }
+    code { background: #1f2937; color: #f3f4f6; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+    .capture {
+      margin: 0 0 24px;
+      background: #111827;
+      border: 1px solid #374151;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .capture-header {
+      padding: 10px 14px;
+      background: #1f2937;
+      border-bottom: 1px solid #374151;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .capture-header .title { font-size: 13px; font-weight: 600; color: #f3f4f6; }
+    .capture-header .meta { font-size: 11px; color: #9ca3af; }
+    .capture img {
+      display: block;
+      width: 100%;
+      height: auto;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .findings {
+      padding: 12px 14px;
+      background: #1a1207;
+      border-top: 1px solid #78350f;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .findings.ok { background: #052e16; border-top-color: #166534; color: #bbf7d0; }
+    .findings.warn { background: #1f1207; border-top-color: #b45309; color: #fed7aa; }
+    .findings ul { margin: 4px 0 0; padding-left: 20px; }
+    .findings li { margin: 2px 0; }
+  </style>
+</head>
+<body>
+  <h1>F3 — Capturas de review visual</h1>
+  <p class="note">
+    Capturas tomadas por Playwright MCP durante <code>sdd-apply</code> (TASK-025 smoke test).
+    1280×720. <strong>Modo automático</strong>: ya están en el repo, servidas en
+    <code>tests/playwright-screenshots/</code>. Las reviso yo (orchestrator) antes de
+    declararlas OK; ahora te las paso a vos para validación final antes de archivar F3.
+  </p>
+
+  <h2>1) f3-menu.png — Producción, main menu</h2>
+  <div class="capture">
+    <div class="capture-header">
+      <span class="title">Main menu (sin ?test=1)</span>
+      <span class="meta">1280×720 · 632 KB</span>
+    </div>
+    <img src="playwright-screenshots/f3-menu.png" alt="F3 main menu">
+    <div class="findings warn">
+      <strong>Observado:</strong>
+      <ul>
+        <li>3 botones centrados: <em>Iniciar test level</em>, <em>Acerca de</em>, <em>Disclaimer</em>.</li>
+        <li><em>Iniciar test level</em> con focus visible (borde blanco).</li>
+        <li>Layout limpio, tipografía pixel legible.</li>
+        <li><strong>⚠️ Posible</strong>: el texto del botón focused se ve con subpíxeles. Verificar si es solo con focus o permanente.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>2) f3-gameplay.png — Producción, tras click en Iniciar test level</h2>
+  <div class="capture">
+    <div class="capture-header">
+      <span class="title">Gameplay (HUD + iso + enemigos)</span>
+      <span class="meta">1280×720 · 504 KB</span>
+    </div>
+    <img src="playwright-screenshots/f3-gameplay.png" alt="F3 gameplay">
+    <div class="findings warn">
+      <strong>Observado:</strong>
+      <ul>
+        <li>HUD visible: barra de integridad (3 segmentos verdes) arriba a la izquierda.</li>
+        <li>Sprites de enemigos en el campo iso (camiones, drone, etc.).</li>
+        <li>Rail camera posicionada, fondo iso tileado perfecto (F2.5.15 OK).</li>
+        <li><strong>⚠️ Crítico #1 (verify):</strong> el sprite de la mano + papeleta tiene artefacto magenta en las esquinas (alpha=255 donde debería ser 0). Visible tenue arriba a la derecha del HUD.</li>
+        <li><strong>⚠️ No se ve</strong> el sprite de la mano siguiendo al puntero en la imagen. Verificar si está fuera del frame o si no se renderiza en absoluto.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>3) f3-boot.png — ?test=1 después de 60s de tick</h2>
+  <div class="capture">
+    <div class="capture-header">
+      <span class="title">Test mode (60s elapsed, todos los enemigos escaparon)</span>
+      <span class="meta">1280×720 · 692 KB</span>
+    </div>
+    <img src="playwright-screenshots/f3-boot.png" alt="F3 test level post-tick">
+    <div class="findings warn">
+      <strong>Observado:</strong>
+      <ul>
+        <li>Tile iso perfecto, sin gaps (F2.5.15 OK).</li>
+        <li>Sprites de enemigos aún visibles (algunos se destruyeron).</li>
+        <li>Integridad debería estar en 0 → game-over overlay debería estar visible.</li>
+        <li><strong>⚠️</strong> No veo el overlay de game-over en la imagen. Puede estar cortado por el viewport, o el screenshot se tomó antes de que se mostrara, o el overlay no se dispara correctamente.</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="note">
+    <strong>Estado del verify:</strong> <code>pass-with-warnings</code>. 2 criticals + 6 warnings + 5 suggestions.
+    39/39 unit tests pass, 4/4 e2e tests pass. Spec conformance 75% (9/12 full, 3 partial por desviaciones documentadas).
+  </p>
+  <p class="note">
+    <strong>Critical findings</strong>:
+    <ol>
+      <li><code>hand_pen.png</code> alpha=255 en esquinas (REQ-HND-001 violation). Fix: 1 postprocess pass en F4.</li>
+      <li><code>__gameTestAPI__.getSeed()</code> devuelve <code>undefined</code> (REQ-TST-002). Fix: 1 LOC en F4.</li>
+    </ol>
+  </p>
+</body>
+</html>

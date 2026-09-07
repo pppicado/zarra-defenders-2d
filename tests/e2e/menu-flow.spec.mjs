@@ -57,7 +57,7 @@ export async function runMenuFlowSpec() {
 
   // Esc -> modal closes, focus returns
   await page.keyboard.press('Escape')
-  await page.waitForSelector('#main-menu [data-modal="disclaimer"].hidden', { timeout: 2_000 })
+  await page.waitForFunction(() => document.querySelector('[data-modal="disclaimer"]')?.classList.contains('hidden'), { timeout: 2_000 })
 
   // ArrowUp twice -> back to Iniciar
   await page.keyboard.press('ArrowUp')
@@ -69,7 +69,7 @@ export async function runMenuFlowSpec() {
 
   // Enter -> Iniciar -> menu hides, test level begins (combat API active)
   await page.keyboard.press('Enter')
-  await page.waitForSelector('#main-menu.hidden', { timeout: 2_000 })
+  await page.waitForFunction(() => document.getElementById('main-menu')?.classList.contains('hidden'), { timeout: 2_000 })
 
   await browser.close()
   return { buttons, baseUrl }
