@@ -37,9 +37,11 @@ export class RailCamera {
 
   /**
    * Avanza la cámara según el delta time. Llamar desde el game loop.
+   * No-op when halted (F3 halt semantics — see halt()).
    * @param {number} dt  Delta time en segundos.
    */
   update(dt) {
+    if (this._halted) return
     this.elapsed += dt
   }
 
@@ -48,6 +50,31 @@ export class RailCamera {
     this.elapsed = 0
     this.startTime = performance.now()
   }
+
+  // ====== F3 additive methods (CAM-001 zero-diff preserved, additions below) ======
+
+  /**
+   * Seek the camera to a specific time (in seconds). Respects halt state
+   * (does not auto-resume). Used by __gameTestAPI__.setTime and Reintentar.
+   * @param {number} t  seconds
+   */
+  setTime(t) {
+    if (typeof t !== 'number' || !Number.isFinite(t)) return
+    if (t < 0) t = 0
+    this.elapsed = t
+  }
+
+  /** @returns {number} current elapsed time in seconds */
+  getTime() { return this.elapsed }
+
+  /** Freeze the ticker. update(dt) becomes a no-op until unHalt() is called. */
+  halt() { this._halted = true }
+
+  /** Resume the ticker. */
+  unHalt() { this._halted = false }
+
+  /** @returns {boolean} */
+  isHalted() { return !!this._halted }
 
   /** Posición X actual de la cámara en píxeles del mundo. */
   getCameraX() {
