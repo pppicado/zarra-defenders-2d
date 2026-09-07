@@ -11,7 +11,7 @@
  * that `src/rail-camera.js` enforces.
  */
 
-import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin } from './iso-math.js'
+import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin, escapeFrontDepth, ISO_STEP } from './iso-math.js'
 import { Tilemap, computeCullRange, computeZIndex, Z_BANDS } from './tilemap.js'
 
 export class IsoWorld {
@@ -129,7 +129,40 @@ export class IsoWorld {
 
   /** Convenience passthroughs so callers don't import iso-math directly. */
   isoToScreen(ix, iy) { return isoToScreen(ix, iy, this.tileSize, this.tileWorldOrigin) }
+
+  /**
+   * @deprecated Since F3: use `screenToIsoWithCamera(sx, sy, cameraIso, viewportCenter)`.
+   *             Legacy pure-math helper; ignores world-container translation.
+   */
   screenToIso(sx, sy) { return screenToIso(sx, sy, this.tileSize, this.tileWorldOrigin) }
+
+  /**
+   * Camera-aware screen -> iso inverse (CAM-002 / F3 hit detection).
+   *
+   * The base `screenToIso` is a pure math transform anchored at `tileWorldOrigin`
+   * (a HUD-strip tile origin). The live world container translates by
+   *   container.position = viewOrigin - isoToScreen(camIso)
+   * so a click in screen-space must first be un-translated by the same amount
+   * before the pure inverse returns the correct world iso coord.
+   *
+   * @param {number} sx          screen X (already relative to canvas)
+   * @param {number} sy          screen Y (already relative to canvas)
+   * @param {{isoX:number, isoY:number}} cameraIso  current camera iso position
+   * @param {{x:number, y:number}} viewportCenter   same as `this._viewOrigin`
+   * @returns {{isoX:number, isoY:number}}
+   */
+  screenToIsoWithCamera(sx, sy, cameraIso, viewportCenter) {
+    const vc = viewportCenter ?? this._viewOrigin
+    const camIso = cameraIso ?? { isoX: 0, isoY: 0 }
+    // screenToIso expects screen coords relative to tileWorldOrigin. We must
+    // back-out the world-container translation first.
+    const { sx: csx, sy: csy } = isoToScreen(camIso.isoX, camIso.isoY, this.tileSize, this.tileWorldOrigin)
+    const worldX = vc.x - csx
+    const worldY = vc.y - csy
+    const localX = sx - worldX
+    const localY = sy - worldY
+    return screenToIso(localX, localY, this.tileSize, this.tileWorldOrigin)
+  }
 }
 
 /** Deterministic checkerboard picker. F4+ stages plug in path-aware logic. */
@@ -139,4 +172,4 @@ function pickVariantFlat(gx, gy, variants) {
 }
 
 // Re-export helpers for callers that already imported IsoWorld.
-export { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin, computeZIndex, computeCullRange, Z_BANDS }
+export { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin, computeZIndex, computeCullRange, Z_BANDS, escapeFrontDepth, ISO_STEP }
