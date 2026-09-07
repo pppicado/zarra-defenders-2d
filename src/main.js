@@ -17,6 +17,7 @@
  *   UI overlays (menu / game-over / integrity HUD) are DOM siblings of #game-canvas-wrapper.
  */
 import { RailCamera } from './rail-camera.js?v=9'
+import { DesignViewport } from './design-viewport.js?v=9'
 import { Input } from './input.js?v=9'
 import { Player } from './player.js?v=9'
 import { IsoWorld } from './iso/world.js?v=9'
@@ -75,6 +76,17 @@ async function bootstrap() {
   // --- World / hud containers ---
   const world = new PIXI.Container(); world.name = 'world'; app.stage.addChild(world)
   const hud = new PIXI.Container(); hud.name = 'hud'; hud.sortableChildren = true; app.stage.addChild(hud)
+
+  // --- Design viewport: scale HUD layer to match design reference (1280x720).
+  // The world (iso tiles) scales itself via computeTileSize; the HUD layer uses
+  // the design scale so the hand sprite, hearts, and future overlays look identical
+  // on 4K, 1080p, and mobile letterbox.
+  const dv = new DesignViewport(wrapper.clientWidth, wrapper.clientHeight)
+  hud.scale.set(dv.scale, dv.scale)
+  // Center the scaled HUD inside the wrapper.
+  hud.position.set(dv.offsetX, dv.offsetY)
+  // Expose for tests + the ?test=1 API.
+  window.__designViewport__ = dv
 
   // --- IsoWorld + Tilemap (F2.5 reused) ---
   const isoWorld = new IsoWorld({
@@ -149,8 +161,9 @@ async function bootstrap() {
     handSprite,
     heartFullTex,
     heartEmptyTex,
-    viewportWidth: wrapper.clientWidth,
-    viewportHeight: wrapper.clientHeight,
+    // HUD lives in design space; the container is scaled + centered by main.js
+    viewportWidth: dv.designWidth,
+    viewportHeight: dv.designHeight,
   })
 
   // Forward pointer movement to HUD (hand sprite tracking).
@@ -287,10 +300,12 @@ async function bootstrap() {
       scene: hud,
       isoWorld,
       cameraIso: { isoX: 0, isoY: 0 },
-      viewportCenter: { x: wrapper.clientWidth / 2, y: wrapper.clientHeight / 2 },
+      // Projectiles live in the HUD layer (design space 1280x720), so viewport
+      // values must also be in design space — the HUD's scale handles final size.
+      viewportCenter: { x: dv.designWidth / 2, y: dv.designHeight / 2 },
       score,
       enemies,
-      viewportSize: { x: wrapper.clientWidth, y: wrapper.clientHeight },
+      viewportSize: { x: dv.designWidth, y: dv.designHeight },
       callbacks: {
         onHit: (id, hp, arch) => { /* hook for HUD later */ },
         onMiss: () => {},
