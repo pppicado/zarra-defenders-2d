@@ -16,8 +16,8 @@
  * (one iso row past the active front edge — see iso-camera-integration / CAM-003).
  * Enemies are static in F3 (no movement); only the camera moves.
  */
-import { emit } from './event-bus.js'
-import { escapeFrontDepth } from './iso/iso-math.js'
+import { emit } from './event-bus.js?v=9'
+import { escapeFrontDepth } from './iso/iso-math.js?v=9'
 
 export const ARCHETYPES = Object.freeze({
   standard:    Object.freeze({ hp: 1,  multiplier: 1,   footprint: Object.freeze({ hw: 0.5, hh: 0.5 }), flashMs: 200 }),

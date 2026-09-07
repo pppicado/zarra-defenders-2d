@@ -18,7 +18,7 @@
  * If heart sprite fails to load (missing PNG), a procedural red square is drawn as fallback.
  * If hand sprite fails to load, a procedural mitten square is drawn as fallback.
  */
-import { on } from '../event-bus.js'
+import { on } from '../event-bus.js?v=9'
 
 /** Hand anchor offset from canvas bottom-center. */
 export const HAND_BOTTOM_OFFSET = Object.freeze({ x: 0, y: -32 })

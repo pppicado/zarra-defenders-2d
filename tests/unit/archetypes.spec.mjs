@@ -6,7 +6,7 @@
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { ARCHETYPES, assertArchetype, ConfigError } from '../../src/enemies.js'
+import { ARCHETYPES, assertArchetype, ConfigError } from '../../src/enemies.js?v=9'
 
 test('ARCHETYPES table is frozen', () => {
   assert.equal(Object.isFrozen(ARCHETYPES), true)

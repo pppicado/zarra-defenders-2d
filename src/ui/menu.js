@@ -21,7 +21,7 @@
  *   - menu:aboutRequested
  *   - menu:disclaimerRequested
  */
-import { emit } from '../event-bus.js'
+import { emit } from '../event-bus.js?v=9'
 
 const BUTTONS = [
   { id: 'start',     label: 'Iniciar test level',         emit: 'menu:startRequested' },
