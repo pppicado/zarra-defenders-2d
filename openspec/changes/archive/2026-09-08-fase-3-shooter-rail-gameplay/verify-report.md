@@ -4,14 +4,19 @@
 **Project**: zarra-defenders-2d
 **Base**: main @ d93ff08 (F2.5.15 archived)
 **Mode**: hybrid · **Strategy**: single-pr with `size:exception` (user-approved 2026-09-07)
-**Verifier**: sdd-verify sub-agent
-**Date**: 2026-09-07
+**Verifier**: sdd-verify sub-agent + user visual review
+**Date**: 2026-09-07 (initial) · 2026-09-08 (re-verify post-fix)
 
 ---
 
-## Status: **PASS WITH WARNINGS**
+## Status: **PASS**
 
-Two real implementation defects are flagged as CRITICAL findings (hand_pen.png alpha + getSeed()), but both are bounded — neither breaks the core combat loop, both are fixable in <5 LOC, and the rest of the 152 scenarios across 12 specs pass. They are escalated for the F4 polish pass.
+Both originally-flagged CRITICAL findings have been resolved in commit `8e47dcf`:
+
+- **Critical #1 (hand_pen.png alpha):** RESOLVED. New hand sprite generated via minimax + post-processed with `tools/postprocess-hand.py`. All 4 corner pixels have alpha=0 (verified). Hand is a pixel-art fist holding a fountain pen, not a procedural rectangle placeholder.
+- **Critical #2 (getSeed()):** RESOLVED. `mulberry32()` now stores `.seed` on the returned function. `getSeed()` returns the actual seed value (e.g. `12345` for `?test=1&seed=12345`).
+
+Re-verify run on 2026-09-08 (post-fix): both criticals PASS, 0 console errors, screenshot `tests/playwright-screenshots/f3-reverify.png` shows the hand correctly following the pointer with full alpha transparency.
 
 ---
 

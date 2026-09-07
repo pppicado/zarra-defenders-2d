@@ -66,6 +66,19 @@ The `hud` and `ui` layers MUST remain siblings of `world` at `(0, 0)` — unchan
 - WHEN the camera advances 10 tiles north-east
 - THEN the crosshair stays at `(960, 540)` because `hud` is a sibling of `world`, not a child.
 
+#### Scenario: screenToIsoWithCamera returns correct iso under camera translation (F3 new)
+
+- GIVEN the camera is at iso `(5, 5)`, the world container has translated accordingly (computed by `IsoWorld.update()`), and the click is at screen `(640, 480)`
+- WHEN `screenToIsoWithCamera(640, 480, 5, 5, { x: 960, y: 540 })` runs
+- THEN the returned world coord is `(5.0, 5.0)` (matches the camera position — the click is at the viewport center where the iso projection lands)
+- AND the helper is a pure function (no globals, no Pixi import).
+
+#### Scenario: Legacy screenToIso is deprecated (F3)
+
+- GIVEN F3 lands
+- THEN every production code path that converts a click to iso (combat, hit detection) uses `screenToIsoWithCamera`
+- AND a code comment marks `screenToIso` as `// @deprecated — use screenToIsoWithCamera; remove in F4`.
+
 ### Requirement: CAM-003 — Stage transitions
 
 The system MUST support switching the active Tilemap when the rail camera exits the bounds of the current stage. The `IsoWorld` orchestrator MUST expose a `setStage(stageId)` method that swaps the active tilemap instance and disposes the previous one. In F2.5, the swap MAY produce a hard cut; a fade or scripted camera move is F4+ polish and is NOT required.

@@ -175,6 +175,26 @@ Each tile MUST render as a `PIXI.Sprite` whose `texture.baseTexture` is exactly 
 - WHEN its `baseTexture` is inspected via `PIXI.BaseTexture#source`
 - THEN the source image is `64×64` px with NO rotation transform applied at the texture level (rotation lives on the `Tile` sprite, not on the texture)
 
+## ADDED Requirements (F3 — `fase-3-shooter-rail-gameplay`)
+
+### Requirement: TILE-005 — Step / cull constants exported
+
+The system MUST export `ISO_STEP(tileSize) = tileSize / Math.SQRT2` and `MAX_VISIBLE_TILES = 400` as named constants from `src/iso/iso-math.js` (or the equivalent module — implementation detail). The constants SHALL be the single source of truth — no inline `Math.SQRT2` or magic `400` numbers anywhere else in the codebase. A `grep` for `Math.SQRT2` outside the constants file SHALL return zero hits; a `grep` for `400` outside the constants file SHALL return zero hits (excluding test assertions and ISO date strings).
+
+#### Scenario: Step constant is exported
+
+- GIVEN the F3 module graph
+- WHEN a consumer needs the iso step
+- THEN they import `ISO_STEP` and call it with `tileSize`
+- AND the value is identical to `tileSize / Math.SQRT2` (verified by `===`)
+
+#### Scenario: Cull cap constant is exported
+
+- GIVEN the F3 module graph
+- WHEN the cull pass computes its upper bound
+- THEN the bound is `MAX_VISIBLE_TILES`
+- AND no inline `400` literal exists in the cull code
+
 ## REMOVED Requirements
 
 None — the previous TILE-001 / TILE-002 text is superseded by the MODIFIED requirements above (same requirement IDs, new contract).
