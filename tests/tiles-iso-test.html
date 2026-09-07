@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html><head><title>Tiles iso test</title>
+<style>body{margin:0;background:#000}canvas{display:block}</style></head>
+<body>
+<canvas id="c" width="800" height="500"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js"></script>
+<script type="module">
+import { isoToScreen } from '../src/iso/iso-math.js';
+import { Tilemap } from '../src/iso/tilemap.js';
+import { IsoWorld } from '../src/iso/world.js';
+
+(async () => {
+  const app = new PIXI.Application({ 
+    view: document.getElementById('c'), width: 800, height: 500, 
+    backgroundColor: 0x222222,
+    antialias: false, resolution: 1, autoDensity: false
+  });
+  
+  // Use isoToScreen directly with PIXI.Graphics (no Tilemap yet)
+  const TILE = 64;
+  const ORIGIN = { x: 400, y: 250 };
+  
+  for (let gy = -2; gy < 5; gy++) {
+    for (let gx = -2; gx < 5; gx++) {
+      const { sx, sy } = isoToScreen(gx, gy, TILE, ORIGIN);
+      
+      // Try Graphics AND Sprite (without rotation first to see if sprites work)
+      const sprite = new PIXI.Graphics();
+      const color = ((gx * 50 + 100) << 16) | ((gy * 50 + 80) << 8) | 100;
+      sprite.beginFill(color);
+      sprite.drawRect(-TILE/2, -TILE/2, TILE, TILE);
+      sprite.endFill();
+      sprite.position.set(sx, sy);
+      sprite.rotation = Math.PI / 4;
+      app.stage.addChild(sprite);
+    }
+  }
+  
+  app.render();
+  window.__testOK = true;
+})();
+</script>
+</body></html>

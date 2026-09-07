@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html><head>
+<style>body{margin:0;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="800" height="500"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js"></script>
+<script type="module">
+(async () => {
+  const app = new PIXI.Application({ view: document.getElementById('c'), width: 800, height: 500, backgroundColor: 0x000000 });
+  
+  const TILE = 64;
+  const ORIGIN = { x: 400, y: 250 };
+  const STEP = TILE * Math.sqrt(2) / 2;
+  
+  for (let gy = -3; gy < 4; gy++) {
+    for (let gx = -3; gx < 4; gx++) {
+      const sx = ORIGIN.x + (gx - gy) * STEP;
+      const sy = ORIGIN.y + (gx + gy) * STEP;
+      
+      const tile = new PIXI.Graphics();
+      const color = ((gx * 50 + 100) << 16) | ((gy * 50 + 80) << 8) | 100;
+      tile.beginFill(color);
+      tile.drawRect(-TILE/2, -TILE/2, TILE, TILE);
+      tile.endFill();
+      tile.position.set(sx, sy);
+      tile.rotation = Math.PI / 4;
+      app.stage.addChild(tile);
+    }
+  }
+  
+  app.render();
+  window.__testOK = true;
+})();
+</script>
+</body></html>

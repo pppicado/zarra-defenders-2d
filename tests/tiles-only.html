@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html><head><title>Tiles only F2.5.13</title>
+<style>body{margin:0;background:#000}canvas{display:block}</style></head>
+<body>
+<canvas id="c" width="800" height="500"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js"></script>
+<script type="module">
+import { isoToScreen } from '../src/iso/iso-math.js';
+import { Tilemap } from '../src/iso/tilemap.js';
+import { IsoWorld } from '../src/iso/world.js';
+
+(async () => {
+  const app = new PIXI.Application({ 
+    view: document.getElementById('c'), width: 800, height: 500, 
+    backgroundColor: 0x222222,
+    antialias: false, resolution: 1, autoDensity: false
+  });
+  
+  const isoWorld = new IsoWorld({ viewportWidth: 800, viewportHeight: 500 });
+  app.stage.addChild(isoWorld.container);
+  
+  const tilemap = new Tilemap('stage1-bosque', 800, 500);
+  await tilemap.load(async (variant) => {
+    const tex = await PIXI.Assets.load(`../assets/tiles/stage1-bosque/${variant}_alt1.png`);
+    tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+    return tex;
+  });
+  isoWorld.registerTilemap(tilemap);
+  isoWorld.setStage('stage1-bosque');
+  
+  // Render multiple frames so textures upload to GPU
+  const camera = { getCameraX: () => 4, getCameraY: () => 4 };
+  for (let i = 0; i < 15; i++) {
+    isoWorld.update(camera, []);
+    app.render();
+  }
+  
+  window.__tilemap = tilemap;
+  window.__testOK = true;
+  console.log('done, tiles active:', tilemap.activeTiles.size);
+})();
+</script>
+</body></html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html><head><title>Tiles with PIXI.Graphics</title>
+<style>body{margin:0;background:#222}canvas{display:block}</style></head>
+<body>
+<canvas id="c" width="800" height="500"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js"></script>
+<script type="module">
+import { isoToScreen } from '../src/iso/iso-math.js';
+
+(async () => {
+  const app = new PIXI.Application({ 
+    view: document.getElementById('c'), width: 800, height: 500, 
+    backgroundColor: 0x222222,
+    antialias: false, resolution: 1, autoDensity: false
+  });
+  const TILE = 64;
+  const ORIGIN = { x: 400, y: 250 };
+  
+  // Draw 5x5 with PIXI.Graphics (not Sprite) — different colored squares rotated 45°
+  for (let gy = 0; gy < 5; gy++) {
+    for (let gx = 0; gx < 5; gx++) {
+      const { sx, sy } = isoToScreen(gx, gy, TILE, ORIGIN);
+      
+      const tile = new PIXI.Graphics();
+      // Solid colored square for each tile
+      const r = 80 + (gx * 30), g = 80 + (gy * 30), b = 100;
+      tile.beginFill((r << 16) | (g << 8) | b);
+      tile.drawRect(-TILE/2, -TILE/2, TILE, TILE);
+      tile.endFill();
+      tile.position.set(sx, sy);
+      tile.rotation = Math.PI / 4;
+      app.stage.addChild(tile);
+    }
+  }
+  
+  app.render();
+  window.__testOK = true;
+})();
+</script>
+</body></html>
