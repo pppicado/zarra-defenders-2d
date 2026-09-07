@@ -1,0 +1,21 @@
+{
+  "railPath": [
+    { "t": 0,  "isoX": 0,  "isoY": 0  },
+    { "t": 60, "isoX": 18, "isoY": 18 }
+  ],
+  "railEndTime": 60,
+  "enemies": [
+    { "id": "e01", "archetype": "standard",    "isoX":  3, "isoY":  2, "spriteId": "enemies_camion_treco",               "depth":  5, "spawnTimeSec":  7.833333333333333 },
+    { "id": "e02", "archetype": "standard",    "isoX":  5, "isoY":  3, "spriteId": "enemies_bolsa_plastico",             "depth":  8, "spawnTimeSec": 12.833333333333334 },
+    { "id": "e03", "archetype": "standard",    "isoX":  7, "isoY":  4, "spriteId": "enemies_bidon_lixiviado",            "depth": 11, "spawnTimeSec": 17.833333333333332 },
+    { "id": "e04", "archetype": "standard",    "isoX":  9, "isoY":  5, "spriteId": "enemies_tubo_lixiviado",             "depth": 14, "spawnTimeSec": 22.833333333333336 },
+    { "id": "e05", "archetype": "tank",        "isoX": 11, "isoY":  6, "spriteId": "enemies_dron_fumigador",             "depth": 17, "spawnTimeSec": 27.833333333333336 },
+    { "id": "e06", "archetype": "standard",    "isoX": 12, "isoY":  7, "spriteId": "enemies_valla_publicitaria",        "depth": 19, "spawnTimeSec": 31.166666666666668 },
+    { "id": "e07", "archetype": "standard",    "isoX": 13, "isoY":  8, "spriteId": "enemies_camion_treco",               "depth": 21, "spawnTimeSec": 34.5 },
+    { "id": "e08", "archetype": "standard",    "isoX": 14, "isoY":  9, "spriteId": "enemies_topadora",                   "depth": 23, "spawnTimeSec": 37.83333333333333 },
+    { "id": "e09", "archetype": "tank",        "isoX": 15, "isoY": 10, "spriteId": "enemies_camion_cisterna_residuos",  "depth": 25, "spawnTimeSec": 41.166666666666664 },
+    { "id": "e10", "archetype": "standard",    "isoX": 16, "isoY": 11, "spriteId": "enemies_trailer",                    "depth": 27, "spawnTimeSec": 44.5 },
+    { "id": "e11", "archetype": "mini-boss",   "isoX": 17, "isoY": 12, "spriteId": "enemies_planta_treco",               "depth": 29, "spawnTimeSec": 47.833333333333336 },
+    { "id": "e12", "archetype": "boss",        "isoX": 18, "isoY": 13, "spriteId": "enemies_sello_burocratico",          "depth": 31, "spawnTimeSec": 51.16666666666667 }
+  ]
+}
