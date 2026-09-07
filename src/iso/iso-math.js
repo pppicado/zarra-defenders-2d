@@ -94,3 +94,29 @@ export function getTileHalf(tileSize) {
   // F2.5.15: step = tileSize / √2.
   return { tileHalfWidth: tileSize / Math.SQRT2, tileHalfHeight: tileSize / Math.SQRT2 }
 }
+
+/**
+ * Iso escape depth (CAM-003 / F3 escape rule).
+ *
+ * An enemy escapes when its iso center crosses the active front edge, defined
+ * as one iso row past the camera position:
+ *   escapeFrontDepth = cameraIsoX + cameraIsoY + 1
+ *
+ * Used by src/enemies.js (EnemyManager.update) — pure function, no side effects.
+ * @param {number} cameraIsoX
+ * @param {number} cameraIsoY
+ * @returns {number}
+ */
+export function escapeFrontDepth(cameraIsoX, cameraIsoY) {
+  return cameraIsoX + cameraIsoY + 1
+}
+
+/**
+ * Named export for the iso grid step (TILE-005 / spec MODIFIED).
+ * Equivalent to tileSize / √2 — the value used inside isoToScreen/screenToIso.
+ * @param {number} tileSize
+ * @returns {number}
+ */
+export function ISO_STEP(tileSize) {
+  return tileSize / Math.SQRT2
+}
