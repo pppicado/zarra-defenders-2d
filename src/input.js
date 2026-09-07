@@ -86,6 +86,25 @@ export class Input {
   getPointerY() { return this.pointerY }
   isPointerInsideCanvas() { return this.pointerInside }
 
+  // ====== F3 additive method: setGate(predicate) ======
+
+  /**
+   * Install a gate predicate. When the predicate returns false, tap events
+   * are silently dropped before reaching 'tap' listeners. Pointer move is
+   * NEVER gated (the HUD hand sprite needs the position).
+   *
+   * Used by main.js to block gameplay taps while the main menu or any
+   * overlay is visible.
+   *
+   * @param {(() => boolean) | null} predicate
+   */
+  setGate(predicate) {
+    this._gate = predicate ?? null
+  }
+
+  /** @returns {boolean} current gate predicate (default = null, no gating) */
+  getGate() { return this._gate ?? null }
+
   // =================== Internal: event wiring ===================
 
   _attach() {
@@ -170,6 +189,9 @@ export class Input {
   }
 
   _emit(event, ...args) {
+    // F3 additive: gate blocks 'tap' events when predicate returns false.
+    // 'move' and 'pause' are NEVER gated (hand sprite needs position; pause is global).
+    if (event === 'tap' && this._gate && !this._gate()) return
     for (const cb of this.listeners[event]) {
       try {
         cb(...args)
