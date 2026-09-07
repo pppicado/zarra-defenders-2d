@@ -1,0 +1,23 @@
+{
+  "active": {
+    "camion_cisterna_residuos": {
+      "path": "assets/sprites/camion_cisterna_residuos.png",
+      "archetype": "tank",
+      "placeholder": true
+    },
+    "dron_fumigador": {
+      "path": "assets/sprites/enemies_dron_fumigador.png",
+      "archetype": "tank"
+    },
+    "hand_pen": {
+      "path": "assets/sprites/hand_pen.png",
+      "real": true
+    }
+  },
+  "deprecated": {
+    "plataforma_solar": {
+      "path": "assets/sprites/enemies_plataforma_solar.png",
+      "note": "F4 audit trail"
+    }
+  }
+}
