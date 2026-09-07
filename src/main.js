@@ -89,13 +89,19 @@ async function bootstrap() {
   window.__designViewport__ = dv
 
   // --- IsoWorld + Tilemap (F2.5 reused) ---
+  // IsoWorld runs in design space (1280x720) so tileSize stays 64 on every
+  // resolution. The world container is scaled to the wrapper's actual size
+  // (matching the HUD layer) so the iso projection looks identical on 4K,
+  // 1080p, and 1280x720 — only the letterbox around the world changes.
   const isoWorld = new IsoWorld({
-    viewportWidth: wrapper.clientWidth,
-    viewportHeight: wrapper.clientHeight,
+    viewportWidth: dv.designWidth,
+    viewportHeight: dv.designHeight,
   })
+  world.scale.set(dv.scale, dv.scale)
+  world.position.set(dv.offsetX, dv.offsetY)
   world.addChild(isoWorld.container)
 
-  const tilemap = new Tilemap('stage1-bosque', wrapper.clientWidth, wrapper.clientHeight)
+  const tilemap = new Tilemap('stage1-bosque', dv.designWidth, dv.designHeight)
   await tilemap.load(async (variant) => {
     const url = `assets/tiles/stage1-bosque/${variant}_alt1.png`
     const tex = await PIXI.Assets.load(url)
