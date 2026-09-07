@@ -162,3 +162,223 @@ canvas {
   -ms-interpolation-mode: nearest-neighbor;
   cursor: none;                     /* ocultar cursor del sistema en gameplay */
 }
+
+/* ============================================================
+   F3 — DOM containers: integrity HUD, main menu, game overlay
+   z-index order (CSS):
+     canvas (auto) < #integrity-hud (50) < #main-menu (100) < #game-overlay (200) < #orientation-warning (9999)
+   ============================================================ */
+
+#integrity-hud {
+  position: absolute;
+  top: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 50;
+  padding: 16px;
+}
+
+#main-menu {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background-color: rgba(10, 10, 10, 0.92);
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(245, 166, 35, 0.04) 2px, rgba(245, 166, 35, 0.04) 4px);
+  z-index: 100;
+  padding: 24px;
+}
+
+#main-menu.menu-root { color: #e8e8e8; }
+
+#main-menu .menu-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #f5a623;
+  text-shadow: 0 3px 0 #000;
+  margin-bottom: 4px;
+  letter-spacing: 2px;
+}
+
+#main-menu .menu-subtitle {
+  font-size: 1rem;
+  color: #d6d6d6;
+  margin-bottom: 24px;
+  text-shadow: 0 2px 0 #000;
+}
+
+#main-menu .menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 320px;
+  max-width: 90vw;
+}
+
+#main-menu .menu-btn {
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 18px 24px;
+  min-height: 64px;
+  background: rgba(245, 166, 35, 0.12);
+  color: #f5a623;
+  border: 2px solid #f5a623;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+#main-menu .menu-btn:hover,
+#main-menu .menu-btn:focus {
+  background: rgba(245, 166, 35, 0.85);
+  color: #0a0a0a;
+  outline: none;
+}
+
+#main-menu .menu-best {
+  margin-top: 24px;
+  font-size: 0.95rem;
+  color: #d6d6d6;
+  text-shadow: 0 2px 0 #000;
+}
+
+#main-menu .menu-modal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 110;
+  padding: 16px;
+}
+#main-menu .menu-modal-card {
+  background: #181818;
+  border: 2px solid #f5a623;
+  border-radius: 4px;
+  max-width: 600px;
+  width: 90vw;
+  max-height: 80vh;
+  overflow: auto;
+  padding: 28px;
+  position: relative;
+  color: #e8e8e8;
+}
+#main-menu .menu-modal-card h2 {
+  color: #f5a623;
+  margin-bottom: 16px;
+  font-size: 1.4rem;
+}
+#main-menu .menu-modal-body p { margin-bottom: 12px; line-height: 1.5; }
+#main-menu .menu-modal-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: transparent;
+  color: #f5a623;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px 12px;
+}
+#main-menu .menu-modal-close:hover { color: #fff; }
+
+/* ============================================================
+   Game-over / Victory overlay (F3)
+   ============================================================ */
+#game-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);  /* dim world 0.5 + slight black wash */
+  z-index: 200;
+  padding: 16px;
+}
+#game-overlay .overlay-card {
+  background: #181818;
+  border: 2px solid #f5a623;
+  border-radius: 4px;
+  width: 480px;
+  max-width: 95vw;
+  padding: 28px;
+  color: #e8e8e8;
+  text-align: center;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.6);
+}
+#game-overlay .overlay-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+#game-overlay .overlay-title--fail { color: #d04848; }
+#game-overlay .overlay-title--win  { color: #5cd87a; }
+#game-overlay .overlay-score-line,
+#game-overlay .overlay-firmas-line,
+#game-overlay .overlay-best-line {
+  font-size: 1rem;
+  margin-bottom: 6px;
+  color: #d6d6d6;
+}
+#game-overlay .overlay-newrecord {
+  color: #f5a623;
+  font-weight: 700;
+  margin-top: 8px;
+  text-shadow: 0 0 4px #f5a623;
+}
+#game-overlay .overlay-buttons {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+#game-overlay .overlay-btn {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 14px 20px;
+  min-height: 48px;
+  background: rgba(245, 166, 35, 0.12);
+  color: #f5a623;
+  border: 2px solid #f5a623;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+#game-overlay .overlay-btn:hover,
+#game-overlay .overlay-btn:focus {
+  background: rgba(245, 166, 35, 0.85);
+  color: #0a0a0a;
+  outline: none;
+}
+#game-overlay .overlay-btn--primary {
+  background: rgba(245, 166, 35, 0.85);
+  color: #0a0a0a;
+}
+#game-overlay .overlay-btn--primary:hover {
+  background: #f5a623;
+}
+
+/* When menu/overlay is visible, disable canvas pointer events so taps reach the DOM. */
+#main-menu:not(.hidden) ~ #game-canvas-wrapper canvas,
+#game-overlay:not(.hidden) ~ #game-canvas-wrapper canvas {
+  pointer-events: none;
+}
+
+/* ============================================================
+   Responsive — viewports < 600 px wide
+   ============================================================ */
+@media (max-width: 600px) {
+  #main-menu .menu-title { font-size: 1.8rem; }
+  #main-menu .menu-nav { width: 90vw; }
+  #main-menu .menu-btn { min-height: 64px; padding: 16px 20px; }
+  #game-overlay .overlay-card { padding: 20px; }
+  #game-overlay .overlay-title { font-size: 1.4rem; }
+  #integrity-hud canvas { width: 160px; height: 20px; }
+}

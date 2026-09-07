@@ -32,6 +32,12 @@
     <div id="game-canvas-wrapper"></div>
     <!-- HUD overlay (placeholder por ahora) -->
     <div id="hud" class="hidden"></div>
+    <!-- F3: integrity HUD (top-right 3 segments) — z-index 50 -->
+    <div id="integrity-hud" class="hidden"></div>
+    <!-- F3: main menu (first-paint, 3 buttons + Acerca de/Disclaimer modals) — z-index 100 -->
+    <div id="main-menu" class="hidden"></div>
+    <!-- F3: game-over + victory overlay — z-index 200 -->
+    <div id="game-overlay" class="hidden"></div>
     <!-- Modal de disclaimer (placeholder; se implementa en Fase 7) -->
     <div id="disclaimer-modal" class="hidden"></div>
   </div>
@@ -52,6 +58,6 @@
   <!-- Pixi.js v7 estable (cargado desde CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js"></script>
   <!-- Nuestro código (ES modules, sin build step) — query string para forzar no-cache durante dev -->
-  <script type="module" src="src/main.js?v=7"></script>
+  <script type="module" src="src/main.js?v=8"></script>
 </body>
 </html>
