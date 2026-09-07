@@ -82,10 +82,13 @@ export function mountTestAPI(ctx) {
     },
     tick(dtMs) {
       ctx.clock?.advance?.(dtMs)
-      // Also drive the camera by dt (so deterministic clock + camera stay in sync)
+      // Drive the camera by dt (so deterministic clock + camera stay in sync).
       if (ctx.camera && !ctx.camera.isHalted?.()) {
         const tBefore = ctx.camera.getTime?.() ?? 0
         ctx.camera.setTime?.(tBefore + dtMs / 1000)
+        // Also drive escape detection so tests can step past enemies deterministically.
+        const camIso = { isoX: ctx.camera.getCameraX(), isoY: ctx.camera.getCameraY() }
+        ctx.enemies?.update?.(dtMs, camIso, tBefore + dtMs / 1000)
       }
     },
     fireAtIso(x, y, opts) {
@@ -104,13 +107,24 @@ export function mountTestAPI(ctx) {
     getProjectiles() { return ctx.combat?.readProjectiles?.() ?? [] },
     on(topic, cb) { return busOn(topic, cb) },
     off(topic, cb) { /* not implemented (single-page tests); events are fire-and-forget */ },
-    // Helper for tests that want to set up from scratch:
+    // Helper for tests that want to set up from scratch.
+    // Note: bootLevel is async, but we don't await it here to keep the
+    // synchronous surface that some tests rely on. Tests that need the
+    // post-reset state should `await` an additional tick + read.
     reset() {
       ctx.integrity?.reset?.()
       ctx.score?.reset?.()
       ctx.combat?.reset?.()
       ctx.enemies?.reset?.()
       ctx.camera?.setTime?.(0)
+      // Reload the test level so reset() leaves a fully-bootable state.
+      if (ctx.bootLevel) {
+        try { ctx.bootLevel() } catch (e) { /* boot may already be in progress */ }
+      }
+      // Force enemies to be loaded synchronously if not yet via bootLevel.
+      if (ctx.testLevel?.enemies && ctx.enemies?._enemies?.size === 0) {
+        for (const def of ctx.testLevel.enemies) ctx.enemies.spawn(def)
+      }
     },
     spawnEnemy(def) { return ctx.enemies?.spawn?.(def) ?? null },
   }

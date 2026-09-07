@@ -153,9 +153,21 @@ async function bootstrap() {
   // Combat is created when the level boots (needs isoWorld + enemies + score).
   let combat = null
 
+  // --- Overlay (created BEFORE bootTestLevel so it's reachable from the closure) ---
+  const overlayRoot = document.getElementById('game-overlay')
+  const overlay = new Overlay({
+    root: overlayRoot,
+    integrity,
+    score,
+    camera,
+    combat: null,                  // refreshed on bootTestLevel
+    enemies,
+    gameState,
+  })
+
   // --- Boot test level now (test branch) or wait for menu (production) ---
   if (inTestMode) {
-    await bootTestLevel({ combat: null, isoWorld, enemies, camera, score, integrity, hud: hudModule, world })
+    await bootTestLevel({ combat: null, isoWorld, enemies, camera, score, integrity, hud: hudModule, world, overlay })
   }
 
   // --- Main menu (production boot) ---
@@ -168,11 +180,11 @@ async function bootstrap() {
   // When player clicks "Iniciar test level"
   busOn('menu:startRequested', async () => {
     mainMenu.hide()
-    await bootTestLevel({ combat, isoWorld, enemies, camera, score, integrity, hud: hudModule, world })
+    await bootTestLevel({ combat, isoWorld, enemies, camera, score, integrity, hud: hudModule, world, overlay })
   })
 
   busOn('menu:back', () => {
-    if (combat) { combat.reset(); combat = null }
+    if (combat) { combat.reset(); combat = null; overlay.combat = null }
     enemies.reset()
     integrity.reset()
     score.reset()
@@ -180,21 +192,6 @@ async function bootstrap() {
     gameState.state = 'main-menu'
     mainMenu.show()
   })
-
-  // --- Overlay ---
-  const overlayRoot = document.getElementById('game-overlay')
-  const overlay = new Overlay({
-    root: overlayRoot,
-    integrity,
-    score,
-    camera,
-    combat,                       // may be null until first boot; refreshed on bootTestLevel
-    enemies,
-    gameState,
-  })
-
-  // Wire overlay's combat reference after first boot
-  if (combat) overlay.combat = combat
 
   // --- Test API (mounts once isoWorld + camera exist) ---
   if (inTestMode) {
@@ -221,19 +218,21 @@ async function bootstrap() {
     const dt = (now - lastTime) / 1000
     lastTime = now
 
-    // Camera advance (skipped when halted)
-    camera.update(dt)
+    // Camera advance. In test mode, the test API owns the clock and skips this
+    // (otherwise double-advancement confuses setTime/seek expectations).
+    if (!inTestMode) camera.update(dt)
 
     // IsoWorld + tilemap cull
     const camIso = { isoX: camera.getCameraX(), isoY: camera.getCameraY() }
     if (combat) combat.setCameraIso(camIso)
     isoWorld.update(camera, [])  // verticalSprites intentionally empty — no decorative sprites in F3 yet
 
-    // Enemies (escape detection)
-    const elapsedSec = camera.getTime ? camera.getTime() : 0
-    enemies.update(dt * 1000, camIso, elapsedSec)
+    // Enemies (escape detection) — driven by either the ticker or the test API
+    if (!inTestMode) {
+      const elapsedSec = camera.getTime ? camera.getTime() : 0
+      enemies.update(dt * 1000, camIso, elapsedSec)
+    }
 
-    // Integrity: explicit drain on enemy:escaped is handled via event bus listener below.
     // Combat ticks
     if (combat) combat.update(dt * 1000)
 
@@ -264,7 +263,7 @@ async function bootstrap() {
     assertTestLevel()
     enemies.loadLevel(TEST_LEVEL.enemies)
 
-    // Create Combat if missing (first boot in test mode).
+    // Create Combat (idempotent across re-boots)
     combat = new Combat({
       scene: hud,
       isoWorld,
@@ -279,7 +278,8 @@ async function bootstrap() {
         onFire: () => {},
       },
     })
-    if (overlay && ctx?.combat !== null) overlay.combat = combat
+    if (ctx?.overlay) ctx.overlay.combat = combat
+    if (overlay) overlay.combat = combat
 
     hudModule.setHandVisible(true)
     gameState.state = 'gameplay'

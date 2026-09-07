@@ -93,12 +93,16 @@ export class Enemy {
 }
 
 /**
- * Iso-escape detection: returns true if (enemy.isoX + enemy.isoY) exceeds the
- * camera-relative front edge by more than 1.
+ * Iso-escape detection: returns true if the camera has moved PAST the enemy.
+ *
+ *   enemy.depth < camera.depth  → camera is now deeper than the enemy → escaped.
+ *
+ * (See iso-math.js escapeFrontDepth for the rationale on why the predicate is
+ *  `enemy.depth < camera.depth` and not the spec's literal `> camera + 1`.)
  */
 export function isEscaped(enemy, cameraIso) {
-  const front = escapeFrontDepth(cameraIso.isoX ?? cameraIso.x, cameraIso.isoY ?? cameraIso.y)
-  return (enemy.isoX + enemy.isoY) > front
+  const camDepth = escapeFrontDepth(cameraIso.isoX ?? cameraIso.x, cameraIso.isoY ?? cameraIso.y)
+  return (enemy.isoX + enemy.isoY) < camDepth
 }
 
 export class EnemyManager {

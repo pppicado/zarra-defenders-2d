@@ -98,17 +98,29 @@ export function getTileHalf(tileSize) {
 /**
  * Iso escape depth (CAM-003 / F3 escape rule).
  *
- * An enemy escapes when its iso center crosses the active front edge, defined
- * as one iso row past the camera position:
- *   escapeFrontDepth = cameraIsoX + cameraIsoY + 1
+ * Returns the iso depth threshold BELOW which an enemy has escaped the
+ * corridor. The threshold = camera iso depth (enemies are static in F3;
+ * the camera advances; when camera.depth exceeds enemy.depth, the enemy
+ * has been left behind).
  *
- * Used by src/enemies.js (EnemyManager.update) — pure function, no side effects.
+ * Implementation note: the original CAM-003 spec wrote
+ *   escapeFrontDepth = cameraIsoX + cameraIsoY + 1
+ * with the predicate `enemy.depth > escapeFrontDepth`. That predicate is
+ * satisfied at t=0 for every enemy (all enemy depths > 1), which is the
+ * inverse of the physics. The CAM-003 invariant we actually want is:
+ *
+ *   enemy escapes iff enemy.depth < camera.iso_depth
+ *   (the camera has moved past the enemy)
+ *
+ * So this function returns `cameraIsoX + cameraIsoY` — the camera's current
+ * iso depth — and the caller checks `enemy.depth < escapeFrontDepth(...)`.
+ *
  * @param {number} cameraIsoX
  * @param {number} cameraIsoY
- * @returns {number}
+ * @returns {number}  the iso depth threshold; enemies with depth < this have escaped
  */
 export function escapeFrontDepth(cameraIsoX, cameraIsoY) {
-  return cameraIsoX + cameraIsoY + 1
+  return cameraIsoX + cameraIsoY
 }
 
 /**
