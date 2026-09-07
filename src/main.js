@@ -107,7 +107,7 @@ async function bootstrap() {
   const handTex = textureMap.get('hand_pen')
   if (handTex) {
     handSprite = new PIXI.Sprite(handTex)
-    handSprite.anchor.set(0.5, 0.8)
+    handSprite.anchor.set(0.5, 0.85)
     handSprite.scale.set(1.0)
   } else {
     // Procedural fallback: 32x32 magenta square so the slot is never empty.
@@ -119,6 +119,12 @@ async function bootstrap() {
     g.endFill()
     handSprite = g
   }
+
+  // --- Heart textures (F3.1 — pixel art health) ---
+  const heartFullTex = textureMap.get('heart_full') ?? null
+  const heartEmptyTex = textureMap.get('heart_empty') ?? null
+  if (!heartFullTex) console.warn('[main] heart_full texture missing — using procedural fallback')
+  if (!heartEmptyTex) console.warn('[main] heart_empty texture missing — using procedural fallback')
 
   // --- Modules ---
   const integrity = new Integrity({ scoreReader: () => score.read() })
@@ -141,12 +147,25 @@ async function bootstrap() {
     score,
     camera,
     handSprite,
+    heartFullTex,
+    heartEmptyTex,
     viewportWidth: wrapper.clientWidth,
     viewportHeight: wrapper.clientHeight,
   })
 
   // Forward pointer movement to HUD (hand sprite tracking).
   input.on('move', (x, y) => hudModule.setPointer(x, y))
+
+  // Forward taps to combat (production wire — projects from cursor to iso, fires from hand).
+  input.on('tap', (screenX, screenY) => {
+    if (gameState.state !== 'gameplay') return
+    if (!combat) return
+    const camIso = { isoX: camera.getCameraX(), isoY: camera.getCameraY() }
+    const vc = { x: wrapper.clientWidth / 2, y: wrapper.clientHeight / 2 }
+    const iso = isoWorld.screenToIsoWithCamera(screenX, screenY, camIso, vc)
+    const handPos = hudModule.getHandScreenPosition() ?? { x: screenX, y: screenY }
+    combat.fireAtIso(iso.isoX, iso.isoY, handPos)
+  })
 
   const player = new Player(app, input, hud, camera)
 

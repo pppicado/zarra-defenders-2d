@@ -12,6 +12,14 @@
     "hand_pen": {
       "path": "assets/sprites/hand_pen.png",
       "real": true
+    },
+    "heart_full": {
+      "path": "assets/sprites/heart_full.png",
+      "real": true
+    },
+    "heart_empty": {
+      "path": "assets/sprites/heart_empty.png",
+      "real": true
     }
   },
   "deprecated": {

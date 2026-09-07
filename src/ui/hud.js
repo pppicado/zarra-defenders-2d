@@ -1,35 +1,43 @@
 /**
  * src/ui/hud.js
  *
- * Integrity HUD + hand sprite pointer tracking (F3 player-integrity + hand-pen-sprite spec).
- *
- * Visual contract:
- *   - 3 horizontal PIXI.Graphics rectangles (200x24 px total layout, 64x24 each, 4 px gap)
- *   - On viewports < 600 px wide: shrink to 160x20 (40x20 + 4 px gap)
- *   - Green #3FB950 filled / dark gray #3A3A3A empty
- *   - Top-right corner of the canvas wrapper
+ * Integrity HUD (3 hearts, bottom-left) + hand sprite (bottom-center, rotates to aim at cursor).
  *
  * Hand sprite:
- *   - PIXI.Sprite loaded from assets/sprites/hand_pen.png (TASK-013)
- *   - zIndex = 1000
- *   - Follows pointer + HAND_POINTER_OFFSET = (24, 16)
- *   - Hidden during main-menu / overlay states
+ *   - PIXI.Sprite loaded from assets/sprites/hand_pen.png
+ *   - Anchored at bottom-center of the canvas wrapper (with vertical offset)
+ *   - Rotates so the pen tip points toward the pointer (cursor)
+ *   - Fires (combat.fireAtIso) are launched from the hand's screen position
+ *   - zIndex = 1000, on top of the world, below the integrity hearts
  *
- * If hand sprite fails to load (missing PNG), a procedural 32x32 magenta-chroma square is
- * drawn as fallback (visible to the developer, never blocks the game).
+ * Integrity hearts:
+ *   - 3 PIXI.Sprite icons (heart_full.png / heart_empty.png), 48×48 each, 8px gap
+ *   - Bottom-left of the canvas wrapper
+ *   - zIndex = 50
+ *
+ * If heart sprite fails to load (missing PNG), a procedural red square is drawn as fallback.
+ * If hand sprite fails to load, a procedural mitten square is drawn as fallback.
  */
 import { on } from '../event-bus.js'
 
-export const HAND_POINTER_OFFSET = Object.freeze({ x: 24, y: 16 })
+/** Hand anchor offset from canvas bottom-center. */
+export const HAND_BOTTOM_OFFSET = Object.freeze({ x: 0, y: -32 })
+
+/** Heart layout. */
+export const HEART_SIZE = 48
+export const HEART_GAP = 8
+export const HEART_MARGIN = 16
 
 export class HUD {
   /**
    * @param {Object} opts
    * @param {PIXI.Container} opts.hudContainer    hud layer
    * @param {Object} opts.integrity               Integrity instance
-   * @param {Object} [opts.score]                 Score instance (for HUD counter display)
-   * @param {Object} [opts.camera]                RailCamera (for halts)
-   * @param {PIXI.Sprite} [opts.handSprite]       preloaded hand sprite (loaded by main.js)
+   * @param {Object} [opts.score]                 Score instance
+   * @param {Object} [opts.camera]                RailCamera
+   * @param {PIXI.Sprite} [opts.handSprite]       preloaded hand sprite
+   * @param {PIXI.Texture} [opts.heartFullTex]    preloaded heart_full texture
+   * @param {PIXI.Texture} [opts.heartEmptyTex]   preloaded heart_empty texture
    * @param {number} opts.viewportWidth
    * @param {number} opts.viewportHeight
    */
@@ -40,30 +48,31 @@ export class HUD {
     this.score = opts.score ?? null
     this.camera = opts.camera ?? null
     this.handSprite = opts.handSprite ?? null
+    this.heartFullTex = opts.heartFullTex ?? null
+    this.heartEmptyTex = opts.heartEmptyTex ?? null
     this.viewportWidth = opts.viewportWidth
     this.viewportHeight = opts.viewportHeight
 
-    this._segments = []
+    this._hearts = []
     this._lastIntegrity = null
-    this._hudGroup = new PIXI.Container()
-    this._hudGroup.name = 'integrity-hud'
-    this.hudContainer.addChild(this._hudGroup)
-    this._hudGroup.zIndex = 50  // above world, below hand
+    this._heartGroup = new PIXI.Container()
+    this._heartGroup.name = 'integrity-hearts'
+    this.hudContainer.addChild(this._heartGroup)
+    this._heartGroup.zIndex = 50
 
-    this._buildSegments()
-    this._positionGroup()
+    this._buildHearts()
+    this._positionHeartGroup()
 
     if (this.handSprite) {
       this.handSprite.zIndex = 1000
+      this.handSprite.anchor.set(0.5, 0.85)  // anchor near the wrist so the pen tip is at the top
       this.hudContainer.addChild(this.handSprite)
-      // visible only when there's a real sprite (not the placeholder magenta square)
       this.handSprite.visible = false
     }
 
     this._unsubs = []
-    this._unsubs.push(on('integrity:changed', () => this._buildSegments()))
-    this._unsubs.push(on('integrity:exhausted', () => this._buildSegments()))
-    this._unsubs.push(on('score:changed', () => {/* HUD counter (optional) updated by main.js if wired */}))
+    this._unsubs.push(on('integrity:changed', () => this._buildHearts()))
+    this._unsubs.push(on('integrity:exhausted', () => this._buildHearts()))
 
     this._lastPointer = { x: -1, y: -1 }
   }
@@ -71,7 +80,7 @@ export class HUD {
   // ============== Public API =================
 
   /**
-   * Track pointer position. Sets hand sprite location if visible.
+   * Track pointer position. Rotates the hand sprite to point at the cursor.
    * @param {number} screenX
    * @param {number} screenY
    */
@@ -79,16 +88,24 @@ export class HUD {
     this._lastPointer.x = screenX
     this._lastPointer.y = screenY
     if (this.handSprite && this.handSprite.visible) {
-      this.handSprite.x = screenX + HAND_POINTER_OFFSET.x
-      this.handSprite.y = screenY + HAND_POINTER_OFFSET.y
+      this._positionHand()
     }
   }
 
-  /** Show / hide hand sprite. Call this from main.js on state changes. */
+  /**
+   * Get the current hand screen position (used by combat to spawn projectiles).
+   * @returns {{x:number, y:number}|null}
+   */
+  getHandScreenPosition() {
+    if (!this.handSprite) return null
+    return { x: this.handSprite.x, y: this.handSprite.y }
+  }
+
+  /** Show / hide hand sprite. */
   setHandVisible(v) {
     if (!this.handSprite) return
     this.handSprite.visible = !!v
-    if (v && this._lastPointer.x >= 0) this.setPointer(this._lastPointer.x, this._lastPointer.y)
+    if (v) this._positionHand()
   }
 
   setHandSprite(sprite) {
@@ -96,6 +113,7 @@ export class HUD {
     this.handSprite = sprite
     if (sprite) {
       sprite.zIndex = 1000
+      sprite.anchor.set(0.5, 0.85)
       this.hudContainer.addChild(sprite)
       sprite.visible = false
     }
@@ -104,61 +122,84 @@ export class HUD {
   setViewportSize(w, h) {
     this.viewportWidth = w
     this.viewportHeight = h
-    this._buildSegments()
-    this._positionGroup()
+    this._buildHearts()
+    this._positionHeartGroup()
+    this._positionHand()
   }
 
   destroy() {
     for (const u of this._unsubs) u()
     this._unsubs = []
-    if (this._hudGroup.parent) this._hudGroup.parent.removeChild(this._hudGroup)
-    this._hudGroup.destroy({ children: true })
+    if (this._heartGroup.parent) this._heartGroup.parent.removeChild(this._heartGroup)
+    this._heartGroup.destroy({ children: true })
+    if (this.handSprite && this.handSprite.parent) {
+      this.handSprite.parent.removeChild(this.handSprite)
+    }
   }
 
   // ============== Internal =================
 
-  _buildSegments() {
-    while (this._hudGroup.children.length > 0) {
-      const c = this._hudGroup.children[0]
-      this._hudGroup.removeChild(c); c.destroy()
+  _buildHearts() {
+    while (this._heartGroup.children.length > 0) {
+      const c = this._heartGroup.children[0]
+      this._heartGroup.removeChild(c); c.destroy()
     }
-    this._segments = []
+    this._hearts = []
 
     const integrity = this.integrity?.read?.() ?? { current: 3, max: 3 }
     const max = integrity.max ?? 3
     const current = integrity.current ?? max
 
-    const small = (this.viewportWidth ?? window.innerWidth) < 600
-    const segW = small ? 40 : 64
-    const segH = small ? 20 : 24
-    const gap = 4
-    const totalW = segW * max + gap * (max - 1)
-
     for (let i = 0; i < max; i++) {
-      const g = new PIXI.Graphics()
       const filled = i < current
-      const color = filled ? 0x3FB950 : 0x3A3A3A
-      g.lineStyle(1, 0x111111, 1)
-      g.beginFill(color, 1)
-      g.drawRect(0, 0, segW, segH)
-      g.endFill()
-      g.x = i * (segW + gap)
-      g.y = 0
-      this._hudGroup.addChild(g)
-      this._segments.push(g)
+      const tex = filled ? this.heartFullTex : this.heartEmptyTex
+      let sprite
+      if (tex) {
+        sprite = new PIXI.Sprite(tex)
+      } else {
+        // Procedural fallback: red filled square or gray empty square.
+        sprite = new PIXI.Graphics()
+        const color = filled ? 0xE63946 : 0x3A3A3A
+        sprite.lineStyle(1, 0x111111, 1)
+        sprite.beginFill(color, 1)
+        sprite.drawRect(0, 0, HEART_SIZE, HEART_SIZE)
+        sprite.endFill()
+      }
+      sprite.width = HEART_SIZE
+      sprite.height = HEART_SIZE
+      sprite.x = i * (HEART_SIZE + HEART_GAP)
+      sprite.y = 0
+      this._heartGroup.addChild(sprite)
+      this._hearts.push(sprite)
     }
 
-    // Group dimensions for positioning
-    this._hudGroup._w = totalW
-    this._hudGroup._h = segH
     this._lastIntegrity = { current, max }
-    this._positionGroup()
+    this._positionHeartGroup()
   }
 
-  _positionGroup() {
-    const margin = 16
-    const w = this._hudGroup._w ?? 200
-    const h = this._hudGroup._h ?? 24
-    this._hudGroup.position.set(this.viewportWidth - w - margin, margin)
+  _positionHeartGroup() {
+    const totalW = this._hearts.length * HEART_SIZE + (this._hearts.length - 1) * HEART_GAP
+    // Bottom-left anchor
+    this._heartGroup.position.set(HEART_MARGIN, this.viewportHeight - HEART_SIZE - HEART_MARGIN)
+    this._heartGroup._w = totalW
+    this._heartGroup._h = HEART_SIZE
+  }
+
+  _positionHand() {
+    if (!this.handSprite) return
+    // Anchor: bottom-center of viewport, lifted up by HAND_BOTTOM_OFFSET.y
+    const cx = this.viewportWidth / 2 + HAND_BOTTOM_OFFSET.x
+    const cy = this.viewportHeight + HAND_BOTTOM_OFFSET.y
+    this.handSprite.x = cx
+    this.handSprite.y = cy
+    // Rotate so the pen tip points toward the cursor
+    if (this._lastPointer.x >= 0) {
+      const dx = this._lastPointer.x - cx
+      const dy = this._lastPointer.y - cy
+      // Pen tip points "up" in the sprite by default (top of anchor at y < anchor.y)
+      // Pixi rotation: 0 = +x right, positive = clockwise. We want the up-vector to point at the cursor.
+      // angle = atan2(dy, dx) - (-PI/2) = atan2(dy, dx) + PI/2
+      this.handSprite.rotation = Math.atan2(dy, dx) + Math.PI / 2
+    }
   }
 }
