@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>F3 — Capturas de review visual (post-cambio mano + corazones)</title>
+  <title>F3 — Catálogo de capturas</title>
   <link rel="icon" href="data:,">
   <style>
     body { margin: 0; padding: 24px; background: #0e0e10; color: #e5e7eb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
@@ -15,102 +15,80 @@
     .capture-header .title { font-size: 13px; font-weight: 600; color: #f3f4f6; }
     .capture-header .meta { font-size: 11px; color: #9ca3af; }
     .capture img { display: block; width: 100%; height: auto; image-rendering: pixelated; image-rendering: crisp-edges; }
-    .findings { padding: 12px 14px; background: #1a1207; border-top: 1px solid #78350f; font-size: 12px; line-height: 1.5; }
-    .findings.ok { background: #052e16; border-top-color: #166534; color: #bbf7d0; }
-    .findings.warn { background: #1f1207; border-top-color: #b45309; color: #fed7aa; }
+    .findings { padding: 12px 14px; background: #052e16; border-top: 1px solid #166534; font-size: 12px; line-height: 1.5; color: #bbf7d0; }
     .findings ul { margin: 4px 0 0; padding-left: 20px; }
     .findings li { margin: 2px 0; }
   </style>
 </head>
 <body>
-  <h1>F3 — Capturas de review visual (v2: mano + corazones)</h1>
+  <h1>F3 — Catálogo de capturas (post-fix viewport + gameplay)</h1>
   <p class="note">
-    Capturas tomadas por Playwright MCP durante el ciclo de cambios rápidos post-F3.
-    1280×720. <strong>Modo automático</strong>: ya están en el repo, servidas en
-    <code>tests/playwright-screenshots/</code>. Las reviso yo (orchestrator) antes de
-    declararlas OK; ahora te las paso a vos para validación final.
+    Capturas tomadas por Playwright MCP tras los fixes de consistencia cross-resolution
+    (commits <code>3de75ac</code>, <code>f96cfbd</code>, <code>2f2eb6a</code>).
+    El HUD (mano + corazones) y el mundo iso escalan juntos via design viewport 1280×720,
+    con <code>tileSize=64</code> constante en todas las resoluciones.
   </p>
 
   <h2>1) f3-menu.png — Cursor arriba, mano apunta arriba</h2>
   <div class="capture">
     <div class="capture-header">
-      <span class="title">Hand sprite bottom-center, rotation 0° (cursor at 640, 200)</span>
-      <span class="meta">1280×720 · 522 KB</span>
-    </div>
-    <img src="playwright-screenshots/f3-menu.png" alt="F3 v2 mano arriba">
-    <div class="findings ok">
-      <strong>Observado:</strong>
-      <ul>
-        <li>Mano + boli anclada abajo-centro de la pantalla (x=640, y=688).</li>
-        <li>Rotación 0°: el boli apunta hacia arriba (al cursor que está en y=200).</li>
-        <li>3 corazones rojos vivos abajo-izquierda, en línea horizontal, separados 8px.</li>
-        <li>Sprite de mano es pixel art real (no placeholder).</li>
-        <li>Sin artefactos magenta, esquinas con alpha=0.</li>
-      </ul>
-    </div>
-  </div>
-
-  <h2>2) f3-gameplay.png — Cursor a la derecha, mano rotada ~58°</h2>
-  <div class="capture">
-    <div class="capture-header">
-      <span class="title">Hand sprite rotation +58° (cursor at 1100, 400)</span>
-      <span class="meta">1280×720 · 523 KB</span>
-    </div>
-    <img src="playwright-screenshots/f3-gameplay.png" alt="F3 v2 mano derecha">
-    <div class="findings ok">
-      <strong>Observado:</strong>
-      <ul>
-        <li>Mano rotada apuntando al cursor (derecha-arriba).</li>
-        <li>El boli "señala" al cursor correctamente.</li>
-        <li>Corazones siguen abajo-izquierda, sin cambios.</li>
-        <li>El disparo saldría desde la mano hacia el cursor (verificado por logs: fireAtIso(1.10, -2.43) origin=mano).</li>
-      </ul>
-    </div>
-  </div>
-
-  <h2>3) f3v2-03-cursor-left.png — Cursor a la izquierda, mano rotada -57°</h2>
-  <div class="capture">
-    <div class="capture-header">
-      <span class="title">Hand sprite rotation -57° (cursor at 200, 400)</span>
+      <span class="title">Gameplay boot, cursor @ (640, 200), mano rotación 0°</span>
       <span class="meta">1280×720</span>
     </div>
-    <img src="playwright-screenshots/f3v2-03-cursor-left.png" alt="F3 v2 mano izquierda">
-    <div class="findings ok">
+    <img src="playwright-screenshots/f3-menu.png" alt="F3 mano arriba">
+    <div class="findings">
       <strong>Observado:</strong>
       <ul>
-        <li>Mano rotada apuntando al cursor (izquierda-arriba).</li>
-        <li>El boli señala al cursor correctamente.</li>
-        <li>Sprite con alpha transparente correcto.</li>
+        <li>Mano pixel art con boli anclada abajo-centro (x=640, y=688) en design space.</li>
+        <li>Boli apunta hacia arriba (rotación 0°) siguiendo el cursor en y=200.</li>
+        <li>3 corazones rojos vivos abajo-izquierda, en línea horizontal.</li>
+        <li>Mundo iso tileado con sprites de enemigos visibles (test level con 12 enemigos).</li>
+        <li>Esquinas del sprite con alpha=0 (sin artefactos magenta).</li>
       </ul>
     </div>
   </div>
 
-  <h2>4) f3-boot.png — Integridad en 0 (todos los corazones vacíos)</h2>
+  <h2>2) f3-gameplay.png — Cursor a la derecha, mano rotada</h2>
   <div class="capture">
     <div class="capture-header">
-      <span class="title">Game-over: 3 corazones vacíos (gris)</span>
-      <span class="meta">1280×720 · 707 KB</span>
+      <span class="title">Gameplay con cursor a la derecha, mano rotación +58°</span>
+      <span class="meta">1280×720</span>
     </div>
-    <img src="playwright-screenshots/f3-boot.png" alt="F3 v2 corazones vacíos">
-    <div class="findings ok">
+    <img src="playwright-screenshots/f3-gameplay.png" alt="F3 mano derecha">
+    <div class="findings">
       <strong>Observado:</strong>
       <ul>
-        <li>Los 3 corazones ahora son grises/empty (integrity=0).</li>
-        <li>Sprite correcto: outline gris oscuro sobre fondo transparente.</li>
-        <li>Posición sigue siendo abajo-izquierda.</li>
-        <li>Cambio de estado (lleno → vacío) funciona via <code>integrity:changed</code> event.</li>
+        <li>Mano rotada apuntando al cursor (derecha-arriba, ~58°).</li>
+        <li>Boli señala correctamente al cursor.</li>
+        <li>Corazones sin cambios (integridad 3).</li>
+        <li>Tap dispara papeleta desde la mano hacia el target iso (verificado en diag interno: <code>fireAtIso(1.10, -2.43, hand=640,688)</code>).</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>3) f3-boot.png — Test level post-tick (integridad 0)</h2>
+  <div class="capture">
+    <div class="capture-header">
+      <span class="title">?test=1 después de 60s: 3 corazones vacíos, integridad agotada</span>
+      <span class="meta">1280×720</span>
+    </div>
+    <img src="playwright-screenshots/f3-boot.png" alt="F3 game over">
+    <div class="findings">
+      <strong>Observado:</strong>
+      <ul>
+        <li>3 corazones grises/empty (integrity=0, game over).</li>
+        <li>Mano en posición de reposo (cursor @ centro).</li>
+        <li>Mundo iso todavía renderizado (algunos enemigos no escaparon por la nueva lógica Manhattan).</li>
+        <li>Smoke e2e: 12 spawn + integridad exhausted + 0 console errors ✓.</li>
       </ul>
     </div>
   </div>
 
   <p class="note">
-    <strong>Cambios implementados:</strong>
-    <ol>
-      <li><code>src/ui/hud.js</code>: mano anclada bottom-center con rotación hacia cursor; integridad reemplazada por 3 sprites heart 48×48 bottom-left.</li>
-      <li><code>src/main.js</code>: pasa heartFullTex / heartEmptyTex al HUD; wirea <code>input.on('tap')</code> → <code>combat.fireAtIso(..., handPos)</code>.</li>
-      <li><code>assets/sprites/heart_full.png</code> + <code>heart_empty.png</code>: generados con minimax + postprocess PIL.</li>
-      <li><code>assets/sprites/manifest.json</code>: agregadas las 2 entradas.</li>
-    </ol>
+    <strong>URLs:</strong><br>
+    Test level: <code>http://100.116.137.66:8000/?test=1&amp;seed=12345</code><br>
+    Catálogo: <code>http://100.116.137.66:8000/tests/f3-screenshots.html</code><br>
+    Producción (main menu): <code>http://100.116.137.66:8000/</code>
   </p>
 </body>
 </html>
