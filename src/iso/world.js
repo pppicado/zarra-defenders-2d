@@ -11,8 +11,8 @@
  * that `src/rail-camera.js` enforces.
  */
 
-import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin, escapeFrontDepth, ISO_STEP } from './iso-math.js?v=19'
-import { Tilemap, computeCullRange, computeZIndex, Z_BANDS } from './tilemap.js?v=19'
+import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin, escapeFrontDepth, ISO_STEP } from './iso-math.js?v=26'
+import { Tilemap, computeCullRange, computeZIndex, Z_BANDS } from './tilemap.js?v=26'
 
 export class IsoWorld {
   constructor(opts) {

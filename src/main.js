@@ -16,23 +16,23 @@
  *   app.stage -> world (camera-driven) | hud (screen-space)
  *   UI overlays (menu / game-over / integrity HUD) are DOM siblings of #game-canvas-wrapper.
  */
-import { RailCamera } from './rail-camera.js?v=19'
-import { Input } from './input.js?v=19'
-import { Player } from './player.js?v=19'
-import { IsoWorld } from './iso/world.js?v=19'
-import { Tilemap } from './iso/tilemap.js?v=19'
-import { Integrity } from './integrity.js?v=19'
-import { Score } from './score.js?v=19'
-import { EnemyManager, ARCHETYPES } from './enemies.js?v=19'
-import { Combat } from './combat.js?v=19'
-import { MainMenu } from './ui/menu.js?v=19'
-import { Overlay } from './ui/overlay.js?v=19'
-import { HUD } from './ui/hud.js?v=19'
-import { TEST_LEVEL, testLevelWaypoints, assertTestLevel, TEST_LEVEL_ENEMY_COUNT } from './levels/test-level.js?v=19'
-import { parseTestFlags, mountTestAPI } from './test-api.js?v=19'
-import { mulberry32, fixedClock } from './random.js?v=19'
-import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?v=19'
-import { on as busOn, emit } from './event-bus.js?v=19'
+import { RailCamera } from './rail-camera.js?v=26'
+import { Input } from './input.js?v=26'
+import { Player } from './player.js?v=26'
+import { IsoWorld } from './iso/world.js?v=26'
+import { Tilemap } from './iso/tilemap.js?v=26'
+import { Integrity } from './integrity.js?v=26'
+import { Score } from './score.js?v=26'
+import { EnemyManager, ARCHETYPES } from './enemies.js?v=26'
+import { Combat } from './combat.js?v=26'
+import { MainMenu } from './ui/menu.js?v=26'
+import { Overlay } from './ui/overlay.js?v=26'
+import { HUD } from './ui/hud.js?v=26'
+import { TEST_LEVEL, testLevelWaypoints, assertTestLevel, TEST_LEVEL_ENEMY_COUNT } from './levels/test-level.js?v=26'
+import { parseTestFlags, mountTestAPI } from './test-api.js?v=26'
+import { mulberry32, fixedClock } from './random.js?v=26'
+import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?v=26'
+import { on as busOn, emit } from './event-bus.js?v=26'
 
 // ============================================================
 // Configuration
@@ -199,6 +199,14 @@ async function bootstrap() {
   }
   const textureMap = await preloadManifestTextures(manifest)
 
+  // Build a spriteId → Texture map for enemy spawn (enemies load by their
+  // manifest spriteId, e.g. 'enemies_camion_treco', 'enemies_dron_fumigador').
+  // The map only contains textures whose keys actually look like enemy sprites.
+  const enemyTextures = new Map()
+  for (const [key, tex] of textureMap) {
+    if (key.startsWith('enemies_')) enemyTextures.set(key, tex)
+  }
+
   // --- Hand sprite ---
   let handSprite = null
   const handTex = textureMap.get('hand_pen')
@@ -226,7 +234,11 @@ async function bootstrap() {
   const integrity = new Integrity({ scoreReader: () => score.read() })
   const score = new Score({})
   score.loadBest()
-  const enemies = new EnemyManager({ rng: inTestMode ? mulberry32(seed) : Math.random })
+  const enemies = new EnemyManager({
+    rng: inTestMode ? mulberry32(seed) : Math.random,
+    scene: isoWorld.spriteLayer,
+    textures: enemyTextures,
+  })
   enemies.rng = inTestMode ? mulberry32(seed) : Math.random
 
   const camera = new RailCamera({ waypoints: buildTestLevelPath(), loop: false })
@@ -335,7 +347,15 @@ async function bootstrap() {
 
     const camIso = { isoX: camera.getCameraX(), isoY: camera.getCameraY() }
     if (combat) combat.setCameraIso(camIso)
-    isoWorld.update(camera, [])
+    // Pass the enemies as verticalSprites so IsoWorld repositions their
+    // sprites on each frame (anchoring them at the south point of their
+    // iso cell, like the tile decorations in F2.5).
+    const verticalSprites = enemies.getAliveSprites().map(e => ({
+      gx: e.def.isoX,
+      gy: e.def.isoY,
+      sprite: e.sprite,
+    }))
+    isoWorld.update(camera, verticalSprites)
 
     if (!inTestMode) {
       const elapsedSec = camera.getTime ? camera.getTime() : 0

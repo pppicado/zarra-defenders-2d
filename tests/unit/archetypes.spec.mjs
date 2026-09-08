@@ -1,12 +1,12 @@
 /**
  * tests/unit/archetypes.spec.mjs
  *
- * Pin the 4-archetype HP/footprint/multiplier table + dron_fumigador→tank binding.
+ * Pin the 4-archetype HP/footprint/multiplier table + enemies_dron_fumigador→tank binding.
  * Run with: node tests/unit/archetypes.spec.mjs
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { ARCHETYPES, assertArchetype, ConfigError } from '../../src/enemies.js?v=19'
+import { ARCHETYPES, assertArchetype, ConfigError } from '../../src/enemies.js?v=26'
 
 test('ARCHETYPES table is frozen', () => {
   assert.equal(Object.isFrozen(ARCHETYPES), true)
@@ -56,7 +56,7 @@ test('assertArchetype: rejects unknown ids with ConfigError', () => {
   })
 })
 
-test('manifest binds dron_fumigador to tank', async () => {
+test('manifest binds enemies_dron_fumigador to tank', async () => {
   // Read the JSON file directly (no fetch in node test).
   const fs = await import('node:fs/promises')
   const path = await import('node:path')
@@ -64,8 +64,8 @@ test('manifest binds dron_fumigador to tank', async () => {
   const here = url.fileURLToPath(new URL('.', import.meta.url))
   const manifestPath = path.resolve(here, '../../assets/sprites/manifest.json')
   const json = JSON.parse(await fs.readFile(manifestPath, 'utf-8'))
-  assert.equal(json.active.dron_fumigador.archetype, 'tank',
-    'dron_fumigador must be bound to tank per user lock 2026-09-07')
+  assert.equal(json.active.enemies_dron_fumigador.archetype, 'tank',
+    'enemies_dron_fumigador must be bound to tank per user lock 2026-09-07')
 })
 
 test('manifest: plataforma_solar is deprecated', async () => {
@@ -78,14 +78,14 @@ test('manifest: plataforma_solar is deprecated', async () => {
   assert.ok(json.deprecated?.plataforma_solar, 'plataforma_solar must be marked deprecated')
 })
 
-test('manifest: camion_cisterna_residuos is placeholder=true tank', async () => {
+test('manifest: enemies_camion_cisterna_residuos is placeholder=true tank', async () => {
   const fs = await import('node:fs/promises')
   const path = await import('node:path')
   const url = await import('node:url')
   const here = url.fileURLToPath(new URL('.', import.meta.url))
   const manifestPath = path.resolve(here, '../../assets/sprites/manifest.json')
   const json = JSON.parse(await fs.readFile(manifestPath, 'utf-8'))
-  const e = json.active.camion_cisterna_residuos
+  const e = json.active.enemies_camion_cisterna_residuos
   assert.equal(e.placeholder, true)
   assert.equal(e.archetype, 'tank')
 })

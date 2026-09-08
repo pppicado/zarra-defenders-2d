@@ -24,8 +24,8 @@
  * PRNG: when in ?test=1, production Math.random is REPLACED by a mulberry32(seed)
  * at the boot site. Default seed = 0xC0FFEE, override via &seed=N.
  */
-import { mulberry32 } from './random.js?v=19'
-import { on as busOn } from './event-bus.js?v=19'
+import { mulberry32 } from './random.js?v=26'
+import { on as busOn } from './event-bus.js?v=26'
 
 export const DEFAULT_TEST_SEED = 0xC0FFEE
 
@@ -82,8 +82,11 @@ export function mountTestAPI(ctx) {
     },
     tick(dtMs) {
       ctx.clock?.advance?.(dtMs)
-      // Drive the camera by dt (so deterministic clock + camera stay in sync).
-      if (ctx.camera && !ctx.camera.isHalted?.()) {
+      // In test mode we always advance the camera regardless of halt state,
+      // so tests can simulate an entire level from start to finish without
+      // getting stuck after the integrity is exhausted. The halt is only
+      // relevant for the production game loop, which the test bypasses.
+      if (ctx.camera) {
         const tBefore = ctx.camera.getTime?.() ?? 0
         ctx.camera.setTime?.(tBefore + dtMs / 1000)
         // Also drive escape detection so tests can step past enemies deterministically.
@@ -116,6 +119,10 @@ export function mountTestAPI(ctx) {
       ctx.score?.reset?.()
       ctx.combat?.reset?.()
       ctx.enemies?.reset?.()
+      // Unhalt the camera so the test can drive it from t=0 even if it
+      // was halted by a previous game-over (in ?test=1 production the halt
+      // would have stopped the ticker).
+      if (ctx.camera?.unHalt) ctx.camera.unHalt()
       ctx.camera?.setTime?.(0)
       // Reload the test level so reset() leaves a fully-bootable state.
       // bootLevel() handles spawning (including time-gated spawns); the manual

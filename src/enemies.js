@@ -19,7 +19,7 @@
  * Escape detection (F3.2): Manhattan distance from enemy to camera > 6 tiles.
  * Enemies are static in F3 (no movement); only the camera moves.
  */
-import { emit } from './event-bus.js?v=19'
+import { emit } from './event-bus.js?v=26'
 
 export const ARCHETYPES = Object.freeze({
   standard:    Object.freeze({ hp: 1,  multiplier: 1,   footprint: Object.freeze({ hw: 1.0, hh: 1.0 }), flashMs: 200 }),
@@ -115,10 +115,12 @@ export class EnemyManager {
   /**
    * @param {Object} opts
    * @param {PIXI.Container} [opts.scene]      world/sprite container (optional; visual layer)
+   * @param {Map<string,PIXI.Texture> [opts.textures]  preloaded enemy textures keyed by spriteId
    * @param {Function} [opts.rng]            seeded PRNG (mulberry32) — used only for non-combat visuals
    */
   constructor(opts = {}) {
     this.scene = opts.scene ?? null
+    this.textures = opts.textures ?? new Map()
     this.rng = opts.rng ?? Math.random
     /** @type {Map<string, Enemy>} */
     this._enemies = new Map()
@@ -142,8 +144,27 @@ export class EnemyManager {
       return null
     }
     const enemy = new Enemy(def)
+    this._createSpriteFor(enemy)
     this._enemies.set(enemy.id, enemy)
     return enemy
+  }
+
+  /**
+   * Create a visual sprite for an enemy using the texture keyed by its spriteId.
+   * If no texture is available, the enemy still spawns (state visible to game
+   * logic) but has no graphical representation. Caller should still register
+   * the enemy so escape / hit detection works.
+   */
+  _createSpriteFor(enemy) {
+    if (!this.scene) return
+    const tex = this.textures.get(enemy.spriteId)
+    if (!tex) return
+    const sprite = new PIXI.Sprite(tex)
+    sprite.anchor.set(0.5, 1.0)  // base anchored at bottom center
+    sprite.x = enemy.isoX
+    sprite.y = enemy.isoY
+    enemy.sprite = sprite
+    this.scene.addChild(sprite)
   }
 
   /**
@@ -174,6 +195,22 @@ export class EnemyManager {
   /** @returns {Array<Enemy>} mutable reference for in-frame iteration */
   _live() { return [...this._enemies.values()] }
 
+  /**
+   * Return alive enemies as `{ def, sprite }` records for IsoWorld's
+   * vertical-sprite layout. `def` carries isoX/isoY/archetype for IsoWorld
+   * to compute screen position; `sprite` is the PIXI.Sprite created at spawn.
+   * Falsy sprites are filtered (texture unavailable).
+   */
+  getAliveSprites() {
+    const out = []
+    for (const e of this._live()) {
+      if (!e.sprite) continue
+      if (e.state !== 'alive') continue
+      out.push({ def: e, sprite: e.sprite })
+    }
+    return out
+  }
+
   remove(enemyId) { return this._enemies.delete(enemyId) }
 
   /**
@@ -193,6 +230,10 @@ export class EnemyManager {
       for (const tg of this._timeGatedSpawns) {
         if (elapsedSec >= tg.atSec) {
           const enemy = new Enemy(tg.def)
+          // Create a visual sprite for the enemy using the preloaded texture.
+          // Sprite lives in this.scene (the world's sprite layer) so it renders
+          // above the iso tiles and z-sorts with them.
+          this._createSpriteFor(enemy)
           this._enemies.set(enemy.id, enemy)
         } else {
           remaining.push(tg)
@@ -207,6 +248,7 @@ export class EnemyManager {
         if (enemy.state !== 'alive') continue
         if (isEscaped(enemy, cameraIso)) {
           emit('enemy:escaped', { enemyId: enemy.id, archetype: enemy.archetype })
+          this._destroySprite(enemy)
           this._enemies.delete(enemy.id)
         }
       }
@@ -216,13 +258,36 @@ export class EnemyManager {
     const now = performance.now()
     for (const enemy of this._live()) {
       if (enemy.state === 'destroyed' && enemy.isExpired(now)) {
+        this._destroySprite(enemy)
         this._enemies.delete(enemy.id)
       }
     }
   }
 
+  /**
+   * Remove and destroy the sprite for an enemy. Safe to call even if no
+   * sprite exists (idempotent).
+   */
+  _destroySprite(enemy) {
+    if (enemy.sprite && enemy.sprite.parent) {
+      enemy.sprite.parent.removeChild(enemy.sprite)
+    }
+    if (enemy.sprite) {
+      enemy.sprite.destroy()
+      enemy.sprite = null
+    }
+  }
+
+  /** Remove ALL enemy sprites from the scene (used by reset/loadLevel). */
+  _removeAllSprites() {
+    for (const enemy of this._live()) {
+      this._destroySprite(enemy)
+    }
+  }
+
   /** Wipe all enemies + queue. Used by Reintentar. */
   reset() {
+    this._removeAllSprites()
     this._enemies.clear()
     this._timeGatedSpawns = []
     this._spawnQueue = []

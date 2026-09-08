@@ -18,7 +18,7 @@
  *
  * Determinism: no Math.random anywhere in this file or the spawn consumption.
  */
-import { ARCHETYPES } from '../enemies.js?v=19'
+import { ARCHETYPES } from '../enemies.js?v=26'
 
 /** Spawn time relative to camera progress — when cameraIso depth >= this value, spawn. */
 function _spawnTimeFromDepth(depth) {
@@ -54,6 +54,15 @@ function _buildEnemyDefs() {
   }).sort((a, b) => a.spawnTimeSec - b.spawnTimeSec)
 }
 
+/**
+ * F3.10: rail direction. The rail runs northwest → southeast (iso 0,0 → 18,18).
+ * From the player's perspective the camera advances toward the southeast,
+ * and the world content scrolls past in the opposite direction (toward the
+ * northwest, the back of the frame). That matches the "moving forward"
+ * visual intuition in an on-rails shooter — the world recedes behind us
+ * as we progress. All real stages (F4+) must reuse the same convention
+ * so the camera always scrolls the world in the same direction.
+ */
 export const TEST_LEVEL = Object.freeze({
   railPath: Object.freeze([
     Object.freeze({ t: 0,  isoX: 0,  isoY: 0  }),

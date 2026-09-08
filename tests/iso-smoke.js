@@ -10,9 +10,9 @@
  * sortableChildren === false, world.position update, setStage disposal.
  */
 
-import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin } from '../src/iso/iso-math.js?v=19'
-import { Tilemap, computeCullRange } from '../src/iso/tilemap.js?v=19'
-import { IsoWorld } from '../src/iso/world.js?v=19'
+import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin } from '../src/iso/iso-math.js?v=26'
+import { Tilemap, computeCullRange } from '../src/iso/tilemap.js?v=26'
+import { IsoWorld } from '../src/iso/world.js?v=26'
 
 const W = 1280, H = 720
 

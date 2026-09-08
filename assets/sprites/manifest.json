@@ -1,13 +1,53 @@
 {
   "active": {
-    "camion_cisterna_residuos": {
+    "enemies_camion_treco": {
+      "path": "assets/sprites/enemies_camion_treco.png",
+      "archetype": "standard"
+    },
+    "enemies_bolsa_plastico": {
+      "path": "assets/sprites/enemies_bolsa_plastico.png",
+      "archetype": "standard"
+    },
+    "enemies_bidon_lixiviado": {
+      "path": "assets/sprites/enemies_bidon_lixiviado.png",
+      "archetype": "standard"
+    },
+    "enemies_tubo_lixiviado": {
+      "path": "assets/sprites/enemies_tubo_lixiviado.png",
+      "archetype": "standard"
+    },
+    "enemies_valla_publicitaria": {
+      "path": "assets/sprites/enemies_valla_publicitaria.png",
+      "archetype": "standard"
+    },
+    "enemies_dron_fumigador": {
+      "path": "assets/sprites/enemies_dron_fumigador.png",
+      "archetype": "tank"
+    },
+    "enemies_topadora": {
+      "path": "assets/sprites/enemies_topadora.png",
+      "archetype": "standard"
+    },
+    "enemies_camion_cisterna_residuos": {
       "path": "assets/sprites/camion_cisterna_residuos.png",
       "archetype": "tank",
       "placeholder": true
     },
-    "dron_fumigador": {
-      "path": "assets/sprites/enemies_dron_fumigador.png",
-      "archetype": "tank"
+    "enemies_trailer": {
+      "path": "assets/sprites/enemies_trailer.png",
+      "archetype": "standard"
+    },
+    "enemies_planta_treco": {
+      "path": "assets/sprites/enemies_planta_treco.png",
+      "archetype": "mini-boss"
+    },
+    "enemies_sello_burocratico": {
+      "path": "assets/sprites/enemies_sello_burocratico.png",
+      "archetype": "boss"
+    },
+    "enemies_incineradora": {
+      "path": "assets/sprites/enemies_incineradora.png",
+      "archetype": "standard"
     },
     "hand_pen": {
       "path": "assets/sprites/hand_pen.png",

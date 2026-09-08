@@ -8,7 +8,7 @@
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { eventBus, emit, on } from '../../src/event-bus.js?v=19'
+import { eventBus, emit, on } from '../../src/event-bus.js?v=26'
 
 const TOPICS = [
   'combat:fire', 'combat:hit', 'combat:miss',
