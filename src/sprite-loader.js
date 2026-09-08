@@ -8,7 +8,7 @@
  *
  * Production boot calls loadSpriteManifest() once at boot to know what to mount.
  */
-import { BEST_KEY } from './score.js?v=9'
+import { BEST_KEY } from './score.js?v=10'
 
 const MANIFEST_URL = 'assets/sprites/manifest.json'
 

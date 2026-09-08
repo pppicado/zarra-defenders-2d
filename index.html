@@ -29,9 +29,10 @@
 
   <!-- Contenedor principal del juego con ratio 16:9 bloqueado -->
   <div id="game-container">
+    <!-- World canvas: mundo iso + tiles + sprites de enemigos. z-index 1. -->
     <div id="game-canvas-wrapper"></div>
-    <!-- HUD overlay (placeholder por ahora) -->
-    <div id="hud" class="hidden"></div>
+    <!-- HUD canvas: mano, corazones, papeleta. Encima del mundo. z-index 2. -->
+    <div id="game-hud-wrapper"></div>
     <!-- F3: integrity HUD (top-right 3 segments) — z-index 50 -->
     <div id="integrity-hud" class="hidden"></div>
     <!-- F3: main menu (first-paint, 3 buttons + Acerca de/Disclaimer modals) — z-index 100 -->
@@ -58,6 +59,6 @@
   <!-- Pixi.js v7 estable (cargado desde CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js"></script>
   <!-- Nuestro código (ES modules, sin build step) — query string para forzar no-cache durante dev -->
-  <script type="module" src="src/main.js?v=8"></script>
+  <script type="module" src="src/main.js?v=10"></script>
 </body>
 </html>

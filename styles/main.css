@@ -47,13 +47,18 @@ html, body {
   overflow: hidden;
 }
 
-/* Wrapper interno del canvas Pixi — JS le setea width/height/transform */
-#game-canvas-wrapper {
+/* World canvas + HUD canvas: JS sets width/height/transform via applyCssScale() */
+#game-canvas-wrapper,
+#game-hud-wrapper {
   position: fixed;
   left: 0;
   top: 0;
   /* width/height/transform set by main.js applyCssScale() */
+  pointer-events: auto;
 }
+/* HUD wrapper always on top of the world; both get scaled identically */
+#game-canvas-wrapper { z-index: 1; }
+#game-hud-wrapper { z-index: 2; }
 
 /* HUD y modal overlay encima del canvas */
 #hud, #disclaimer-modal {

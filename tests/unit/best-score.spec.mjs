@@ -6,7 +6,7 @@
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { Score, BEST_KEY } from '../../src/score.js?v=9'
+import { Score, BEST_KEY } from '../../src/score.js?v=10'
 
 class FakeStorage {
   constructor() { this._store = new Map(); this._throwOn = null }

@@ -7,7 +7,7 @@
  * - sortableChildren = false on every container holding tiles (design ADR #1).
  */
 
-import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin } from './iso-math.js?v=9'
+import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin } from './iso-math.js?v=10'
 
 // F2.5.4: bumped from 100 to 400 to support a 4x larger world (4 stages of
 // viewport tiles visible at any time). The hard cap protects against an

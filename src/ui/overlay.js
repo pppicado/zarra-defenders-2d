@@ -18,8 +18,8 @@
  *
  * Idempotency: showGameOver / showVictory are safe to call multiple times.
  */
-import { emit } from '../event-bus.js?v=9'
-import { on } from '../event-bus.js?v=9'
+import { emit } from '../event-bus.js?v=10'
+import { on } from '../event-bus.js?v=10'
 
 export class Overlay {
   /**

@@ -16,23 +16,23 @@
  *   app.stage -> world (camera-driven) | hud (screen-space)
  *   UI overlays (menu / game-over / integrity HUD) are DOM siblings of #game-canvas-wrapper.
  */
-import { RailCamera } from './rail-camera.js?v=9'
-import { Input } from './input.js?v=9'
-import { Player } from './player.js?v=9'
-import { IsoWorld } from './iso/world.js?v=9'
-import { Tilemap } from './iso/tilemap.js?v=9'
-import { Integrity } from './integrity.js?v=9'
-import { Score } from './score.js?v=9'
-import { EnemyManager, ARCHETYPES } from './enemies.js?v=9'
-import { Combat } from './combat.js?v=9'
-import { MainMenu } from './ui/menu.js?v=9'
-import { Overlay } from './ui/overlay.js?v=9'
-import { HUD } from './ui/hud.js?v=9'
-import { TEST_LEVEL, testLevelWaypoints, assertTestLevel, TEST_LEVEL_ENEMY_COUNT } from './levels/test-level.js?v=9'
-import { parseTestFlags, mountTestAPI } from './test-api.js?v=9'
-import { mulberry32, fixedClock } from './random.js?v=9'
-import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?v=9'
-import { on as busOn, emit } from './event-bus.js?v=9'
+import { RailCamera } from './rail-camera.js?v=10'
+import { Input } from './input.js?v=10'
+import { Player } from './player.js?v=10'
+import { IsoWorld } from './iso/world.js?v=10'
+import { Tilemap } from './iso/tilemap.js?v=10'
+import { Integrity } from './integrity.js?v=10'
+import { Score } from './score.js?v=10'
+import { EnemyManager, ARCHETYPES } from './enemies.js?v=10'
+import { Combat } from './combat.js?v=10'
+import { MainMenu } from './ui/menu.js?v=10'
+import { Overlay } from './ui/overlay.js?v=10'
+import { HUD } from './ui/hud.js?v=10'
+import { TEST_LEVEL, testLevelWaypoints, assertTestLevel, TEST_LEVEL_ENEMY_COUNT } from './levels/test-level.js?v=10'
+import { parseTestFlags, mountTestAPI } from './test-api.js?v=10'
+import { mulberry32, fixedClock } from './random.js?v=10'
+import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?v=10'
+import { on as busOn, emit } from './event-bus.js?v=10'
 
 // ============================================================
 // Configuration
@@ -45,6 +45,15 @@ import { on as busOn, emit } from './event-bus.js?v=9'
  * then visual-scales the 1920x1080 buffer to fit any browser viewport.
  */
 const LOGICAL_W = 1920
+
+/**
+ * F3.5: fixed tile edge length in logical pixels. The canvas is always
+ * 1920x1080, so a 128-px tile yields ~15 tiles wide × ~8 tiles tall — enough
+ * to see the iso corridor and a couple of enemies at once, with pixel-art
+ * readability preserved. This value is INDEPENDENT of the browser viewport:
+ * the CSS transform scale-up/scale-down keeps it visually consistent.
+ */
+const TILE_SIZE = 128
 const LOGICAL_H = 1080
 
 /**
@@ -52,19 +61,20 @@ const LOGICAL_H = 1080
  * wrapper's CSS transform to a uniform scale. The canvas inside stays 1920x1080
  * (logical px); the transform only scales the visible rendering.
  *
- * IMPORTANT: this is applied to the wrapper element whose CSS sizing is
- * controlled here (NOT by #game-container letterbox). We compute the target
- * box as `min(viewportW / logicalW, viewportH / logicalH)` to maintain aspect.
+ * F3.5: applied to BOTH the world canvas wrapper and the HUD canvas wrapper
+ * (kept in lockstep so they overlay pixel-perfect on every viewport).
  */
-function applyCssScale(wrapper, logicalW, logicalH) {
-  // Force the wrapper to the exact logical size, then center via transform.
-  // We override the CSS letterbox (#game-container) here so we have full control.
-  const cs = window.getComputedStyle(wrapper)
-  if (cs.position !== 'absolute') wrapper.style.position = 'absolute'
-  if (cs.left !== '0px') wrapper.style.left = '0'
-  if (cs.top !== '0px') wrapper.style.top = '0'
-  wrapper.style.width = logicalW + 'px'
-  wrapper.style.height = logicalH + 'px'
+function applyCssScale(wrappers, logicalW, logicalH) {
+  const list = Array.isArray(wrappers) ? wrappers : [wrappers]
+  for (const w of list) {
+    if (!w) continue
+    w.style.position = 'fixed'
+    w.style.left = '0'
+    w.style.top = '0'
+    w.style.width = logicalW + 'px'
+    w.style.height = logicalH + 'px'
+    w.style.transformOrigin = '0 0'
+  }
 
   const vw = window.innerWidth
   const vh = window.innerHeight
@@ -72,19 +82,20 @@ function applyCssScale(wrapper, logicalW, logicalH) {
   const scale = Math.min(vw / logicalW, vh / logicalH)
   const xOff = (vw - logicalW * scale) / 2
   const yOff = (vh - logicalH * scale) / 2
-  wrapper.style.transformOrigin = '0 0'
-  wrapper.style.transform = `translate(${xOff}px, ${yOff}px) scale(${scale})`
+  const transform = `translate(${xOff}px, ${yOff}px) scale(${scale})`
+  for (const w of list) if (w) w.style.transform = transform
   window.__cssScale__ = { scale, xOff, yOff }
 }
 
 /**
  * Convert a mouse coordinate reported in the wrapper's CSS space into the
- * game's logical 1920x1080 space. This is the inverse of the CSS transform
- * applied by applyCssScale.
+ * game's logical 1920x1080 space. Used by the tap handler so screenToIso
+ * projects from the cursor position to the right iso cell regardless of the
+ * CSS scale applied for the current viewport.
  */
-function toLogical(cssX, cssY, wrapper, logicalW, logicalH) {
+export function toLogical(cssX, cssY) {
   const cs = window.__cssScale__
-  if (!cs || cs.scale === 0) return { x: cssX, y: cssY }
+  if (!cs || !cs.scale) return { x: cssX, y: cssY }
   return {
     x: (cssX - cs.xOff) / cs.scale,
     y: (cssY - cs.yOff) / cs.scale,
@@ -114,33 +125,53 @@ async function bootstrap() {
 
   const { inTestMode, seed } = parseTestFlags()
 
-  // --- Pixi Application ---
-  // The game ALWAYS renders at LOGICAL_W x LOGICAL_H (1920x1080). All positions,
-  // sizes, and game logic use these coordinates. The CSS #game-canvas-wrapper
-  // then applies a CSS `transform: scale()` to fit the actual browser viewport.
-  const wrapper = document.getElementById('game-canvas-wrapper')
-  const app = new PIXI.Application({
+  // --- Pixi Application (WORLD) ---
+  // F3.5: TWO separate Pixi apps stacked via CSS z-index.
+  //   appWorld: iso tiles + enemy sprites (z-index 1, behind)
+  //   appHud:   hand sprite + integrity hearts + papeleta (z-index 2, on top)
+  // Both run at LOGICAL_W x LOGICAL_H (1920x1080). Both CSS wrappers get the
+  // same transform: scale() so they overlay pixel-perfect.
+  const worldWrapper = document.getElementById('game-canvas-wrapper')
+  const hudWrapper = document.getElementById('game-hud-wrapper')
+
+  const appWorld = new PIXI.Application({
     width: LOGICAL_W,
     height: LOGICAL_H,
     background: 0x1a3a1a,
     antialias: false,
-    resolution: 1,        // logical px = drawing px (CSS handles the upscaling)
+    resolution: 1,
     autoDensity: false,
   })
-  wrapper.appendChild(app.view)
+  worldWrapper.appendChild(appWorld.view)
 
-  // --- World / hud containers ---
-  // Both live in logical space (1920x1080). No scale.set, no position.offset.
-  const world = new PIXI.Container(); world.name = 'world'; app.stage.addChild(world)
-  const hud = new PIXI.Container(); hud.name = 'hud'; hud.sortableChildren = true; app.stage.addChild(hud)
+  const appHud = new PIXI.Application({
+    width: LOGICAL_W,
+    height: LOGICAL_H,
+    background: 0x000000,
+    backgroundAlpha: 0,             // transparent so the world shows through
+    antialias: false,
+    resolution: 1,
+    autoDensity: false,
+  })
+  hudWrapper.appendChild(appHud.view)
 
-  // --- CSS scale: fit the 1920x1080 logical canvas into the wrapper's actual size.
-  applyCssScale(wrapper, LOGICAL_W, LOGICAL_H)
+  // --- CSS scale: fit the 1920x1080 logical canvas into the actual viewport.
+  // Same transform applied to both wrappers — they overlay exactly.
+  applyCssScale([worldWrapper, hudWrapper], LOGICAL_W, LOGICAL_H)
 
-  // --- IsoWorld + Tilemap (F2.5 reused) ---
+  // Listen for resize / orientation change and reapply the transform.
+  window.addEventListener('resize', () => applyCssScale([worldWrapper, hudWrapper], LOGICAL_W, LOGICAL_H))
+  window.addEventListener('orientationchange', () => applyCssScale([worldWrapper, hudWrapper], LOGICAL_W, LOGICAL_H))
+
+  // --- World: iso tiles + enemies ---
+  const world = new PIXI.Container(); world.name = 'world'; appWorld.stage.addChild(world)
+
   const isoWorld = new IsoWorld({
     viewportWidth: LOGICAL_W,
     viewportHeight: LOGICAL_H,
+    // F3.5: tileSize is fixed at 128 px logical regardless of viewport. The
+    // canvas is always 1920x1080 so this is a stable value (≈15 tiles wide).
+    tileSize: TILE_SIZE,
   })
   world.addChild(isoWorld.container)
 
@@ -154,6 +185,9 @@ async function bootstrap() {
   isoWorld.registerTilemap(tilemap)
   isoWorld.setStage('stage1-bosque')
 
+  // --- HUD: mano + corazones + papeleta (en appHud.stage) ---
+  const hudContainer = new PIXI.Container(); hudContainer.name = 'hud'; hudContainer.sortableChildren = true; appHud.stage.addChild(hudContainer)
+
   // --- Manifest + sprites ---
   let manifest = { active: {}, deprecated: {} }
   try {
@@ -163,7 +197,7 @@ async function bootstrap() {
   }
   const textureMap = await preloadManifestTextures(manifest)
 
-  // --- Hand sprite (F3 hand-pen-sprite) ---
+  // --- Hand sprite ---
   let handSprite = null
   const handTex = textureMap.get('hand_pen')
   if (handTex) {
@@ -171,7 +205,6 @@ async function bootstrap() {
     handSprite.anchor.set(0.5, 0.85)
     handSprite.scale.set(1.0)
   } else {
-    // Procedural fallback: 32x32 magenta square so the slot is never empty.
     console.warn('[main] hand_pen texture missing — using procedural fallback')
     const g = new PIXI.Graphics()
     g.lineStyle(1, 0x111111, 1)
@@ -181,7 +214,7 @@ async function bootstrap() {
     handSprite = g
   }
 
-  // --- Heart textures (F3.1 — pixel art health) ---
+  // --- Heart textures ---
   const heartFullTex = textureMap.get('heart_full') ?? null
   const heartEmptyTex = textureMap.get('heart_empty') ?? null
   if (!heartFullTex) console.warn('[main] heart_full texture missing — using procedural fallback')
@@ -190,62 +223,56 @@ async function bootstrap() {
   // --- Modules ---
   const integrity = new Integrity({ scoreReader: () => score.read() })
   const score = new Score({})
-  score.loadBest()  // populate in-memory best
+  score.loadBest()
   const enemies = new EnemyManager({ rng: inTestMode ? mulberry32(seed) : Math.random })
-  // rng field is private in the manager; expose it for the test API
   enemies.rng = inTestMode ? mulberry32(seed) : Math.random
 
   const camera = new RailCamera({ waypoints: buildTestLevelPath(), loop: false })
   const input = new Input()
-  input.setCanvas(app.view)
+  // Input reads events from BOTH canvases (world and HUD); clicks on the HUD
+  // canvas are the gameplay ones.
+  input.setCanvas(appHud.view)
 
-  // Wire input gate: taps only reach Player during gameplay state.
   input.setGate(() => gameState.state === 'gameplay')
 
   const hudModule = new HUD({
-    hudContainer: hud,
+    hudContainer,
     integrity,
     score,
     camera,
     handSprite,
     heartFullTex,
     heartEmptyTex,
-    // HUD lives in design space; the container is scaled + centered by main.js
     viewportWidth: LOGICAL_W,
     viewportHeight: LOGICAL_H,
   })
 
-  // Forward pointer movement to HUD (hand sprite tracking).
   input.on('move', (x, y) => hudModule.setPointer(x, y))
 
-  // Forward taps to combat (production wire — projects from cursor to iso, fires from hand).
-  // screenX/Y arrive in wrapper CSS pixel coords. Convert to logical 1920x1080 before
-  // projecting, since the isoWorld runs in logical space and the CSS transform handles
-  // the visual scaling.
+  // Tap handler: convert CSS px → logical px, then project to iso.
   input.on('tap', (screenX, screenY) => {
     if (gameState.state !== 'gameplay') return
     if (!combat) return
     const camIso = { isoX: camera.getCameraX(), isoY: camera.getCameraY() }
-    const lg = toLogical(screenX, screenY, wrapper, LOGICAL_W, LOGICAL_H)
+    const lg = toLogical(screenX, screenY)
     const vc = { x: LOGICAL_W / 2, y: LOGICAL_H / 2 }
     const iso = isoWorld.screenToIsoWithCamera(lg.x, lg.y, camIso, vc)
     const handPos = hudModule.getHandScreenPosition() ?? { x: lg.x, y: lg.y }
     combat.fireAtIso(iso.isoX, iso.isoY, handPos)
   })
 
-  const player = new Player(app, input, hud, camera)
+  const player = new Player(appWorld, input, hudContainer, camera)
 
-  // Combat is created when the level boots (needs isoWorld + enemies + score).
   let combat = null
 
-  // --- Overlay (created BEFORE bootTestLevel so it's reachable from the closure) ---
+  // --- Overlay (DOM) ---
   const overlayRoot = document.getElementById('game-overlay')
   const overlay = new Overlay({
     root: overlayRoot,
     integrity,
     score,
     camera,
-    combat: null,                  // refreshed on bootTestLevel
+    combat: null,
     enemies,
     gameState,
   })
@@ -262,7 +289,6 @@ async function bootstrap() {
   if (!inTestMode) mainMenu.show()
   else mainMenu.hide()
 
-  // When player clicks "Iniciar test level"
   busOn('menu:startRequested', async () => {
     mainMenu.hide()
     await bootTestLevel({ combat, isoWorld, enemies, camera, score, integrity, hud: hudModule, world, overlay })
@@ -278,7 +304,7 @@ async function bootstrap() {
     mainMenu.show()
   })
 
-  // --- Test API (mounts once isoWorld + camera exist) ---
+  // --- Test API ---
   if (inTestMode) {
     mountTestAPI({
       bus: window.eventBus,
@@ -296,46 +322,40 @@ async function bootstrap() {
     })
   }
 
-  // --- Game loop ---
+  // --- Game loop (drives both apps in lockstep) ---
   let lastTime = performance.now()
-  app.ticker.add(() => {
+  const ticker = () => {
     const now = performance.now()
     const dt = (now - lastTime) / 1000
     lastTime = now
 
-    // Camera advance. In test mode, the test API owns the clock and skips this
-    // (otherwise double-advancement confuses setTime/seek expectations).
     if (!inTestMode) camera.update(dt)
 
-    // IsoWorld + tilemap cull
     const camIso = { isoX: camera.getCameraX(), isoY: camera.getCameraY() }
     if (combat) combat.setCameraIso(camIso)
-    isoWorld.update(camera, [])  // verticalSprites intentionally empty — no decorative sprites in F3 yet
+    isoWorld.update(camera, [])
 
-    // Enemies (escape detection) — driven by either the ticker or the test API
     if (!inTestMode) {
       const elapsedSec = camera.getTime ? camera.getTime() : 0
       enemies.update(dt * 1000, camIso, elapsedSec)
     }
 
-    // Combat ticks
     if (combat) combat.update(dt * 1000)
 
-    // Victory detector
     maybeFireVictory({ camera, enemies, integrity })
-  })
+  }
+  appWorld.ticker.add(ticker)
+  appHud.ticker.add(ticker)
 
-  // Integrity hookup: enemy:escaped -> integrity.drain
   busOn('enemy:escaped', () => {
     integrity.drain('enemy:escaped')
   })
 
-  // Listen for victory detector
   busOn('stage:cleared', () => {
     overlay.showVictory()
   })
 
-  console.log('[ZarraDefenders2D] Bootstrap OK. F3 shooter rail gameplay ready.')
+  console.log('[ZarraDefenders2D] Bootstrap OK. F3.5 two-canvas + tileSize=128.')
 
   async function bootTestLevel(ctx) {
     if (combat) { combat.reset() }
@@ -344,16 +364,14 @@ async function bootstrap() {
     score.reset()
     camera.setTime(0)
 
-    // Spawn enemies from the deterministic test level.
     assertTestLevel()
     enemies.loadLevel(TEST_LEVEL.enemies)
 
-    // Create Combat (idempotent across re-boots)
+    // Combat fires its papeleta into the HUD canvas (on top of the world).
     combat = new Combat({
-      scene: hud,
+      scene: hudContainer,
       isoWorld,
       cameraIso: { isoX: 0, isoY: 0 },
-      // Projectiles live in the HUD layer (logical 1920x1080 space).
       viewportCenter: { x: LOGICAL_W / 2, y: LOGICAL_H / 2 },
       score,
       enemies,
@@ -381,9 +399,8 @@ async function bootstrap() {
     }
   }
 
-  // Expose for Playwright tests (also used for `__gameTestAPI__`)
   window.__zarraGameState__ = gameState
-  window.__zarraModules__ = { integrity, score, enemies, camera, input, isoWorld, hud: hudModule, overlay }
+  window.__zarraModules__ = { integrity, score, enemies, camera, input, isoWorld, hud: hudModule, overlay, appWorld, appHud }
 }
 
 /** Victory detector helper — emits stage:cleared exactly once. */

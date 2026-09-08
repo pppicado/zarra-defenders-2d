@@ -56,13 +56,18 @@ export class Input {
 
   /**
    * Vincula los event listeners al canvas del juego. Llamar una vez en bootstrap.
-   * @param {HTMLCanvasElement} canvas
+   * Acepta un solo canvas o un array de canvases (para multi-canvas: el listener
+   * se registra en el primero que reciba eventos). F3.5: pasamos ambos canvases
+   * (world + HUD) y los listeners viven en ambos.
+   * @param {HTMLCanvasElement|HTMLCanvasElement[]} canvasOrCanvases
    */
-  setCanvas(canvas) {
+  setCanvas(canvasOrCanvases) {
     if (this.canvas) {
       this._detach()
     }
-    this.canvas = canvas
+    const arr = Array.isArray(canvasOrCanvases) ? canvasOrCanvases : [canvasOrCanvases]
+    this.canvas = arr[0] || null
+    this._canvases = arr
     this._attach()
   }
 
@@ -108,15 +113,18 @@ export class Input {
   // =================== Internal: event wiring ===================
 
   _attach() {
+    // F3.5: register listeners on a single element (the primary canvas) only,
+    // to avoid double-firing when both world and HUD canvases overlap. The
+    // primary canvas is the one on top (HUD). For multi-canvas apps, pass the
+    // topmost canvas to setCanvas(); the click will register even though the
+    // visual rendering comes from the world canvas underneath, because the HUD
+    // canvas has backgroundAlpha: 0 and pointer-events: auto.
     if (!this.canvas) return
-    // Pointer Events (preferido: cubre mouse, touch y pen con una sola API)
     this.canvas.addEventListener('pointermove', this._onPointerMove, { passive: true })
     this.canvas.addEventListener('pointerdown', this._onPointerDown)
     this.canvas.addEventListener('pointerup', this._onPointerUp)
     this.canvas.addEventListener('pointercancel', this._onPointerCancel)
-    // Pointer leave: cuando el puntero sale del canvas
     this.canvas.addEventListener('pointerleave', () => { this.pointerInside = false })
-    // Teclado (pausa)
     window.addEventListener('keydown', this._onKeyDown)
   }
 
