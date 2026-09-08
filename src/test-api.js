@@ -118,11 +118,11 @@ export function mountTestAPI(ctx) {
       ctx.enemies?.reset?.()
       ctx.camera?.setTime?.(0)
       // Reload the test level so reset() leaves a fully-bootable state.
+      // bootLevel() handles spawning (including time-gated spawns); the manual
+      // fallback below is only for tests that bypass bootLevel entirely.
       if (ctx.bootLevel) {
         try { ctx.bootLevel() } catch (e) { /* boot may already be in progress */ }
-      }
-      // Force enemies to be loaded synchronously if not yet via bootLevel.
-      if (ctx.testLevel?.enemies && ctx.enemies?._enemies?.size === 0) {
+      } else if (ctx.testLevel?.enemies) {
         for (const def of ctx.testLevel.enemies) ctx.enemies.spawn(def)
       }
     },

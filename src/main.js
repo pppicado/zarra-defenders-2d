@@ -176,13 +176,17 @@ async function bootstrap() {
   input.on('move', (x, y) => hudModule.setPointer(x, y))
 
   // Forward taps to combat (production wire — projects from cursor to iso, fires from hand).
+  // screenX/Y arrive in wrapper-real coordinates; the isoWorld now lives in design
+  // space (1280x720), so convert before projecting.
   input.on('tap', (screenX, screenY) => {
     if (gameState.state !== 'gameplay') return
     if (!combat) return
     const camIso = { isoX: camera.getCameraX(), isoY: camera.getCameraY() }
-    const vc = { x: wrapper.clientWidth / 2, y: wrapper.clientHeight / 2 }
-    const iso = isoWorld.screenToIsoWithCamera(screenX, screenY, camIso, vc)
-    const handPos = hudModule.getHandScreenPosition() ?? { x: screenX, y: screenY }
+    const dsX = (screenX - dv.offsetX) / dv.scale
+    const dsY = (screenY - dv.offsetY) / dv.scale
+    const vc = { x: dv.designWidth / 2, y: dv.designHeight / 2 }
+    const iso = isoWorld.screenToIsoWithCamera(dsX, dsY, camIso, vc)
+    const handPos = hudModule.getHandScreenPosition() ?? { x: dsX, y: dsY }
     combat.fireAtIso(iso.isoX, iso.isoY, handPos)
   })
 

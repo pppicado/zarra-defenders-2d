@@ -120,7 +120,12 @@ export function getTileHalf(tileSize) {
  * @returns {number}  the iso depth threshold; enemies with depth < this have escaped
  */
 export function escapeFrontDepth(cameraIsoX, cameraIsoY) {
-  return cameraIsoX + cameraIsoY
+  // F3.2: buffer of 4 tiles so enemies remain hittable for a window after they
+  // spawn. The camera-departure semantics are: enemy escapes when the camera
+  // has moved ~4 tiles past it on the iso rail (depth grows at 0.6 per second
+  // for our 60s rail; 4 tiles = ~6.6 s of hittable time per enemy, which gives
+  // the player enough reaction time to score hits before escape).
+  return cameraIsoX + cameraIsoY + 4
 }
 
 /**

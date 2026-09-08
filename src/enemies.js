@@ -11,13 +11,10 @@
  *
  * dron_fumigador -> tank (locked by user 2026-09-07).
  *
- * Escape detection: enemy escapes when its iso center crosses
- *   escapeFrontDepth = cameraIsoX + cameraIsoY + 1
- * (one iso row past the active front edge — see iso-camera-integration / CAM-003).
+ * Escape detection (F3.2): Manhattan distance from enemy to camera > 6 tiles.
  * Enemies are static in F3 (no movement); only the camera moves.
  */
 import { emit } from './event-bus.js?v=9'
-import { escapeFrontDepth } from './iso/iso-math.js?v=9'
 
 export const ARCHETYPES = Object.freeze({
   standard:    Object.freeze({ hp: 1,  multiplier: 1,   footprint: Object.freeze({ hw: 0.5, hh: 0.5 }), flashMs: 200 }),
@@ -95,14 +92,18 @@ export class Enemy {
 /**
  * Iso-escape detection: returns true if the camera has moved PAST the enemy.
  *
- *   enemy.depth < camera.depth  → camera is now deeper than the enemy → escaped.
+ *   F3.2: Manhattan distance from enemy to camera > 6 tiles → escaped.
  *
- * (See iso-math.js escapeFrontDepth for the rationale on why the predicate is
- *  `enemy.depth < camera.depth` and not the spec's literal `> camera + 1`.)
+ * Previous version used `enemy.depth < camera.depth` (iso-sum comparison),
+ * which flagged perpendicular enemies (e.g. enemy at (3,2) with camera at
+ * (2.7,2.7)) as escaped even though they were right next to the camera.
+ * Manhattan distance > 6 tiles correctly captures "the camera has moved past
+ * and is more than 6 tiles away in any direction".
  */
 export function isEscaped(enemy, cameraIso) {
-  const camDepth = escapeFrontDepth(cameraIso.isoX ?? cameraIso.x, cameraIso.isoY ?? cameraIso.y)
-  return (enemy.isoX + enemy.isoY) < camDepth
+  const dx = Math.abs((enemy.isoX ?? 0) - (cameraIso.isoX ?? cameraIso.x ?? 0))
+  const dy = Math.abs((enemy.isoY ?? 0) - (cameraIso.isoY ?? cameraIso.y ?? 0))
+  return (dx + dy) > 6
 }
 
 export class EnemyManager {

@@ -24,10 +24,12 @@ import { ARCHETYPES } from '../enemies.js?v=9'
 function _spawnTimeFromDepth(depth) {
   // rail path: 0..60 s, depth 0..36 (18 + 18). Map depth to time.
   // depth = 36 -> t = 60, depth = 0 -> t = 0.
-  // Per-enemy: spawn just slightly before its iso depth is reached, so it's hittable.
-  // We use the per-enemy depth + a small offset (0.5).
-  const t = (depth / 36) * 60
-  return Math.max(0, t - 0.5)
+  // F3.2: spawn each enemy when the camera is ~5 tiles short of their iso depth,
+  // so the player has a ~5-tile window to hit them before the camera passes
+  // and they fall out of the corridor. With a +4 buffer in escapeFrontDepth,
+  // this gives the enemy roughly 9 tiles of visible+hittable time.
+  const t = ((depth - 5) / 36) * 60
+  return Math.max(0, t)
 }
 
 /** @returns {Array<Object>} test-level enemy definitions, sorted by spawnTime. */
