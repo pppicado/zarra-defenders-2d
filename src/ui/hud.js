@@ -20,13 +20,19 @@
  */
 import { on } from '../event-bus.js?v=9'
 
-/** Hand anchor offset from canvas bottom-center. */
-export const HAND_BOTTOM_OFFSET = Object.freeze({ x: 0, y: -32 })
+/**
+ * The HUD always runs in 1920x1080 logical space (see src/main.js LOGICAL_W/H).
+ * Hand and hearts are positioned at real 1920x1080 coordinates; CSS transform
+ * on the wrapper scales them visually to any viewport size.
+ */
 
-/** Heart layout. */
-export const HEART_SIZE = 48
-export const HEART_GAP = 8
-export const HEART_MARGIN = 16
+/** Hand anchor offset from canvas bottom-center. */
+export const HAND_BOTTOM_OFFSET = Object.freeze({ x: 0, y: -48 })
+
+/** Heart layout (in logical 1920x1080 space). */
+export const HEART_SIZE = 96
+export const HEART_GAP = 16
+export const HEART_MARGIN = 32
 
 export class HUD {
   /**

@@ -17,7 +17,6 @@
  *   UI overlays (menu / game-over / integrity HUD) are DOM siblings of #game-canvas-wrapper.
  */
 import { RailCamera } from './rail-camera.js?v=9'
-import { DesignViewport } from './design-viewport.js?v=9'
 import { Input } from './input.js?v=9'
 import { Player } from './player.js?v=9'
 import { IsoWorld } from './iso/world.js?v=9'
@@ -38,6 +37,59 @@ import { on as busOn, emit } from './event-bus.js?v=9'
 // ============================================================
 // Configuration
 // ============================================================
+
+/**
+ * LOGICAL_W × LOGICAL_H is the fixed internal rendering resolution. Every game
+ * coordinate (hand position, hearts, projectile origin, tile sizes, viewport
+ * center) is expressed in this space. CSS `transform: scale()` on the wrapper
+ * then visual-scales the 1920x1080 buffer to fit any browser viewport.
+ */
+const LOGICAL_W = 1920
+const LOGICAL_H = 1080
+
+/**
+ * Fit a fixed-size logical canvas into the actual viewport by setting the
+ * wrapper's CSS transform to a uniform scale. The canvas inside stays 1920x1080
+ * (logical px); the transform only scales the visible rendering.
+ *
+ * IMPORTANT: this is applied to the wrapper element whose CSS sizing is
+ * controlled here (NOT by #game-container letterbox). We compute the target
+ * box as `min(viewportW / logicalW, viewportH / logicalH)` to maintain aspect.
+ */
+function applyCssScale(wrapper, logicalW, logicalH) {
+  // Force the wrapper to the exact logical size, then center via transform.
+  // We override the CSS letterbox (#game-container) here so we have full control.
+  const cs = window.getComputedStyle(wrapper)
+  if (cs.position !== 'absolute') wrapper.style.position = 'absolute'
+  if (cs.left !== '0px') wrapper.style.left = '0'
+  if (cs.top !== '0px') wrapper.style.top = '0'
+  wrapper.style.width = logicalW + 'px'
+  wrapper.style.height = logicalH + 'px'
+
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  if (!vw || !vh) return
+  const scale = Math.min(vw / logicalW, vh / logicalH)
+  const xOff = (vw - logicalW * scale) / 2
+  const yOff = (vh - logicalH * scale) / 2
+  wrapper.style.transformOrigin = '0 0'
+  wrapper.style.transform = `translate(${xOff}px, ${yOff}px) scale(${scale})`
+  window.__cssScale__ = { scale, xOff, yOff }
+}
+
+/**
+ * Convert a mouse coordinate reported in the wrapper's CSS space into the
+ * game's logical 1920x1080 space. This is the inverse of the CSS transform
+ * applied by applyCssScale.
+ */
+function toLogical(cssX, cssY, wrapper, logicalW, logicalH) {
+  const cs = window.__cssScale__
+  if (!cs || cs.scale === 0) return { x: cssX, y: cssY }
+  return {
+    x: (cssX - cs.xOff) / cs.scale,
+    y: (cssY - cs.yOff) / cs.scale,
+  }
+}
 
 /** F3 test level rail path (iso coords; same shape as F2.5 DEMO_PATH_ISO). */
 function buildTestLevelPath() {
@@ -63,45 +115,36 @@ async function bootstrap() {
   const { inTestMode, seed } = parseTestFlags()
 
   // --- Pixi Application ---
+  // The game ALWAYS renders at LOGICAL_W x LOGICAL_H (1920x1080). All positions,
+  // sizes, and game logic use these coordinates. The CSS #game-canvas-wrapper
+  // then applies a CSS `transform: scale()` to fit the actual browser viewport.
   const wrapper = document.getElementById('game-canvas-wrapper')
   const app = new PIXI.Application({
+    width: LOGICAL_W,
+    height: LOGICAL_H,
     background: 0x1a3a1a,
     antialias: false,
-    resolution: window.devicePixelRatio || 1,
-    autoDensity: true,
-    resizeTo: wrapper,
+    resolution: 1,        // logical px = drawing px (CSS handles the upscaling)
+    autoDensity: false,
   })
   wrapper.appendChild(app.view)
 
   // --- World / hud containers ---
+  // Both live in logical space (1920x1080). No scale.set, no position.offset.
   const world = new PIXI.Container(); world.name = 'world'; app.stage.addChild(world)
   const hud = new PIXI.Container(); hud.name = 'hud'; hud.sortableChildren = true; app.stage.addChild(hud)
 
-  // --- Design viewport: scale HUD layer to match design reference (1280x720).
-  // The world (iso tiles) scales itself via computeTileSize; the HUD layer uses
-  // the design scale so the hand sprite, hearts, and future overlays look identical
-  // on 4K, 1080p, and mobile letterbox.
-  const dv = new DesignViewport(wrapper.clientWidth, wrapper.clientHeight)
-  hud.scale.set(dv.scale, dv.scale)
-  // Center the scaled HUD inside the wrapper.
-  hud.position.set(dv.offsetX, dv.offsetY)
-  // Expose for tests + the ?test=1 API.
-  window.__designViewport__ = dv
+  // --- CSS scale: fit the 1920x1080 logical canvas into the wrapper's actual size.
+  applyCssScale(wrapper, LOGICAL_W, LOGICAL_H)
 
   // --- IsoWorld + Tilemap (F2.5 reused) ---
-  // IsoWorld runs in design space (1280x720) so tileSize stays 64 on every
-  // resolution. The world container is scaled to the wrapper's actual size
-  // (matching the HUD layer) so the iso projection looks identical on 4K,
-  // 1080p, and 1280x720 — only the letterbox around the world changes.
   const isoWorld = new IsoWorld({
-    viewportWidth: dv.designWidth,
-    viewportHeight: dv.designHeight,
+    viewportWidth: LOGICAL_W,
+    viewportHeight: LOGICAL_H,
   })
-  world.scale.set(dv.scale, dv.scale)
-  world.position.set(dv.offsetX, dv.offsetY)
   world.addChild(isoWorld.container)
 
-  const tilemap = new Tilemap('stage1-bosque', dv.designWidth, dv.designHeight)
+  const tilemap = new Tilemap('stage1-bosque', LOGICAL_W, LOGICAL_H)
   await tilemap.load(async (variant) => {
     const url = `assets/tiles/stage1-bosque/${variant}_alt1.png`
     const tex = await PIXI.Assets.load(url)
@@ -168,25 +211,25 @@ async function bootstrap() {
     heartFullTex,
     heartEmptyTex,
     // HUD lives in design space; the container is scaled + centered by main.js
-    viewportWidth: dv.designWidth,
-    viewportHeight: dv.designHeight,
+    viewportWidth: LOGICAL_W,
+    viewportHeight: LOGICAL_H,
   })
 
   // Forward pointer movement to HUD (hand sprite tracking).
   input.on('move', (x, y) => hudModule.setPointer(x, y))
 
   // Forward taps to combat (production wire — projects from cursor to iso, fires from hand).
-  // screenX/Y arrive in wrapper-real coordinates; the isoWorld now lives in design
-  // space (1280x720), so convert before projecting.
+  // screenX/Y arrive in wrapper CSS pixel coords. Convert to logical 1920x1080 before
+  // projecting, since the isoWorld runs in logical space and the CSS transform handles
+  // the visual scaling.
   input.on('tap', (screenX, screenY) => {
     if (gameState.state !== 'gameplay') return
     if (!combat) return
     const camIso = { isoX: camera.getCameraX(), isoY: camera.getCameraY() }
-    const dsX = (screenX - dv.offsetX) / dv.scale
-    const dsY = (screenY - dv.offsetY) / dv.scale
-    const vc = { x: dv.designWidth / 2, y: dv.designHeight / 2 }
-    const iso = isoWorld.screenToIsoWithCamera(dsX, dsY, camIso, vc)
-    const handPos = hudModule.getHandScreenPosition() ?? { x: dsX, y: dsY }
+    const lg = toLogical(screenX, screenY, wrapper, LOGICAL_W, LOGICAL_H)
+    const vc = { x: LOGICAL_W / 2, y: LOGICAL_H / 2 }
+    const iso = isoWorld.screenToIsoWithCamera(lg.x, lg.y, camIso, vc)
+    const handPos = hudModule.getHandScreenPosition() ?? { x: lg.x, y: lg.y }
     combat.fireAtIso(iso.isoX, iso.isoY, handPos)
   })
 
@@ -249,7 +292,7 @@ async function bootstrap() {
       testLevel: TEST_LEVEL,
       bootLevel: () => bootTestLevel({ combat, isoWorld, enemies, camera, score, integrity, hud: hudModule, world }),
       isoWorld,
-      viewportCenter: { x: wrapper.clientWidth / 2, y: wrapper.clientHeight / 2 },
+      viewportCenter: { x: LOGICAL_W / 2, y: LOGICAL_H / 2 },
     })
   }
 
@@ -310,12 +353,11 @@ async function bootstrap() {
       scene: hud,
       isoWorld,
       cameraIso: { isoX: 0, isoY: 0 },
-      // Projectiles live in the HUD layer (design space 1280x720), so viewport
-      // values must also be in design space — the HUD's scale handles final size.
-      viewportCenter: { x: dv.designWidth / 2, y: dv.designHeight / 2 },
+      // Projectiles live in the HUD layer (logical 1920x1080 space).
+      viewportCenter: { x: LOGICAL_W / 2, y: LOGICAL_H / 2 },
       score,
       enemies,
-      viewportSize: { x: dv.designWidth, y: dv.designHeight },
+      viewportSize: { x: LOGICAL_W, y: LOGICAL_H },
       callbacks: {
         onHit: (id, hp, arch) => { /* hook for HUD later */ },
         onMiss: () => {},

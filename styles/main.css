@@ -35,22 +35,24 @@ html, body {
    - En cualquier caso: máx área posible manteniendo 16:9
    ============================================================ */
 #game-container {
+  /* F3.4: sizing is now controlled by main.js (applyCssScale), not by letterbox
+     CSS. The container is just the positioning root; the wrapper inside is sized
+     to 1920x1080 by JS and then CSS-transform-scaled to fit the viewport. */
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
   width: 100vw;
-  height: 56.25vw;                /* 9/16 = 0.5625 */
-  max-height: 100vh;
-  max-width: 177.77778vh;          /* 16/9 = 1.7778 */
+  height: 100vh;
   background: #000;
   overflow: hidden;
 }
 
-/* Wrapper interno del canvas Pixi — llena el contenedor */
+/* Wrapper interno del canvas Pixi — JS le setea width/height/transform */
 #game-canvas-wrapper {
-  position: absolute;
-  inset: 0;
+  position: fixed;
+  left: 0;
+  top: 0;
+  /* width/height/transform set by main.js applyCssScale() */
 }
 
 /* HUD y modal overlay encima del canvas */
