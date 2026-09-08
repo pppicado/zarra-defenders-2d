@@ -86,6 +86,9 @@ html, body {
   gap: 1.5rem;
   z-index: 9999;
   color: #f5a623;                  /* naranja retro */
+  /* F3.5: pointer-events none so the modal doesn't block click testing on
+     small viewports. The modal is purely advisory; the game still renders. */
+  pointer-events: none;
 }
 
 #orientation-warning p {

@@ -3,24 +3,29 @@
  *
  * Enemy archetypes + Enemy + EnemyManager (F3 enemy-archetypes spec).
  *
- * Archetype table — locked:
- *   standard    : HP 1,  multiplier 1,   footprint hw=0.5 hh=0.5, flash 200 ms
- *   tank        : HP 3,  multiplier 1.5, footprint hw=0.7 hh=0.7, flash 200 ms
- *   'mini-boss' : HP 10, multiplier 2,   footprint hw=0.8 hh=0.8, flash 200 ms
- *   boss        : HP 30, multiplier 3,   footprint hw=1.0 hh=1.0, flash 200 ms
+ * Archetype table — F3.5 widened footprints:
+ *   standard    : HP 1,  multiplier 1,   footprint hw=1.0 hh=1.0, flash 200 ms
+ *   tank        : HP 3,  multiplier 1.5, footprint hw=1.2 hh=1.2, flash 200 ms
+ *   'mini-boss' : HP 10, multiplier 2,   footprint hw=1.5 hh=1.5, flash 200 ms
+ *   boss        : HP 30, multiplier 3,   footprint hw=2.0 hh=2.0, flash 200 ms
+ *
+ * F3.5: footprints enlarged from the original 0.5x0.5 / 0.7x0.7. At tileSize=128,
+ * a 0.5 footprint = 64px hittable area, which required pixel-perfect clicks.
+ * 1.0 footprint = 128px, matching the visible sprite size, so any click on or
+ * near the visible enemy counts as a hit.
  *
  * dron_fumigador -> tank (locked by user 2026-09-07).
  *
  * Escape detection (F3.2): Manhattan distance from enemy to camera > 6 tiles.
  * Enemies are static in F3 (no movement); only the camera moves.
  */
-import { emit } from './event-bus.js?v=10'
+import { emit } from './event-bus.js?v=15'
 
 export const ARCHETYPES = Object.freeze({
-  standard:    Object.freeze({ hp: 1,  multiplier: 1,   footprint: Object.freeze({ hw: 0.5, hh: 0.5 }), flashMs: 200 }),
-  tank:        Object.freeze({ hp: 3,  multiplier: 1.5, footprint: Object.freeze({ hw: 0.7, hh: 0.7 }), flashMs: 200 }),
-  'mini-boss': Object.freeze({ hp: 10, multiplier: 2,   footprint: Object.freeze({ hw: 0.8, hh: 0.8 }), flashMs: 200 }),
-  boss:        Object.freeze({ hp: 30, multiplier: 3,   footprint: Object.freeze({ hw: 1.0, hh: 1.0 }), flashMs: 200 }),
+  standard:    Object.freeze({ hp: 1,  multiplier: 1,   footprint: Object.freeze({ hw: 1.0, hh: 1.0 }), flashMs: 200 }),
+  tank:        Object.freeze({ hp: 3,  multiplier: 1.5, footprint: Object.freeze({ hw: 1.2, hh: 1.2 }), flashMs: 200 }),
+  'mini-boss': Object.freeze({ hp: 10, multiplier: 2,   footprint: Object.freeze({ hw: 1.5, hh: 1.5 }), flashMs: 200 }),
+  boss:        Object.freeze({ hp: 30, multiplier: 3,   footprint: Object.freeze({ hw: 2.0, hh: 2.0 }), flashMs: 200 }),
 })
 
 export const ARCHETYPE_IDS = Object.freeze(Object.keys(ARCHETYPES))

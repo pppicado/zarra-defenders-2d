@@ -19,8 +19,8 @@
  *   - Input.setGate from main.js (when menu/overlay visible, fireAtIso still works — only the
  *     pointer tap pipeline is gated; this is for tests + UI button "fire" hooks).
  */
-import { emit } from './event-bus.js?v=10'
-import { ARCHETYPES } from './enemies.js?v=10'
+import { emit } from './event-bus.js?v=15'
+import { ARCHETYPES } from './enemies.js?v=15'
 
 export const FIRE_COOLDOWN_MS = 333
 export const PROJECTILE_SPEED = 800          // world-units / sec

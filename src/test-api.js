@@ -24,8 +24,8 @@
  * PRNG: when in ?test=1, production Math.random is REPLACED by a mulberry32(seed)
  * at the boot site. Default seed = 0xC0FFEE, override via &seed=N.
  */
-import { mulberry32 } from './random.js?v=10'
-import { on as busOn } from './event-bus.js?v=10'
+import { mulberry32 } from './random.js?v=15'
+import { on as busOn } from './event-bus.js?v=15'
 
 export const DEFAULT_TEST_SEED = 0xC0FFEE
 

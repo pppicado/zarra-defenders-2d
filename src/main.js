@@ -16,23 +16,23 @@
  *   app.stage -> world (camera-driven) | hud (screen-space)
  *   UI overlays (menu / game-over / integrity HUD) are DOM siblings of #game-canvas-wrapper.
  */
-import { RailCamera } from './rail-camera.js?v=10'
-import { Input } from './input.js?v=10'
-import { Player } from './player.js?v=10'
-import { IsoWorld } from './iso/world.js?v=10'
-import { Tilemap } from './iso/tilemap.js?v=10'
-import { Integrity } from './integrity.js?v=10'
-import { Score } from './score.js?v=10'
-import { EnemyManager, ARCHETYPES } from './enemies.js?v=10'
-import { Combat } from './combat.js?v=10'
-import { MainMenu } from './ui/menu.js?v=10'
-import { Overlay } from './ui/overlay.js?v=10'
-import { HUD } from './ui/hud.js?v=10'
-import { TEST_LEVEL, testLevelWaypoints, assertTestLevel, TEST_LEVEL_ENEMY_COUNT } from './levels/test-level.js?v=10'
-import { parseTestFlags, mountTestAPI } from './test-api.js?v=10'
-import { mulberry32, fixedClock } from './random.js?v=10'
-import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?v=10'
-import { on as busOn, emit } from './event-bus.js?v=10'
+import { RailCamera } from './rail-camera.js?v=15'
+import { Input } from './input.js?v=15'
+import { Player } from './player.js?v=15'
+import { IsoWorld } from './iso/world.js?v=15'
+import { Tilemap } from './iso/tilemap.js?v=15'
+import { Integrity } from './integrity.js?v=15'
+import { Score } from './score.js?v=15'
+import { EnemyManager, ARCHETYPES } from './enemies.js?v=15'
+import { Combat } from './combat.js?v=15'
+import { MainMenu } from './ui/menu.js?v=15'
+import { Overlay } from './ui/overlay.js?v=15'
+import { HUD } from './ui/hud.js?v=15'
+import { TEST_LEVEL, testLevelWaypoints, assertTestLevel, TEST_LEVEL_ENEMY_COUNT } from './levels/test-level.js?v=15'
+import { parseTestFlags, mountTestAPI } from './test-api.js?v=15'
+import { mulberry32, fixedClock } from './random.js?v=15'
+import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?v=15'
+import { on as busOn, emit } from './event-bus.js?v=15'
 
 // ============================================================
 // Configuration
@@ -175,7 +175,9 @@ async function bootstrap() {
   })
   world.addChild(isoWorld.container)
 
-  const tilemap = new Tilemap('stage1-bosque', LOGICAL_W, LOGICAL_H)
+  // F3.5: pass TILE_SIZE explicitly so the tilemap renders at the same
+  // scale as IsoWorld expects for screenToIsoWithCamera / hit detection.
+  const tilemap = new Tilemap('stage1-bosque', LOGICAL_W, LOGICAL_H, { tileSize: TILE_SIZE })
   await tilemap.load(async (variant) => {
     const url = `assets/tiles/stage1-bosque/${variant}_alt1.png`
     const tex = await PIXI.Assets.load(url)
@@ -249,15 +251,15 @@ async function bootstrap() {
 
   input.on('move', (x, y) => hudModule.setPointer(x, y))
 
-  // Tap handler: convert CSS px → logical px, then project to iso.
-  input.on('tap', (screenX, screenY) => {
+  // Tap handler: the input handler has already converted CSS px → logical
+  // 1920x1080 px (see _toLogical in input.js). Pass through to isoWorld.
+  input.on('tap', (logicalX, logicalY) => {
     if (gameState.state !== 'gameplay') return
     if (!combat) return
     const camIso = { isoX: camera.getCameraX(), isoY: camera.getCameraY() }
-    const lg = toLogical(screenX, screenY)
     const vc = { x: LOGICAL_W / 2, y: LOGICAL_H / 2 }
-    const iso = isoWorld.screenToIsoWithCamera(lg.x, lg.y, camIso, vc)
-    const handPos = hudModule.getHandScreenPosition() ?? { x: lg.x, y: lg.y }
+    const iso = isoWorld.screenToIsoWithCamera(logicalX, logicalY, camIso, vc)
+    const handPos = hudModule.getHandScreenPosition() ?? { x: logicalX, y: logicalY }
     combat.fireAtIso(iso.isoX, iso.isoY, handPos)
   })
 
@@ -413,14 +415,21 @@ let _victoryEmitted = false
 function setupOrientationLock() {
   const modal = document.getElementById('orientation-warning')
   if (!modal) return
-  const mq = window.matchMedia('(orientation: landscape)')
+  // F3.5: only show the modal if the viewport is too small in BOTH dimensions
+  // to be playable. A 412x915 viewport renders the game in a 88x196 letterbox
+  // area at the top, which is technically playable but useless. So we hide the
+  // modal when either dimension >= 720 (the game has a meaningful canvas area).
   function update() {
-    if (mq.matches) modal.classList.add('hidden')
-    else modal.classList.remove('hidden')
+    const w = window.innerWidth
+    const h = window.innerHeight
+    const minDim = Math.min(w, h)
+    if (minDim >= 720) {
+      modal.classList.add('hidden')
+    } else {
+      modal.classList.remove('hidden')
+    }
   }
   update()
-  if (mq.addEventListener) mq.addEventListener('change', update)
-  else if (mq.addListener) mq.addListener(update)
   window.addEventListener('resize', update)
   window.addEventListener('orientationchange', update)
 }

@@ -6,42 +6,42 @@
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { ARCHETYPES, assertArchetype, ConfigError } from '../../src/enemies.js?v=10'
+import { ARCHETYPES, assertArchetype, ConfigError } from '../../src/enemies.js?v=15'
 
 test('ARCHETYPES table is frozen', () => {
   assert.equal(Object.isFrozen(ARCHETYPES), true)
 })
 
-test('standard: hp=1, mult=1, footprint 0.5/0.5', () => {
+test('standard: hp=1, mult=1, footprint 1.0/1.0', () => {
   const a = ARCHETYPES.standard
   assert.equal(a.hp, 1)
   assert.equal(a.multiplier, 1)
-  assert.equal(a.footprint.hw, 0.5)
-  assert.equal(a.footprint.hh, 0.5)
+  assert.equal(a.footprint.hw, 1.0)
+  assert.equal(a.footprint.hh, 1.0)
 })
 
-test('tank: hp=3, mult=1.5, footprint 0.7/0.7', () => {
+test('tank: hp=3, mult=1.5, footprint 1.2/1.2', () => {
   const a = ARCHETYPES.tank
   assert.equal(a.hp, 3)
   assert.equal(a.multiplier, 1.5)
-  assert.equal(a.footprint.hw, 0.7)
-  assert.equal(a.footprint.hh, 0.7)
+  assert.equal(a.footprint.hw, 1.2)
+  assert.equal(a.footprint.hh, 1.2)
 })
 
-test('mini-boss: hp=10, mult=2, footprint 0.8/0.8', () => {
+test('mini-boss: hp=10, mult=2, footprint 1.5/1.5', () => {
   const a = ARCHETYPES['mini-boss']
   assert.equal(a.hp, 10)
   assert.equal(a.multiplier, 2)
-  assert.equal(a.footprint.hw, 0.8)
-  assert.equal(a.footprint.hh, 0.8)
+  assert.equal(a.footprint.hw, 1.5)
+  assert.equal(a.footprint.hh, 1.5)
 })
 
-test('boss: hp=30, mult=3, footprint 1.0/1.0', () => {
+test('boss: hp=30, mult=3, footprint 2.0/2.0', () => {
   const a = ARCHETYPES.boss
   assert.equal(a.hp, 30)
   assert.equal(a.multiplier, 3)
-  assert.equal(a.footprint.hw, 1.0)
-  assert.equal(a.footprint.hh, 1.0)
+  assert.equal(a.footprint.hw, 2.0)
+  assert.equal(a.footprint.hh, 2.0)
 })
 
 test('assertArchetype: accepts all 4 ids', () => {

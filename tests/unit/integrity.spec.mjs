@@ -6,8 +6,8 @@
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { Integrity } from '../../src/integrity.js?v=10'
-import { eventBus } from '../../src/event-bus.js?v=10'
+import { Integrity } from '../../src/integrity.js?v=15'
+import { eventBus } from '../../src/event-bus.js?v=15'
 
 function captureEvents() {
   const events = []

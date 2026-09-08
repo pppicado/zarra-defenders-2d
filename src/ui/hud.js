@@ -18,7 +18,7 @@
  * If heart sprite fails to load (missing PNG), a procedural red square is drawn as fallback.
  * If hand sprite fails to load, a procedural mitten square is drawn as fallback.
  */
-import { on } from '../event-bus.js?v=10'
+import { on } from '../event-bus.js?v=15'
 
 /**
  * The HUD always runs in 1920x1080 logical space (see src/main.js LOGICAL_W/H).

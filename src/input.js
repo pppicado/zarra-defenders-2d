@@ -139,11 +139,22 @@ export class Input {
 
   // =================== Handlers ===================
 
+  /**
+   * Convert pointer event coordinates (viewport CSS px) into the canvas's
+   * logical 1920x1080 space. Uses the cached __cssScale__ that main.js
+   * applies on resize; falls back to no-op (raw clientX/Y) if missing.
+   */
+  _toLogical(clientX, clientY) {
+    const cs = (typeof window !== 'undefined' && window.__cssScale__) || null
+    if (!cs || !cs.scale) return { x: clientX, y: clientY }
+    return {
+      x: (clientX - cs.xOff) / cs.scale,
+      y: (clientY - cs.yOff) / cs.scale,
+    }
+  }
+
   _handlePointerMove(e) {
-    // Convertir coordenadas del evento a coordenadas del canvas (relativas al canvas)
-    const rect = this.canvas.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+    const { x, y } = this._toLogical(e.clientX, e.clientY)
     this.pointerX = x
     this.pointerY = y
     this.pointerInside = true
@@ -153,15 +164,13 @@ export class Input {
   _handlePointerDown(e) {
     if (e.pointerType === 'touch') {
       // En touch, guardamos posición y tiempo para detectar tap vs drag después
-      const rect = this.canvas.getBoundingClientRect()
-      this.touchStartX = e.clientX - rect.left
-      this.touchStartY = e.clientY - rect.top
+      const { x, y } = this._toLogical(e.clientX, e.clientY)
+      this.touchStartX = x
+      this.touchStartY = y
       this.touchStartTime = performance.now()
     } else {
       // Mouse / pen: tap = click directo (sin distancia, sin duración relevante)
-      const rect = this.canvas.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
+      const { x, y } = this._toLogical(e.clientX, e.clientY)
       this._emit('tap', x, y)
     }
   }
@@ -169,9 +178,7 @@ export class Input {
   _handlePointerUp(e) {
     if (e.pointerType === 'touch') {
       // Detectar tap en touch: poca distancia + poco tiempo
-      const rect = this.canvas.getBoundingClientRect()
-      const endX = e.clientX - rect.left
-      const endY = e.clientY - rect.top
+      const { x: endX, y: endY } = this._toLogical(e.clientX, e.clientY)
       const dx = endX - this.touchStartX
       const dy = endY - this.touchStartY
       const dist = Math.sqrt(dx * dx + dy * dy)
