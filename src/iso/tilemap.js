@@ -7,7 +7,7 @@
  * - sortableChildren = false on every container holding tiles (design ADR #1).
  */
 
-import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin } from './iso-math.js?v=17'
+import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin } from './iso-math.js?v=18'
 
 // F2.5.4: bumped from 100 to 400 to support a 4x larger world (4 stages of
 // viewport tiles visible at any time). The hard cap protects against an
@@ -146,10 +146,13 @@ export class Tilemap {
  * on-disk filenames in `assets/tiles/stage{N}-{name}/{variant}.png`
  * and the asset-pipeline output exactly.
  */
+// F3.8: tiles upscaled 2x (64 → 128 px) so the rotated diamonds fully cover
+// the iso cell when tileSize=128. Each variant gets a `_2x` suffix here;
+// the loader looks up the PNG by the resolved URL in main.js.
 export const STAGE_VARIANTS = Object.freeze({
-  'stage1-bosque': ['pino_clear_grass_rojizo','pino_underbrush_dark','encina_redonda_sombra','suelo_arcilloso_rojizo','trocha_forestal_compactada','matorral_coscoja_romero','arroyo_barranco_edge','hojarasca_pino_seca'],
-  'stage2-pueblo': ['cal_blanca_pared','teja_arabe_roja','adoquin_calle_empedrada','asfalto_N330_circulado','acera_baldosa_hidraulica','sombra_calle_estrecha','balcon_hierro_forjado','porton_madera_pueblo'],
-  'stage3-rio': ['agua_cristalina_verde_azul','cortado_vertical_karstico','roca_chorrera_humeda','sedimento_aluvial_rio','chopo_ribera_densa','canto_rodado_orilla','musgo_humedo_roca','ladera_matorral_seca'],
-  'stage4-vertedero': ['cement_pad_crack','gravel_dust_industrial','dirt_oily_contaminated','plastic_debris_mixed','container_lixiviado_stain','metal_scrap_rust','asphalt_cracked_heavy_truck','weeds_through_pavement'],
-  'stage5-castillo': ['penon_basalto_volcanico','cal_castillo_blanca','torre_homenaje_reloj','mamposteria_antigua_ocre','patio_armas_adoquines','sendero_subida_penon','pino_penon_mediterraneo','aljibe_boveda_subterraneo'],
+  'stage1-bosque': ['pino_clear_grass_rojizo_2x','pino_underbrush_dark_2x','encina_redonda_sombra_2x','suelo_arcilloso_rojizo_2x','trocha_forestal_compactada_2x','matorral_coscoja_romero_2x','arroyo_barranco_edge_2x','hojarasca_pino_seca_2x'],
+  'stage2-pueblo': ['cal_blanca_pared_2x','teja_arabe_roja_2x','adoquin_calle_empedrada_2x','asfalto_N330_circulado_2x','acera_baldosa_hidraulica_2x','sombra_calle_estrecha_2x','balcon_hierro_forjado_2x','porton_madera_pueblo_2x'],
+  'stage3-rio': ['agua_cristalina_verde_azul_2x','cortado_vertical_karstico_2x','roca_chorrera_humeda_2x','sedimento_aluvial_rio_2x','chopo_ribera_densa_2x','canto_rodado_orilla_2x','musgo_humedo_roca_2x','ladera_matorral_seca_2x'],
+  'stage4-vertedero': ['cement_pad_crack_2x','gravel_dust_industrial_2x','dirt_oily_contaminated_2x','plastic_debris_mixed_2x','container_lixiviado_stain_2x','metal_scrap_rust_2x','asphalt_cracked_heavy_truck_2x','weeds_through_pavement_2x'],
+  'stage5-castillo': ['penon_basalto_volcanico_2x','cal_castillo_blanca_2x','torre_homenaje_reloj_2x','mamposteria_antigua_ocre_2x','patio_armas_adoquines_2x','sendero_subida_penon_2x','pino_penon_mediterraneo_2x','aljibe_boveda_subterraneo_2x'],
 })

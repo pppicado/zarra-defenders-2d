@@ -19,7 +19,7 @@
  * Escape detection (F3.2): Manhattan distance from enemy to camera > 6 tiles.
  * Enemies are static in F3 (no movement); only the camera moves.
  */
-import { emit } from './event-bus.js?v=17'
+import { emit } from './event-bus.js?v=18'
 
 export const ARCHETYPES = Object.freeze({
   standard:    Object.freeze({ hp: 1,  multiplier: 1,   footprint: Object.freeze({ hw: 1.0, hh: 1.0 }), flashMs: 200 }),

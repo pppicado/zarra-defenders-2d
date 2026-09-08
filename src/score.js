@@ -24,7 +24,7 @@
  *   - combat:hit (handled by Combat / main.js calling addHit)
  *   - stage:cleared (handled by main.js calling tryWriteBest)
  */
-import { emit } from './event-bus.js?v=17'
+import { emit } from './event-bus.js?v=18'
 
 export const BEST_KEY = 'zarra2d:best:test_level'
 
