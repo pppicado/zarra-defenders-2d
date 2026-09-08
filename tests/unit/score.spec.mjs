@@ -6,7 +6,7 @@
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { Score, BEST_KEY } from '../../src/score.js?v=15'
+import { Score, BEST_KEY } from '../../src/score.js?v=17'
 
 /** Fresh in-memory storage stub. */
 function makeStorage(initial = {}) {

@@ -16,23 +16,23 @@
  *   app.stage -> world (camera-driven) | hud (screen-space)
  *   UI overlays (menu / game-over / integrity HUD) are DOM siblings of #game-canvas-wrapper.
  */
-import { RailCamera } from './rail-camera.js?v=15'
-import { Input } from './input.js?v=15'
-import { Player } from './player.js?v=15'
-import { IsoWorld } from './iso/world.js?v=15'
-import { Tilemap } from './iso/tilemap.js?v=15'
-import { Integrity } from './integrity.js?v=15'
-import { Score } from './score.js?v=15'
-import { EnemyManager, ARCHETYPES } from './enemies.js?v=15'
-import { Combat } from './combat.js?v=15'
-import { MainMenu } from './ui/menu.js?v=15'
-import { Overlay } from './ui/overlay.js?v=15'
-import { HUD } from './ui/hud.js?v=15'
-import { TEST_LEVEL, testLevelWaypoints, assertTestLevel, TEST_LEVEL_ENEMY_COUNT } from './levels/test-level.js?v=15'
-import { parseTestFlags, mountTestAPI } from './test-api.js?v=15'
-import { mulberry32, fixedClock } from './random.js?v=15'
-import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?v=15'
-import { on as busOn, emit } from './event-bus.js?v=15'
+import { RailCamera } from './rail-camera.js?v=17'
+import { Input } from './input.js?v=17'
+import { Player } from './player.js?v=17'
+import { IsoWorld } from './iso/world.js?v=17'
+import { Tilemap } from './iso/tilemap.js?v=17'
+import { Integrity } from './integrity.js?v=17'
+import { Score } from './score.js?v=17'
+import { EnemyManager, ARCHETYPES } from './enemies.js?v=17'
+import { Combat } from './combat.js?v=17'
+import { MainMenu } from './ui/menu.js?v=17'
+import { Overlay } from './ui/overlay.js?v=17'
+import { HUD } from './ui/hud.js?v=17'
+import { TEST_LEVEL, testLevelWaypoints, assertTestLevel, TEST_LEVEL_ENEMY_COUNT } from './levels/test-level.js?v=17'
+import { parseTestFlags, mountTestAPI } from './test-api.js?v=17'
+import { mulberry32, fixedClock } from './random.js?v=17'
+import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?v=17'
+import { on as busOn, emit } from './event-bus.js?v=17'
 
 // ============================================================
 // Configuration
@@ -415,18 +415,19 @@ let _victoryEmitted = false
 function setupOrientationLock() {
   const modal = document.getElementById('orientation-warning')
   if (!modal) return
-  // F3.5: only show the modal if the viewport is too small in BOTH dimensions
-  // to be playable. A 412x915 viewport renders the game in a 88x196 letterbox
-  // area at the top, which is technically playable but useless. So we hide the
-  // modal when either dimension >= 720 (the game has a meaningful canvas area).
+  // F3.5: only show the modal when BOTH viewport dimensions are too small
+  // (mobile portrait at < 480×480). If EITHER dimension is >= 720, the game
+  // has a meaningful canvas area (16:9 letterbox) and the modal is hidden.
+  // The resize/orientationchange listeners below call update() on rotation,
+  // so the modal updates live when the user rotates their phone.
   function update() {
     const w = window.innerWidth
     const h = window.innerHeight
     const minDim = Math.min(w, h)
-    if (minDim >= 720) {
-      modal.classList.add('hidden')
-    } else {
+    if (minDim < 360) {
       modal.classList.remove('hidden')
+    } else {
+      modal.classList.add('hidden')
     }
   }
   update()
