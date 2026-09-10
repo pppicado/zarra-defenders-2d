@@ -128,7 +128,7 @@ export async function runProjectileDirectionSpec() {
   // Off-center cursor at depth=10 (the original-flip moment), verifying the gfx
   // actually travels toward the screen position the cursor pointed at, not its
   // mirror below the hand.
-  const offCenter = await page.evaluate(() => {
+  const offCenter = await page.evaluate(({ handX, handY, viewportX, viewportY }) => {
     const mods = window.__zarraModules__
     window.__gameTestAPI__.reset()
     window.__gameTestAPI__.setTime((10 / 36) * 60)
@@ -140,8 +140,8 @@ export async function runProjectileDirectionSpec() {
     // Cursor at upper-right quadrant (e.g. (1300, 300) — a real iso target
     // somewhere ahead-right of the camera).
     const cursor = { x: 1300, y: 300 }
-    const iso = isoWorld.screenToIsoWithCamera(cursor.x, cursor.y, camIso, VIEWPORT_CENTER)
-    mods.combat.fireAtIso(iso.isoX, iso.isoY, HAND_SCREEN, { bypassCooldown: true })
+    const iso = isoWorld.screenToIsoWithCamera(cursor.x, cursor.y, camIso, { x: viewportX, y: viewportY })
+    mods.combat.fireAtIso(iso.isoX, iso.isoY, { x: handX, y: handY }, { bypassCooldown: true })
     const live = mods.combat._projectiles[mods.combat._projectiles.length - 1]
     // After 1 tick of 16ms, where is the gfx on screen?
     mods.combat.update(16)
@@ -151,7 +151,7 @@ export async function runProjectileDirectionSpec() {
       gfxAfter: { x: live.gfx.x, y: live.gfx.y },
       target: { x: live.target.x, y: live.target.y },
     }
-  })
+  }, { handX: HAND_SCREEN.x, handY: HAND_SCREEN.y, viewportX: VIEWPORT_CENTER.x, viewportY: VIEWPORT_CENTER.y })
   offCenterRows.push(offCenter)
 
   await browser.close()
