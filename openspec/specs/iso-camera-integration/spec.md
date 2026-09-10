@@ -22,22 +22,25 @@ The system MUST reuse `src/rail-camera.js` exactly as it exists today — no new
 - WHEN the camera interpolates from start to end
 - THEN `getCameraX() + getCameraY()` never decreases at any sample point
 
-### Requirement: CAM-002 — World container anchor and camera projection (MODIFIED in F2.5.1)
+### Requirement: CAM-002 — World container anchor and camera projection (MODIFIED in F4a — viewport literal sweep)
 
 The world container's `position` MUST equal `(viewOrigin.x − camScreenX, viewOrigin.y − camScreenY)` where:
+
 - `viewOrigin = { x: W/2, y: H/2 }` is the **viewport center** (the world-container anchor).
 - `(camScreenX, camScreenY) = isoToScreen(camera.getCameraX(), camera.getCameraY(), tileSize, tileWorldOrigin)` uses `tileWorldOrigin = { x: W/2, y: H*0.30 }` (the HUD-strip tile origin — unchanged).
 - The world-container `position` thus lands the camera-projected iso position at the viewport center, not at the HUD strip.
 
 The `hud` and `ui` layers MUST remain siblings of `world` at `(0, 0)` — unchanged. The `tileWorldOrigin` (HUD strip) is preserved for F3 hit-detection (`screenToIso` snap), so existing round-trip semantics still hold (TILE-001).
 
-(Previously: world container's `position` equaled `(-camScreenX, -camScreenY)` directly, which anchored the iso projection at the HUD strip `y = H*0.30` instead of the viewport center.)
+(Previously F4a: scenarios used viewport `W=1920, H=1080` and derived `viewOrigin = { x: 960, y: 540 }`. After `LOGICAL_H = 720`, the same formulas give `viewOrigin = { x: 960, y: 360 }` — anchor math is viewport-agnostic; only the example numbers shift.)
+
+(Originally F2.5.1: world container's `position` equaled `(-camScreenX, -camScreenY)` directly, which anchored the iso projection at the HUD strip `y = H*0.30` instead of the viewport center.)
 
 #### Scenario: World container centers camera-projected iso at viewport center
 
-- GIVEN `IsoWorld.update()` runs with camera position `(5, 5)` and viewport `W=1920, H=1080`
+- GIVEN `IsoWorld.update()` runs with camera position `(5, 5)` and viewport `W=1920, H=720`
 - WHEN the per-frame camera transform applies
-- THEN `viewOrigin === { x: 960, y: 540 }`
+- THEN `viewOrigin === { x: 960, y: 360 }`
 - AND `world.container.position.x === viewOrigin.x − isoToScreen(5, 5).x`
 - AND `world.container.position.y === viewOrigin.y − isoToScreen(5, 5).y`.
 
@@ -56,20 +59,20 @@ The `hud` and `ui` layers MUST remain siblings of `world` at `(0, 0)` — unchan
 
 #### Scenario: Two-axis iso scroll (retained from CAM-002 v0.1)
 
-- GIVEN the camera at iso `(4, 2)` with `tileSize = 128` and viewport `1920×1080`
+- GIVEN the camera at iso `(4, 2)` with `tileSize = 128` and viewport `1920×720`
 - WHEN the game loop applies the camera
 - THEN the projected iso point lands at the viewport center, the HUD does NOT move, and the iso plane scrolls smoothly.
 
 #### Scenario: HUD survives camera transform (retained from CAM-002 v0.1)
 
-- GIVEN the crosshair at screen `(960, 540)` on `hud`
+- GIVEN the crosshair at screen `(960, 360)` on `hud`
 - WHEN the camera advances 10 tiles north-east
-- THEN the crosshair stays at `(960, 540)` because `hud` is a sibling of `world`, not a child.
+- THEN the crosshair stays at `(960, 360)` because `hud` is a sibling of `world`, not a child.
 
 #### Scenario: screenToIsoWithCamera returns correct iso under camera translation (F3 new)
 
 - GIVEN the camera is at iso `(5, 5)`, the world container has translated accordingly (computed by `IsoWorld.update()`), and the click is at screen `(640, 480)`
-- WHEN `screenToIsoWithCamera(640, 480, 5, 5, { x: 960, y: 540 })` runs
+- WHEN `screenToIsoWithCamera(640, 480, 5, 5, { x: 960, y: 360 })` runs
 - THEN the returned world coord is `(5.0, 5.0)` (matches the camera position — the click is at the viewport center where the iso projection lands)
 - AND the helper is a pure function (no globals, no Pixi import).
 

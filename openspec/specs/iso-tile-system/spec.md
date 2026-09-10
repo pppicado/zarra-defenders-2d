@@ -15,13 +15,15 @@ The system MUST provide pure functions `isoToScreen(isoX, isoY, tileSize, tileWo
 - `sy = tileWorldOrigin.y + (isoX + isoY) * tileHalfHeight`
 - Inverse uses the same constants to recover `(isoX, isoY)`.
 
-`tileSize` MUST be proportional to the viewport (yielding ≥ 64 px on 1080p). The functions MUST be pure — no globals, no Pixi import — so they can be exercised from DevTools.
+`tileSize` MUST be proportional to the viewport (yielding ≥ 64 px on the target viewport 1920×720). The functions MUST be pure — no globals, no Pixi import — so they can be exercised from DevTools.
 
-(Previously: `tileHalfWidth` and `tileHalfHeight` were asymmetric (2:1 diamond); `tileSize` represented the diamond width.)
+(Previously F4a: viewport literal was `1920×1080`; `LOGICAL_H` dropped 1080→720 in `src/main.js:57` so the example GIVEN matches the active logical canvas. Math is viewport-agnostic.)
+
+(Originally: `tileHalfWidth` and `tileHalfHeight` were asymmetric (2:1 diamond); `tileSize` represented the diamond width.)
 
 #### Scenario: Round-trip identity on the grid (square ratio)
 
-- GIVEN a tile at iso `(3, 5)`, viewport `1920×1080`, `tileSize = 64`
+- GIVEN a tile at iso `(3, 5)`, viewport `1920×720`, `tileSize = 64`
 - WHEN the renderer converts to screen and back
 - THEN the recovered iso coord equals `(3, 5)` within ±0.001
 
@@ -80,11 +82,13 @@ The system MUST assign each tile and vertical sprite an explicit `zIndex` and MU
 
 ### Requirement: TILE-004 — Viewport culling
 
-The system MUST instantiate `PIXI.Sprite` only for tiles inside the camera viewport plus a 1-tile overshoot margin on every side. The visible range `(gxMin, gxMax, gyMin, gyMax)` MUST be recomputed each frame from the camera center `(camIsoX, camIsoY)` and viewport size `(W, H)`. The system MUST keep the visible tile count ≤ 100 at all times.
+The system MUST instantiate `PIXI.Sprite` only for tiles inside the camera viewport plus a 1-tile overshoot margin on every side. The visible range `(gxMin, gxMax, gyMin, gyMax)` MUST be recomputed each frame from the camera center `(camIsoX, camIsoY)` and viewport size `(W, H)`. The system MUST keep the visible tile count ≤ 400 at all times (constant exported as `MAX_VISIBLE_TILES` from `src/iso/tilemap.js`).
+
+(Previously F4a: viewport literal in the GIVEN was `1920×1080`. With `LOGICAL_H = 720` the visible window is shorter vertically. The cap was also bumped `≤ 100 → ≤ 400` because the cull is now camera-aware (closed-form formula) and the budget must fit the wider iso plane — the v0.1 cap was a v0.1 placeholder.)
 
 #### Scenario: Visible window bounded by overshoot
 
-- GIVEN viewport `1920×1080`, `tileSize = 128`, camera at iso `(10, 10)`
+- GIVEN viewport `1920×720`, `tileSize = 128`, camera at iso `(10, 10)`
 - WHEN the cull pass runs
 - THEN the window covers at most `(11, 11)` tiles with 1 tile margin per edge
 
@@ -92,7 +96,7 @@ The system MUST instantiate `PIXI.Sprite` only for tiles inside the camera viewp
 
 - GIVEN a `1000×1000` tile grid and a camera at iso `(0, 0)`
 - WHEN only the visible window is iterated
-- THEN `Tile` instances alive in the world container is ≤ 100, not 1,000,000
+- THEN `Tile` instances alive in the world container is ≤ 400, not 1,000,000
 
 ## MODIFIED Requirements
 
@@ -125,13 +129,15 @@ The system MUST provide pure functions `isoToScreen(isoX, isoY, tileSize, tileWo
 - `sy = tileWorldOrigin.y + (isoX + isoY) * step`
 - Inverse uses the same constants to recover `(isoX, isoY)`.
 
-`tileSize` MUST be proportional to the viewport (yielding ≥ 64 px on 1080p). The functions MUST be pure — no globals, no Pixi import — so they can be exercised from DevTools.
+`tileSize` MUST be proportional to the viewport (yielding ≥ 64 px on the target viewport 1920×720). The functions MUST be pure — no globals, no Pixi import — so they can be exercised from DevTools.
 
-(Previously F2.5.2: `tileHalfWidth = tileHalfHeight = tileSize / 2`. The F2.5.2 step was the half-width of the square PNG; with a 45°-rotated container that produced overlapping diamonds because the iso grid spacing was wrong.)
+(Previously F4a: viewport literal was `1920×1080`; `LOGICAL_H` dropped 1080→720. `tileSize = 64` is not viewport-derived and is unchanged.)
+
+(Originally F2.5.2: `tileHalfWidth = tileHalfHeight = tileSize / 2`. The F2.5.2 step was the half-width of the square PNG; with a 45°-rotated container that produced overlapping diamonds because the iso grid spacing was wrong.)
 
 #### Scenario: Round-trip identity on the grid (F2.5.15 classic iso)
 
-- GIVEN a tile at iso `(3, 5)`, viewport `1920×1080`, `tileSize = 64`
+- GIVEN a tile at iso `(3, 5)`, viewport `1920×720`, `tileSize = 64`
 - WHEN the renderer converts to screen and back
 - THEN the recovered iso coord equals `(3, 5)` within ±0.001
 - AND `step === tileSize / Math.SQRT2 ≈ 45.2548`
