@@ -11,47 +11,93 @@
  *   - The `_worldLayer` does NOT rotate — only individual tiles do.
  *   - The grid of tile CENTERS uses the CLASSIC iso formula:
  *       sx = origin.x + (gx - gy) * (tileSize / √2)
- *       sy = origin.y + (gx + gy) * (tileSize / √2)
+ *       sy = origin.y - (gx + gy) * (tileSize / √2)    ← F3.11: inverted Y
  *   - With step = tileSize / √2 (= half the rotated diamond's diagonal),
  *     the 6 neighbors in the iso grid have their diamond corners
  *     exactly touching at one point: NO overlap, NO gap. This is
  *     mathematically verified (see Python proof).
  *   - isoToScreen(0, 0) === tileWorldOrigin.
+ *
+ * F3.11 orientation flip:
+ *   The classic iso projection places high iso sum at the BOTTOM of the
+ *   screen, which made the world content flow UP past the player as the
+ *   camera advanced — the "fleeing" feel. Inverting the Y component makes
+ *   high iso sum render at the TOP of the screen, so content flows DOWN
+ *   past the player — the natural "advancing" feel of an on-rails shooter
+ *   (the world approaches from the horizon and rolls under the camera).
+ *   The mirror is around `viewOrigin.y` (= viewport center Y), so the
+ *   camera-projected iso position still lands at the viewport center
+ *   (the CAM-002 invariant is preserved).
  */
 
 /**
+ * Mirror-Y constant: screen Y of the iso plane mirror. The flipped plane's
+ * "iso (0, 0)" lands at `flippedYOrigin`, not at `tileWorldOrigin.y` —
+ * see `isoToScreen` below.
+ */
+function flippedYOrigin(tileWorldOrigin, viewOrigin) {
+  // The viewport center Y is the mirror line; `tileWorldOrigin.y` sits on
+  // the NW side of the plane (in the OLD projection it was the iso (0,0)
+  // anchor). In the flipped projection we keep the iso (0, 0) anchor at
+  // tileWorldOrigin.y for the inverse math, but mirror the rendered Y so
+  // the visible content flows the other way. The mirror constant below is
+  // used in the iso→screen direction.
+  return 2 * (viewOrigin?.y ?? tileWorldOrigin.y) - tileWorldOrigin.y
+}
+
+/**
  * Convert iso coords to screen coords using a fixed world origin.
+ * F3.11: the Y component is mirrored around viewOrigin.y so that high iso
+ * sum renders UP on the screen (content flows DOWN as the camera advances).
+ * The X component and the iso plane tessellation are unchanged.
  * @param {number} isoX
  * @param {number} isoY
  * @param {number} tileSize  > 0
  * @param {{x:number, y:number}} tileWorldOrigin
+ * @param {{x:number, y:number}} [viewOrigin]  if absent, the iso plane is
+ *        anchored at tileWorldOrigin and the flip is a no-op (legacy mode).
  * @returns {{sx:number, sy:number}}
  */
-export function isoToScreen(isoX, isoY, tileSize, tileWorldOrigin) {
+export function isoToScreen(isoX, isoY, tileSize, tileWorldOrigin, viewOrigin) {
   // F2.5.15: classic iso formula with step = tileSize / √2 (half diagonal of
   // the rotated diamond). Combined with each tile's own rotation = π/4
   // (set in Tile constructor), adjacent diamonds tessellate perfectly:
   // the right corner of one diamond exactly touches the left corner of
   // its iso neighbor at one point.
   const step = tileSize / Math.SQRT2
+  const sy = viewOrigin
+    ? flippedYOrigin(tileWorldOrigin, viewOrigin) - (isoX + isoY) * step
+    : tileWorldOrigin.y + (isoX + isoY) * step  // legacy / unit-test mode
   return {
     sx: tileWorldOrigin.x + (isoX - isoY) * step,
-    sy: tileWorldOrigin.y + (isoX + isoY) * step,
+    sy,
   }
 }
 
 /**
  * Inverse of isoToScreen. Free-aim may produce fractional coords.
+ * F3.11: mirrors the isoToScreen Y inversion when `viewOrigin` is supplied.
+ * The Y delta is taken from the FLIPPED origin, not the raw `tileWorldOrigin.y`,
+ * so the iso projection-c and projection-inverse are consistent (cursor at
+ * viewport center always returns the camera iso coord).
  * @param {number} sx
  * @param {number} sy
  * @param {number} tileSize
  * @param {{x:number, y:number}} tileWorldOrigin
+ * @param {{x:number, y:number}} [viewOrigin]
  * @returns {{isoX:number, isoY:number}}
  */
-export function screenToIso(sx, sy, tileSize, tileWorldOrigin) {
+export function screenToIso(sx, sy, tileSize, tileWorldOrigin, viewOrigin) {
   const step = tileSize / Math.SQRT2
   const lx = sx - tileWorldOrigin.x
-  const ly = sy - tileWorldOrigin.y
+  // F3.11: in the flipped projection the iso-sum axis is mapped to a NEGATIVE
+  // screen-Y delta (sy = flippedOrigin − (a+b)·step). The inverse therefore
+  // needs the DELTA = (flippedOrigin − sy), not (sy − flippedOrigin) like the
+  // legacy formula. Inverting the wrong sign gives negative iso coords for a
+  // cursor at viewport center when the camera is anywhere except (0,0).
+  const ly = viewOrigin
+    ? flippedYOrigin(tileWorldOrigin, viewOrigin) - sy
+    : sy - tileWorldOrigin.y
   return {
     isoX: (lx / step + ly / step) / 2,
     isoY: (ly / step - lx / step) / 2,

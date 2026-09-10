@@ -422,7 +422,7 @@ async function bootstrap() {
   }
 
   window.__zarraGameState__ = gameState
-  window.__zarraModules__ = { integrity, score, enemies, camera, input, isoWorld, hud: hudModule, overlay, appWorld, appHud }
+  window.__zarraModules__ = { integrity, score, enemies, camera, input, isoWorld, hud: hudModule, overlay, appWorld, appHud, get combat() { return combat }, setViewportSize: (w, h) => { isoWorld.viewportWidth = w; isoWorld.viewportHeight = h; isoWorld._viewOrigin = { x: w / 2, y: h / 2 }; isoWorld.tileWorldOrigin = { x: Math.round(w / 2), y: Math.round(h * 0.30) }; if (combat) combat.setViewportSize(w, h); if (combat) combat.setViewportCenter({ x: w / 2, y: h / 2 }) } }
 }
 
 /** Victory detector helper — emits stage:cleared exactly once. */

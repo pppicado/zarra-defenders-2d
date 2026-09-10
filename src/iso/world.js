@@ -92,12 +92,15 @@ export class IsoWorld {
   update(camera, verticalSprites = []) {
     const camIsoX = camera.getCameraX(), camIsoY = camera.getCameraY()
     const sum = camIsoX + camIsoY
-    if (sum < this._lastCameraSum) {
+    // CAM-001: rail direction is monotonic non-decreasing in depth. A regression
+    // (sum drops below the previous frame) means the camera moved backward
+    // unexpectedly — warn.
+    if (sum < this._lastCameraSum && this._lastCameraSum !== -Infinity) {
       console.warn(`[IsoWorld] camera depth regressed: ${this._lastCameraSum} → ${sum}`)
     }
     this._lastCameraSum = sum
 
-    const { sx: csx, sy: csy } = isoToScreen(camIsoX, camIsoY, this.tileSize, this.tileWorldOrigin)
+    const { sx: csx, sy: csy } = isoToScreen(camIsoX, camIsoY, this.tileSize, this.tileWorldOrigin, this._viewOrigin)
     // CAM-002: world container anchor is viewOrigin (viewport center), NOT tileWorldOrigin.
     // camera-projected iso position lands at viewOrigin instead of the HUD strip.
     this.container.position.set(this._viewOrigin.x - csx, this._viewOrigin.y - csy)
@@ -111,11 +114,12 @@ export class IsoWorld {
       // F2.5.10: tiles are SQUARE PNGs rotated 45° INDIVIDUALLY (Tile.rotation
       // = π/4 around each tile's own center). The `_worldLayer` does not
       // rotate, so the sprite (in `container`) is unaffected by any world
-      // transforms. The sprite base lands on the south point of the diamond
-      // (= tile center + tileSize/√2 below in screen-space).
-      const { sx: csx, sy: csy } = isoToScreen(gx, gy, this.tileSize, this.tileWorldOrigin)
+      // transforms. The sprite base lands on the south point of the diamond.
+      // F3.11: iso Y is mirrored around viewOrigin.y, so "south" (high iso sum)
+      // is UP on screen — the sprite offset is therefore NEGATIVE in screen Y.
+      const { sx: csx, sy: csy } = isoToScreen(gx, gy, this.tileSize, this.tileWorldOrigin, this._viewOrigin)
       const southOffset = this.tileSize / Math.SQRT2
-      sprite.position.set(csx, csy + southOffset)
+      sprite.position.set(csx, csy - southOffset)
       sprite.zIndex = computeZIndex(gx, gy, offset)
     }
   }
@@ -128,13 +132,44 @@ export class IsoWorld {
   }
 
   /** Convenience passthroughs so callers don't import iso-math directly. */
-  isoToScreen(ix, iy) { return isoToScreen(ix, iy, this.tileSize, this.tileWorldOrigin) }
+  isoToScreen(ix, iy) { return isoToScreen(ix, iy, this.tileSize, this.tileWorldOrigin, this._viewOrigin) }
+
+  /**
+   * Camera-aware iso -> screen inverse (mirror of `screenToIsoWithCamera`).
+   *
+   * `isoToScreen(ix, iy)` is pure math anchored at `tileWorldOrigin`; it returns
+   * the position INSIDE the world container, NOT on screen. The live world
+   * container translates by `viewOrigin - isoToScreen(camIso)`, so a sprite
+   * that should appear at the on-screen position of iso cell (ix, iy) needs to
+   * be positioned at `isoToScreen(ix, iy) + container.position`.
+   *
+   * Use this for anything mounted in the HUD layer (papeleta gfx, projectile
+   * targets, etc.) so origin (screen) and target (screen) share one coordinate
+   * system. Mixing the two — origin in screen, target in container — is the
+   * projectile-direction bug that this method exists to prevent.
+   *
+   * @param {number} ix
+   * @param {number} iy
+   * @param {{isoX:number, isoY:number}} cameraIso       current camera iso position
+   * @param {{x:number, y:number}} [viewportCenter]      defaults to `this._viewOrigin`
+   * @returns {{sx:number, sy:number}}                   position in screen (logical 1920x1080) space
+   */
+  isoToScreenWithCamera(ix, iy, cameraIso, viewportCenter) {
+    const vc = viewportCenter ?? this._viewOrigin
+    const camIso = cameraIso ?? { isoX: 0, isoY: 0 }
+    const camScreen = isoToScreen(camIso.isoX, camIso.isoY, this.tileSize, this.tileWorldOrigin, vc)
+    const targetScreen = isoToScreen(ix, iy, this.tileSize, this.tileWorldOrigin, vc)
+    return {
+      sx: vc.x + (targetScreen.sx - camScreen.sx),
+      sy: vc.y + (targetScreen.sy - camScreen.sy),
+    }
+  }
 
   /**
    * @deprecated Since F3: use `screenToIsoWithCamera(sx, sy, cameraIso, viewportCenter)`.
    *             Legacy pure-math helper; ignores world-container translation.
    */
-  screenToIso(sx, sy) { return screenToIso(sx, sy, this.tileSize, this.tileWorldOrigin) }
+  screenToIso(sx, sy) { return screenToIso(sx, sy, this.tileSize, this.tileWorldOrigin, this._viewOrigin) }
 
   /**
    * Camera-aware screen -> iso inverse (CAM-002 / F3 hit detection).
@@ -156,12 +191,12 @@ export class IsoWorld {
     const camIso = cameraIso ?? { isoX: 0, isoY: 0 }
     // screenToIso expects screen coords relative to tileWorldOrigin. We must
     // back-out the world-container translation first.
-    const { sx: csx, sy: csy } = isoToScreen(camIso.isoX, camIso.isoY, this.tileSize, this.tileWorldOrigin)
+    const { sx: csx, sy: csy } = isoToScreen(camIso.isoX, camIso.isoY, this.tileSize, this.tileWorldOrigin, vc)
     const worldX = vc.x - csx
     const worldY = vc.y - csy
     const localX = sx - worldX
     const localY = sy - worldY
-    return screenToIso(localX, localY, this.tileSize, this.tileWorldOrigin)
+    return screenToIso(localX, localY, this.tileSize, this.tileWorldOrigin, vc)
   }
 }
 

@@ -6,16 +6,19 @@ the per-change history lives under `openspec/changes/archive/`.
 | Spec file | Capability | Requirements | Last change |
 |---|---|---|---|
 | [iso-tile-system/spec.md](./iso-tile-system/spec.md) | Isometric tile grid, Z-order, viewport culling | TILE-001, TILE-002, TILE-003, TILE-004 | F2.5.2 (TILE-001/002/003 MODIFIED) |
-| [iso-camera-integration/spec.md](./iso-camera-integration/spec.md) | Reinterpret `RailCamera` waypoints as iso coords; world transform | CAM-001, CAM-002, CAM-003 | F2.5 (ADDED) |
+| [iso-camera-integration/spec.md](./iso-camera-integration/spec.md) | Reinterpret `RailCamera` waypoints as iso coords; world transform; iso-plane escape detection | CAM-001, CAM-002, CAM-003, **CAM-004** | F3.5 (CAM-004 ADDED — escape boundary) |
 | [iso-asset-pipeline/spec.md](./iso-asset-pipeline/spec.md) | minimax MCP batch generation + chroma-key postprocess + NEAREST downsample + bootstrap loader | ASSET-001 … ASSET-010 | F2.5.2 (ASSET-001/002/007 MODIFIED, ASSET-009/010 ADDED) |
 | [iso-gallery/spec.md](./iso-gallery/spec.md) | Dev-only asset review surface: tile/sprite cards, rotation toggle, mini-iso-demo | GAL-001, GAL-002, GAL-003 | F2.5.2 (ADDED) |
 
 ## Totals
 
-- **20 requirements** total across 4 capabilities
+- **21 requirements** total across 4 capabilities (CAM-004 brings iso-camera-integration to 4)
 - Tile geometry is **square iso**: `tileHalfWidth = tileHalfHeight = tileSize / 2`, with the
   45° look produced by `_worldLayer.rotation = Math.PI / 4` at the container level (on-disk PNGs stay top-down)
 - Tile set is **40 active** PNGs at 64×64 px (`manifest.totals.active === 40`)
+- Iso-plane escape: `isEscaped(enemy, cameraIso) = (|ex - cx| + |ey - cy|) > 6` — Manhattan distance > 6 tiles
+  (CAM-004). Direction-agnostic, conservative at the perimeter. Validated by `tests/unit/escape-detection.spec.mjs`
+  and `tests/e2e/hit-detection.spec.mjs`.
 
 ## Known drift
 
@@ -28,5 +31,6 @@ the per-change history lives under `openspec/changes/archive/`.
 ## Cross-references
 
 - Iso math formulas: `PLAN.md` §13 (referenced by TILE-001)
+- Escape rule scenarios: `tests/unit/escape-detection.spec.mjs` (CAM-004)
 - Style/verification rules: `openspec/config.yaml` (Given/When/Then + RFC 2119 keywords)
 - Change history: `openspec/changes/archive/`

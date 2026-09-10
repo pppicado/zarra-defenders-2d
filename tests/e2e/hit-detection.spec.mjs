@@ -1,14 +1,24 @@
 /**
  * tests/e2e/hit-detection.spec.mjs
  *
- * Playwright headless test: load ?test=1, fire 4 taps at known enemy iso positions,
- * assert destroyed + integrity unchanged. Advance camera past an enemy to drain integrity.
+ * Playwright headless test: load ?test=1, fire a tap at a known enemy iso position,
+ * assert hit lands and integrity stays at 3. Then advance the camera past the
+ * escape threshold and assert integrity drains.
+ *
+ * Escape rule under test (CAM-004 in openspec/specs/iso-camera-integration/spec.md):
+ *   isEscaped(enemy, cameraIso) === |ex - cx| + |ey - cy| > 6
+ *   — Manhattan distance from enemy iso to camera iso > 6 tiles.
+ *
+ * For the rail (0,0) -> (18,18) over 60s and enemy e01 at iso (3,2):
+ *   spawn  at t=0     (spawnTime = (depth-5)/36 * 60 = 0s for depth-5 enemy)
+ *   escape at t ~ 18.33s   (camera depth > 11; iso depth growth 0.6 tile/s)
+ * -> choose t=5 for part 1 (well before escape), t=20 for part 2 (e01 escaped).
  *
  * Runtime: dev server on http://localhost:8000 (start via start_server.sh).
  * Boots PIXI Application + IsoWorld + Combat + EnemyManager + Integrity.
  *
  * Run: npx playwright test tests/e2e/hit-detection.spec.mjs
- *      (or node --test tests/e2e/hit-detection.spec.mjs — the latter requires a running browser harness)
+ *      (or node tests/e2e/hit-detection.spec.mjs — the latter requires a running browser harness)
  */
 import { chromium } from 'playwright'
 import { fileURLToPath } from 'node:url'
@@ -48,16 +58,16 @@ export async function runHitDetectionSpec() {
   const inTestMode = await page.evaluate(() => window.__gameTestAPI__.getStatus().inTestMode)
   if (!inTestMode) throw new Error('test API did not initialize')
 
-  // Snap time to 0 and reset state. Reset enqueues the 12 time-gated spawns;
-// advance time just past e01's spawnTimeSec (≈7.83s) but before its escape
-// boundary (depth 5, camera at depth 5 = t≈8.33s) so e01 is alive.
+  // --- Part 1: hit detection on a live enemy ---
+  // Advance just past e01's spawnTimeSec (=0s for depth-5 enemy) so e01 is the
+  // only live enemy, and well before its escape boundary at t~18.33s.
   await page.evaluate(() => {
     window.__gameTestAPI__.reset()
-    window.__gameTestAPI__.setTime(8.0)
+    window.__gameTestAPI__.setTime(5.0)
     window.__gameTestAPI__.tick(16.6667)
   })
 
-  // Fire at e01's iso position (3,2). With camera just past e01 spawn,
+  // Fire at e01's iso position (3,2). With camera at t=5 still near spawn,
   // e01 is the only live enemy — verify hit lands and integrity stays at 3.
   const result1 = await page.evaluate(() => {
     const api = window.__gameTestAPI__
@@ -75,13 +85,16 @@ export async function runHitDetectionSpec() {
   }
   if (result1.integrity.current !== 3) throw new Error('integrity must remain at 3 after destruction')
 
-  // Advance camera past 1 enemy — should drain 1 integrity segment.
-  // The test level rail runs 0..60s iso (0,0) -> (18,18) (depth 0 -> 36).
-  // Enemy at iso (3,2) — depth 5 — escapes when camera depth >= 6.
-  // Camera depth 6 = t = 6/36 * 60 = 10s. Set time to 11s.
+  // --- Part 2: escape detection drains integrity (t=20) ---
+  // Rail: 0..60s iso (0,0) -> (18,18). Camera depth grows at 0.6 tile/s.
+  //   e01 (depth 5):  Manhattan > 6 with camera at (X,X) means 2X - 5 > 6 -> X > 5.5,
+  //                   i.e. camera depth > 11 -> t > 11/0.6 ~ 18.33s.
+  //   e02 (depth 8):  X > 7  -> t > 23.33s.
+  //   e03 (depth 11): X > 8.5 -> t > 28.33s.
+  // At t=20s, only e01 has escaped -> integrity 3 - 1 = 2.
   await page.evaluate(() => {
     window.__gameTestAPI__.reset()
-    window.__gameTestAPI__.setTime(11)
+    window.__gameTestAPI__.setTime(20)
     // tick to trigger enemies.update escape detection
     window.__gameTestAPI__.tick(16.6667)
   })
@@ -91,18 +104,33 @@ export async function runHitDetectionSpec() {
     enemies: window.__gameTestAPI__.getEnemies(),
   }))
 
-  // After advancing to t=11, multiple low-depth enemies (depth <= 6) should have escaped.
-  // Initial depth 5 (e01) is at the boundary — depending on inclusive/exclusive, may or may not escape.
-  // We just assert integrity.current <= 3 - 1 (at least one drain).
-  if (result2.integrity.current > 2) {
-    throw new Error(`expected at least one escape after t=11, integrity=${result2.integrity.current}`)
+  // e01 has escaped -> exactly 1 drain.
+  if (result2.integrity.current !== 2) {
+    throw new Error(`expected exactly one escape at t=20 (e01), integrity=${result2.integrity.current}`)
   }
   if (result2.integrity.current < 0) {
     throw new Error(`integrity went negative: ${result2.integrity.current}`)
   }
 
+  // --- Part 3: more time -> more escapes (t=25) ---
+  // At t=25s, e01 + e02 have escaped; e03 (depth 11) not yet (t < 28.33s).
+  await page.evaluate(() => {
+    window.__gameTestAPI__.reset()
+    window.__gameTestAPI__.setTime(25)
+    window.__gameTestAPI__.tick(16.6667)
+  })
+
+  const result3 = await page.evaluate(() => ({
+    integrity: window.__gameTestAPI__.getIntegrity(),
+    enemies: window.__gameTestAPI__.getEnemies(),
+  }))
+
+  if (result3.integrity.current !== 1) {
+    throw new Error(`expected two escapes at t=25 (e01+e02), integrity=${result3.integrity.current}`)
+  }
+
   await browser.close()
-  return { result1, result2 }
+  return { result1, result2, result3 }
 }
 
 // CLI entry point

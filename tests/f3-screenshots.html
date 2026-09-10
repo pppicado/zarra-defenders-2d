@@ -2,93 +2,11 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>F3 — Catálogo de capturas</title>
-  <link rel="icon" href="data:,">
-  <style>
-    body { margin: 0; padding: 24px; background: #0e0e10; color: #e5e7eb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    h1 { font-size: 20px; margin: 0 0 8px; color: #f3f4f6; }
-    h2 { font-size: 15px; margin: 28px 0 10px; color: #fbbf24; border-bottom: 1px solid #374151; padding-bottom: 6px; }
-    p.note { font-size: 13px; color: #9ca3af; margin: 0 0 16px; line-height: 1.5; }
-    code { background: #1f2937; color: #f3f4f6; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
-    .capture { margin: 0 0 24px; background: #111827; border: 1px solid #374151; border-radius: 6px; overflow: hidden; }
-    .capture-header { padding: 10px 14px; background: #1f2937; border-bottom: 1px solid #374151; display: flex; justify-content: space-between; align-items: center; }
-    .capture-header .title { font-size: 13px; font-weight: 600; color: #f3f4f6; }
-    .capture-header .meta { font-size: 11px; color: #9ca3af; }
-    .capture img { display: block; width: 100%; height: auto; image-rendering: pixelated; image-rendering: crisp-edges; }
-    .findings { padding: 12px 14px; background: #052e16; border-top: 1px solid #166534; font-size: 12px; line-height: 1.5; color: #bbf7d0; }
-    .findings ul { margin: 4px 0 0; padding-left: 20px; }
-    .findings li { margin: 2px 0; }
-  </style>
+  <title>Zarra Defenders 2D — redirección al catálogo unificado</title>
+  <meta http-equiv="refresh" content="0; url=catalog.html">
+  <link rel="canonical" href="catalog.html">
 </head>
 <body>
-  <h1>F3 — Catálogo de capturas (post-fix viewport + gameplay)</h1>
-  <p class="note">
-    Capturas tomadas por Playwright MCP tras los fixes de consistencia cross-resolution
-    (commits <code>3de75ac</code>, <code>f96cfbd</code>, <code>2f2eb6a</code>).
-    El HUD (mano + corazones) y el mundo iso escalan juntos via design viewport 1280×720,
-    con <code>tileSize=64</code> constante en todas las resoluciones.
-  </p>
-
-  <h2>1) f3-menu.png — Cursor arriba, mano apunta arriba</h2>
-  <div class="capture">
-    <div class="capture-header">
-      <span class="title">Gameplay boot, cursor @ (640, 200), mano rotación 0°</span>
-      <span class="meta">1280×720</span>
-    </div>
-    <img src="playwright-screenshots/f3-menu.png" alt="F3 mano arriba">
-    <div class="findings">
-      <strong>Observado:</strong>
-      <ul>
-        <li>Mano pixel art con boli anclada abajo-centro (x=640, y=688) en design space.</li>
-        <li>Boli apunta hacia arriba (rotación 0°) siguiendo el cursor en y=200.</li>
-        <li>3 corazones rojos vivos abajo-izquierda, en línea horizontal.</li>
-        <li>Mundo iso tileado con sprites de enemigos visibles (test level con 12 enemigos).</li>
-        <li>Esquinas del sprite con alpha=0 (sin artefactos magenta).</li>
-      </ul>
-    </div>
-  </div>
-
-  <h2>2) f3-gameplay.png — Cursor a la derecha, mano rotada</h2>
-  <div class="capture">
-    <div class="capture-header">
-      <span class="title">Gameplay con cursor a la derecha, mano rotación +58°</span>
-      <span class="meta">1280×720</span>
-    </div>
-    <img src="playwright-screenshots/f3-gameplay.png" alt="F3 mano derecha">
-    <div class="findings">
-      <strong>Observado:</strong>
-      <ul>
-        <li>Mano rotada apuntando al cursor (derecha-arriba, ~58°).</li>
-        <li>Boli señala correctamente al cursor.</li>
-        <li>Corazones sin cambios (integridad 3).</li>
-        <li>Tap dispara papeleta desde la mano hacia el target iso (verificado en diag interno: <code>fireAtIso(1.10, -2.43, hand=640,688)</code>).</li>
-      </ul>
-    </div>
-  </div>
-
-  <h2>3) f3-boot.png — Test level post-tick (integridad 0)</h2>
-  <div class="capture">
-    <div class="capture-header">
-      <span class="title">?test=1 después de 60s: 3 corazones vacíos, integridad agotada</span>
-      <span class="meta">1280×720</span>
-    </div>
-    <img src="playwright-screenshots/f3-boot.png" alt="F3 game over">
-    <div class="findings">
-      <strong>Observado:</strong>
-      <ul>
-        <li>3 corazones grises/empty (integrity=0, game over).</li>
-        <li>Mano en posición de reposo (cursor @ centro).</li>
-        <li>Mundo iso todavía renderizado (algunos enemigos no escaparon por la nueva lógica Manhattan).</li>
-        <li>Smoke e2e: 12 spawn + integridad exhausted + 0 console errors ✓.</li>
-      </ul>
-    </div>
-  </div>
-
-  <p class="note">
-    <strong>URLs:</strong><br>
-    Test level: <code>http://100.116.137.66:8000/?test=1&amp;seed=12345</code><br>
-    Catálogo: <code>http://100.116.137.66:8000/tests/f3-screenshots.html</code><br>
-    Producción (main menu): <code>http://100.116.137.66:8000/</code>
-  </p>
+  <p>Redirigiendo a <a href="catalog.html">tests/catalog.html</a> (catálogo unificado F3.11).</p>
 </body>
 </html>

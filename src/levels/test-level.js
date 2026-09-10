@@ -20,7 +20,7 @@
  */
 import { ARCHETYPES } from '../enemies.js?v=26'
 
-/** Spawn time relative to camera progress — when cameraIso depth >= this value, spawn. */
+/** Spawn time relative to camera progress — when cameraIso depth reaches this value, spawn. */
 function _spawnTimeFromDepth(depth) {
   // rail path: 0..60 s, depth 0..36 (18 + 18). Map depth to time.
   // depth = 36 -> t = 60, depth = 0 -> t = 0.
@@ -56,12 +56,12 @@ function _buildEnemyDefs() {
 
 /**
  * F3.10: rail direction. The rail runs northwest → southeast (iso 0,0 → 18,18).
- * From the player's perspective the camera advances toward the southeast,
- * and the world content scrolls past in the opposite direction (toward the
- * northwest, the back of the frame). That matches the "moving forward"
- * visual intuition in an on-rails shooter — the world recedes behind us
- * as we progress. All real stages (F4+) must reuse the same convention
- * so the camera always scrolls the world in the same direction.
+ * From the player's perspective the camera advances toward the southeast.
+ * With the F3.11 isoToScreen Y-mirror, the world content scrolls DOWN past
+ * the player (content approaches from the top, exits at the bottom) — the
+ * natural "moving forward" feel of an on-rails shooter. All real stages
+ * (F4+) MUST reuse this rail convention AND the mirrored isoToScreen, so
+ * every stage has the same scroll direction.
  */
 export const TEST_LEVEL = Object.freeze({
   railPath: Object.freeze([

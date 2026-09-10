@@ -95,6 +95,61 @@ The system MUST support switching the active Tilemap when the rail camera exits 
 - WHEN it queries `isoWorld.activeTilemap`
 - THEN the returned tilemap is exactly the one set by the last `setStage` call
 
+### Requirement: CAM-004 — Iso-plane escape detection (F3 added)
+
+The system MUST detect when a live enemy has left the rail corridor by computing the **Manhattan distance** from the enemy's iso center to the camera's iso position, and MUST treat an enemy as escaped when that distance is **strictly greater than `6` tiles**. The predicate lives in `src/enemies.js` as `isEscaped(enemy, cameraIso)` and is invoked once per tick from `EnemyManager.update`.
+
+Formally: for an enemy at iso `(ex, ey)` and the camera at iso `(cx, cy)`,
+
+```
+isEscaped(enemy, cameraIso) === (|ex - cx| + |ey - cy|) > 6
+```
+
+The escape boundary MUST be direction-agnostic: an enemy placed off-rail in any direction MUST escape when the camera is far enough away, regardless of which way the rail points. The boundary MUST also be conservative at the perimeter: an enemy with Manhattan distance ≤ 6 (i.e. still within 6 tiles of the camera) MUST remain hittable.
+
+The predicate SHALL accept `cameraIso` as either `{isoX, isoY}` (canonical, F3) or `{x, y}` (legacy field names from earlier iso-screen code). `cameraIso` MAY be `null` or `undefined`; in that case the predicate MUST treat the camera as the origin and apply the same rule.
+
+(Previously: a depth-based rule `enemy.depth < camera.depth` was attempted, but it flagged perpendicular enemies — camera at `(3.0, 2.0)`, enemy at `(3.0, 2.0)`, depth-difference 0 yet iso-correct escape at depth > buffer — as escaped on frame 1. Manhattan distance > 6 correctly keeps perpendicular neighbours hittable. See `tests/unit/escape-detection.spec.mjs` and `tests/e2e/hit-detection.spec.mjs` for the canonical numeric tables.)
+
+#### Scenario: Enemy with Manhattan distance 0 stays hittable
+
+- GIVEN a live `standard` enemy at iso `(3, 2)` and the camera at iso `(3.0, 2.0)`
+- WHEN `EnemyManager.update` ticks
+- THEN `isEscaped` returns `false`
+- AND no `enemy:escaped` event fires
+- AND integrity is unchanged.
+
+#### Scenario: Enemy with Manhattan distance exactly 6 stays hittable (strict `>`)
+
+- GIVEN a live enemy at iso `(3, 2)` and the camera at iso `(9, 2)` (Manhattan = `|3-9| + |2-2| = 6`)
+- WHEN `EnemyManager.update` ticks
+- THEN `isEscaped` returns `false` (the threshold is **strict** greater-than)
+- AND no `enemy:escaped` event fires.
+
+#### Scenario: Enemy with Manhattan distance 7 escapes
+
+- GIVEN a live enemy at iso `(3, 2)` and the camera at iso `(10, 2)` (Manhattan = 7)
+- WHEN `EnemyManager.update` ticks
+- THEN `isEscaped` returns `true`
+- AND `enemy:escaped` fires exactly once with `{ enemyId, archetype }`
+- AND the enemy's iso entry is removed from `EnemyManager._enemies`.
+
+#### Scenario: Rail-aligned enemy in TEST_LEVEL escapes at the documented time
+
+- GIVEN the TEST_LEVEL rail `(0,0) → (18,18)` over 60 s (camera depth grows at 0.6 tile/s)
+- AND `e01` at iso `(3, 2)` (depth 5, spawn at t=0)
+- WHEN the camera advances to `t ≈ 18.33 s` (camera depth > 11, Manhattan > 6)
+- THEN `e01` MUST have escaped (one `enemy:escaped` event fired)
+- AND integrity MUST have drained by exactly 1 segment.
+
+#### Scenario: Perpendicular enemy in TEST_LEVEL stays hittable while the camera is near
+
+- GIVEN `e01` at iso `(3, 2)` (one tile off the rail)
+- AND the camera at iso `(5.0, 5.0)` (Manhattan = 4, well under threshold)
+- WHEN `EnemyManager.update` ticks
+- THEN `e01` is NOT escaped
+- AND a hit lands and HP decrements.
+
 ## MODIFIED Requirements
 
 None — camera/input/player specs at v0.1 remain the contract; F2.5 only reinterprets `RailCamera` semantics from the renderer side.

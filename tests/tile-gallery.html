@@ -394,10 +394,10 @@
       if (typeof PIXI === 'undefined') {
         throw new Error('PIXI global not loaded (cdn script missing or blocked)')
       }
-      const { Tilemap, computeCullRange } = await import('../src/iso/tilemap.js')
-      const worldModule = await import('../src/iso/world.js')
+      const { Tilemap, computeCullRange } = await import('../src/iso/tilemap.js?v=26')
+      const worldModule = await import('../src/iso/world.js?v=26')
       const { IsoWorld } = worldModule
-      const isoMath = await import('../src/iso/iso-math.js')
+      const isoMath = await import('../src/iso/iso-math.js?v=26')
       const { isoToScreen } = isoMath
 
       // ---- State -----------------------------------------------------------
@@ -507,7 +507,11 @@
         }
         tilemap = new Tilemap(stageId, 1024, 640)
         await tilemap.load(async (variant) => {
-          const tex = await PIXI.Assets.load(`../assets/tiles/${stageId}/${variant}_alt${alt}.png`)
+          // STAGE_VARIANTS keys carry a `_2x` suffix (marking the 64→128 upscale)
+          // but the on-disk filename is `${baseName}_alt${alt}.png` (no _2x).
+          // Strip the suffix before composing the URL.
+          const baseName = variant.endsWith('_2x') ? variant.slice(0, -3) : variant
+          const tex = await PIXI.Assets.load(`../assets/tiles/${stageId}/${baseName}_alt${alt}.png`)
           tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
           return tex
         })
@@ -725,7 +729,9 @@
           // Wind sway (trees only) — horizontal jitter via x
           if (state.flags.wind && s.layer === 'tree') {
             const sway = Math.sin(t * 0.9 + s.phase) * 1.2
-            // Override the iso-position by re-setting sprite.position via screenToIso
+            // Override the iso-position by re-setting sprite.position. isoWorld.isoToScreen
+            // already passes viewOrigin so the F3.11 Y-flip is applied consistently
+            // with the in-game visual.
             const screen = isoWorld.isoToScreen(s.baseGx, s.baseGy)
             s.sprite.x = screen.sx + sway
             s.sprite.y = screen.sy + (state.flags.bobbing ? Math.sin(t * 1.4 + s.phase) * 2.5 : 0)
@@ -812,18 +818,27 @@
       function customUpdate(camera, verticalSprites = []) {
         const camIsoX = camera.getCameraX(), camIsoY = camera.getCameraY()
         const sum = camIsoX + camIsoY
-        if (sum < isoWorld._lastCameraSum) {
+        // F3.11: rail convention here is fixed-position camera (customUpdate is called
+        // every frame even when the demo is "paused"); only warn if the depth
+        // regresses by more than 0.001 to avoid spurious warnings on first-tick init.
+        if (sum < isoWorld._lastCameraSum - 0.001 && isoWorld._lastCameraSum !== -Infinity) {
           console.warn(`[IsoWorld] camera depth regressed: ${isoWorld._lastCameraSum} → ${sum}`)
         }
         isoWorld._lastCameraSum = sum
-        const { sx: csx, sy: csy } = isoToScreen(camIsoX, camIsoY, isoWorld.tileSize, isoWorld.tileWorldOrigin)
+        // F3.11: pass `viewOrigin` so isoToScreen uses the flipped projection
+        // (high iso sum = UP on screen — the game's "advancing" feel). Without
+        // this, the mini-demo would render with the legacy orientation and
+        // look inconsistent with the in-game visual.
+        const { sx: csx, sy: csy } = isoToScreen(camIsoX, camIsoY, isoWorld.tileSize, isoWorld.tileWorldOrigin, isoWorld._viewOrigin)
         isoWorld.container.position.set(isoWorld._viewOrigin.x - csx, isoWorld._viewOrigin.y - csy)
         if (tilemap) {
+          // F3.11: computeCullRange already accepts the camera iso and is
+          // direction-agnostic (works for both old and new projection).
           const range = computeCullRange(camIsoX, camIsoY, isoWorld.viewportWidth, isoWorld.viewportHeight, isoWorld.tileSize, isoWorld.tileWorldOrigin)
           tilemap.cullAndRender(isoWorld.tileLayer, range, biomePicker)
         }
         for (const { gx, gy, sprite, offset = 0 } of verticalSprites) {
-          const { sx, sy } = isoToScreen(gx, gy, isoWorld.tileSize, isoWorld.tileWorldOrigin)
+          const { sx, sy } = isoToScreen(gx, gy, isoWorld.tileSize, isoWorld.tileWorldOrigin, isoWorld._viewOrigin)
           sprite.position.set(sx, sy)
           sprite.zIndex = (gx + gy) * 1000 + offset
         }

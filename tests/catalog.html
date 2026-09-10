@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Zarra Defenders 2D — Catálogo unificado</title>
+  <link rel="icon" href="data:,">
+  <style>
+    body { margin: 0; padding: 24px; background: #0e0e10; color: #e5e7eb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    h1 { font-size: 20px; margin: 0 0 8px; color: #f3f4f6; }
+    h2 { font-size: 15px; margin: 28px 0 10px; color: #fbbf24; border-bottom: 1px solid #374151; padding-bottom: 6px; }
+    h3 { font-size: 13px; margin: 18px 0 6px; color: #fde68a; }
+    p.note { font-size: 13px; color: #9ca3af; margin: 0 0 16px; line-height: 1.5; }
+    code { background: #1f2937; color: #f3f4f6; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+    .capture { margin: 0 0 24px; background: #111827; border: 1px solid #374151; border-radius: 6px; overflow: hidden; }
+    .capture-header { padding: 10px 14px; background: #1f2937; border-bottom: 1px solid #374151; display: flex; justify-content: space-between; align-items: center; }
+    .capture-header .title { font-size: 13px; font-weight: 600; color: #f3f4f6; }
+    .capture-header .meta { font-size: 11px; color: #9ca3af; }
+    .capture img { display: block; width: 100%; height: auto; image-rendering: pixelated; image-rendering: crisp-edges; }
+    .findings { padding: 12px 14px; background: #052e16; border-top: 1px solid #166534; font-size: 12px; line-height: 1.5; color: #bbf7d0; }
+    .findings ul { margin: 4px 0 0; padding-left: 20px; }
+    .findings li { margin: 2px 0; }
+    .grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+    figure { margin: 0; padding: 4px; background: #111827; border: 1px solid #374151; border-radius: 4px; text-align: center; }
+    figure img { display: block; width: 100%; image-rendering: pixelated; }
+    figcaption { font-size: 11px; color: #9ca3af; margin-top: 4px; font-family: monospace; }
+    #tile-test-canvas-wrap { margin: 12px 0; padding: 12px; background: #111827; border: 1px solid #374151; border-radius: 6px; }
+    #tile-test-canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; cursor: crosshair; background: #1a3a1a; }
+    .tile-test-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; padding: 10px; background: #1f2937; border-radius: 4px; align-items: center; }
+    .tile-test-controls label { font-size: 12px; color: #d1d5db; }
+    .tile-test-controls input[type="number"], .tile-test-controls select { background: #374151; color: #f3f4f6; border: 1px solid #4b5563; border-radius: 3px; padding: 4px 8px; font-size: 12px; }
+    .tile-test-controls button { background: #4ade80; color: #111827; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; }
+    .tile-test-controls button.secondary { background: #6b7280; color: #f3f4f6; }
+    .tile-test-hud { display: flex; gap: 16px; margin-top: 8px; padding: 8px 12px; background: #052e16; border-radius: 4px; font-size: 12px; color: #bbf7d0; font-family: monospace; }
+    .external-link { color: #93c5fd; }
+  </style>
+</head>
+<body>
+  <h1>Zarra Defenders 2D — Catálogo unificado</h1>
+  <p class="note">
+    Punto de entrada único para revisar el estado del juego: capturas de gameplay
+    por commit, sprites del manifest, variantes de tiles, mini-demo interactivo
+    (<a class="external-link" href="tile-gallery.html">tile-gallery.html</a>)
+    y un <strong>tile test</strong> para validar una variante aislada en distintas
+    coordenadas iso. Las capturas se regeneran con Playwright headless tras cada
+    fix importante; las variantes de tiles y sprites vienen del manifest.
+  </p>
+
+  <h2>1) Capturas de gameplay (rail + cámara + HUD)</h2>
+  <p class="note">
+    Tomadas con Playwright headless tras el fix F3.11 de dirección iso (high iso
+    sum = arriba en pantalla, contenido fluye <strong>DOWN</strong> al avanzar la
+    cámara — feel natural de "avanzando"). Rail NW→SE (iso 0,0 → 18,18) en 60 s.
+  </p>
+
+  <div class="capture">
+    <div class="capture-header">
+      <span class="title">t=0s — Boot</span>
+      <span class="meta">1280×720 · camera iso (0, 0)</span>
+    </div>
+    <img src="playwright-screenshots/f3-t00-boot.png" alt="F3 boot">
+    <div class="findings">
+      <strong>Observado:</strong>
+      <ul>
+        <li>Cámara en iso (0,0) — el origen del mundo aparece en el centro vertical.</li>
+        <li>Tile (0,0) y sus vecinos inmediatos renderizan en el viewport.</li>
+        <li>Sin enemigos visibles (ninguno en profundidad &lt; 6 aún).</li>
+        <li>HUD: 3 corazones vivos, mano centrada abajo.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="capture">
+    <div class="capture-header">
+      <span class="title">t=8s — Spawn window</span>
+      <span class="meta">1280×720 · camera iso (2.4, 2.4)</span>
+    </div>
+    <img src="playwright-screenshots/f3-t08-spawn.png" alt="F3 t=8">
+    <div class="findings">
+      <strong>Observado:</strong>
+      <ul>
+        <li>e01 (camión <code>enemies_camion_treco</code>) ya spawneó en t=0 y aparece ARRIBA del centro: está "ahead" de la cámara (depth 5 &gt; depth 2.4) y con isoToScreen Y-flip se renderiza arriba.</li>
+        <li>e02 (bolsa_plastico) aparece a la derecha — Manhattan = 3, hittable.</li>
+        <li>Mano rotación hacia el cursor (derecha).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="capture">
+    <div class="capture-header">
+      <span class="title">t=16s — Escape window</span>
+      <span class="meta">1280×720 · camera iso (4.8, 4.8)</span>
+    </div>
+    <img src="playwright-screenshots/f3-t16-escape.png" alt="F3 t=16">
+    <div class="findings">
+      <strong>Observado:</strong>
+      <ul>
+        <li>e01 (camión) ahora visible CERCA del centro: la cámara se acercó a depth 5.</li>
+        <li>e01 escapará a t≈18.3s (Manhattan &gt; 6) — integridad empezará a drenar.</li>
+        <li>e03 (bidón lixiviado) visible ARRIBA — depth 11 &gt; camera depth 4.8, "ahead", renderizado arriba.</li>
+        <li>El contenido fluye DOWN al avanzar la cámara — natural "avanzando".</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="capture">
+    <div class="capture-header">
+      <span class="title">t=58s — Rail end</span>
+      <span class="meta">1280×720 · camera iso (17.4, 17.4)</span>
+    </div>
+    <img src="playwright-screenshots/f3-t58-rail-end.png" alt="F3 t=58">
+    <div class="findings">
+      <strong>Observado:</strong>
+      <ul>
+        <li>Cámara cerca de (17.4, 17.4) — el origen iso (0,0) ya está muy abajo en pantalla (rotó 17 tiles abajo).</li>
+        <li>e12 (sello_burocrático) está cerca del centro, listo para hit final.</li>
+        <li>Si integridad &gt; 0 y todos hit → victory. Si integridad = 0 → game over (depende de cuántas escaparon).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="capture">
+    <div class="capture-header">
+      <span class="title">Cursor a la derecha, mano apunta a la derecha</span>
+      <span class="meta">1280×720 · t=15s</span>
+    </div>
+    <img src="playwright-screenshots/f3-cursor-right.png" alt="F3 mano derecha">
+    <div class="findings">
+      <strong>Observado:</strong>
+      <ul>
+        <li>Mano rotación hacia el cursor (derecha-arriba).</li>
+        <li>Boli apunta correctamente al cursor.</li>
+        <li>Tap dispara papeleta desde la mano hacia el target iso.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>2) Tiles y sprites (mini-demo interactivo)</h2>
+  <p class="note">
+    El catálogo interactivo completo de tiles (40 variantes × 3 alts = 120 PNGs) +
+    sprites (manos, enemigos, decoraciones) + mini-demo del bosque mediterráneo
+    con cámara orbital, bobbing, viento y patrullaje de enemigos está en:
+  </p>
+  <p class="note">
+    → <a class="external-link" href="tile-gallery.html"><strong>tile-gallery.html</strong></a>
+  </p>
+  <p class="note">
+    Vista rápida de las 8 variantes activas de stage1-bosque (generadas con
+    minimax + postprocess_v4.py con NEAREST downsample 128→64 y chroma-key
+    magenta → alpha):
+  </p>
+  <div id="stage1-quick" class="grid"></div>
+
+  <h2>3) Tile test (validación de variante aislada)</h2>
+  <p class="note">
+    Renderiza UNA variante de tile a una coordenada iso arbitraria con una cámara
+    controlada. Útil para verificar visualmente que una variante nueva (post-generación
+    minimax o postprocess) tessella con sus vecinas sin overlap ni gap, y para
+    comparar variantes lado a lado cambiando el offset iso.
+  </p>
+  <div class="tile-test-controls">
+    <label>Variante: <select id="tt-variant"></select></label>
+    <label>Cámara iso X: <input type="number" id="tt-cam-x" value="0" step="0.5"></label>
+    <label>Cámara iso Y: <input type="number" id="tt-cam-y" value="0" step="0.5"></label>
+    <label>Tile gx: <input type="number" id="tt-gx" value="0" step="1"></label>
+    <label>Tile gy: <input type="number" id="tt-gy" value="0" step="1"></label>
+    <button id="tt-render">Render</button>
+    <button id="tt-reset" class="secondary">Reset</button>
+    <button id="tt-fill" class="secondary">Llenar 5×5</button>
+  </div>
+  <div id="tile-test-canvas-wrap">
+    <canvas id="tile-test-canvas" width="640" height="360"></canvas>
+  </div>
+  <div class="tile-test-hud">
+    <span>cam iso: <span id="tt-cam-display">(0,0)</span></span>
+    <span>tile gx,gy: <span id="tt-tile-display">(0,0)</span></span>
+    <span>iso→screen Y: <span id="tt-screen-display">-</span></span>
+    <span>step = tileSize/√2: <span id="tt-step-display">-</span></span>
+  </div>
+  <div class="findings">
+    <strong>Cómo usar:</strong>
+    <ul>
+      <li>Seleccioná una variante del dropdown (las 8 del stage activo).</li>
+      <li>Ajustá la cámara iso con X/Y para ver el tile desde distintos puntos de vista.</li>
+      <li>Cambiá gx/gy para reposicionar el tile aislado en el mundo iso.</li>
+      <li>"Llenar 5×5" pinta los 25 tiles alrededor de (gx,gy) usando el picker
+        checkerboard del manifest — sirve para ver el patrón repetido de una
+        variante junto a sus vecinas.</li>
+      <li>Si el tile tesella sin overlap ni gap con sus vecinos, el HUD muestra
+        step = tileSize/√2 ≈ 90.5 (a tileSize=128). Si ves gaps o solapes, el
+        problema está en la variante PNG o en el step math.</li>
+    </ul>
+  </div>
+
+  <h2>URLs de referencia</h2>
+  <p class="note">
+    Test level (gameplay): <code>http://100.116.137.66:8000/?test=1</code><br>
+    Producción (main menu): <code>http://100.116.137.66:8000/</code><br>
+    Catálogo interactivo de tiles: <a class="external-link" href="tile-gallery.html"><code>tile-gallery.html</code></a>
+  </p>
+
+  <script>
+    // ---- Stage1 quick view ----
+    (async () => {
+      try {
+        const r = await fetch('../assets/tiles/manifest.json')
+        const m = await r.json()
+        const seen = new Set()
+        const variants = []
+        // m.active is an array of {variant, alternative, outPath, ...}; pull unique variants.
+        for (const e of (m.active || [])) {
+          if (!e.outPath.includes('stage1-bosque')) continue
+          const base = e.outPath.split('/').pop().replace('_alt' + e.alternative + '.png', '')
+          if (!seen.has(base)) {
+            seen.add(base)
+            variants.push(base)
+          }
+          if (variants.length >= 8) break
+        }
+        const wrap = document.getElementById('stage1-quick')
+        for (const v of variants) {
+          const fig = document.createElement('figure')
+          const img = document.createElement('img')
+          img.src = `../assets/tiles/stage1-bosque/${v}_alt1.png`
+          img.alt = v
+          img.title = v
+          img.onerror = () => { img.style.opacity = '0.2' }
+          const cap = document.createElement('figcaption')
+          cap.textContent = v.replace('_2x', '').replace(/_/g, ' ')
+          fig.appendChild(img)
+          fig.appendChild(cap)
+          wrap.appendChild(fig)
+        }
+      } catch (e) { /* manifest may not be reachable from this page; just skip */ }
+    })()
+
+    // ---- Tile test (vanilla canvas; no Pixi dep) ----
+    const TILE_SIZE = 128
+    const STEP = TILE_SIZE / Math.SQRT2
+    const VIEW_W = 640, VIEW_H = 360
+    const VIEW_OX = VIEW_W / 2, VIEW_OY = VIEW_H / 2
+    const TILE_WY_ORIG = Math.round(VIEW_H * 0.30)
+    const FLIPPED_OY = 2 * VIEW_OY - TILE_WY_ORIG
+
+    function isoToScreen(ix, iy) {
+      return {
+        sx: VIEW_OX + (ix - iy) * STEP,
+        sy: FLIPPED_OY - (ix + iy) * STEP,
+      }
+    }
+
+    const canvas = document.getElementById('tile-test-canvas')
+    const ctx = canvas.getContext('2d')
+    ctx.imageSmoothingEnabled = false
+
+    const variantSelect = document.getElementById('tt-variant')
+    const camXInput = document.getElementById('tt-cam-x')
+    const camYInput = document.getElementById('tt-cam-y')
+    const gxInput = document.getElementById('tt-gx')
+    const gyInput = document.getElementById('tt-gy')
+    const renderBtn = document.getElementById('tt-render')
+    const resetBtn = document.getElementById('tt-reset')
+    const fillBtn = document.getElementById('tt-fill')
+
+    let currentVariant = null
+    let fillMode = false
+
+    function loadVariants() {
+      // Try the stage1-bosque variants first; fall back to a single placeholder.
+      // The on-disk URL pattern is `${variant}_alt1.png` (matches src/main.js tilemap.load).
+      const candidates = [
+        'pino_clear_grass_rojizo_2x',
+        'pino_underbrush_dark_2x',
+        'encina_redonda_sombra_2x',
+        'suelo_arcilloso_rojizo_2x',
+        'trocha_forestal_compactada_2x',
+        'matorral_coscoja_romero_2x',
+        'arroyo_barranco_edge_2x',
+        'hojarasca_pino_seca_2x',
+      ]
+      for (const v of candidates) {
+        const opt = document.createElement('option')
+        opt.value = v
+        opt.textContent = v.replace('_2x', '')
+        variantSelect.appendChild(opt)
+      }
+      currentVariant = candidates[0]
+    }
+
+    function checkerPickVariant(gx, gy, pool) {
+      return pool[Math.abs(gx + gy) % pool.length]
+    }
+
+    async function drawTileTest() {
+      const camX = parseFloat(camXInput.value) || 0
+      const camY = parseFloat(camYInput.value) || 0
+      const gx = parseInt(gxInput.value) || 0
+      const gy = parseInt(gyInput.value) || 0
+
+      ctx.fillStyle = '#1a3a1a'
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H)
+
+      // World container translation: place camIso at viewport center.
+      const camScreen = isoToScreen(camX, camY)
+      const cdx = VIEW_OX - camScreen.sx
+      const cdy = VIEW_OY - camScreen.sy
+
+      ctx.save()
+      ctx.translate(cdx, cdy)
+
+      const tilesToDraw = fillMode
+        ? (() => {
+            const out = []
+            for (let dx = -2; dx <= 2; dx++) {
+              for (let dy = -2; dy <= 2; dy++) {
+                out.push({ gx: gx + dx, gy: gy + dy })
+              }
+            }
+            return out
+          })()
+        : [{ gx, gy }]
+
+      const pool = [currentVariant]
+      for (const { gx: a, gy: b } of tilesToDraw) {
+        const variant = fillMode ? checkerPickVariant(a, b, pool) : currentVariant
+        const tex = await loadTexture(variant)
+        const { sx, sy } = isoToScreen(a, b)
+        ctx.save()
+        ctx.translate(sx, sy)
+        ctx.rotate(Math.PI / 4)
+        ctx.drawImage(tex, -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE)
+        ctx.restore()
+      }
+
+      // Mark the requested (gx, gy) with a red ring.
+      const { sx: tsx, sy: tsy } = isoToScreen(gx, gy)
+      ctx.save()
+      ctx.translate(tsx, tsy)
+      ctx.strokeStyle = '#ef4444'
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.arc(0, 0, 36, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.restore()
+
+      // HUD
+      document.getElementById('tt-cam-display').textContent = `(${camX}, ${camY})`
+      document.getElementById('tt-tile-display').textContent = `(${gx}, ${gy})`
+      document.getElementById('tt-screen-display').textContent = `(sx=${tsx.toFixed(1)}, sy=${tsy.toFixed(1)})`
+      document.getElementById('tt-step-display').textContent = STEP.toFixed(3)
+
+      ctx.restore()
+    }
+
+    const texCache = new Map()
+    function loadTexture(variant) {
+      if (texCache.has(variant)) return Promise.resolve(texCache.get(variant))
+      return new Promise((resolve, reject) => {
+        const img = new Image()
+        img.onload = () => { texCache.set(variant, img); resolve(img) }
+        img.onerror = () => {
+          // Placeholder checker for variants that don't exist on disk yet.
+          const ph = makePlaceholder(variant)
+          texCache.set(variant, ph)
+          resolve(ph)
+        }
+        img.src = `../assets/tiles/stage1-bosque/${variant}_alt1.png`
+      })
+    }
+    function makePlaceholder(label) {
+      const c = document.createElement('canvas')
+      c.width = TILE_SIZE; c.height = TILE_SIZE
+      const cx = c.getContext('2d')
+      cx.fillStyle = '#2a4d2a'; cx.fillRect(0, 0, TILE_SIZE, TILE_SIZE)
+      cx.fillStyle = '#9ca3af'; cx.font = '10px monospace'; cx.textAlign = 'center'
+      cx.fillText(label.slice(0, 12), TILE_SIZE / 2, TILE_SIZE / 2)
+      return c
+    }
+
+    renderBtn.addEventListener('click', () => { fillMode = false; drawTileTest() })
+    resetBtn.addEventListener('click', () => {
+      camXInput.value = 0; camYInput.value = 0; gxInput.value = 0; gyInput.value = 0
+      fillMode = false
+      drawTileTest()
+    })
+    fillBtn.addEventListener('click', () => { fillMode = true; drawTileTest() })
+    variantSelect.addEventListener('change', () => { currentVariant = variantSelect.value; drawTileTest() })
+
+    loadVariants()
+    drawTileTest()
+  </script>
+</body>
+</html>

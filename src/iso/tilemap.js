@@ -7,7 +7,7 @@
  * - sortableChildren = false on every container holding tiles (design ADR #1).
  */
 
-import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin } from './iso-math.js?v=26'
+import { isoToScreen, computeTileSize, computeWorldOrigin } from './iso-math.js?v=26'
 
 // F2.5.4: bumped from 100 to 400 to support a 4x larger world (4 stages of
 // viewport tiles visible at any time). The hard cap protects against an
@@ -25,20 +25,48 @@ export function computeZIndex(gx, gy, offset = 0) {
   return (gx + gy) * 1000 + offset
 }
 
-/** Inverse-project the viewport corners, take bbox, ±overshoot tiles. */
+/**
+ * Inverse-project the viewport corners (in screen px) into the iso grid,
+ * accounting for the camera iso position. F3.11 fix: previously this only
+ * worked when the camera was at iso origin (0, 0) — for any other camera
+ * position the cull rectangle was off by the camera offset, leaving the
+ * viewport empty or under-populated. Now we invert the math:
+ *
+ *   screenPos(sx, sy) maps to iso position
+ *     isoX = (sx - origin.x) / step  + camIsoX, with the container offset
+ *     back-tracked.
+ *
+ * The container is positioned so that isoToScreen(camIso) lands at the
+ * viewport center (CAM-002). For a screen position (sx, sy) to find its
+ * iso coord, we walk the screen→container translation back, then through
+ * `screenToIso`. Concretely: a screen point (sx, sy) corresponds to the
+ * world-space point (sx - container.x, sy - container.y). Substituting
+ * container.x = viewOrigin.x - isoToScreen(camIso).sx and solving for the
+ * iso sum/diff bounds yields:
+ *
+ *   a + b ∈ [camIsoX + camIsoY − vh/(2·step),  camIsoX + camIsoY + vh/(2·step)]
+ *   a − b ∈ [camIsoX − camIsoY − vw/(2·step),  camIsoX − camIsoY + vw/(2·step)]
+ *
+ * From these: a = (a+b + a−b)/2, b = (a+b − a−b)/2.
+ */
 export function computeCullRange(camIsoX, camIsoY, vw, vh, tileSize, origin, overshoot = CULL_OVERSHOOT) {
-  const corners = [
-    screenToIso(0, 0, tileSize, origin),
-    screenToIso(vw, 0, tileSize, origin),
-    screenToIso(0, vh, tileSize, origin),
-    screenToIso(vw, vh, tileSize, origin),
-  ]
-  const xs = corners.map(c => c.isoX), ys = corners.map(c => c.isoY)
+  const step = tileSize / Math.SQRT2
+  const vwHalfIso = vw / (2 * step)
+  const vhHalfIso = vh / (2 * step)
+  const sumMin = camIsoX + camIsoY - vhHalfIso
+  const sumMax = camIsoX + camIsoY + vhHalfIso
+  const diffMin = camIsoX - camIsoY - vwHalfIso
+  const diffMax = camIsoX - camIsoY + vwHalfIso
+  // a = (sum + diff) / 2 ;  b = (sum - diff) / 2
+  const aMinRaw = (sumMin + diffMin) / 2
+  const aMaxRaw = (sumMax + diffMax) / 2
+  const bMinRaw = (sumMin - diffMax) / 2
+  const bMaxRaw = (sumMax - diffMin) / 2
   return {
-    gxMin: Math.floor(Math.min(...xs)) - overshoot,
-    gxMax: Math.ceil(Math.max(...xs)) + overshoot,
-    gyMin: Math.floor(Math.min(...ys)) - overshoot,
-    gyMax: Math.ceil(Math.max(...ys)) + overshoot,
+    gxMin: Math.floor(Math.min(aMinRaw, aMaxRaw)) - overshoot,
+    gxMax: Math.ceil(Math.max(aMinRaw, aMaxRaw)) + overshoot,
+    gyMin: Math.floor(Math.min(bMinRaw, bMaxRaw)) - overshoot,
+    gyMax: Math.ceil(Math.max(bMinRaw, bMaxRaw)) + overshoot,
   }
 }
 

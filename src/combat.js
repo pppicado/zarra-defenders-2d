@@ -187,7 +187,14 @@ export class Combat {
 
     // Resolve hit synchronously (footprint AABB + reverse-depth)
     const target = this._resolveHit(isoX, isoY)
-    const targetScreen = this.isoWorld.isoToScreen(isoX, isoY)
+    // Camera-aware: origin (hand) and projectile gfx both use SCREEN coords
+    // (hudContainer is in the HUD canvas, not the world canvas), so the target
+    // must also be in screen coords. `isoWorld.isoToScreen` returns container-
+    // internal world coords anchored at tileWorldOrigin — mixing those with
+    // screen-coord origin is the projectile-direction bug. Use the camera-aware
+    // variant: target = isoToScreen(ix, iy) + container.position
+    //                          = isoToScreen(ix, iy) + viewOrigin - isoToScreen(camIso)
+    const targetScreen = this.isoWorld.isoToScreenWithCamera(isoX, isoY, this.cameraIso, this.viewportCenter)
 
     // Spawn projectile (visual)
     const proj = new Projectile({
