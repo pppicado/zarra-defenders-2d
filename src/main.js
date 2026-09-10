@@ -44,7 +44,7 @@ import { on as busOn, emit } from './event-bus.js?v=26'
  * center) is expressed in this space. CSS `transform: scale()` on the wrapper
  * then visual-scales the 1920x720 buffer to fit any browser viewport.
  */
-const LOGICAL_W = 1920
+export const LOGICAL_W = 1920
 
 /**
  * F3.5: fixed tile edge length in logical pixels. The canvas is always
