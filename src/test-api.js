@@ -24,8 +24,9 @@
  * PRNG: when in ?test=1, production Math.random is REPLACED by a mulberry32(seed)
  * at the boot site. Default seed = 0xC0FFEE, override via &seed=N.
  */
-import { mulberry32 } from './random.js?v=26'
-import { on as busOn } from './event-bus.js?v=26'
+import { mulberry32 } from './random.js?v=27'
+import { on as busOn } from './event-bus.js?v=27'
+import { LOGICAL_W, LOGICAL_H } from './main.js?v=27'
 
 export const DEFAULT_TEST_SEED = 0xC0FFEE
 
@@ -100,7 +101,7 @@ export function mountTestAPI(ctx) {
     simulateTap(screenX, screenY) {
       const isoWorld = ctx.isoWorld
       const camIso = ctx.camera ? { isoX: ctx.camera.getCameraX(), isoY: ctx.camera.getCameraY() } : { isoX: 0, isoY: 0 }
-      const vc = ctx.viewportCenter ?? { x: 640, y: 360 }
+      const vc = ctx.viewportCenter ?? { x: LOGICAL_W / 2, y: LOGICAL_H / 2 }
       const iso = isoWorld.screenToIsoWithCamera(screenX, screenY, camIso, vc)
       return ctx.combat?.fireAtIso?.(iso.isoX, iso.isoY, { x: screenX, y: screenY })
     },
