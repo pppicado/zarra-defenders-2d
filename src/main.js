@@ -42,23 +42,23 @@ import { on as busOn, emit } from './event-bus.js?v=26'
  * LOGICAL_W × LOGICAL_H is the fixed internal rendering resolution. Every game
  * coordinate (hand position, hearts, projectile origin, tile sizes, viewport
  * center) is expressed in this space. CSS `transform: scale()` on the wrapper
- * then visual-scales the 1920x1080 buffer to fit any browser viewport.
+ * then visual-scales the 1920x720 buffer to fit any browser viewport.
  */
-const LOGICAL_W = 1920
+export const LOGICAL_W = 1920
 
 /**
  * F3.5: fixed tile edge length in logical pixels. The canvas is always
- * 1920x1080, so a 128-px tile yields ~15 tiles wide × ~8 tiles tall — enough
+ * 1920x720, so a 128-px tile yields ~15 tiles wide × ~5.6 iso tiles tall — enough
  * to see the iso corridor and a couple of enemies at once, with pixel-art
  * readability preserved. This value is INDEPENDENT of the browser viewport:
  * the CSS transform scale-up/scale-down keeps it visually consistent.
  */
 const TILE_SIZE = 128
-const LOGICAL_H = 1080
+export const LOGICAL_H = 720
 
 /**
  * Fit a fixed-size logical canvas into the actual viewport by setting the
- * wrapper's CSS transform to a uniform scale. The canvas inside stays 1920x1080
+ * wrapper's CSS transform to a uniform scale. The canvas inside stays 1920x720
  * (logical px); the transform only scales the visible rendering.
  *
  * F3.5: applied to BOTH the world canvas wrapper and the HUD canvas wrapper
@@ -89,7 +89,7 @@ function applyCssScale(wrappers, logicalW, logicalH) {
 
 /**
  * Convert a mouse coordinate reported in the wrapper's CSS space into the
- * game's logical 1920x1080 space. Used by the tap handler so screenToIso
+ * game's logical 1920x720 space. Used by the tap handler so screenToIso
  * projects from the cursor position to the right iso cell regardless of the
  * CSS scale applied for the current viewport.
  */
@@ -129,7 +129,7 @@ async function bootstrap() {
   // F3.5: TWO separate Pixi apps stacked via CSS z-index.
   //   appWorld: iso tiles + enemy sprites (z-index 1, behind)
   //   appHud:   hand sprite + integrity hearts + papeleta (z-index 2, on top)
-  // Both run at LOGICAL_W x LOGICAL_H (1920x1080). Both CSS wrappers get the
+  // Both run at LOGICAL_W x LOGICAL_H (1920x720). Both CSS wrappers get the
   // same transform: scale() so they overlay pixel-perfect.
   const worldWrapper = document.getElementById('game-canvas-wrapper')
   const hudWrapper = document.getElementById('game-hud-wrapper')
@@ -155,7 +155,7 @@ async function bootstrap() {
   })
   hudWrapper.appendChild(appHud.view)
 
-  // --- CSS scale: fit the 1920x1080 logical canvas into the actual viewport.
+  // --- CSS scale: fit the 1920x720 logical canvas into the actual viewport.
   // Same transform applied to both wrappers — they overlay exactly.
   applyCssScale([worldWrapper, hudWrapper], LOGICAL_W, LOGICAL_H)
 
@@ -170,7 +170,7 @@ async function bootstrap() {
     viewportWidth: LOGICAL_W,
     viewportHeight: LOGICAL_H,
     // F3.5: tileSize is fixed at 128 px logical regardless of viewport. The
-    // canvas is always 1920x1080 so this is a stable value (≈15 tiles wide).
+    // canvas is always 1920x720 so this is a stable value (≈15 tiles wide).
     tileSize: TILE_SIZE,
   })
   world.addChild(isoWorld.container)
@@ -264,7 +264,7 @@ async function bootstrap() {
   input.on('move', (x, y) => hudModule.setPointer(x, y))
 
   // Tap handler: the input handler has already converted CSS px → logical
-  // 1920x1080 px (see _toLogical in input.js). Pass through to isoWorld.
+  // 1920x720 px (see _toLogical in input.js). Pass through to isoWorld.
   input.on('tap', (logicalX, logicalY) => {
     if (gameState.state !== 'gameplay') return
     if (!combat) return
