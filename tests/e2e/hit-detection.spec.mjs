@@ -9,7 +9,7 @@
  *   isEscaped(enemy, cameraIso) === |ex - cx| + |ey - cy| > 6
  *   — Manhattan distance from enemy iso to camera iso > 6 tiles.
  *
- * For the rail (0,0) -> (18,18) over 60s and enemy e01 at iso (3,2):
+ * For the rail (0,0) -> (36,36) over 120s (F4b) and enemy e01 at iso (3,2):
  *   spawn  at t=0     (spawnTime = (depth-5)/36 * 60 = 0s for depth-5 enemy)
  *   escape at t ~ 18.33s   (camera depth > 11; iso depth growth 0.6 tile/s)
  * -> choose t=5 for part 1 (well before escape), t=20 for part 2 (e01 escaped).
