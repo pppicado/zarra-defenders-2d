@@ -54,7 +54,7 @@ export const LOGICAL_W = 1920
  * the CSS transform scale-up/scale-down keeps it visually consistent.
  */
 const TILE_SIZE = 128
-const LOGICAL_H = 720
+export const LOGICAL_H = 720
 
 /**
  * Fit a fixed-size logical canvas into the actual viewport by setting the
