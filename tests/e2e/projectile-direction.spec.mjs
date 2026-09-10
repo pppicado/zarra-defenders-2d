@@ -16,16 +16,16 @@
  *   broken vector.y        = (tileWorldOrigin.y + 2D*step) - hand.y
  *   correct vector.y       = viewOrigin.y - hand.y  (constant)
  *
- * With tileWorldOrigin.y = round(1080*0.30) = 324, hand.y = 1080 - 48 = 1032,
- * viewOrigin.y = 540, step = 128/√2 ≈ 90.5097:
- *   correct  = 540 - 1032 = -492  (always UP)
- *   broken at D=0   = 324 - 1032 = -708  (UP, wrong magnitude)
- *   broken at D=1.2 = 324 + 217 - 1032 = -491  (≈ correct, accidental)
- *   broken at D=3   = 324 + 543 - 1032 = -165  (UP, short)
- *   broken at D=4   = 324 + 724 - 1032 = +16   (DOWN — flipped!)
+ * With tileWorldOrigin.y = round(720*0.30) = 216, hand.y = 720 - 48 = 672,
+ * viewOrigin.y = 360, step = 128/√2 ≈ 90.5097:
+ *   correct  = 360 - 672 = -312  (always UP)
+ *   broken at D=0   = 216 - 672 = -456  (UP, wrong magnitude)
+ *   broken at D=1.2 = 216 + 217 - 672 = -239  (UP, short)
+ *   broken at D=3   = 216 + 543 - 672 = +87   (DOWN — flipped!)
+ *   broken at D=4   = 216 + 724 - 672 = +268  (DOWN, more flipped)
  *
  * So the projectile begins pointing UP but with wrong magnitude, then
- * progressively shortens, and finally aims DOWN once camera depth crosses ~3.6.
+ * progressively shortens, and finally aims DOWN once camera depth crosses ~2.5.
  *
  * Test asserts: after the fix, broken_y == correct_y for every (t, targetIso) pair.
  */
@@ -37,7 +37,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url))
 const URL = process.env.TEST_URL || 'http://localhost:8000/?test=1'
 
 const LOGICAL_W = 1920
-const LOGICAL_H = 1080
+const LOGICAL_H = 720
 const HAND_BOTTOM_OFFSET_Y = -48
 const VIEWPORT_CENTER = { x: LOGICAL_W / 2, y: LOGICAL_H / 2 }
 const HAND_SCREEN = { x: VIEWPORT_CENTER.x, y: LOGICAL_H + HAND_BOTTOM_OFFSET_Y }
@@ -140,8 +140,8 @@ export async function runProjectileDirectionSpec() {
     // Cursor at upper-right quadrant (e.g. (1300, 300) — a real iso target
     // somewhere ahead-right of the camera).
     const cursor = { x: 1300, y: 300 }
-    const iso = isoWorld.screenToIsoWithCamera(cursor.x, cursor.y, camIso, { x: 960, y: 540 })
-    mods.combat.fireAtIso(iso.isoX, iso.isoY, { x: 960, y: 1032 }, { bypassCooldown: true })
+    const iso = isoWorld.screenToIsoWithCamera(cursor.x, cursor.y, camIso, VIEWPORT_CENTER)
+    mods.combat.fireAtIso(iso.isoX, iso.isoY, HAND_SCREEN, { bypassCooldown: true })
     const live = mods.combat._projectiles[mods.combat._projectiles.length - 1]
     // After 1 tick of 16ms, where is the gfx on screen?
     mods.combat.update(16)
@@ -180,19 +180,19 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       console.log(summarize(rows))
       console.log('\nOff-center cursor (depth=10, cursor=(1300,300)):')
       for (const o of offCenter) {
-        const dirX = o.gfxAfter.x - 960
-        const dirY = o.gfxAfter.y - 1032
-        const cursorDirX = o.cursor.x - 960
-        const cursorDirY = o.cursor.y - 1032
+        const dirX = o.gfxAfter.x - HAND_SCREEN.x
+        const dirY = o.gfxAfter.y - HAND_SCREEN.y
+        const cursorDirX = o.cursor.x - HAND_SCREEN.x
+        const cursorDirY = o.cursor.y - HAND_SCREEN.y
         const aligned = Math.sign(dirX) === Math.sign(cursorDirX) && Math.sign(dirY) === Math.sign(cursorDirY)
         console.log(`  iso target=${JSON.stringify(o.isoTarget)} target_screen=${JSON.stringify(o.target)} gfx_after_1_tick=${JSON.stringify(o.gfxAfter)} vector_to_gfx=(${dirX.toFixed(0)},${dirY.toFixed(0)}) cursor_relative=(${cursorDirX},${cursorDirY}) aligned=${aligned ? 'YES' : 'NO'}`)
       }
       const anyFlipped = rows.some(r => r.flipped)
       const anyMisaligned = offCenter.some(o => {
-        const dirX = o.gfxAfter.x - 960
-        const dirY = o.gfxAfter.y - 1032
-        const cursorDirX = o.cursor.x - 960
-        const cursorDirY = o.cursor.y - 1032
+        const dirX = o.gfxAfter.x - HAND_SCREEN.x
+        const dirY = o.gfxAfter.y - HAND_SCREEN.y
+        const cursorDirX = o.cursor.x - HAND_SCREEN.x
+        const cursorDirY = o.cursor.y - HAND_SCREEN.y
         return Math.sign(dirX) !== Math.sign(cursorDirX) || Math.sign(dirY) !== Math.sign(cursorDirY)
       })
       if (anyFlipped) { console.error('\nBUG REPRODUCED: center-cursor Y component flips sign for some camera depths'); process.exit(2) }
