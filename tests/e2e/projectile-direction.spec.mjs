@@ -36,7 +36,7 @@ import path from 'node:path'
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const URL = process.env.TEST_URL || 'http://localhost:8000/?test=1'
 
-const LOGICAL_W = 1920
+const LOGICAL_W = 1280
 const LOGICAL_H = 720
 const HAND_BOTTOM_OFFSET_Y = -48
 const VIEWPORT_CENTER = { x: LOGICAL_W / 2, y: LOGICAL_H / 2 }

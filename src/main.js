@@ -24,15 +24,16 @@ import { Tilemap } from './iso/tilemap.js?v=26'
 import { Integrity } from './integrity.js?v=26'
 import { Score } from './score.js?v=26'
 import { EnemyManager, ARCHETYPES } from './enemies.js?v=26'
-import { Combat } from './combat.js?v=26'
+import { Combat } from './combat.js?v=28'
 import { MainMenu } from './ui/menu.js?v=26'
 import { Overlay } from './ui/overlay.js?v=26'
 import { HUD } from './ui/hud.js?v=26'
 import { TEST_LEVEL, testLevelWaypoints, assertTestLevel, TEST_LEVEL_ENEMY_COUNT } from './levels/test-level.js?v=26'
-import { parseTestFlags, mountTestAPI } from './test-api.js?v=26'
+import { parseTestFlags, mountTestAPI } from './test-api.js?v=28'
 import { mulberry32, fixedClock } from './random.js?v=26'
 import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?v=26'
 import { on as busOn, emit } from './event-bus.js?v=26'
+import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=28'
 
 // ============================================================
 // Configuration
@@ -42,19 +43,11 @@ import { on as busOn, emit } from './event-bus.js?v=26'
  * LOGICAL_W × LOGICAL_H is the fixed internal rendering resolution. Every game
  * coordinate (hand position, hearts, projectile origin, tile sizes, viewport
  * center) is expressed in this space. CSS `transform: scale()` on the wrapper
- * then visual-scales the 1920x720 buffer to fit any browser viewport.
- */
-export const LOGICAL_W = 1920
-
-/**
- * F3.5: fixed tile edge length in logical pixels. The canvas is always
- * 1920x720, so a 128-px tile yields ~15 tiles wide × ~5.6 iso tiles tall — enough
- * to see the iso corridor and a couple of enemies at once, with pixel-art
- * readability preserved. This value is INDEPENDENT of the browser viewport:
- * the CSS transform scale-up/scale-down keeps it visually consistent.
+ * then visual-scales the 1280x720 buffer to fit any browser viewport.
+ *
+ * F4e: LOGICAL_W is now 1280 (16:9 standard 720p), imported from ./canvas.js.
  */
 const TILE_SIZE = 128
-export const LOGICAL_H = 720
 
 /**
  * Fit a fixed-size logical canvas into the actual viewport by setting the
