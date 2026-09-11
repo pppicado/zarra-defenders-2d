@@ -20,14 +20,14 @@
  *   - Input.setGate from main.js (when menu/overlay visible, fireAtIso still works — only the
  *     pointer tap pipeline is gated; this is for tests + UI button "fire" hooks).
  */
-import { emit } from './event-bus.js?v=28'
-import { ARCHETYPES } from './enemies.js?v=28'
-import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=28'
+import { emit } from './event-bus.js?v=29'
+import { ARCHETYPES } from './enemies.js?v=29'
+import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=29'
 
 export const FIRE_COOLDOWN_MS = 200          // F4d: was 333 (F3) — ~40% faster fire rate
-export const PROJECTILE_SPEED = 800          // world-units / sec
+export const PROJECTILE_SPEED = 2400         // F4f: was 800 (F3-F4d) — 3x faster per user request
 export const PROJECTILE_LIFETIME_MS = 1500   // ms
-export const SINE_AMPLITUDE_PX = 2           // paper flutter ±2 px
+export const SINE_AMPLITUDE_PX = 4           // F4f: was 2 — paper flutter ±4 px (proportional to bigger sprite)
 export const SINE_PERIOD_MS = 400            // 0.4 s
 const PAPELETA_TEX_URL = 'assets/sprites/papeleta_firmada.png'
 
