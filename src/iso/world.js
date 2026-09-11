@@ -100,10 +100,23 @@ export class IsoWorld {
     }
     this._lastCameraSum = sum
 
-    const { sx: csx, sy: csy } = isoToScreen(camIsoX, camIsoY, this.tileSize, this.tileWorldOrigin, this._viewOrigin)
-    // CAM-002: world container anchor is viewOrigin (viewport center), NOT tileWorldOrigin.
-    // camera-projected iso position lands at viewOrigin instead of the HUD strip.
-    this.container.position.set(this._viewOrigin.x - csx, this._viewOrigin.y - csy)
+    // F4i: compute the container position so that the iso (camIsoX, camIsoY)
+    // lands at viewport center. The Tiles are rendered in local space using
+    // isoToScreen WITHOUT viewOrigin (see Tile constructor), so the local
+    // position of (gx, gy) is tileWorldOrigin + iso(gx, gy) * step. The
+    // container offset must compensate: we want world y of camIso = viewport
+    // center y, i.e. (tileWorldOrigin.y + camIsoSum * step) + container.y =
+    // viewportHeight / 2. Solving for container.y gives the formula below.
+    //
+    // The OLD formula (viewOrigin.y - isoToScreen(camIso).y CON viewOrigin)
+    // produced a sign-flipped offset that pushed tiles below the viewport as
+    // camIsoSum grew — the cull range was correct in iso space but the
+    // world-space tile bounds drifted by ~camIsoSum * step * 2.
+    const localSy = this.tileWorldOrigin.y + (camIsoX + camIsoY) * (this.tileSize / Math.SQRT2)
+    this.container.position.set(
+      this.viewportWidth / 2 - (this.tileWorldOrigin.x + (camIsoX - camIsoY) * (this.tileSize / Math.SQRT2)),
+      this.viewportHeight / 2 - localSy
+    )
 
     if (this._activeTilemap) {
       const range = computeCullRange(camIsoX, camIsoY, this.viewportWidth, this.viewportHeight, this.tileSize, this.tileWorldOrigin)

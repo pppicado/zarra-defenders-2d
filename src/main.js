@@ -19,7 +19,7 @@
 import { RailCamera } from './rail-camera.js?v=26'
 import { Input } from './input.js?v=26'
 import { Player } from './player.js?v=26'
-import { IsoWorld } from './iso/world.js?v=33'
+import { IsoWorld } from './iso/world.js?v=40'
 import { Tilemap } from './iso/tilemap.js?v=26'
 import { Integrity } from './integrity.js?v=26'
 import { Score } from './score.js?v=26'
