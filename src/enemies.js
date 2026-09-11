@@ -22,10 +22,18 @@
 import { emit } from './event-bus.js?v=26'
 
 export const ARCHETYPES = Object.freeze({
-  standard:    Object.freeze({ hp: 1,  multiplier: 1,   footprint: Object.freeze({ hw: 1.0, hh: 1.0 }), flashMs: 200 }),
-  tank:        Object.freeze({ hp: 3,  multiplier: 1.5, footprint: Object.freeze({ hw: 1.2, hh: 1.2 }), flashMs: 200 }),
-  'mini-boss': Object.freeze({ hp: 10, multiplier: 2,   footprint: Object.freeze({ hw: 1.5, hh: 1.5 }), flashMs: 200 }),
-  boss:        Object.freeze({ hp: 30, multiplier: 3,   footprint: Object.freeze({ hw: 2.0, hh: 2.0 }), flashMs: 200 }),
+  // F4f: footprints widened on the iso-sum axis (hh) to cover the full vertical
+  // extent of the visible sprite. Each enemy sprite is anchored at bottom-center
+  // (0.5, 1.0) and offset by `southOffset = tileSize / √2` upward from the iso
+  // center, so the visible sprite extends ~1 tile ABOVE the iso cell. The F3.5
+  // footprints (1.0/1.0 standard, up to 2.0/2.0 boss) only captured the bottom
+  // half of the sprite — clicking on the visible sprite body missed the AABB
+  // and the projectile whiffed. Widening hh to ~2.5 tiles makes the hit box
+  // cover the sprite from iso center up to the sprite top.
+  standard:    Object.freeze({ hp: 1,  multiplier: 1,   footprint: Object.freeze({ hw: 1.5, hh: 2.5 }), flashMs: 200 }),
+  tank:        Object.freeze({ hp: 3,  multiplier: 1.5, footprint: Object.freeze({ hw: 1.7, hh: 2.7 }), flashMs: 200 }),
+  'mini-boss': Object.freeze({ hp: 10, multiplier: 2,   footprint: Object.freeze({ hw: 2.0, hh: 3.0 }), flashMs: 200 }),
+  boss:        Object.freeze({ hp: 30, multiplier: 3,   footprint: Object.freeze({ hw: 2.5, hh: 3.5 }), flashMs: 200 }),
 })
 
 export const ARCHETYPE_IDS = Object.freeze(Object.keys(ARCHETYPES))
