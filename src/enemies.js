@@ -169,7 +169,11 @@ export class EnemyManager {
     const tex = this.textures.get(enemy.spriteId)
     if (!tex) return
     const sprite = new PIXI.Sprite(tex)
-    sprite.anchor.set(0.5, 1.0)  // base anchored at bottom center
+    sprite.anchor.set(0.5, 0.5)  // F4g: centered on the iso cell, so the visible
+                                  // sprite sits inside the AABB the player aims at.
+                                  // The previous (0.5, 1.0) + southOffset placed
+                                  // the sprite 1 tile ABOVE the iso center, so the
+                                  // AABB and the visible sprite didn't overlap.
     // F4g: source textures are 512x512 (asset-pipeline generation); at 720p that
     // leaves most of the sprite off-screen. Normalize to TILE_SIZE so the sprite
     // visually matches one iso tile regardless of source resolution.

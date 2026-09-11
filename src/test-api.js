@@ -94,6 +94,19 @@ export function mountTestAPI(ctx) {
         const camIso = { isoX: ctx.camera.getCameraX(), isoY: ctx.camera.getCameraY() }
         ctx.enemies?.update?.(dtMs, camIso, tBefore + dtMs / 1000)
       }
+      // F4g: also drive isoWorld.update() so the world container's position
+      // and the enemy sprite positions stay in sync with the camera. Without
+      // this, headless probes that don't yield to the Pixi ticker see stale
+      // container position and `screenToIsoWithCamera` returns the wrong iso
+      // coord — making the hit AABB miss every visible sprite.
+      if (ctx.isoWorld && ctx.camera && ctx.enemies) {
+        const camIso = { isoX: ctx.camera.getCameraX(), isoY: ctx.camera.getCameraY() }
+        if (ctx.combat) ctx.combat.setCameraIso(camIso)
+        const verticalSprites = ctx.enemies.getAliveSprites().map(e => ({
+          gx: e.def.isoX, gy: e.def.isoY, sprite: e.sprite,
+        }))
+        ctx.isoWorld.update(ctx.camera, verticalSprites)
+      }
     },
     fireAtIso(x, y, opts) {
       return ctx.combat?.fireAtIso?.(x, y, { x: 0, y: 0 }, { bypassCooldown: true, ...(opts ?? {}) })

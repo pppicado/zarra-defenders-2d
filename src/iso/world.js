@@ -114,12 +114,13 @@ export class IsoWorld {
       // F2.5.10: tiles are SQUARE PNGs rotated 45° INDIVIDUALLY (Tile.rotation
       // = π/4 around each tile's own center). The `_worldLayer` does not
       // rotate, so the sprite (in `container`) is unaffected by any world
-      // transforms. The sprite base lands on the south point of the diamond.
-      // F3.11: iso Y is mirrored around viewOrigin.y, so "south" (high iso sum)
-      // is UP on screen — the sprite offset is therefore NEGATIVE in screen Y.
+      // transforms. F4g: enemies anchor at center (0.5, 0.5) and sit on the
+      // iso cell center so the visible sprite lines up with the AABB the
+      // player aims at; the previous (anchor 0.5, 1.0) + southOffset rendered
+      // the sprite 1 tile ABOVE the iso center, leaving the AABB and the
+      // visible sprite disjoint.
       const { sx: csx, sy: csy } = isoToScreen(gx, gy, this.tileSize, this.tileWorldOrigin, this._viewOrigin)
-      const southOffset = this.tileSize / Math.SQRT2
-      sprite.position.set(csx, csy - southOffset)
+      sprite.position.set(csx, csy)
       sprite.zIndex = computeZIndex(gx, gy, offset)
     }
   }
