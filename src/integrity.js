@@ -13,7 +13,7 @@
  *   - reset() returns to { current: 3, max: 3 } and clears the exhausted latch.
  *   - stage:cleared / stage:failed freeze the state (further drain() calls no-op).
  */
-import { emit } from './event-bus.js?v=26'
+import { emit } from './event-bus.js?v=34'
 
 export const INTEGRITY_MAX = 3
 

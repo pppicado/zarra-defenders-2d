@@ -32,7 +32,7 @@ import { TEST_LEVEL, testLevelWaypoints, assertTestLevel, TEST_LEVEL_ENEMY_COUNT
 import { parseTestFlags, mountTestAPI } from './test-api.js?v=33'
 import { mulberry32, fixedClock } from './random.js?v=26'
 import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?v=26'
-import { on as busOn, emit } from './event-bus.js?v=26'
+import { on as busOn, emit } from './event-bus.js?v=34'
 import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=28'
 
 // ============================================================

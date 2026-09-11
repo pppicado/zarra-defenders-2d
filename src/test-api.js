@@ -25,7 +25,7 @@
  * at the boot site. Default seed = 0xC0FFEE, override via &seed=N.
  */
 import { mulberry32 } from './random.js?v=28'
-import { on as busOn } from './event-bus.js?v=28'
+import { on as busOn } from './event-bus.js?v=34'
 import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=28'
 
 export const DEFAULT_TEST_SEED = 0xC0FFEE
