@@ -28,4 +28,5 @@ tests/out/*.png
 # F3 diagnostic scratch
 .scratch/
 node_modules/
+assets/sprites/_heart-attempts/
 assets/sprites/_hand-attempts/
