@@ -26,9 +26,10 @@ import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=29'
 
 export const FIRE_COOLDOWN_MS = 200          // F4d: was 333 (F3) — ~40% faster fire rate
 export const PROJECTILE_SPEED = 2400         // F4f: was 800 (F3-F4d) — 3x faster per user request
-export const PROJECTILE_LIFETIME_MS = 1500   // ms
+export const PROJECTILE_LIFETIME_MS = 1500   // ms (fallback if a projectile never reaches its target)
 export const SINE_AMPLITUDE_PX = 4           // F4f: was 2 — paper flutter ±4 px (proportional to bigger sprite)
 export const SINE_PERIOD_MS = 400            // 0.4 s
+const ARRIVAL_EPSILON_PX_SQ = 4 * 4         // F4g: despawn projectile when within 4 px of its target screen position
 const PAPELETA_TEX_URL = 'assets/sprites/papeleta_firmada.png'
 
 /**
@@ -108,6 +109,13 @@ class Projectile {
       this.gfx.x += nx * offset * (dtMs / 16.6667)  // sine is dt-independent; render at every frame
       this.gfx.y += ny * offset * (dtMs / 16.6667)
     }
+    // F4g: kill when the projectile reaches (or passes) its target. The hit
+    // was already resolved synchronously in Combat.fireAtIso, so this is a
+    // visual despawn cue — the sprite disappears at the impact point instead
+    // of continuing to fly until lifetime or frustum exit.
+    const dx = this.gfx.x - this.target.x
+    const dy = this.gfx.y - this.target.y
+    if (dx * dx + dy * dy < ARRIVAL_EPSILON_PX_SQ) return this._kill()
     // despawn conditions
     if (this.elapsedMs >= PROJECTILE_LIFETIME_MS) return this._kill()
     if (this.gfx.x < frustumMin.x || this.gfx.x > frustumMax.x) return this._kill()

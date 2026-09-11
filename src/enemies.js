@@ -19,7 +19,8 @@
  * Escape detection (F3.2): Manhattan distance from enemy to camera > 6 tiles.
  * Enemies are static in F3 (no movement); only the camera moves.
  */
-import { emit } from './event-bus.js?v=26'
+import { emit } from './event-bus.js?v=31'
+import { TILE_SIZE } from './canvas.js?v=31'
 
 export const ARCHETYPES = Object.freeze({
   // F4f: footprints widened on the iso-sum axis (hh) to cover the full vertical
@@ -169,6 +170,11 @@ export class EnemyManager {
     if (!tex) return
     const sprite = new PIXI.Sprite(tex)
     sprite.anchor.set(0.5, 1.0)  // base anchored at bottom center
+    // F4g: source textures are 512x512 (asset-pipeline generation); at 720p that
+    // leaves most of the sprite off-screen. Normalize to TILE_SIZE so the sprite
+    // visually matches one iso tile regardless of source resolution.
+    const baseSize = Math.max(tex.width, tex.height) || 512
+    sprite.scale.set(TILE_SIZE / baseSize)
     sprite.x = enemy.isoX
     sprite.y = enemy.isoY
     enemy.sprite = sprite
