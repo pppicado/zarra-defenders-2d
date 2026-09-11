@@ -53,6 +53,11 @@
       "path": "assets/sprites/hand_pen.png",
       "real": true
     },
+    "papeleta_firmada": {
+      "path": "assets/sprites/papeleta_firmada.png",
+      "real": true,
+      "note": "F4d — procedural 20x24 RGBA sprite for the signed-papeleta projectile. Replaces the PIXI.Graphics procedural papeleta in combat.js."
+    },
     "heart_full": {
       "path": "assets/sprites/heart_full.png",
       "real": true

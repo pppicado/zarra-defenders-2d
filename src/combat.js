@@ -1,11 +1,12 @@
 /**
  * src/combat.js
  *
- * Combat orchestration (F3 combat-core spec).
+ * Combat orchestration (F3 combat-core spec + F4d papeleta sprite).
  *
  * Owns:
- *   - Projectile pool (PIXI.Graphics papeleta: 4×6 cream + 1px outline + diagonal signature)
- *   - Cooldown gate (333 ms fixed; spec REQ-CMB-001)
+ *   - Projectile pool (F4d: PIXI.Sprite papeleta_firmada.png, 20x24 RGBA;
+ *     fallback to PIXI.Graphics procedural if the texture fails to load)
+ *   - Cooldown gate (F4d: 200 ms, was 333 ms in F3 — ~40% faster fire rate)
  *   - Hit-resolution pipeline (footprint AABB + reverse-depth sort + HP decrement)
  *   - Score/firmas deltas (delegated to caller via callback or via direct EventBus emit)
  *
@@ -23,11 +24,12 @@ import { emit } from './event-bus.js?v=27'
 import { ARCHETYPES } from './enemies.js?v=27'
 import { LOGICAL_W, LOGICAL_H } from './main.js?v=27'
 
-export const FIRE_COOLDOWN_MS = 333
+export const FIRE_COOLDOWN_MS = 200          // F4d: was 333 (F3) — ~40% faster fire rate
 export const PROJECTILE_SPEED = 800          // world-units / sec
 export const PROJECTILE_LIFETIME_MS = 1500   // ms
 export const SINE_AMPLITUDE_PX = 2           // paper flutter ±2 px
 export const SINE_PERIOD_MS = 400            // 0.4 s
+const PAPELETA_TEX_URL = 'assets/sprites/papeleta_firmada.png'
 
 /**
  * Pure helper: compute the projectile's velocity vector from origin screen point to
@@ -43,7 +45,7 @@ export function projectVelocity(originScreen, targetScreen) {
 }
 
 class Projectile {
-  constructor({ origin, target, isoX, isoY }) {
+  constructor({ origin, target, isoX, isoY, texture }) {
     this.origin = { ...origin }
     this.target = { ...target }
     this.isoX = isoX
@@ -52,14 +54,21 @@ class Projectile {
     this.alive = true
     this.hit = false  // resolves hit synchronously on spawn (Combat.fireAtIso)
 
-    // Visual: PIXI.Graphics — cream 4x6 rectangle + 1 px black outline + diagonal signature line
-    this.gfx = new PIXI.Graphics()
-    this._redraw()
+    // F4d: prefer the papeleta_firmada sprite (20x24 RGBA, generated via tools/generate-papeleta-firmada.py).
+    // Fallback to PIXI.Graphics procedural if the texture is missing or still loading.
+    if (texture) {
+      this.gfx = new PIXI.Sprite(texture)
+      this.gfx.anchor.set(0.5, 0.5)
+    } else {
+      // Fallback: PIXI.Graphics — cream 4x6 rectangle + 1 px black outline + diagonal signature line
+      this.gfx = new PIXI.Graphics()
+      this._redrawGraphics()
+    }
     this.gfx.x = origin.x
     this.gfx.y = origin.y
   }
 
-  _redraw() {
+  _redrawGraphics() {
     const g = this.gfx
     g.clear()
     // 1 px black outline
@@ -149,6 +158,22 @@ export class Combat {
     this._lastFireMs = -Infinity
     // For tests: `?test=1` sets this so simulated taps share the same clock as setTime().
     this.nowMs = () => performance.now()
+
+    // F4d: lazy-load the papeleta_firmada sprite. Fire-and-forget — the first few
+    // Projectile instances may spawn before the texture is ready and fall back to
+    // the PIXI.Graphics procedural rendering. By the time the player is actively
+    // firing (boot + first frame), the texture is ready.
+    this._papeletaTex = null
+    if (typeof PIXI !== 'undefined' && PIXI.Assets && typeof PIXI.Assets.load === 'function') {
+      PIXI.Assets.load(PAPELETA_TEX_URL)
+        .then(tex => {
+          if (tex && tex.baseTexture) tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
+          this._papeletaTex = tex
+        })
+        .catch(err => {
+          console.warn('[Combat] papeleta_firmada texture failed to load, falling back to procedural Graphics:', err?.message ?? err)
+        })
+    }
   }
 
   /**
@@ -202,6 +227,7 @@ export class Combat {
       origin: { x: originScreen.x, y: originScreen.y },
       target: { x: targetScreen.sx, y: targetScreen.sy },
       isoX, isoY,
+      texture: this._papeletaTex,
     })
     this.scene.addChild(proj.gfx)
     proj.hit = target != null
