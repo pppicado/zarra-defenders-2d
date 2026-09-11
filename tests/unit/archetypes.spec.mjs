@@ -12,36 +12,36 @@ test('ARCHETYPES table is frozen', () => {
   assert.equal(Object.isFrozen(ARCHETYPES), true)
 })
 
-test('standard: hp=1, mult=1, footprint 1.0/1.0', () => {
+test('standard: hp=1, mult=1, footprint 1.5/2.5 (F4f widened)', () => {
   const a = ARCHETYPES.standard
   assert.equal(a.hp, 1)
   assert.equal(a.multiplier, 1)
-  assert.equal(a.footprint.hw, 1.0)
-  assert.equal(a.footprint.hh, 1.0)
+  assert.equal(a.footprint.hw, 1.5)
+  assert.equal(a.footprint.hh, 2.5)
 })
 
-test('tank: hp=3, mult=1.5, footprint 1.2/1.2', () => {
+test('tank: hp=3, mult=1.5, footprint 1.7/2.7 (F4f widened)', () => {
   const a = ARCHETYPES.tank
   assert.equal(a.hp, 3)
   assert.equal(a.multiplier, 1.5)
-  assert.equal(a.footprint.hw, 1.2)
-  assert.equal(a.footprint.hh, 1.2)
+  assert.equal(a.footprint.hw, 1.7)
+  assert.equal(a.footprint.hh, 2.7)
 })
 
-test('mini-boss: hp=10, mult=2, footprint 1.5/1.5', () => {
+test('mini-boss: hp=10, mult=2, footprint 2.0/3.0 (F4f widened)', () => {
   const a = ARCHETYPES['mini-boss']
   assert.equal(a.hp, 10)
   assert.equal(a.multiplier, 2)
-  assert.equal(a.footprint.hw, 1.5)
-  assert.equal(a.footprint.hh, 1.5)
+  assert.equal(a.footprint.hw, 2.0)
+  assert.equal(a.footprint.hh, 3.0)
 })
 
-test('boss: hp=30, mult=3, footprint 2.0/2.0', () => {
+test('boss: hp=30, mult=3, footprint 2.5/3.5 (F4f widened)', () => {
   const a = ARCHETYPES.boss
   assert.equal(a.hp, 30)
   assert.equal(a.multiplier, 3)
-  assert.equal(a.footprint.hw, 2.0)
-  assert.equal(a.footprint.hh, 2.0)
+  assert.equal(a.footprint.hw, 2.5)
+  assert.equal(a.footprint.hh, 3.5)
 })
 
 test('assertArchetype: accepts all 4 ids', () => {
