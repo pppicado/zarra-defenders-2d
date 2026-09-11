@@ -213,7 +213,7 @@ async function bootstrap() {
   if (handTex) {
     handSprite = new PIXI.Sprite(handTex)
     handSprite.anchor.set(0.5, 0.85)
-    handSprite.scale.set(1.0)
+    handSprite.scale.set(1.2)
   } else {
     console.warn('[main] hand_pen texture missing — using procedural fallback')
     const g = new PIXI.Graphics()
