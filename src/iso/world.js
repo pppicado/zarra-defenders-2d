@@ -11,8 +11,8 @@
  * that `src/rail-camera.js` enforces.
  */
 
-import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin, escapeFrontDepth, ISO_STEP } from './iso-math.js?v=26'
-import { Tilemap, computeCullRange, computeZIndex, Z_BANDS } from './tilemap.js?v=26'
+import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin, escapeFrontDepth, ISO_STEP } from './iso-math.js?v=44'
+import { Tilemap, computeCullRange, computeZIndex, Z_BANDS } from './tilemap.js?v=44'
 
 export class IsoWorld {
   constructor(opts) {
@@ -100,22 +100,27 @@ export class IsoWorld {
     }
     this._lastCameraSum = sum
 
-    // F4i: compute the container position so that the iso (camIsoX, camIsoY)
-    // lands at viewport center. The Tiles are rendered in local space using
-    // isoToScreen WITHOUT viewOrigin (see Tile constructor), so the local
-    // position of (gx, gy) is tileWorldOrigin + iso(gx, gy) * step. The
-    // container offset must compensate: we want world y of camIso = viewport
-    // center y, i.e. (tileWorldOrigin.y + camIsoSum * step) + container.y =
-    // viewportHeight / 2. Solving for container.y gives the formula below.
+    // F4i: anchor the world container so the iso (camIsoX, camIsoY) lands at
+    // tileWorldOrigin (NOT viewport center). The Tile constructor renders
+    // each tile in local space as isoToScreen(gx, gy, ..., tileWorldOrigin)
+    // — i.e. with the Y-mirror baked into tileWorldOrigin.y but NOT inverted
+    // a second time by a separate viewOrigin. Keeping the container anchor
+    // aligned with tileWorldOrigin means world_y of a tile = local_y +
+    // container.y = (tileWorldOrigin.y + sum*step) + (sum·step_offset) =
+    // tileWorldOrigin.y + sum·(step + step_offset).
     //
-    // The OLD formula (viewOrigin.y - isoToScreen(camIso).y CON viewOrigin)
-    // produced a sign-flipped offset that pushed tiles below the viewport as
-    // camIsoSum grew — the cull range was correct in iso space but the
-    // world-space tile bounds drifted by ~camIsoSum * step * 2.
-    const localSy = this.tileWorldOrigin.y + (camIsoX + camIsoY) * (this.tileSize / Math.SQRT2)
+    // F4i: the +camIsoSum term on the Y side makes container.y INCREASE as
+    // the rail advances, so fixed tiles migrate DOWN on screen — the
+    // "world scrolls DOWN past the player" feel described in F3.10.
+    // A fixed tile (sum=S) is at world_y = tileWorldOrigin.y + (S-camIsoSum)*step,
+    // which moves DOWN with time. Tiles ahead of the camera (S > camIsoSum)
+    // render BELOW tileWorldOrigin.y; tiles behind (S < camIsoSum) render
+    // ABOVE it. New tiles (larger S) appear from above the anchor as
+    // camIsoSum grows.
+    const step = this.tileSize / Math.SQRT2
     this.container.position.set(
-      this.viewportWidth / 2 - (this.tileWorldOrigin.x + (camIsoX - camIsoY) * (this.tileSize / Math.SQRT2)),
-      this.viewportHeight / 2 - localSy
+      this.tileWorldOrigin.x - (this.tileWorldOrigin.x + (camIsoX - camIsoY) * step),
+      this.tileWorldOrigin.y - (this.tileWorldOrigin.y - (camIsoX + camIsoY) * step)
     )
 
     if (this._activeTilemap) {

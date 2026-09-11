@@ -18,7 +18,7 @@
  *
  * Determinism: no Math.random anywhere in this file or the spawn consumption.
  */
-import { ARCHETYPES } from '../enemies.js?v=26'
+import { ARCHETYPES } from '../enemies.js?v=44'
 
 /** Spawn time relative to camera progress — when cameraIso depth reaches this value, spawn. */
 function _spawnTimeFromDepth(depth) {

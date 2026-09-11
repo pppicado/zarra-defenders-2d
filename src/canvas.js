@@ -10,8 +10,8 @@
  *
  * F4e (bug fix): extracted from src/main.js to break the dual-load cycle that
  * caused double-bootstrap (4 canvases instead of 2). The bug was triggered by
- * `index.html` loading main.js with `?v=26` while combat.js + test-api.js
- * imported from `./main.js?v=27` — those query-string mismatches produced two
+ * `index.html` loading main.js with `?v=44` while combat.js + test-api.js
+ * imported from `./main.js?v=44` — those query-string mismatches produced two
  * distinct module-graph copies of main.js, each running its own bootstrap().
  * Moving LOGICAL_W/LOGICAL_H to this standalone module lets consumers import
  * the constants without going through main.js, so all paths load exactly one

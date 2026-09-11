@@ -7,7 +7,7 @@
  * - sortableChildren = false on every container holding tiles (design ADR #1).
  */
 
-import { isoToScreen, computeTileSize, computeWorldOrigin } from './iso-math.js?v=26'
+import { isoToScreen, computeTileSize, computeWorldOrigin } from './iso-math.js?v=44'
 
 // F2.5.4: bumped from 100 to 400 to support a 4x larger world (4 stages of
 // viewport tiles visible at any time). The hard cap protects against an
@@ -52,9 +52,18 @@ export function computeZIndex(gx, gy, offset = 0) {
 export function computeCullRange(camIsoX, camIsoY, vw, vh, tileSize, origin, overshoot = CULL_OVERSHOOT) {
   const step = tileSize / Math.SQRT2
   const vwHalfIso = vw / (2 * step)
-  const vhHalfIso = vh / (2 * step)
-  const sumMin = camIsoX + camIsoY - vhHalfIso
-  const sumMax = camIsoX + camIsoY + vhHalfIso
+  // F4i: the sum range is asymmetric around camIsoSum. Tiles render in local
+  // space as (origin.x + (gx-gy)*step, origin.y + (gx+gy)*step). The container
+  // offsets them by (origin.x - (origin.x + (camIsoX-camIsoY)*step),
+  // origin.y - (origin.y - (camIsoX+camIsoY)*step)) = (-(camIsoX-camIsoY)*step,
+  // +(camIsoSum)*step). So world_y = origin.y + (sum + camIsoSum)*step.
+  // For world_y ∈ [0, vh]: sum ∈ [-origin.y/step - camIsoSum,
+  //                              (vh - origin.y)/step - camIsoSum].
+  // (Before F4i the sum range was symmetric [camIsoSum ± vhHalfIso], which
+  // was correct for the F3.5 setup where container.y = -camIsoSum*step;
+  // with the F4i container.y = +camIsoSum*step the visible range shifts.)
+  const sumMin = -origin.y / step - (camIsoX + camIsoY)
+  const sumMax = (vh - origin.y) / step - (camIsoX + camIsoY)
   const diffMin = camIsoX - camIsoY - vwHalfIso
   const diffMax = camIsoX - camIsoY + vwHalfIso
   // a = (sum + diff) / 2 ;  b = (sum - diff) / 2
