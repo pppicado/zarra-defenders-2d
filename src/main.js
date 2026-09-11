@@ -24,7 +24,7 @@ import { Tilemap } from './iso/tilemap.js?v=26'
 import { Integrity } from './integrity.js?v=26'
 import { Score } from './score.js?v=26'
 import { EnemyManager, ARCHETYPES } from './enemies.js?v=32'
-import { Combat } from './combat.js?v=31'
+import { Combat } from './combat.js?v=36'
 import { MainMenu } from './ui/menu.js?v=26'
 import { Overlay } from './ui/overlay.js?v=26'
 import { HUD } from './ui/hud.js?v=26'
@@ -382,21 +382,27 @@ async function bootstrap() {
     assertTestLevel()
     enemies.loadLevel(TEST_LEVEL.enemies)
 
-    // Combat fires its papeleta into the HUD canvas (on top of the world).
-    combat = new Combat({
-      scene: hudContainer,
-      isoWorld,
-      cameraIso: { isoX: 0, isoY: 0 },
-      viewportCenter: { x: LOGICAL_W / 2, y: LOGICAL_H / 2 },
-      score,
-      enemies,
-      viewportSize: { x: LOGICAL_W, y: LOGICAL_H },
-      callbacks: {
-        onHit: (id, hp, arch) => { /* hook for HUD later */ },
-        onMiss: () => {},
-        onFire: () => {},
-      },
-    })
+    // F4h: do NOT re-create the Combat instance on every reset. The test-api
+    // captures `combat` once at mount-time and rebinding it via
+    // `ctx.combat = combat` would silently break the tick→combat wiring when
+    // the test-api's tick runs `ctx.combat.setCameraIso(...)`. Combat.reset()
+    // already clears projectiles and lastFireMs, which is all reset() needs.
+    if (!combat) {
+      combat = new Combat({
+        scene: hudContainer,
+        isoWorld,
+        cameraIso: { isoX: 0, isoY: 0 },
+        viewportCenter: { x: LOGICAL_W / 2, y: LOGICAL_H / 2 },
+        score,
+        enemies,
+        viewportSize: { x: LOGICAL_W, y: LOGICAL_H },
+        callbacks: {
+          onHit: (id, hp, arch) => { /* hook for HUD later */ },
+          onMiss: () => {},
+          onFire: () => {},
+        },
+      })
+    }
     if (ctx?.overlay) ctx.overlay.combat = combat
     if (overlay) overlay.combat = combat
 
