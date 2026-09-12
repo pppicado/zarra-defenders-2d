@@ -385,7 +385,14 @@ async function bootstrap() {
 
     if (!inTestMode) {
       const elapsedSec = camera.getTime ? camera.getTime() : 0
-      enemies.update(dt * 1000, camIso, elapsedSec)
+      // Fase-5 REQ-CMB-008: pass isoWorld + viewport geometry so the
+      // screen-space escape test runs alongside the Manhattan fallback.
+      enemies.update(
+        dt * 1000, camIso, elapsedSec,
+        isoWorld,
+        { x: LOGICAL_W / 2, y: LOGICAL_H / 2 },
+        { x: LOGICAL_W, y: LOGICAL_H },
+      )
     }
 
     if (combat) combat.update(dt * 1000)

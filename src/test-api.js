@@ -93,8 +93,12 @@ export function mountTestAPI(ctx) {
         const tBefore = ctx.camera.getTime?.() ?? 0
         ctx.camera.setTime?.(tBefore + dtMs / 1000)
         // Also drive escape detection so tests can step past enemies deterministically.
+        // Fase-5 REQ-CMB-008: pass isoWorld + viewport geometry so the
+        // screen-space escape test runs alongside the Manhattan fallback.
         const camIso = { isoX: ctx.camera.getCameraX(), isoY: ctx.camera.getCameraY() }
-        ctx.enemies?.update?.(dtMs, camIso, tBefore + dtMs / 1000)
+        const vc = ctx.viewportCenter ?? { x: LOGICAL_W / 2, y: LOGICAL_H / 2 }
+        const vs = ctx._viewportSize ?? { x: LOGICAL_W, y: LOGICAL_H }
+        ctx.enemies?.update?.(dtMs, camIso, tBefore + dtMs / 1000, ctx.isoWorld, vc, vs)
       }
       // F4g: also drive isoWorld.update() so the world container's position
       // and the enemy sprite positions stay in sync with the camera. Without
@@ -188,6 +192,26 @@ export function mountTestAPI(ctx) {
      */
     getHitboxRects() {
       return ctx.debugHitboxes?.readRects?.() ?? []
+    },
+    /**
+     * Fase-5 (REQ-CMB-008): resize the viewport for screen-space escape tests.
+     * Delegates to the existing `__zarraModules__.setViewportSize` flow (rewires
+     * isoWorld + combat) and stores the size on ctx so `enemies.update` reads
+     * the current size on subsequent ticks.
+     */
+    setViewportSize(w, h) {
+      ctx._viewportSize = { x: w, y: h }
+      ctx._viewportCenter = { x: w / 2, y: h / 2 }
+      window.__zarraModules__?.setViewportSize?.(w, h)
+    },
+    /**
+     * Fase-5 (REQ-CMB-008): return the list of enemies that screen-escaped
+     * on the most recent `update()` tick. Each entry is
+     * `{ enemyId, reason: 'screen' | 'manhattan' }`. Empty when the screen-
+     * space test wasn't run (no isoWorld/viewport supplied).
+     */
+    getScreenEscapedRects() {
+      return ctx.enemies?._lastScreenEscaped ?? []
     },
   }
   window.__gameTestAPI__ = api

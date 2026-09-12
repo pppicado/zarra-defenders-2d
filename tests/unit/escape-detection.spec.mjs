@@ -5,11 +5,17 @@
  *   isEscaped(enemy, cameraIso) === |ex - cx| + |ey - cy| > 6
  * Manhattan distance from enemy iso to camera iso > 6 tiles.
  *
+ * Fase-5 (REQ-CMB-008): also pins the screen-space escape test — when the enemy
+ * projects below `viewportSize.y + 32 px` after the camera moves south past it,
+ * the system removes the enemy within 1 frame. The 32 px margin preserves a
+ * ~0.5 s visual warning at the rail's 0.6 tile/s advance.
+ *
  * Run with: node tests/unit/escape-detection.spec.mjs
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { isEscaped, Enemy } from '../../src/enemies.js?v=26'
+import { isEscaped, isScreenEscaped, Enemy, EnemyManager } from '../../src/enemies.js?v=44'
+import { isoToScreen } from '../../src/iso/iso-math.js?v=44'
 
 const enemy = (isoX, isoY) => new Enemy({ archetype: 'standard', isoX, isoY })
 
@@ -84,4 +90,89 @@ test('CAM-004 — missing enemy coords default to 0 (defensive)', () => {
   // Manhattan 0 from (0,0) -> not escaped regardless of camera position under 6
   assert.equal(isEscaped(e, { isoX: 0, isoY: 0 }), false)
   assert.equal(isEscaped(e, { isoX: 5, isoY: 2 }), true, 'Manhattan 7')
+})
+
+// ============================================================
+// Fase-5 REQ-CMB-008: screen-space escape detection
+// ============================================================
+
+/**
+ * Mount an IsoWorld-like object with the same `isoToScreenWithCamera` math,
+ * backed by the pure `isoToScreen` transform from iso-math. Unit tests don't
+ * pull PIXI (which is browser-only), so we keep this dependency-free and
+ * match the math that production IsoWorld.isoToScreenWithCamera uses.
+ */
+function mountIsoWorld() {
+  const LOGICAL_W = 1280, LOGICAL_H = 720
+  const TILE_SIZE = 128
+  const vc = { x: LOGICAL_W / 2, y: LOGICAL_H / 2 }
+  const tw = { x: Math.round(LOGICAL_W / 2), y: Math.round(LOGICAL_H * 0.30) }
+  return {
+    isoToScreenWithCamera(ix, iy, cameraIso) {
+      const camScreen = isoToScreen(cameraIso.isoX, cameraIso.isoY, TILE_SIZE, tw, vc)
+      const targetScreen = isoToScreen(ix, iy, TILE_SIZE, tw, vc)
+      const anchorX = tw.x
+      const anchorY = 2 * vc.y - tw.y
+      return {
+        sx: anchorX + (targetScreen.sx - camScreen.sx),
+        sy: anchorY + (targetScreen.sy - camScreen.sy),
+      }
+    },
+  }
+}
+
+test('REQ-CMB-008 — enemy directly behind camera escapes within 1 frame (screen-space)', () => {
+  // Enemy at iso (8, 8) with camera advanced south to (10, 10): the Y-mirror
+  // projection lands the enemy BELOW the viewport (sy > 752). The 6-tile
+  // Manhattan buffer (Manhattan = 4) would NOT trigger escape on its own,
+  // so this test is purely a screen-space check — and it MUST remove the
+  // enemy in 1 frame.
+  const mgr = new EnemyManager()
+  mgr.spawn({ id: 'e_screen_1', archetype: 'standard', isoX: 8, isoY: 8 })
+
+  const isoWorld = mountIsoWorld()
+  const viewportCenter = { x: 640, y: 360 }
+  const viewportSize = { x: 1280, y: 720 }
+  const cameraIso = { isoX: 10, isoY: 10 }
+
+  mgr.update(16, cameraIso, 0, isoWorld, viewportCenter, viewportSize)
+
+  const remaining = mgr.readAll().filter(e => e.id === 'e_screen_1')
+  assert.equal(remaining.length, 0, 'enemy at iso(8,8) with cam(10,10) MUST be removed by screen-space escape within 1 frame')
+})
+
+test('REQ-CMB-008 — enemy at top of viewport does NOT escape', () => {
+  // Enemy at iso (5, 5) with camera at (5, 5) — projects to viewport center
+  // (sy = 504 < 752). Manhattan = 0 ≤ 6. Both escape predicates return false,
+  // so the enemy MUST stay alive after the tick.
+  const mgr = new EnemyManager()
+  mgr.spawn({ id: 'e_top', archetype: 'standard', isoX: 5, isoY: 5 })
+
+  const isoWorld = mountIsoWorld()
+  const viewportCenter = { x: 640, y: 360 }
+  const viewportSize = { x: 1280, y: 720 }
+  const cameraIso = { isoX: 5, isoY: 5 }
+
+  mgr.update(16, cameraIso, 0, isoWorld, viewportCenter, viewportSize)
+
+  const remaining = mgr.readAll().filter(e => e.id === 'e_top')
+  assert.equal(remaining.length, 1, 'enemy at iso(5,5) with cam(5,5) MUST survive (sy < 752 AND Manhattan = 0)')
+})
+
+test('REQ-CMB-008 — enemy far off-axis escapes via Manhattan fallback', () => {
+  // Enemy at iso (10, 10) with camera at (0, 0): sy = -1306 (well above the
+  // viewport — NOT a south escape) but Manhattan = 20 > 6, so the off-axis
+  // Manhattan fallback MUST trigger and remove the enemy.
+  const mgr = new EnemyManager()
+  mgr.spawn({ id: 'e_off_axis', archetype: 'standard', isoX: 10, isoY: 10 })
+
+  const isoWorld = mountIsoWorld()
+  const viewportCenter = { x: 640, y: 360 }
+  const viewportSize = { x: 1280, y: 720 }
+  const cameraIso = { isoX: 0, isoY: 0 }
+
+  mgr.update(16, cameraIso, 0, isoWorld, viewportCenter, viewportSize)
+
+  const remaining = mgr.readAll().filter(e => e.id === 'e_off_axis')
+  assert.equal(remaining.length, 0, 'enemy at iso(10,10) with cam(0,0) MUST escape via Manhattan fallback (Manhattan = 20 > 6)')
 })

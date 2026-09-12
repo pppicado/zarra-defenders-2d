@@ -94,10 +94,18 @@ export async function runHitDetectionSpec() {
   }
   if (result1.integrity.current !== 3) throw new Error('integrity must remain at 3 after destruction')
 
-  // --- Part 2: escape detection drains integrity (t=20) ---
+  // --- Part 2: escape detection drains integrity (Fase-5 screen-space) ---
+  // Old rule: e01 at iso (3,2) escaped at t~18.33s via Manhattan > 6 (rail depth growth).
+  // New rule (REQ-CMB-008): when the camera moves south past the enemy, the
+  // screen-space projection crosses viewportSize.y + 32 px within 1 frame —
+  // so the escape fires as soon as the camera sum passes e01's iso sum (5).
+  // At rail speed 0.6 tile/s, that's t > 5/0.6 ≈ 8.33s; with the +32 px
+  // margin and the camera's actual screen anchor, e01's sy crosses 752 at
+  // t≈13s, well before the old Manhattan buffer (t≈18.33s). We pick t=13
+  // so the test asserts the new fast path with a clean single-escape result.
   await page.evaluate(() => {
     window.__gameTestAPI__.reset()
-    window.__gameTestAPI__.setTime(20)
+    window.__gameTestAPI__.setTime(13)
     window.__gameTestAPI__.tick(16.6667)
   })
 
@@ -107,16 +115,21 @@ export async function runHitDetectionSpec() {
   }))
 
   if (result2.integrity.current !== 2) {
-    throw new Error(`expected exactly one escape at t=20 (e01), integrity=${result2.integrity.current}`)
+    throw new Error(`expected exactly one escape at t=13 (e01 screen-space), integrity=${result2.integrity.current}`)
   }
   if (result2.integrity.current < 0) {
     throw new Error(`integrity went negative: ${result2.integrity.current}`)
   }
 
-  // --- Part 3: more time -> more escapes (t=25) ---
+  // --- Part 3: more time -> more escapes (t=20) ---
+  // With the Fase-5 screen-space escape test, e01 (sum=5) and e02 (sum=8) both
+  // escape by t=20s — e01 via screen-space (camera sum=12 > e01 sum=5), e02
+  // also via screen-space (sy > 752 once the camera has moved past). e03
+  // (sum=11) does NOT escape until t=23s, so the integrity count at t=20
+  // cleanly reflects exactly two escapes.
   await page.evaluate(() => {
     window.__gameTestAPI__.reset()
-    window.__gameTestAPI__.setTime(25)
+    window.__gameTestAPI__.setTime(20)
     window.__gameTestAPI__.tick(16.6667)
   })
 
@@ -126,7 +139,7 @@ export async function runHitDetectionSpec() {
   }))
 
   if (result3.integrity.current !== 1) {
-    throw new Error(`expected two escapes at t=25 (e01+e02), integrity=${result3.integrity.current}`)
+    throw new Error(`expected two escapes at t=20 (e01+e02), integrity=${result3.integrity.current}`)
   }
 
   // ============================================================

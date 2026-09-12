@@ -18,9 +18,20 @@
  *
  * Escape detection (F3.2): Manhattan distance from enemy to camera > 6 tiles.
  * Enemies are static in F3 (no movement); only the camera moves.
+ *
+ * Fase-5 REQ-CMB-008: added screen-space escape test that fires when the enemy
+ * projects below `viewportSize.y + SOUTH_MARGIN_PX`. Combined with the
+ * Manhattan fallback so off-axis escapes still work.
  */
 import { emit } from './event-bus.js?v=44'
 import { TILE_SIZE } from './canvas.js?v=44'
+
+/**
+ * ~1 tile visual warning (REQ-CMB-008); 0.6 tile/s × 32 px ≈ 0.5 s buffer.
+ * The south margin gives the player a brief moment to react before integrity
+ * drains, instead of the enemy vanishing the instant the camera passes south.
+ */
+export const SOUTH_MARGIN_PX = 32
 
 export const ARCHETYPES = Object.freeze({
   // F4f: footprints widened on the iso-sum axis (hh) to cover the full vertical
@@ -193,6 +204,32 @@ export function isEscaped(enemy, cameraIso) {
   return (dx + dy) > 6
 }
 
+/**
+ * Fase-5 REQ-CMB-008: screen-space escape test. Projects the enemy to logical
+ * canvas px via `isoWorld.isoToScreenWithCamera` (same math that Combat and
+ * `Enemy.getScreenBounds` already use), then checks if it sits below the
+ * viewport bottom + `SOUTH_MARGIN_PX`. Fires when the camera has moved south
+ * past the enemy in screen space — common case is the visible enemy sliding
+ * off the bottom of the viewport as the rail advances.
+ *
+ * This is the primary path for south-bound escapes; the iso Manhattan test
+ * (`isEscaped`) remains as the off-axis fallback so enemies that drift
+ * sideways out of the corridor still get cleaned up.
+ *
+ * @param {Object} enemy              Enemy or any object with `isoX`/`isoY`
+ * @param {Object} isoWorld           IsoWorld (provides isoToScreenWithCamera)
+ * @param {{isoX:number, isoY:number}} cameraIso  current camera iso position
+ * @param {{x:number, y:number}} viewportCenter   same as isoWorld._viewOrigin
+ * @param {{x:number, y:number}} viewportSize    logical canvas size
+ * @returns {boolean}  true when the enemy's projected sy is below the south margin
+ */
+export function isScreenEscaped(enemy, isoWorld, cameraIso, viewportCenter, viewportSize) {
+  const { sy } = isoWorld.isoToScreenWithCamera(
+    enemy.isoX ?? 0, enemy.isoY ?? 0, cameraIso, viewportCenter,
+  )
+  return sy > viewportSize.y + SOUTH_MARGIN_PX
+}
+
 export class EnemyManager {
   /**
    * @param {Object} opts
@@ -310,11 +347,23 @@ export class EnemyManager {
    *   2. Evaluate escape for every live enemy.
    *   3. Garbage-collect destroyed enemies whose 200 ms animation window expired.
    *
+   * Fase-5 (REQ-CMB-008): when the optional `isoWorld`/`viewportCenter`/
+   * `viewportSize` are supplied, the screen-space escape test runs first
+   * (south-bound slide-off) and is OR'd with the iso Manhattan fallback.
+   * Old callers (no extra args) keep working with the Manhattan-only path.
+   *
    * @param {number} dtMs                delta time in milliseconds
    * @param {{isoX:number, isoY:number}} cameraIso  current camera iso position
    * @param {number} [elapsedSec]        current simulation time (used for time-gated spawns)
+   * @param {Object} [isoWorld]          IsoWorld (enables screen-space escape test)
+   * @param {{x:number, y:number}} [viewportCenter]   same as isoWorld._viewOrigin
+   * @param {{x:number, y:number}} [viewportSize]     logical canvas size
    */
-  update(dtMs, cameraIso, elapsedSec = 0) {
+  update(dtMs, cameraIso, elapsedSec = 0, isoWorld = null, viewportCenter = null, viewportSize = null) {
+    // Fase-5 REQ-CMB-008: clear the per-tick "screen escaped" trace so callers
+    // (e.g. test-api.getScreenEscapedRects) see only the enemies removed THIS frame.
+    this._lastScreenEscaped = []
+
     // Time-gated spawn materialization
     if (this._timeGatedSpawns.length > 0) {
       const remaining = []
@@ -335,9 +384,22 @@ export class EnemyManager {
 
     // Escape detection (F3 enemies are static, only the camera moves)
     if (cameraIso) {
+      const runScreenTest = !!(isoWorld && viewportCenter && viewportSize)
       for (const enemy of this._live()) {
         if (enemy.state !== 'alive') continue
-        if (isEscaped(enemy, cameraIso)) {
+        // Fase-5 REQ-CMB-008: screen-space test runs first (common case is the
+        // south slide-off). Off-axis escapes still hit the Manhattan fallback.
+        const screenEscaped = runScreenTest
+          ? isScreenEscaped(enemy, isoWorld, cameraIso, viewportCenter, viewportSize)
+          : false
+        const manhattanEscaped = isEscaped(enemy, cameraIso)
+        if (screenEscaped || manhattanEscaped) {
+          // Record the escape reason for debug overlays / tests to inspect.
+          this._lastScreenEscaped ??= []
+          this._lastScreenEscaped.push({
+            enemyId: enemy.id,
+            reason: screenEscaped ? 'screen' : 'manhattan',
+          })
           emit('enemy:escaped', { enemyId: enemy.id, archetype: enemy.archetype })
           this._destroySprite(enemy)
           this._enemies.delete(enemy.id)
