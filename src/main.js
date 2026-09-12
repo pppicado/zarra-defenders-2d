@@ -116,10 +116,24 @@ const gameState = { state: 'main-menu' }   // 'main-menu' | 'gameplay' | 'overla
  * pueblo, etc. (mapped via simple switch so each stage is recognisable).
  */
 /**
+ * Load `assets/backgrounds/manifest.json` (BG-004). The manifest maps
+ * stageId → relative path to the Minimax-generated PNG. Returns an empty
+ * object if the file is missing (fallback to placeholder).
+ */
+async function _loadBackgroundManifest() {
+  try {
+    const res = await fetch('assets/backgrounds/manifest.json', { cache: 'no-cache' })
+    if (!res.ok) return {}
+    return await res.json()
+  } catch (err) {
+    console.warn('[main] bg manifest load failed:', err?.message ?? err)
+    return {}
+  }
+}
+
+/**
  * Load a procedural placeholder bg into the given BackgroundLayer.
- * Used during PR-1 (disable tile system + add bg placeholder) before
- * the Minimax-generated assets land in `assets/backgrounds/`. The placeholder
- * is a 2-tone vertical gradient so each stage is recognisable in screenshots.
+ * Fallback when the Minimax-generated asset fails to load.
  *
  * Per-stage placeholder palette: olive-green for bosque, warm-cream for
  * pueblo, etc.
@@ -237,7 +251,16 @@ async function bootstrap() {
   // Procedural placeholder (solid color sprite) until Minimax-generated assets
   // land in `assets/backgrounds/`. See tools/generate-stage-backgrounds.py.
   const bg = new BackgroundLayer({ container: isoWorld.container, viewportWidth: LOGICAL_W })
-  _loadPlaceholderBg(bg, 'stage1-bosque')
+  // PR-2: load the real Minimax-generated background from `assets/backgrounds/`.
+  // The placeholder path is kept for offline / first-boot fallback (see _loadPlaceholderBg).
+  const _bgManifest = await _loadBackgroundManifest()
+  const stage1Path = _bgManifest['stage1-bosque'] ?? 'assets/backgrounds/stage1-bosque.png'
+  try {
+    await bg.load('stage1-bosque', stage1Path)
+  } catch (err) {
+    console.warn('[main] bg load failed, falling back to procedural placeholder:', err?.message ?? err)
+    _loadPlaceholderBg(bg, 'stage1-bosque')
+  }
 
   // --- HUD: mano + corazones + papeleta (en appHud.stage) ---
   const hudContainer = new PIXI.Container(); hudContainer.name = 'hud'; hudContainer.sortableChildren = true; appHud.stage.addChild(hudContainer)
