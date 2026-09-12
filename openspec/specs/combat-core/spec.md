@@ -296,16 +296,22 @@ false escape for in-frame enemies).
 
 Per-instance spawn definitions MAY include `speed` (number, iso-units/sec, `>= 0`)
 and `movementPattern` (one of `static` | `linear` | `sine` | `zigzag` | `arc`).
-`ARCHETYPES` MUST NOT carry these fields — per-spawn properties only. Defaults
-when omitted: `speed: 0`, `movementPattern: 'static'`.
+`ARCHETYPES` MUST NOT carry these fields.
 
-**Hard rule (must not be violated):** enemies representing static-world objects
-(`valla_publicitaria`, `billboard_*`, `signage_*`, `incineradora`, `planta_treco`,
-`sello_burocratico`, `castillo_cofrentes`) MUST keep `speed: 0` and
-`movementPattern: 'static'`. Their apparent motion comes from camera-induced
-tile scrolling only and MUST NOT be changed.
+**Resolution rule:** `resolveMovementConfig(spriteId, speed?, pattern?)` SHALL
+resolve the effective config. The `Enemy` constructor MUST NOT pre-default
+`speed` or `movementPattern` — both MUST pass through as `undefined` when
+omitted so the resolver can distinguish "user omitted" from "user chose static":
 
-**Default per mobile spriteId** (applied at spawn when omitted):
+- If `spriteId` is in `STATIC_SPRITE_IDS` → return `{ speed: 0, movementPattern: 'static' }`
+  (hard rule, beats any user values).
+- Else: `userSpeed` = `speed` when `typeof speed === 'number' && Number.isFinite(speed)`,
+  else `undefined`. `userPattern` = `pattern` when `typeof pattern === 'string'`,
+  else `undefined`.
+- `effSpeed = userSpeed ?? MOBILE_DEFAULT[spriteId]?.speed ?? 0`
+- `effPattern = userPattern ?? MOBILE_DEFAULT[spriteId]?.movementPattern ?? 'static'`
+
+**`MOBILE_DEFAULT`** (applied when user omitted the field):
 
 | SpriteId | speed | pattern |
 |---|---|---|
@@ -318,8 +324,20 @@ tile scrolling only and MUST NOT be changed.
 | `tubo_lixiviado` | 25 | sine |
 | `bolsa_plastico` | 60 | sine |
 
+**Hard rule:** `STATIC_SPRITE_IDS` (`valla_publicitaria`, `billboard_*`,
+`signage_*`, `incineradora`, `planta_treco`, `sello_burocratico`,
+`castillo_cofrentes`) MUST resolve to `speed: 0, movementPattern: 'static'`
+regardless of user-supplied values. Apparent motion comes from camera-induced
+tile scrolling only and MUST NOT change.
+
 When `movementPattern === 'static'` the system SHALL NOT apply any per-tick
 self-translation to `enemy.isoX` or `enemy.isoY`.
+
+(Updated 2026-09-12 by fase-5-enemy-movement-fix: replaced "defaults when
+omitted" with explicit resolver contract. The prior `Enemy` ctor pre-defaulted
+`speed = 0, movementPattern = 'static'`, which short-circuited the resolver
+before `MOBILE_DEFAULT` could apply — every mobile spriteId spawned with
+`speed: 0, pattern: 'static'`.)
 
 #### Scenario: Static enemy isoX stays constant across 10 frames
 
@@ -406,6 +424,39 @@ X sits at the bound. The clamp MUST NOT apply to `movementPattern === 'static'`.
 - WHEN a click resolves against the live sprite bounds
 - THEN the hit semantics from REQ-CMB-003 apply
 - AND `hit` fires iff the click is inside the shrunk AABB.
+
+### REQ-CMB-011: Reintentar must reload test level
+
+When the user clicks `Reintentar test level` in the game-over overlay, the
+system MUST fully reset state AND reload the `TEST_LEVEL` enemy roster so
+that enemies re-spawn over time as the camera advances. The overlay MUST
+emit a single `bootTestLevel:request` event; `main.js`'s `bootTestLevel`
+handler MUST perform the reset + level reload. The overlay MUST NOT contain
+inline reset logic.
+
+#### Scenario: Reintentar from game-over overlay reloads the level
+
+- GIVEN the game-over overlay is visible
+- WHEN the user clicks `Reintentar test level`
+- THEN `bootTestLevel:request` fires exactly once
+- AND `enemies._timeGatedSpawns.length > 0` after the handler completes
+- AND the camera time resets to `0`.
+
+#### Scenario: After Reintentar + 5s wait, enemies spawn at camera time
+
+- GIVEN the game-over overlay was visible and the user clicked `Reintentar`
+- WHEN the camera advances for 5 seconds
+- THEN `enemies._timeGatedSpawns` materializes time-gated spawns as the
+  camera time crosses each spawn's `atSec`
+- AND `enemies._enemies.size > 0`.
+
+#### Scenario: Overlay emits single event (no inline reset)
+
+- GIVEN the `Overlay._onRetry` handler
+- WHEN the retry button is clicked
+- THEN the handler emits `bootTestLevel:request` exactly once
+- AND does NOT call `enemies.reset()`, `integrity.reset()`, `score.reset()`,
+  `combat.reset()`, or `camera.setTime(0)` directly.
 
 ## MODIFIED Requirements
 

@@ -101,8 +101,25 @@ export const MOBILE_DEFAULT = Object.freeze({
 
 /**
  * Resolve the effective `speed` / `movementPattern` for a spawn def.
+ *
  * Static spriteIds always resolve to `0` / `'static'` (hard rule).
- * Mobile spriteIds default to MOBILE_DEFAULT[spriteId] when omitted.
+ * Mobile spriteIds default to MOBILE_DEFAULT[spriteId] when the caller
+ * OMITS the field — but the resolver MUST distinguish "user omitted"
+ * (undefined) from "user explicitly chose 0/'static'". The caller MUST
+ * NOT pre-default params to `0` / `'static'` at the constructor level,
+ * because that short-circuits this resolver before MOBILE_DEFAULT can
+ * apply and every mobile spriteId would spawn static.
+ *
+ * Rules (REQ-CMB-009):
+ *   - `userSpeed`   = `speed` when `typeof speed === 'number' && Number.isFinite(speed)`,
+ *                     else `null` (undefined / NaN / non-number).
+ *   - `userPattern` = `pattern` when `typeof pattern === 'string'`,
+ *                     else `null`.
+ *   - `effSpeed   = userSpeed   ?? MOBILE_DEFAULT[spriteId]?.speed   ?? 0`
+ *   - `effPattern = userPattern ?? MOBILE_DEFAULT[spriteId]?.movementPattern ?? 'static'`
+ *
+ * Single source of truth: this resolver. Callers pass through what they
+ * received (no destructuring defaults).
  */
 export function resolveMovementConfig(spriteId, speed, pattern) {
   const sid = spriteId ?? null
@@ -110,12 +127,14 @@ export function resolveMovementConfig(spriteId, speed, pattern) {
     return { speed: 0, movementPattern: 'static' }
   }
   const defaults = sid ? MOBILE_DEFAULT[sid] : null
-  const effSpeed = (typeof speed === 'number' && Number.isFinite(speed) && speed >= 0)
+  const userSpeed = (typeof speed === 'number' && Number.isFinite(speed))
     ? speed
-    : (defaults?.speed ?? 0)
-  const effPattern = (typeof pattern === 'string')
+    : null
+  const userPattern = (typeof pattern === 'string')
     ? pattern
-    : (defaults?.movementPattern ?? 'static')
+    : null
+  const effSpeed = userSpeed ?? defaults?.speed ?? 0
+  const effPattern = userPattern ?? defaults?.movementPattern ?? 'static'
   return { speed: effSpeed, movementPattern: effPattern }
 }
 
@@ -179,12 +198,13 @@ export class Enemy {
    * @param {number} opts.isoX
    * @param {number} opts.isoY
    * @param {string} [opts.spriteId]
-   * @param {number} [opts.speed]                    iso-units/sec (default 0)
+   * @param {number} [opts.speed]                    iso-units/sec. NOT pre-defaulted
+   *        to 0 here — resolver (REQ-CMB-009) is the single source of truth for
+   *        effective config. Passing `undefined` lets MOBILE_DEFAULT apply.
    * @param {'static'|'linear'|'sine'|'zigzag'|'arc'} [opts.movementPattern]
-   *        default 'static'. Resolved through resolveMovementConfig() so
-   *        static spriteIds (REQ-CMB-009 hard rule) are always downgraded.
+   *        NOT pre-defaulted to 'static' here — same reason as speed.
    */
-  constructor({ id, archetype, isoX, isoY, spriteId, speed = 0, movementPattern = 'static' }) {
+  constructor({ id, archetype, isoX, isoY, spriteId, speed, movementPattern }) {
     assertArchetype(archetype)
     this.id = id ?? _nextId()
     this.archetype = archetype
@@ -195,7 +215,9 @@ export class Enemy {
     this.state = 'alive'   // 'alive' | 'destroyed'
     this._destroyedAt = 0  // performance.now() ms when transitioned to destroyed
     // Fase-5 (REQ-CMB-009): resolve effective movement config (handles the
-    // static-spriteId hard rule and per-spriteId defaults).
+    // static-spriteId hard rule and per-spriteId defaults). Speed and
+    // movementPattern are passed through undefined when omitted so the
+    // resolver can distinguish "user omitted" from "user chose 0/static".
     const resolved = resolveMovementConfig(spriteId, speed, movementPattern)
     this.speed = resolved.speed
     this.movementPattern = resolved.movementPattern

@@ -149,13 +149,11 @@ export class Overlay {
   }
 
   _onRetry() {
-    // Reset everything: integrity, score, combat, enemies, camera
-    if (this.integrity?.reset) this.integrity.reset()
-    if (this.score?.reset) this.score.reset()
-    if (this.combat?.reset) this.combat.reset()
-    if (this.enemies?.reset) this.enemies.reset()
-    if (this.camera?.setTime) this.camera.setTime(0)
-    if (this.camera?.unHalt) this.camera.unHalt()
+    // REQ-CMB-011: emit a single `bootTestLevel:request` event so the
+    // overlay stays UI-only. main.js's listener performs the full state
+    // reset + TEST_LEVEL reload — same path as menu:startRequested.
+    // Do NOT call integrity/score/combat/enemies/camera here directly.
+    emit('bootTestLevel:request', {})
     this.hide()
     this.gameState.state = 'gameplay'
   }

@@ -81,8 +81,35 @@ export async function runEnemyMovementSpec() {
     throw new Error(`TASK-R5: hit missed on moving sine dron_fumigador`)
   }
 
+  // TASK-R6: spawning a mobile spriteId WITHOUT speed/pattern must apply
+  //   MOBILE_DEFAULT (not the ctor's pre-defaults).
+  const r6 = await runR6_CamionTrecoDefaults(page)
+  if (r6.pattern !== 'zigzag') {
+    throw new Error(`TASK-R6: expected MOBILE_DEFAULT[camion_treco].movementPattern === 'zigzag', got '${r6.pattern}'`)
+  }
+  if (!(r6.speed > 30)) {
+    throw new Error(`TASK-R6: expected MOBILE_DEFAULT[camion_treco].speed > 30, got ${r6.speed}`)
+  }
+
+  // TASK-R7: explicit speed=0 + pattern='static' MUST be respected on a
+  //   mobile spriteId (no implicit MOBILE_DEFAULT override).
+  const r7 = await runR7_ExplicitStaticRespected(page)
+  if (r7.pattern !== 'static') {
+    throw new Error(`TASK-R7: explicit speed=0 + pattern='static' not respected; got pattern='${r7.pattern}'`)
+  }
+  if (r7.speed !== 0) {
+    throw new Error(`TASK-R7: explicit speed=0 not respected; got speed=${r7.speed}`)
+  }
+
+  // TASK-R8: triggering reset (the test-api's retry proxy) must reload the
+  //   TEST_LEVEL enemy roster — queue must be non-empty afterwards.
+  const r8 = await runR8_RetryReloadsLevel(page)
+  if (r8.queueLen < 50) {
+    throw new Error(`TASK-R8: expected enemies._timeGatedSpawns.length > 50 after reset/retry, got ${r8.queueLen}`)
+  }
+
   await browser.close()
-  return { r1, r2, r3, r4, r5 }
+  return { r1, r2, r3, r4, r5, r6, r7, r8 }
 }
 
 // ----------------------------------------------------------------
@@ -296,6 +323,92 @@ async function runR5HitOnMovingEnemy(page) {
     const result = api.fireAtScreen(cx, cy, { bypassCooldown: true })
     return { bounds, firedAt: { x: cx, y: cy }, ...result }
   })
+}
+
+// ----------------------------------------------------------------
+// TASK-R6 — spawn a mobile spriteId WITHOUT speed/pattern: the resolver
+//   MUST apply MOBILE_DEFAULT[spriteId] (not the ctor's pre-defaults of
+//   speed=0/pattern='static'). Pre-fix this returns {speed:0, pattern:'static'}
+//   because the ctor destructures `speed=0, movementPattern='static'` BEFORE
+//   resolveMovementConfig gets a chance to apply MOBILE_DEFAULT.
+// ----------------------------------------------------------------
+async function runR6_CamionTrecoDefaults(page) {
+  return await page.evaluate(() => {
+    const api = window.__gameTestAPI__
+    api.reset()
+    api.setTime(0)
+    const e = api.spawnEnemy({
+      id: 'r6_camion_treco_defaults',
+      archetype: 'standard',
+      isoX: 10,
+      isoY: 10,
+      spriteId: 'enemies_camion_treco',
+      // NOTE: deliberately no speed / no movementPattern here.
+    })
+    if (!e) throw new Error('R6 setup: spawnEnemy returned null')
+    return {
+      id: e.id,
+      speed: e.speed,
+      pattern: e.movementPattern,
+    }
+  })
+}
+
+// ----------------------------------------------------------------
+// TASK-R7 — explicit user-supplied speed=0 + pattern='static' on a mobile
+//   spriteId MUST be respected (not overridden by MOBILE_DEFAULT). Pre-fix
+//   the ctor pre-defaults short-circuit the resolver, but even after the
+//   fix the resolver must distinguish "user chose 0/static" from
+//   "user omitted", which means `typeof speed === 'number' && Number.isFinite`
+//   — undefined MUST NOT pass that gate, but 0 MUST.
+// ----------------------------------------------------------------
+async function runR7_ExplicitStaticRespected(page) {
+  return await page.evaluate(() => {
+    const api = window.__gameTestAPI__
+    api.reset()
+    api.setTime(0)
+    const e = api.spawnEnemy({
+      id: 'r7_explicit_static',
+      archetype: 'standard',
+      isoX: 10,
+      isoY: 10,
+      spriteId: 'enemies_camion_treco',
+      speed: 0,
+      movementPattern: 'static',
+    })
+    if (!e) throw new Error('R7 setup: spawnEnemy returned null')
+    return { speed: e.speed, pattern: e.movementPattern }
+  })
+}
+
+// ----------------------------------------------------------------
+// TASK-R8 — Reintentar equivalent (overlay._onRetry) must populate the
+//   time-gated spawn queue. Pre-fix, `overlay._onRetry` only called
+//   `enemies.reset()` (clears) but never `bootTestLevel` (loads).
+//   After the fix, overlay emits `bootTestLevel:request` and main.js
+//   listens for it — the level reload must leave the queue populated.
+//
+//   We exercise the REAL overlay click path (not the test-api reset
+//   shortcut) so we cover the SPEC-CMB-011 wiring end-to-end: bus
+//   event → main.js listener → bootTestLevel → loadLevel.
+// ----------------------------------------------------------------
+async function runR8_RetryReloadsLevel(page) {
+  // Step 1: show the overlay via its public API (the same path the game
+  // takes when integrity hits zero).
+  await page.evaluate(() => {
+    window.__zarraModules__.overlay.showGameOver()
+  })
+  // Step 2: click Reintentar — the user-facing retry button.
+  await page.click('[data-role="retry"]')
+  // Step 3: give the bus listener + bootTestLevel a moment to settle.
+  await page.waitForTimeout(500)
+
+  return await page.evaluate(() => ({
+    queueLen: window.__zarraModules__.enemies._timeGatedSpawns?.length ?? 0,
+    alive: window.__zarraModules__.enemies._enemies?.size ?? 0,
+    cameraTime: window.__zarraModules__.camera?.getTime?.() ?? null,
+    overlayHidden: window.__zarraModules__.overlay?.isVisible === false,
+  }))
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

@@ -333,6 +333,14 @@ async function bootstrap() {
     await bootTestLevel({ combat, isoWorld, enemies, camera, score, integrity, hud: hudModule, world, overlay })
   })
 
+  // REQ-CMB-011: Overlay emits `bootTestLevel:request` when the user clicks
+  // Reintentar. We invoke the same `bootTestLevel` used for menu-start so
+  // the retry path gets a full state reset + level reload — the overlay no
+  // longer needs to know about integrity/score/combat/enemies/camera.
+  busOn('bootTestLevel:request', async () => {
+    await bootTestLevel({ combat, isoWorld, enemies, camera, score, integrity, hud: hudModule, world, overlay })
+  })
+
   busOn('menu:back', () => {
     if (combat) { combat.reset(); combat = null; overlay.combat = null }
     enemies.reset()
