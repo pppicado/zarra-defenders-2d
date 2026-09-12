@@ -194,7 +194,55 @@ function _buildEnemyDefs() {
  * F3.10: rail direction. The rail runs northwest → southeast.
  * F4b: extended from iso (0,0) → (18,18) over 60 s to iso (0,0) → (36,36) over 120 s
  * (linear 2× extension, rail speed unchanged at 0.6 tile/s).
+ *
+ * fase-6 (BG-006/BG-007): extended with finalBossId and postFinalWaveRoster.
+ * At camera.time >= railEndTime, the bg freezes and waves of mobile enemies
+ * spawn at fixed iso positions while the final boss stays hittable. Killing
+ * the boss emits stage:cleared.
+ *
+ * - finalBossId: id of the deepest (highest depth) enemy in the roster.
+ *   The deepest enemy at iso (36, 35) is e24 (sello_burocratico, boss archetype).
+ * - postFinalWaveRoster: 3 waves of 3 mobile enemies each. All entries have
+ *   a spawnAtSec (camera time at which to spawn) and a fixed isoX/isoY within
+ *   the visible viewport range. Wave 1 starts at t=125 (5 s after rail end),
+ *   wave 2 at t=140, wave 3 at t=155. The waves keep coming UNTIL the boss
+ *   dies (BG-006 — continuous waves during finale).
  */
+function _buildPostFinalWaveRoster() {
+  const waves = []
+  // 3 waves × 3 mobile enemies. Each wave spawns 3 enemies in a small iso
+  // triangle around the viewport center (visible from any camera iso).
+  for (let w = 0; w < 3; w++) {
+    const t = 125 + w * 15  // 125, 140, 155 s
+    const offset = 6        // iso distance from center
+    // Triangle positions around (18, 18) — well within viewport at t=120
+    const positions = [
+      { isoX: 18 + offset, isoY: 18 },           // east
+      { isoX: 18,          isoY: 18 + offset },  // south
+      { isoX: 18 - 4,      isoY: 18 + 4 },       // NW (closer to camera)
+    ]
+    // Cycle through mobile spriteIds (only standard + tank — no static)
+    const spriteIds = [
+      'enemies_dron_fumigador',    // tank
+      'enemies_camion_treco',      // standard
+      'enemies_topadora',          // standard
+    ]
+    for (let i = 0; i < positions.length; i++) {
+      waves.push({
+        id: `wave${w + 1}_e${i + 1}`,
+        spawnAtSec: t,
+        spriteId: spriteIds[i],
+        archetype: i === 0 ? 'tank' : 'standard',
+        isoX: positions[i].isoX,
+        isoY: positions[i].isoY,
+        speed: i === 0 ? 0.5 : 0.3,           // tank a bit faster
+        movementPattern: 'linear',             // waves move straight, not zigzag
+      })
+    }
+  }
+  return Object.freeze(waves)
+}
+
 export const TEST_LEVEL = Object.freeze({
   railPath: Object.freeze([
     Object.freeze({ t: 0,   isoX: 0,  isoY: 0  }),
@@ -202,6 +250,11 @@ export const TEST_LEVEL = Object.freeze({
   ]),
   railEndTime: 120,
   enemies: Object.freeze(_buildEnemyDefs()),
+  // BG-007 — final boss of the level (deepest enemy at iso 36, 35).
+  finalBossId: 'e24',
+  // BG-006 — waves of mobile enemies that spawn AFTER the rail ends and the
+  // bg freezes. Each entry has spawnAtSec = camera time at which to spawn.
+  postFinalWaveRoster: _buildPostFinalWaveRoster(),
 })
 
 /** Build rail-camera waypoints (RailCamera expects {t, x, y} where x=isoX, y=isoY). */

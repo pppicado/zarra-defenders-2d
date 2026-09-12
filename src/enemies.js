@@ -612,6 +612,43 @@ export class EnemyManager {
     for (const def of defs) this.spawn(def)
   }
 
+  /**
+   * BG-006 — Spawn a wave of mobile enemies at fixed iso positions.
+   *
+   * Each roster entry MUST be a mobile archetype (`standard` or `tank`).
+   * Static spriteIds are rejected (the wave is meant to keep the player
+   * engaged during the finale, not to clutter the screen with non-moving
+   * billboards).
+   *
+   * Each entry MUST have `spawnAtSec` (camera time at which to spawn) and
+   * the iso position. The entries are scheduled via the time-gated spawn
+   * queue; `EnemyManager.update` fires them at the configured time.
+   *
+   * @param {Array<{id:string, archetype:string, isoX:number, isoY:number, spriteId?:string, spawnAtSec:number}>} roster
+   * @returns {number} count of entries actually queued (rejected static entries excluded)
+   */
+  spawnWave(roster) {
+    if (!Array.isArray(roster)) throw new Error('EnemyManager.spawnWave: roster must be an array')
+    let queued = 0
+    for (const def of roster) {
+      // BG-006 safety: reject static spriteIds from the wave roster.
+      if (def.spriteId && STATIC_SPRITE_IDS.has(def.spriteId)) {
+        console.warn(`[EnemyManager.spawnWave] rejected static spriteId ${def.spriteId} from wave`)
+        continue
+      }
+      if (def.archetype === 'mini-boss' || def.archetype === 'boss') {
+        console.warn(`[EnemyManager.spawnWave] rejected ${def.archetype} archetype from wave (only standard/tank allowed)`)
+        continue
+      }
+      if (typeof def.spawnAtSec !== 'number') {
+        console.warn(`[EnemyManager.spawnWave] entry ${def.id} has no spawnAtSec, spawning immediately`)
+      }
+      this.spawn(def)
+      queued++
+    }
+    return queued
+  }
+
   /** @returns {Enemy|null} */
   get(id) { return this._enemies.get(id) ?? null }
 

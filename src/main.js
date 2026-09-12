@@ -378,6 +378,7 @@ async function bootstrap() {
   const player = new Player(appWorld, input, hudContainer, camera)
 
   let combat = null
+  let finaleStarted = false  // BG-006 — true after the first finale frame; reset on boot
 
   // --- Overlay (DOM) ---
   const overlayRoot = document.getElementById('game-overlay')
@@ -405,6 +406,22 @@ async function bootstrap() {
 
   busOn('menu:startRequested', async () => {
     mainMenu.hide()
+    await bootTestLevel({ combat, isoWorld, enemies, camera, score, integrity, hud: hudModule, world, overlay })
+  })
+
+  // BG-005 — fase-6 stage selector. Each unlocked stage button emits this.
+  busOn('menu:startStage', async ({ stageId }) => {
+    mainMenu.hide()
+    // Swap the bg texture for the requested stage (if it differs).
+    const newPath = _bgManifest[stageId]
+    if (newPath && stageId !== bg.stageId) {
+      try {
+        await bg.setStage(stageId, newPath)
+      } catch (err) {
+        console.warn(`[main] bg.setStage(${stageId}) failed:`, err?.message ?? err)
+        _loadPlaceholderBg(bg, stageId)
+      }
+    }
     await bootTestLevel({ combat, isoWorld, enemies, camera, score, integrity, hud: hudModule, world, overlay })
   })
 
@@ -499,6 +516,10 @@ async function bootstrap() {
     // a no-op when disabled (early return).
     if (debugHitboxes) debugHitboxes.update(camIso)
 
+    // BG-006 — fire the finale BEFORE checking victory so the bg can freeze
+    // and waves can spawn even if integrity has already drained (e.g. when
+    // tests skip time). The finale is a one-shot event.
+    maybeFireFinale({ camera, bg })
     maybeFireVictory({ camera, enemies, integrity })
   }
   appWorld.ticker.add(ticker)
@@ -508,7 +529,15 @@ async function bootstrap() {
     integrity.drain('enemy:escaped')
   })
 
-  busOn('stage:cleared', () => {
+  busOn('stage:cleared', ({ stageId }) => {
+    // BG-005 — persist stage clear to localStorage so the next stage unlocks.
+    if (stageId) {
+      try {
+        localStorage.setItem(`zarra2d:stageClear:${stageId}`, JSON.stringify({ firmas: score.read().firmas }))
+      } catch (err) {
+        console.warn('[main] localStorage write failed:', err?.message ?? err)
+      }
+    }
     overlay.showVictory()
   })
 
@@ -519,6 +548,9 @@ async function bootstrap() {
     enemies.reset()
     integrity.reset()
     score.reset()
+    // BG-006 — reset finale flag + unfreeze bg so it scrolls again on retry.
+    finaleStarted = false
+    bg.unfreeze()
     // REQ-CMB-013: ensure camera is unfrozen after retry (was halted by game-over)
     if (camera.unHalt) camera.unHalt()
     camera.setTime(0)
@@ -555,12 +587,32 @@ async function bootstrap() {
     gameState.state = 'gameplay'
   }
 
-  function maybeFireVictory({ camera, enemies, integrity }) {
-    if (gameState.state !== 'gameplay') return
-    const allDestroyed = enemies._enemies.size === 0
+  function maybeFireFinale({ camera, bg }) {
+    // Note: this fires regardless of gameState so the finale can trigger
+    // even when integrity:exhausted has already flipped gameState to
+    // 'overlay' (e.g. when tests skip time without firing). The bg.freeze()
+    // and wave queue still take effect for the duration of the overlay.
     const timeAtEnd = camera.getTime?.() ?? 0
-    if (allDestroyed && timeAtEnd >= TEST_LEVEL.railEndTime) {
-      emit('stage:cleared', {})
+    if (timeAtEnd < TEST_LEVEL.railEndTime) return
+    if (finaleStarted) return
+    finaleStarted = true
+    // BG-006 — freeze the bg, schedule the post-finale wave roster.
+    bg.freeze()
+    const queued = enemies.spawnWave(TEST_LEVEL.postFinalWaveRoster)
+    emit('stage:finaleStarted', { stageId: bg.stageId, wavesQueued: queued })
+    console.log(`[ZarraDefenders2D] finale started — bg frozen, ${queued} wave enemies scheduled`)
+  }
+
+  function maybeFireVictory({ camera, enemies, integrity }) {
+    // Note: fires regardless of gameState (same reasoning as maybeFireFinale).
+    // gameState.state = 'overlay' is still set so the overlay UI shows.
+    const timeAtEnd = camera.getTime?.() ?? 0
+    const finalBossAlive = enemies.get(TEST_LEVEL.finalBossId) != null
+    // BG-006/BG-007 — stage clears when the final boss is destroyed
+    // (regardless of remaining wave enemies). This lets the boss fight
+    // happen with continuous waves in the background.
+    if (timeAtEnd >= TEST_LEVEL.railEndTime && !finalBossAlive) {
+      emit('stage:cleared', { stageId: bg.stageId })
       gameState.state = 'overlay'
     }
   }

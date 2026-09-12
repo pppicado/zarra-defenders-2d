@@ -1,32 +1,43 @@
 /**
  * src/ui/menu.js
  *
- * Main menu DOM overlay (F3 main-menu spec).
+ * Main menu DOM overlay (BG-005 — fase-6 stage selector).
  *
- * Buttons (locked):
- *   1. Iniciar test level   (default focus)
- *   2. Acerca de             (scrollable inline modal)
- *   3. Disclaimer            (scrollable inline modal)
+ * Stage buttons (locked/unlocked based on localStorage clears):
+ *   1. Bosque mediterráneo     (default unlocked)
+ *   2. Pueblo de Cofrentes     (locked until stage 1 cleared)
+ *   3. Río Cabriel             (locked until stage 2 cleared)
+ *   4. Vertedero TRECO         (locked until stage 3 cleared)
+ *   5. Castillo de Cofrentes   (locked until stage 4 cleared)
+ *
+ * Plus:
+ *   - Acerca de                (scrollable inline modal)
+ *   - Disclaimer               (scrollable inline modal)
  *
  * Keyboard:
  *   ArrowDown / ArrowUp   : cycle focus
  *   Enter                  : activate focused button
- *   Escape                 : close any open inline modal (top-level focus stays)
+ *   Escape                 : close any open inline modal
  *
  * Touch: native button tap (default browser behavior).
- * Mobile: 64px-tall tap targets; container width 90% on <600 px viewports.
  *
  * Emits:
- *   - menu:startRequested
+ *   - menu:startStage  { stageId }
  *   - menu:aboutRequested
  *   - menu:disclaimerRequested
  */
 import { emit } from '../event-bus.js?v=44'
 
-const BUTTONS = [
-  { id: 'start',     label: 'Iniciar test level',         emit: 'menu:startRequested' },
-  { id: 'about',     label: 'Acerca de',                  emit: 'menu:aboutRequested' },
-  { id: 'disclaimer', label: 'Disclaimer',                 emit: 'menu:disclaimerRequested' },
+/** localStorage key for "stage N cleared" marker. */
+export const STAGE_CLEAR_KEY = (stageId) => `zarra2d:stageClear:${stageId}`
+
+/** Stage ordering — the first stage is unlocked by default. */
+const STAGES = [
+  { id: 'stage1-bosque',    label: '1 · Bosque mediterráneo' },
+  { id: 'stage2-pueblo',    label: '2 · Pueblo de Cofrentes' },
+  { id: 'stage3-rio',       label: '3 · Río Cabriel' },
+  { id: 'stage4-vertedero', label: '4 · Vertedero TRECO' },
+  { id: 'stage5-castillo',  label: '5 · Castillo de Cofrentes' },
 ]
 
 const ABOUT_TEXT = `
@@ -37,7 +48,7 @@ TRECO GESTI\u00d3N DE RESIDUOS S.L. en el Valle de Ayora-Cofrentes (Valencia).</
 firm\u00e1s papeletas de recogida en lugar de disparar balas. Cada firma es una firma real
 contra la destrucci\u00f3n del territorio.</p>
 <p>Inspirado en <em>House of the Dead</em>, <em>Time Crisis</em> y <em>Virtua Cop</em>.</p>
-<p>Versi\u00f3n: F3 \u2014 shooter rail gameplay (2026).</p>
+<p>Versi\u00f3n: F6 \u2014 scrolling pixel-art backgrounds (2026).</p>
 `
 
 const DISCLAIMER_TEXT = `
@@ -52,6 +63,20 @@ vertederos. Las fuentes citadas se incluyen en las tarjetas pedag\u00f3gicas (F6
 proyecto.</p>
 `
 
+/**
+ * A stage is unlocked if its own clear key exists OR if the previous stage's
+ * clear key exists (progressive unlock — clearing stage 3 unlocks stage 4).
+ */
+function _isStageUnlocked(stageIndex) {
+  if (stageIndex === 0) return true  // stage 1 always unlocked
+  const prevStageId = STAGES[stageIndex - 1].id
+  try {
+    return !!localStorage.getItem(STAGE_CLEAR_KEY(prevStageId))
+  } catch {
+    return false
+  }
+}
+
 export class MainMenu {
   /**
    * @param {Object} opts
@@ -65,7 +90,6 @@ export class MainMenu {
     this.focusIndex = 0
     this._buttonEls = []
     this._openModal = null
-
     this._onKeyDown = this._handleKeyDown.bind(this)
     this._build()
   }
@@ -79,12 +103,38 @@ export class MainMenu {
         bestEl.textContent = best ? `Mejor: ${best.firmas} firmas` : 'Mejor: \u2014 firmas'
       }
     }
+    this._refreshLocks()
   }
 
-  /** Show the menu (display:flex) + focus the default button (Iniciar). */
+  /** Re-read localStorage and update the lock icons on each button. */
+  _refreshLocks() {
+    let stageIndex = 0
+    for (let i = 0; i < this._buttonEls.length; i++) {
+      const btn = this._buttonEls[i]
+      if (btn.dataset.kind !== 'stage') continue   // modal buttons don't have lock state
+      const unlocked = _isStageUnlocked(stageIndex)
+      stageIndex++
+      btn.dataset.locked = unlocked ? 'false' : 'true'
+      btn.setAttribute('aria-disabled', unlocked ? 'false' : 'true')
+      // Prepend/update lock icon
+      let icon = btn.querySelector('.lock-icon')
+      if (!unlocked && !icon) {
+        icon = document.createElement('span')
+        icon.className = 'lock-icon'
+        icon.setAttribute('aria-hidden', 'true')
+        icon.textContent = '🔒 '
+        btn.prepend(icon)
+      } else if (unlocked && icon) {
+        icon.remove()
+      }
+    }
+  }
+
+  /** Show the menu (display:flex) + focus the default button (stage 1). */
   show() {
     this.root.classList.remove('hidden')
     this.root.setAttribute('aria-hidden', 'false')
+    this._refreshLocks()
     this._setFocus(0)
   }
 
@@ -118,12 +168,24 @@ export class MainMenu {
     nav.className = 'menu-nav'
     this.root.appendChild(nav)
 
-    for (let i = 0; i < BUTTONS.length; i++) {
-      const def = BUTTONS[i]
+    // Build one button per stage (defs array is stages + 2 modals)
+    const DEFS = [
+      ...STAGES.map((s, i) => ({
+        kind: 'stage',
+        index: i,
+        id: s.id,
+        label: s.label,
+      })),
+      { kind: 'modal', id: 'about',      label: 'Acerca de' },
+      { kind: 'modal', id: 'disclaimer', label: 'Disclaimer' },
+    ]
+    for (let i = 0; i < DEFS.length; i++) {
+      const def = DEFS[i]
       const btn = document.createElement('button')
       btn.type = 'button'
       btn.className = 'menu-btn'
       btn.dataset.menuId = def.id
+      btn.dataset.kind = def.kind
       btn.textContent = def.label
       btn.setAttribute('aria-label', def.label)
       btn.addEventListener('click', () => {
@@ -169,18 +231,18 @@ export class MainMenu {
   }
 
   _activate(i) {
-    const def = BUTTONS[i]
-    if (!def) return
-    // modals toggle inline rather than emitting navigation
-    if (def.id === 'about') {
-      this._openModalInline('about')
+    const btn = this._buttonEls[i]
+    if (!btn) return
+    const def = { kind: btn.dataset.kind, id: btn.dataset.menuId }
+    if (def.kind === 'modal') {
+      this._openModalInline(def.id)
       return
     }
-    if (def.id === 'disclaimer') {
-      this._openModalInline('disclaimer')
-      return
-    }
-    emit(def.emit, {})
+    // Stage button — only fire if unlocked
+    const stageIndex = STAGES.findIndex(s => s.id === def.id)
+    if (stageIndex < 0) return
+    if (!_isStageUnlocked(stageIndex)) return
+    emit('menu:startStage', { stageId: def.id })
   }
 
   _openModalInline(which) {
@@ -226,7 +288,6 @@ export class MainMenu {
       e.preventDefault()
       this._activate(this.focusIndex)
     } else if (e.key === 'Escape') {
-      // at top level, Esc does nothing (no parent to return to)
       e.preventDefault()
     }
   }
