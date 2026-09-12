@@ -442,6 +442,8 @@ async function bootstrap() {
     enemies.reset()
     integrity.reset()
     score.reset()
+    // REQ-CMB-013: ensure camera is unfrozen after retry (was halted by game-over)
+    if (camera.unHalt) camera.unHalt()
     camera.setTime(0)
 
     assertTestLevel()

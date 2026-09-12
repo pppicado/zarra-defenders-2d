@@ -156,8 +156,21 @@ export async function runEnemyMovementSpec() {
     throw new Error(`TASK-R12: e01 must remain alive at cameraTime≈5s; state=${r12.e01State} isoX=${r12.e01IsoX} cameraTime=${r12.cameraTime}`)
   }
 
+  // TASK-R13 (fase-5-retry-camera-unhalt) — Reintentar must unHalt camera +
+  // unfreeze integrity. See openspec/changes/fase-5-retry-camera-unhalt.
+  const r13 = await runR13_RetryUnhaltsCamera(page)
+  if (r13.halted) {
+    throw new Error(`TASK-R13: camera still halted after Reintentar (REQ-CMB-013 violated)`)
+  }
+  if (r13.cameraTime < 1.0) {
+    throw new Error(`TASK-R13: camera did not advance after Reintentar; t=${r13.cameraTime} (REQ-CMB-013 violated)`)
+  }
+  if (!r13.integrityFresh) {
+    throw new Error(`TASK-R13: integrity not reset after Reintentar; current=${r13.integrityCurrent} exhausted=${r13.integrityExhausted} (REQ-CMB-013 violated)`)
+  }
+
   await browser.close()
-  return { r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12 }
+  return { r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13 }
 }
 
 // ----------------------------------------------------------------
@@ -565,6 +578,54 @@ async function runR10OscillationRate(page) {
       passed: signFlips >= 2 && maxIxDrift < 1e-9 && observedPattern === 'sine' && observedSpeed > 0,
     }
   })
+}
+
+// ----------------------------------------------------------------
+// TASK-R13 (fase-5-retry-camera-unhalt NEW, REQ-CMB-013) — boot test
+//   mode, force game-over by draining integrity 3x, click Reintentar
+//   without first calling `__gameTestAPI__.reset()`, then assert:
+//     - camera.isHalted() === false (was the bug — overlay halted it
+//       but bootTestLevel never unHalted),
+//     - camera.getTime() advanced by >= 1.0s in the 2s window after
+//       the retry click (proves the production ticker resumes),
+//     - integrity is fresh again (current === 3, exhausted === false).
+//   Pre-fix: camera stays halted → cameraTime stays 0 → R13 fails.
+// ----------------------------------------------------------------
+async function runR13_RetryUnhaltsCamera(page) {
+  await page.goto('http://localhost:8000/?test=1', { waitUntil: 'load' })
+  await page.waitForFunction(() => !!window.__gameTestAPI__?.reset, { timeout: 10_000 })
+  await page.waitForTimeout(1000)
+  const before = await page.evaluate(() => ({
+    cameraTime: window.__zarraModules__.camera.getTime(),
+    halted: window.__zarraModules__.camera.isHalted?.()
+  }))
+  if (before.cameraTime < 0.5) throw new Error('R13 setup: camera not advancing on fresh boot')
+  await page.evaluate(() => {
+    const i = window.__zarraModules__.integrity
+    i.drain('test'); i.drain('test'); i.drain('test')
+  })
+  await page.waitForTimeout(500)
+  await page.evaluate(() => document.querySelector('[data-role="retry"]')?.click())
+  await page.waitForTimeout(2000)
+  const after = await page.evaluate(() => {
+    const i = window.__zarraModules__.integrity
+    const r = i.read()
+    return {
+      cameraTime: window.__zarraModules__.camera.getTime(),
+      halted: window.__zarraModules__.camera.isHalted?.(),
+      integrityCurrent: r.current,
+      integrityExhausted: r.exhausted,
+      integrityFresh: r.current === 3 && !r.exhausted,
+    }
+  })
+  return {
+    before,
+    halted: after.halted,
+    cameraTime: after.cameraTime,
+    integrityCurrent: after.integrityCurrent,
+    integrityExhausted: after.integrityExhausted,
+    integrityFresh: after.integrityFresh,
+  }
 }
 
 // ----------------------------------------------------------------
