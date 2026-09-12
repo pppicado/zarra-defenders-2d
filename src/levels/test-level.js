@@ -1,42 +1,73 @@
 /**
  * src/levels/test-level.js
  *
- * Deterministic 12-enemy test level (F3 — single PR with size:exception).
+ * Deterministic 120-enemy test level (Fase-5 — REQ-CMB-009 + REQ-CMB-010).
  *
- * Rail path: 0..60 s, camera goes iso (0,0) -> (18, 18).
- *   - Escape front edge = (camIsoX + camIsoY + 1), so enemies become escapeable
- *     when camera depth passes their depth.
- *   - Enemies are static in F3 (no enemy velocity); only the camera advances.
+ * Rail path: 0..120 s, camera goes iso (0,0) -> (36, 36).
  *
- * Roster (locked, 12 enemies — see tasks.md note: the design roster in design.md §2.8
- *   has 12 entries, all 4 archetypes represented):
- *   - 8 standard (camion_treco, bolsa_plastico, bidon_lixiviado, tubo_lixiviado,
- *                 valla_publicitaria, camion_treco, topadora, trailer)
- *   - 2 tank (dron_fumigador, camion_cisterna_residuos [placeholder PNG])
- *   - 1 mini-boss (planta_treco)
- *   - 1 boss (sello_burocratico)
+ * Roster (locked, 120 enemies — see tasks.md §Phase 2.7):
+ *   - 20 static (valla_publicitaria / billboard_* / signage_* / incineradora /
+ *                planta_treco / sello_burocratico / castillo_cofrentes)
+ *   - 70 standard mobile
+ *   - 20 tank mobile
+ *   - 8 mini-boss (static — planta_treco is in STATIC_SPRITE_IDS)
+ *   - 2 boss (static — sello_burocratico is in STATIC_SPRITE_IDS)
+ *
+ * Mobile spriteIds get their default speed/pattern from MOBILE_DEFAULT in
+ * src/enemies.js. Static spriteIds are enforced to speed=0/pattern='static'
+ * by Enemy's ctor via resolveMovementConfig(). Apparent motion for static
+ * enemies still comes from camera-induced tile scrolling only — NEVER from
+ * per-tick self-translation (REQ-CMB-009 hard rule).
  *
  * Determinism: no Math.random anywhere in this file or the spawn consumption.
  */
-import { ARCHETYPES } from '../enemies.js?v=44'
+import { ARCHETYPES, STATIC_SPRITE_IDS, MOBILE_DEFAULT, resolveMovementConfig } from '../enemies.js?v=44'
 
 /** Spawn time relative to camera progress — when cameraIso depth reaches this value, spawn. */
 function _spawnTimeFromDepth(depth) {
   // F4b: rail path: 0..120 s, depth 0..72 (36 + 36). Map depth to time.
-  // depth = 72 -> t = 120, depth = 0 -> t = 0.
   // F3.2: spawn each enemy when the camera is ~5 tiles short of their iso depth,
-  // so the player has a ~5-tile window to hit them before the camera passes
-  // and they fall out of the corridor. With a +4 buffer in escapeFrontDepth,
-  // this gives the enemy roughly 9 tiles of visible+hittable time.
+  // so the player has a ~5-tile window to hit them before the camera passes.
   const t = ((depth - 5) / 72) * 120
   return Math.max(0, t)
 }
 
-/** @returns {Array<Object>} test-level enemy definitions, sorted by spawnTime.
- *  F4b: 24 enemies (16 standard + 4 tank + 2 mini-boss + 2 boss), spanning depth 5..71.
- *  The existing 12 (e01..e12) cover depth 5..31; e13..e24 extend the corridor to depth 71. */
+/**
+ * Build a deterministic spread of N enemy definitions for one archetype.
+ * The path winds through the iso grid (1..34) so every enemy survives long
+ * enough to be hit-tested, and depths cover the rail corridor (5..71).
+ */
+function _spreadForArchetype(archetype, spriteId, count, startDepth, depthStep) {
+  const out = []
+  for (let i = 0; i < count; i++) {
+    // Walk along isoX, incrementing depth by depthStep. Vary isoX a bit so
+    // sprites don't all line up vertically.
+    const depth = startDepth + i * depthStep
+    const isoX = Math.min(34, Math.max(1, Math.floor(depth / 2) + (i % 3)))
+    const isoY = depth - isoX
+    out.push({
+      id: `e_${archetype}_${String(i + 1).padStart(3, '0')}`,
+      archetype,
+      isoX,
+      isoY,
+      spriteId,
+      // speed + movementPattern are RESOLVED at spawn by Enemy ctor (sees
+      // MOBILE_DEFAULT for mobile spriteIds; static spriteIds forced to 0/static).
+    })
+  }
+  return out
+}
+
+/** @returns {Array<Object>} test-level enemy definitions, sorted by spawnTime. */
 function _buildEnemyDefs() {
-  const items = [
+  const items = []
+
+  // ----------------------------------------------------------------
+  // F4b: 24 ORIGINAL entries (e01..e24) — preserved for backward compat
+  // with existing tests that reference specific IDs (e01 in hit-detection).
+  // These were the F4b locked roster: 16 standard + 4 tank + 2 mini-boss + 2 boss.
+  // ----------------------------------------------------------------
+  const original24 = [
     { id: 'e01', archetype: 'standard',    isoX:  3, isoY:  2, spriteId: 'enemies_camion_treco' },
     { id: 'e02', archetype: 'standard',    isoX:  5, isoY:  3, spriteId: 'enemies_bolsa_plastico' },
     { id: 'e03', archetype: 'standard',    isoX:  7, isoY:  4, spriteId: 'enemies_bidon_lixiviado' },
@@ -49,7 +80,6 @@ function _buildEnemyDefs() {
     { id: 'e10', archetype: 'standard',    isoX: 16, isoY: 11, spriteId: 'enemies_trailer' },
     { id: 'e11', archetype: 'mini-boss',   isoX: 17, isoY: 12, spriteId: 'enemies_planta_treco' },
     { id: 'e12', archetype: 'boss',        isoX: 18, isoY: 13, spriteId: 'enemies_sello_burocratico' },
-    // F4b: 12 additional enemies covering depth 19..71 (rotation of the 11 existing spriteIds)
     { id: 'e13', archetype: 'standard',    isoX: 17, isoY: 19, spriteId: 'enemies_bolsa_plastico' },
     { id: 'e14', archetype: 'standard',    isoX: 19, isoY: 21, spriteId: 'enemies_camion_treco' },
     { id: 'e15', archetype: 'standard',    isoX: 21, isoY: 23, spriteId: 'enemies_tubo_lixiviado' },
@@ -63,6 +93,97 @@ function _buildEnemyDefs() {
     { id: 'e23', archetype: 'mini-boss',   isoX: 35, isoY: 36, spriteId: 'enemies_planta_treco' },
     { id: 'e24', archetype: 'boss',        isoX: 36, isoY: 35, spriteId: 'enemies_sello_burocratico' },
   ]
+  for (const e of original24) items.push(e)
+
+  // ----------------------------------------------------------------
+  // 96 NEW entries (e25..e120) — Fase-5 expansion: 20 static + 76 mobile.
+  // Static spriteIds (REQ-CMB-009 hard rule — never self-translate).
+  //
+  // DEPTH CONSTRAINT: existing hit-detection.spec.mjs (Part 3) asserts
+  // exactly 2 escapes at t=20s. Screen-escape fires when camSum - enemySum = 2.74,
+  // i.e. t = (depth + 2.74) / 0.6. For NO new enemy to escape at t=20s,
+  // depth must be > 9.26. We pick depth ≥ 13 (buffer of ~3.7s) to give
+  // margin against timing jitter and to match the original e01..e24 tail.
+  // ----------------------------------------------------------------
+  const staticSpriteIds = [
+    'enemies_valla_publicitaria',
+    'enemies_incineradora',
+    'enemies_planta_treco',
+    'enemies_sello_burocratico',
+  ]
+  for (let i = 0; i < 20; i++) {
+    const spriteId = staticSpriteIds[i % staticSpriteIds.length]
+    // depth 13..32 (increment 1) — outside the t=20 escape window.
+    const depth = 13 + i
+    if (depth > 32) break
+    const isoX = Math.min(34, Math.max(1, Math.floor(depth / 2) + (i % 3)))
+    const isoY = depth - isoX
+    items.push({
+      id: `e_static_${String(i + 1).padStart(3, '0')}`,
+      archetype: 'standard',
+      isoX,
+      isoY,
+      spriteId,
+    })
+  }
+
+  // 54 standard mobile (depth 36..68)
+  const standardMobileIds = [
+    'enemies_camion_treco',
+    'enemies_bolsa_plastico',
+    'enemies_bidon_lixiviado',
+    'enemies_tubo_lixiviado',
+    'enemies_topadora',
+    'enemies_trailer',
+  ]
+  for (let i = 0; i < 54; i++) {
+    const spriteId = standardMobileIds[i % standardMobileIds.length]
+    const depth = 36 + (i * 32 / 53)
+    const isoX = Math.min(34, Math.max(1, Math.floor(depth / 2) + (i % 4)))
+    const isoY = depth - isoX
+    items.push({
+      id: `e_std_${String(i + 1).padStart(3, '0')}`,
+      archetype: 'standard',
+      isoX: Math.round(isoX),
+      isoY: Math.round(isoY * 10) / 10,
+      spriteId,
+    })
+  }
+
+  // 16 tank mobile (depth 38..66)
+  const tankMobileIds = [
+    'enemies_dron_fumigador',
+    'enemies_camion_cisterna_residuos',
+  ]
+  for (let i = 0; i < 16; i++) {
+    const spriteId = tankMobileIds[i % tankMobileIds.length]
+    const depth = 38 + (i * 28 / 15)
+    const isoX = Math.min(33, Math.max(1, Math.floor(depth / 2) + (i % 3)))
+    const isoY = depth - isoX
+    items.push({
+      id: `e_tank_${String(i + 1).padStart(3, '0')}`,
+      archetype: 'tank',
+      isoX: Math.round(isoX),
+      isoY: Math.round(isoY * 10) / 10,
+      spriteId,
+    })
+  }
+
+  // 6 mini-boss (depth 36..61)
+  for (let i = 0; i < 6; i++) {
+    const depth = 36 + i * 5
+    const isoX = Math.min(34, Math.max(1, Math.floor(depth / 2)))
+    const isoY = depth - isoX
+    items.push({
+      id: `e_miniboss_${String(i + 1).padStart(3, '0')}`,
+      archetype: 'mini-boss',
+      isoX,
+      isoY,
+      spriteId: 'enemies_planta_treco',
+    })
+  }
+
+  // Stamp depth + spawnTimeSec + sort by spawn time.
   return items.map(e => {
     const depth = e.isoX + e.isoY
     return { ...e, depth, spawnTimeSec: _spawnTimeFromDepth(depth) }
@@ -73,19 +194,13 @@ function _buildEnemyDefs() {
  * F3.10: rail direction. The rail runs northwest → southeast.
  * F4b: extended from iso (0,0) → (18,18) over 60 s to iso (0,0) → (36,36) over 120 s
  * (linear 2× extension, rail speed unchanged at 0.6 tile/s).
- * From the player's perspective the camera advances toward the southeast.
- * With the F3.11 isoToScreen Y-mirror, the world content scrolls DOWN past
- * the player (content approaches from the top, exits at the bottom) — the
- * natural "advancing" feel of an on-rails shooter. All real stages
- * (F4+) MUST reuse this rail convention AND the mirrored isoToScreen, so
- * every stage has the same scroll direction.
  */
 export const TEST_LEVEL = Object.freeze({
   railPath: Object.freeze([
     Object.freeze({ t: 0,   isoX: 0,  isoY: 0  }),
     Object.freeze({ t: 120, isoX: 36, isoY: 36 }),
   ]),
-  railEndTime: 120,  // victory fires when camera.getTime() >= 120 AND all 24 enemies destroyed
+  railEndTime: 120,
   enemies: Object.freeze(_buildEnemyDefs()),
 })
 
@@ -97,18 +212,52 @@ export function testLevelWaypoints() {
 /** Total enemy count (for tests / HUD). */
 export const TEST_LEVEL_ENEMY_COUNT = TEST_LEVEL.enemies.length
 
-/** Convenience: assert the locked 24-enemy composition (F4b: 2× extension). */
+/**
+ * Fase-5 (REQ-CMB-009): assert every entry in TEST_LEVEL resolves to a
+ * movement config consistent with the spriteId's static-ness. Mobile spriteIds
+ * get their default config; static spriteIds are forced to speed=0/static.
+ */
+export function assertStaticSpriteIds() {
+  const violations = []
+  for (const def of TEST_LEVEL.enemies) {
+    if (!def.spriteId) continue
+    const isStatic = STATIC_SPRITE_IDS.has(def.spriteId)
+    const resolved = resolveMovementConfig(def.spriteId, def.speed, def.movementPattern)
+    if (isStatic) {
+      if (resolved.speed !== 0 || resolved.movementPattern !== 'static') {
+        violations.push({ id: def.id, spriteId: def.spriteId, resolved })
+      }
+    }
+  }
+  if (violations.length > 0) {
+    throw new Error(
+      `TEST_LEVEL violates REQ-CMB-009 static rule for spriteIds:\n` +
+      violations.map(v => `  ${v.id} (${v.spriteId}) -> ${JSON.stringify(v.resolved)}`).join('\n')
+    )
+  }
+}
+
+/** Convenience: assert the locked 120-enemy composition (Fase-5). */
 export function assertTestLevel() {
-  if (TEST_LEVEL.enemies.length !== 24) {
-    throw new Error(`TEST_LEVEL must have 24 enemies, got ${TEST_LEVEL.enemies.length}`)
+  if (TEST_LEVEL.enemies.length !== 120) {
+    throw new Error(`TEST_LEVEL must have 120 enemies, got ${TEST_LEVEL.enemies.length}`)
   }
   const counts = { standard: 0, tank: 0, 'mini-boss': 0, boss: 0 }
   for (const e of TEST_LEVEL.enemies) {
     if (!ARCHETYPES[e.archetype]) throw new Error(`unknown archetype in TEST_LEVEL: ${e.archetype}`)
     counts[e.archetype]++
   }
-  if (counts.standard !== 16) throw new Error(`TEST_LEVEL: expected 16 standard, got ${counts.standard}`)
-  if (counts.tank !== 4) throw new Error(`TEST_LEVEL: expected 4 tank, got ${counts.tank}`)
-  if (counts['mini-boss'] !== 2) throw new Error(`TEST_LEVEL: expected 2 mini-boss, got ${counts['mini-boss']}`)
+  // 24 original (F4b: 16 std + 4 tank + 2 mini-boss + 2 boss) +
+  // 96 added (Fase-5: 20 static [all 'standard'] + 54 std mobile + 16 tank + 6 mini-boss).
+  // Archetype breakdown: standard = 16 + 20 + 54 = 90
+  //                     tank = 4 + 16 = 20
+  //                     mini-boss = 2 + 6 = 8
+  //                     boss = 2
+  //                     total = 90 + 20 + 8 + 2 = 120 ✓
+  if (counts.standard !== 90) throw new Error(`TEST_LEVEL: expected 90 standard, got ${counts.standard}`)
+  if (counts.tank !== 20) throw new Error(`TEST_LEVEL: expected 20 tank, got ${counts.tank}`)
+  if (counts['mini-boss'] !== 8) throw new Error(`TEST_LEVEL: expected 8 mini-boss, got ${counts['mini-boss']}`)
   if (counts.boss !== 2) throw new Error(`TEST_LEVEL: expected 2 boss, got ${counts.boss}`)
+  // Also verify static rule.
+  assertStaticSpriteIds()
 }

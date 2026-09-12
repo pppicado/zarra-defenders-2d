@@ -24,7 +24,7 @@
  * Manhattan fallback so off-axis escapes still work.
  */
 import { emit } from './event-bus.js?v=44'
-import { TILE_SIZE } from './canvas.js?v=44'
+import { TILE_SIZE, LOGICAL_W } from './canvas.js?v=44'
 
 /**
  * ~1 tile visual warning (REQ-CMB-008); 0.6 tile/s × 32 px ≈ 0.5 s buffer.
@@ -32,6 +32,92 @@ import { TILE_SIZE } from './canvas.js?v=44'
  * drains, instead of the enemy vanishing the instant the camera passes south.
  */
 export const SOUTH_MARGIN_PX = 32
+
+// ============================================================================
+// Fase-5 (REQ-CMB-009 + REQ-CMB-010) — per-instance enemy movement
+// ============================================================================
+
+/**
+ * Lateral screen-space clamp bounds (REQ-CMB-010). Mobile enemies whose
+ * projected screen X falls outside `[LATERAL_MIN_PX, LATERAL_MAX_PX]` get
+ * their iso X velocity reflected and snapped to the bound. Static enemies
+ * never reach the clamp branch (their tick returns early).
+ */
+export const LATERAL_MIN_PX = 80
+export const LATERAL_MAX_PX = LOGICAL_W - 80
+
+/**
+ * Movement-pattern math constants. Module-private — exposed for tests but
+ * not part of the public API.
+ *
+ * Linear / sine / zigzag / arc pattern amplitudes and frequencies are tuned
+ * so that mobile sprites feel responsive without leaving the corridor too
+ * quickly. SINE_AMP = 0.6 means the perpendicular sway magnitude is 60% of
+ * the per-tick advance — enough to see motion, small enough to stay in the
+ * 80 px..viewportW-80 px clamp corridor.
+ */
+export const SINE_AMP = 0.6
+export const SINE_FREQ_HZ = 1.0
+export const ZIGZAG_AMP = 0.4
+export const ZIGZAG_PERIOD_MS = 1000
+export const ARC_RADIUS = 0.8
+export const ARC_OMEGA = 0.6
+
+/**
+ * Sprite IDs that MUST stay static (REQ-CMB-009 hard rule). Apparent motion
+ * comes from camera-induced tile scrolling only. Spawns that try to override
+ * `speed` / `movementPattern` for these sprite IDs are silently downgraded
+ * to `speed: 0, movementPattern: 'static'`.
+ */
+export const STATIC_SPRITE_IDS = Object.freeze(new Set([
+  'enemies_valla_publicitaria',
+  'enemies_billboard_nuclear',
+  'enemies_billboard_sewer',
+  'enemies_billboard_corporate',
+  'enemies_signage_hotel',
+  'enemies_signage_factory',
+  'enemies_signage_office',
+  'enemies_incineradora',
+  'enemies_planta_treco',
+  'enemies_sello_burocratico',
+  'enemies_castillo_cofrentes',
+]))
+
+/**
+ * Default per-mobile-spriteId movement config (REQ-CMB-009). When a spawn
+ * definition omits `speed` / `movementPattern`, these defaults are applied
+ * UNLESS the spriteId is in STATIC_SPRITE_IDS.
+ */
+export const MOBILE_DEFAULT = Object.freeze({
+  enemies_dron_fumigador:           Object.freeze({ speed: 70, movementPattern: 'sine' }),
+  enemies_camion_treco:             Object.freeze({ speed: 50, movementPattern: 'zigzag' }),
+  enemies_topadora:                 Object.freeze({ speed: 40, movementPattern: 'linear' }),
+  enemies_bidon_lixiviado:          Object.freeze({ speed: 35, movementPattern: 'arc' }),
+  enemies_camion_cisterna_residuos: Object.freeze({ speed: 30, movementPattern: 'linear' }),
+  enemies_trailer:                  Object.freeze({ speed: 45, movementPattern: 'zigzag' }),
+  enemies_tubo_lixiviado:           Object.freeze({ speed: 25, movementPattern: 'sine' }),
+  enemies_bolsa_plastico:           Object.freeze({ speed: 60, movementPattern: 'sine' }),
+})
+
+/**
+ * Resolve the effective `speed` / `movementPattern` for a spawn def.
+ * Static spriteIds always resolve to `0` / `'static'` (hard rule).
+ * Mobile spriteIds default to MOBILE_DEFAULT[spriteId] when omitted.
+ */
+export function resolveMovementConfig(spriteId, speed, pattern) {
+  const sid = spriteId ?? null
+  if (sid && STATIC_SPRITE_IDS.has(sid)) {
+    return { speed: 0, movementPattern: 'static' }
+  }
+  const defaults = sid ? MOBILE_DEFAULT[sid] : null
+  const effSpeed = (typeof speed === 'number' && Number.isFinite(speed) && speed >= 0)
+    ? speed
+    : (defaults?.speed ?? 0)
+  const effPattern = (typeof pattern === 'string')
+    ? pattern
+    : (defaults?.movementPattern ?? 'static')
+  return { speed: effSpeed, movementPattern: effPattern }
+}
 
 export const ARCHETYPES = Object.freeze({
   // F4f: footprints widened on the iso-sum axis (hh) to cover the full vertical
@@ -88,13 +174,17 @@ function _nextId() { return `e${String(++_idCounter).padStart(3, '0')}` }
 export class Enemy {
   /**
    * @param {Object} opts
-   * @param {string} [opts.id]           auto-generated if omitted
+   * @param {string} [opts.id]                       auto-generated if omitted
    * @param {keyof ARCHETYPES} opts.archetype
    * @param {number} opts.isoX
    * @param {number} opts.isoY
    * @param {string} [opts.spriteId]
+   * @param {number} [opts.speed]                    iso-units/sec (default 0)
+   * @param {'static'|'linear'|'sine'|'zigzag'|'arc'} [opts.movementPattern]
+   *        default 'static'. Resolved through resolveMovementConfig() so
+   *        static spriteIds (REQ-CMB-009 hard rule) are always downgraded.
    */
-  constructor({ id, archetype, isoX, isoY, spriteId }) {
+  constructor({ id, archetype, isoX, isoY, spriteId, speed = 0, movementPattern = 'static' }) {
     assertArchetype(archetype)
     this.id = id ?? _nextId()
     this.archetype = archetype
@@ -104,6 +194,18 @@ export class Enemy {
     this.hp = ARCHETYPES[archetype].hp
     this.state = 'alive'   // 'alive' | 'destroyed'
     this._destroyedAt = 0  // performance.now() ms when transitioned to destroyed
+    // Fase-5 (REQ-CMB-009): resolve effective movement config (handles the
+    // static-spriteId hard rule and per-spriteId defaults).
+    const resolved = resolveMovementConfig(spriteId, speed, movementPattern)
+    this.speed = resolved.speed
+    this.movementPattern = resolved.movementPattern
+    // Internal timing + arc center for parametric patterns.
+    this._elapsedMs = 0
+    this._arcCenter = null
+    this._spawnIsoY = isoY        // captured for sine/zigzag oscillation reference
+    // Velocity cache for lateral-clamp reflection (REQ-CMB-010). Signed
+    // advance along isoX — positive means "advance toward rail end".
+    this._vxIso = 0
   }
 
   /**
@@ -184,6 +286,124 @@ export class Enemy {
   isExpired(now) {
     if (this.state !== 'destroyed') return false
     return (now - this._destroyedAt) >= 200
+  }
+
+  // ==========================================================================
+  // Fase-5 (REQ-CMB-009 + REQ-CMB-010): per-instance self-translation
+  // ==========================================================================
+
+  /**
+   * Per-tick self-translation. Static pattern returns early (O(1)).
+   * Mobile patterns mutate `this.isoX` / `this.isoY` in place and are then
+   * projected to screen-space via `_lateralClamp` so they stay inside the
+   * `[LATERAL_MIN_PX, LATERAL_MAX_PX]` corridor.
+   *
+   * Camera iso is unused here (the enemy self-translates in WORLD iso, not
+   * relative to the camera). It's accepted as part of the tick contract so
+   * future camera-aware patterns can plug in without changing the call site.
+   *
+   * @param {number} dtMs            delta time in milliseconds
+   * @param {{isoX:number, isoY:number}} [cameraIso]   current camera iso (unused for now)
+   * @param {{minX:number, maxX:number}} [viewportBounds] lateral screen-bounds clamp
+   * @param {Object} [isoWorld]      IsoWorld (needed by _lateralClamp for projection)
+   * @param {{x:number, y:number}} [viewportCenter]   same as isoWorld._viewOrigin
+   */
+  tick(dtMs, cameraIso = null, viewportBounds = null, isoWorld = null, viewportCenter = null) {
+    if (this.state !== 'alive') return
+    if (this.movementPattern === 'static') return
+    if (!Number.isFinite(dtMs) || dtMs <= 0) return
+
+    this._elapsedMs += dtMs
+    const dtSec = dtMs / 1000
+    const pattern = this.movementPattern
+    const speed = this.speed
+
+    // The camera advances along the iso-sum axis (0,0) → (36,36). Enemies
+    // advance in the same direction so they "approach the camera" from the
+    // player's POV (their projected screen position drifts down-and-toward).
+    // dir = (1, 1) / √2  in iso units.
+    const dx = 0.7071067811865475 * speed * dtSec
+    const dy = 0.7071067811865475 * speed * dtSec
+
+    if (pattern === 'linear') {
+      this.isoX += dx
+      this.isoY += dy
+      this._vxIso = +dx
+    } else if (pattern === 'sine') {
+      // Linear advance on isoX; isoY oscillates around SPAWN isoY (REQ-CMB-009
+      // scenario: "oscillates around its spawn isoY"). Amplitude scales with
+      // speed so faster drons sway more visibly, but stays bounded enough to
+      // keep the enemy inside the lateral corridor.
+      this.isoX += dx
+      const omega = 2 * Math.PI * SINE_FREQ_HZ
+      const ampIso = SINE_AMP * speed * 0.05      // empirical: speed=70 → amp≈2.1
+      this.isoY = this._spawnIsoY + ampIso * Math.sin(this._elapsedMs * 0.001 * omega)
+      this._vxIso = +dx
+    } else if (pattern === 'zigzag') {
+      // Linear advance on isoX; isoY sways between ±ampIso around SPAWN isoY
+      // using a triangle wave that flips sign every ZIGZAG_PERIOD_MS.
+      this.isoX += dx
+      const ampIso = ZIGZAG_AMP * speed * 0.05
+      const phase = (this._elapsedMs % (2 * ZIGZAG_PERIOD_MS)) / ZIGZAG_PERIOD_MS
+      const sign = phase < 1 ? 1 : -1
+      const ramp = phase < 1 ? phase : (2 - phase)   // 0..1 triangle wave
+      this.isoY = this._spawnIsoY + sign * ampIso * ramp
+      this._vxIso = +dx
+    } else if (pattern === 'arc') {
+      // Parametric around `_arcCenter` (captured at first tick). ix = cx + r*cos(ωt),
+      // iy = cy + r*sin(ωt). No linear advance; radius is constant.
+      if (!this._arcCenter) {
+        this._arcCenter = { isoX: this.isoX - ARC_RADIUS, isoY: this.isoY }
+      }
+      const omega = ARC_OMEGA
+      const phase = this._elapsedMs * 0.001 * omega
+      this.isoX = this._arcCenter.isoX + ARC_RADIUS * Math.cos(phase)
+      this.isoY = this._arcCenter.isoY + ARC_RADIUS * Math.sin(phase)
+      this._vxIso = -ARC_RADIUS * omega * Math.sin(phase) * 0.001
+    }
+
+    // Apply lateral screen-bounds clamp (REQ-CMB-010). Skipped if no
+    // isoWorld was provided (test harness may not always supply one).
+    if (viewportBounds && isoWorld) {
+      this._lateralClamp(isoWorld, cameraIso, viewportBounds, viewportCenter)
+    }
+  }
+
+  /**
+   * Project current isoX/isoY to screen space; if the projected screen X
+   * falls outside `[viewportBounds.minX, viewportBounds.maxX]`, snap isoX so
+   * the projected sx sits at the bound AND reflect `_vxIso` so the next tick
+   * moves back into the corridor. Only mobile enemies reach this branch
+   * (static pattern short-circuits in tick).
+   *
+   * @param {Object} isoWorld           IsoWorld (provides isoToScreenWithCamera)
+   * @param {{isoX:number, isoY:number}} cameraIso
+   * @param {{minX:number, maxX:number}} viewportBounds
+   * @param {{x:number, y:number}} viewportCenter
+   */
+  _lateralClamp(isoWorld, cameraIso, viewportBounds, viewportCenter) {
+    const vc = viewportCenter ?? { x: LOGICAL_W / 2, y: 360 }
+    const camIso = cameraIso ?? { isoX: 0, isoY: 0 }
+    const { sx, sy } = isoWorld.isoToScreenWithCamera(this.isoX, this.isoY, camIso, vc)
+
+    if (sx < viewportBounds.minX) {
+      // Walk isoX forward in small steps until projected sx sits at the bound.
+      // Use the iso-projection X derivative: d(sx)/d(ix) ≈ step * 0.5 + step * 0.5
+      // — derived from isoToScreenWithCamera; in practice the camera-anchored
+      // projection has d(sx)/d(ix) ≈ TILE_SIZE / √2 / 2 with a small camIso
+      // contribution. We approximate with a constant step to keep this O(1).
+      const step = TILE_SIZE / Math.SQRT2
+      const dIsoX = (viewportBounds.minX - sx) / step
+      this.isoX += dIsoX
+      // Reflect the velocity (we don't know the exact camIso sign — flip
+      // the cache; next tick the pattern math recomputes it anyway).
+      this._vxIso = -this._vxIso
+    } else if (sx > viewportBounds.maxX) {
+      const step = TILE_SIZE / Math.SQRT2
+      const dIsoX = (viewportBounds.maxX - sx) / step
+      this.isoX += dIsoX
+      this._vxIso = -this._vxIso
+    }
   }
 }
 
@@ -343,6 +563,7 @@ export class EnemyManager {
 
   /**
    * Per-frame tick:
+   *   0. (NEW Fase-5) Advance self-translation for every live mobile enemy.
    *   1. Materialize any time-gated spawns whose time has arrived.
    *   2. Evaluate escape for every live enemy.
    *   3. Garbage-collect destroyed enemies whose 200 ms animation window expired.
@@ -352,17 +573,36 @@ export class EnemyManager {
    * (south-bound slide-off) and is OR'd with the iso Manhattan fallback.
    * Old callers (no extra args) keep working with the Manhattan-only path.
    *
+   * Fase-5 (REQ-CMB-009 + REQ-CMB-010): step 0 advances every live mobile
+   * enemy's isoX/isoY through Enemy.tick() and applies the lateral clamp.
+   * Static enemies early-return from tick in O(1) — no observable change vs F4b.
+   *
    * @param {number} dtMs                delta time in milliseconds
    * @param {{isoX:number, isoY:number}} cameraIso  current camera iso position
    * @param {number} [elapsedSec]        current simulation time (used for time-gated spawns)
    * @param {Object} [isoWorld]          IsoWorld (enables screen-space escape test)
    * @param {{x:number, y:number}} [viewportCenter]   same as isoWorld._viewOrigin
    * @param {{x:number, y:number}} [viewportSize]     logical canvas size
+   * @param {{minX:number, maxX:number}} [viewportBounds]   lateral clamp bounds (mobile only)
    */
-  update(dtMs, cameraIso, elapsedSec = 0, isoWorld = null, viewportCenter = null, viewportSize = null) {
+  update(dtMs, cameraIso, elapsedSec = 0, isoWorld = null, viewportCenter = null, viewportSize = null, viewportBounds = null, opts = null) {
     // Fase-5 REQ-CMB-008: clear the per-tick "screen escaped" trace so callers
     // (e.g. test-api.getScreenEscapedRects) see only the enemies removed THIS frame.
     this._lastScreenEscaped = []
+
+    // Step 0 (NEW Fase-5 REQ-CMB-009 + REQ-CMB-010): per-instance self-translation.
+    // Runs BEFORE escape detection so a mobile enemy that moves into the lateral
+    // clamp range is corrected before the next frame's projection is judged.
+    if (cameraIso) {
+      const runMotion = !!(isoWorld && viewportCenter)
+      for (const enemy of this._live()) {
+        if (enemy.state !== 'alive') continue
+        if (enemy.movementPattern === 'static') continue   // O(1) skip for static
+        if (runMotion) {
+          enemy.tick(dtMs, cameraIso, viewportBounds, isoWorld, viewportCenter)
+        }
+      }
+    }
 
     // Time-gated spawn materialization
     if (this._timeGatedSpawns.length > 0) {
@@ -384,8 +624,9 @@ export class EnemyManager {
 
     // Escape detection (F3 enemies are static, only the camera moves)
     if (cameraIso) {
+      const skipEscape = !!(opts && opts.skipEscape)
       const runScreenTest = !!(isoWorld && viewportCenter && viewportSize)
-      for (const enemy of this._live()) {
+      if (!skipEscape) for (const enemy of this._live()) {
         if (enemy.state !== 'alive') continue
         // Fase-5 REQ-CMB-008: screen-space test runs first (common case is the
         // south slide-off). Off-axis escapes still hit the Manhattan fallback.

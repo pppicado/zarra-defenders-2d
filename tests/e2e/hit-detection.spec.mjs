@@ -260,9 +260,9 @@ async function runR3AllArchetypesHit(page) {
     api.tick(16.6667)
     // Spawn one of each remaining archetype near the camera so they survive
     // the escape-detection tick (manhattan ≤ 6 from camIso at t=5).
-    api.spawnEnemy({ id: 'arch_tank',      archetype: 'tank',      isoX: 4, isoY: 4, spriteId: 'enemies_dron_fumigador' })
-    api.spawnEnemy({ id: 'arch_miniboss',  archetype: 'mini-boss', isoX: 5, isoY: 4, spriteId: 'enemies_planta_treco' })
-    api.spawnEnemy({ id: 'arch_boss',      archetype: 'boss',      isoX: 4, isoY: 5, spriteId: 'enemies_sello_burocratico' })
+    api.spawnEnemy({ id: 'arch_tank',      archetype: 'tank',      isoX: 4, isoY: 4, spriteId: 'enemies_dron_fumigador',           speed: 0, movementPattern: 'static' })
+    api.spawnEnemy({ id: 'arch_miniboss',  archetype: 'mini-boss', isoX: 5, isoY: 4, spriteId: 'enemies_planta_treco',             speed: 0, movementPattern: 'static' })
+    api.spawnEnemy({ id: 'arch_boss',      archetype: 'boss',      isoX: 4, isoY: 5, spriteId: 'enemies_sello_burocratico',         speed: 0, movementPattern: 'static' })
     api.tick(16.6667)
   })
 
@@ -326,8 +326,8 @@ async function runX1DepthSortTieBreak(page) {
     // on screen. Both survive escape detection (manhattan ≤ 6 from camIso at t=5).
     // Tie-break: lower id ('e_tie_a') must win over 'e_tie_b' even when 'b'
     // renders on top.
-    api.spawnEnemy({ id: 'e_tie_a', archetype: 'standard', isoX: 4, isoY: 3, spriteId: 'enemies_camion_treco' })
-    api.spawnEnemy({ id: 'e_tie_b', archetype: 'standard', isoX: 4, isoY: 3, spriteId: 'enemies_bolsa_plastico' })
+    api.spawnEnemy({ id: 'e_tie_a', archetype: 'standard', isoX: 4, isoY: 3, spriteId: 'enemies_camion_treco',   speed: 0, movementPattern: 'static' })
+    api.spawnEnemy({ id: 'e_tie_b', archetype: 'standard', isoX: 4, isoY: 3, spriteId: 'enemies_bolsa_plastico',  speed: 0, movementPattern: 'static' })
     api.tick(16.6667)
   })
 
@@ -361,7 +361,7 @@ async function runX2SpriteNullFallback(page) {
     api.setTime(5.0)
     api.tick(16.6667)
     // spriteId 'NONEXISTENT' is not preloaded, so enemy.sprite stays null.
-    api.spawnEnemy({ id: 'e_null_a', archetype: 'standard', isoX: 4, isoY: 4, spriteId: 'NONEXISTENT' })
+    api.spawnEnemy({ id: 'e_null_a', archetype: 'standard', isoX: 4, isoY: 4, spriteId: 'NONEXISTENT', speed: 0, movementPattern: 'static' })
     api.tick(16.6667)
   })
 

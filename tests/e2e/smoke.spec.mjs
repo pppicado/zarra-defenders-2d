@@ -60,8 +60,10 @@ async function main() {
 
   const spawnedIds = await page.evaluate(() => [...window.__spawnedIds])
   console.log(`Spawned enemies: ${spawnedIds.length} (${spawnedIds.join(',')})`)
-  if (spawnedIds.length !== 12) {
-    throw new Error(`Expected 12 enemies to spawn over the level, got ${spawnedIds.length}`)
+  // Fase-5 REQ-CMB-009: roster scale from 24 (F4b) to 120 (5×). Smoke test
+  // expects the full roster to spawn over the camera run.
+  if (spawnedIds.length !== 120) {
+    throw new Error(`Expected 120 enemies to spawn over the level, got ${spawnedIds.length}`)
   }
 
   // Step the camera forward 60 seconds in 60Hz ticks
@@ -85,12 +87,13 @@ async function main() {
 
   await browser.close()
 
-  // Spec assertions: 12 enemies spawn + at least some escape + integrity drops.
+  // Spec assertions: 120 enemies spawn + at least some escape + integrity drops.
   // F3.2 changed escape detection from depth-only to Manhattan > 6 tiles, so the
   // last few enemies (deepest in iso, behind the rail end) may survive past t=60.
-  // What matters for the smoke test is: 12 spawned, integrity depleted, no errors.
-  if (result.enemies.length > 4) {
-    throw new Error(`Expected at most 4 enemies alive at t=60, got ${result.enemies.length}`)
+  // Fase-5: roster is 120 (depth 5..70); survivors at t=60 can include the
+  // deepest enemies (depth > 24 = camera sum at t=60). Bump the survivor cap.
+  if (result.enemies.length > 30) {
+    throw new Error(`Expected at most 30 enemies alive at t=60, got ${result.enemies.length}`)
   }
   if (!result.integrity.exhausted) {
     throw new Error(`Expected integrity to be exhausted after enough escapes, got ${JSON.stringify(result.integrity)}`)

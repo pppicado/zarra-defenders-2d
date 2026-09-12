@@ -23,12 +23,12 @@ import { IsoWorld } from './iso/world.js?v=44'
 import { Tilemap } from './iso/tilemap.js?v=44'
 import { Integrity } from './integrity.js?v=44'
 import { Score } from './score.js?v=44'
-import { EnemyManager, ARCHETYPES } from './enemies.js?v=44'
+import { EnemyManager, ARCHETYPES, LATERAL_MIN_PX, LATERAL_MAX_PX } from './enemies.js?v=44'
 import { Combat } from './combat.js?v=44'
 import { MainMenu } from './ui/menu.js?v=44'
 import { Overlay } from './ui/overlay.js?v=44'
 import { HUD } from './ui/hud.js?v=44'
-import { TEST_LEVEL, testLevelWaypoints, assertTestLevel, TEST_LEVEL_ENEMY_COUNT } from './levels/test-level.js?v=44'
+import { TEST_LEVEL, testLevelWaypoints, assertTestLevel, assertStaticSpriteIds, TEST_LEVEL_ENEMY_COUNT } from './levels/test-level.js?v=44'
 import { parseTestFlags, mountTestAPI } from './test-api.js?v=44'
 import { DebugHitboxes } from './debug-hitboxes.js?v=44'
 import { mulberry32, fixedClock } from './random.js?v=44'
@@ -387,11 +387,15 @@ async function bootstrap() {
       const elapsedSec = camera.getTime ? camera.getTime() : 0
       // Fase-5 REQ-CMB-008: pass isoWorld + viewport geometry so the
       // screen-space escape test runs alongside the Manhattan fallback.
+      // Fase-5 REQ-CMB-010: viewportBounds drives the lateral clamp for
+      // mobile enemies. Bounds = [80, LOGICAL_W - 80].
+      const viewportBounds = { minX: LATERAL_MIN_PX, maxX: LATERAL_MAX_PX }
       enemies.update(
         dt * 1000, camIso, elapsedSec,
         isoWorld,
         { x: LOGICAL_W / 2, y: LOGICAL_H / 2 },
         { x: LOGICAL_W, y: LOGICAL_H },
+        viewportBounds,
       )
     }
 
@@ -425,6 +429,7 @@ async function bootstrap() {
     camera.setTime(0)
 
     assertTestLevel()
+    assertStaticSpriteIds()
     enemies.loadLevel(TEST_LEVEL.enemies)
 
     // F4h: do NOT re-create the Combat instance on every reset. The test-api

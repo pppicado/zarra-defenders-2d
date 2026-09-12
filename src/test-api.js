@@ -27,7 +27,7 @@
 import { mulberry32 } from './random.js?v=44'
 import { on as busOn } from './event-bus.js?v=44'
 import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=44'
-import { Enemy } from './enemies.js?v=44'
+import { Enemy, LATERAL_MIN_PX, LATERAL_MAX_PX } from './enemies.js?v=44'
 
 export const DEFAULT_TEST_SEED = 0xC0FFEE
 
@@ -83,7 +83,7 @@ export function mountTestAPI(ctx) {
       ctx.clock?.setTime?.(Math.max(0, t * 1000))
       if (ctx.camera?.setTime) ctx.camera.setTime(t)
     },
-    tick(dtMs) {
+    tick(dtMs, opts) {
       ctx.clock?.advance?.(dtMs)
       // In test mode we always advance the camera regardless of halt state,
       // so tests can simulate an entire level from start to finish without
@@ -95,10 +95,13 @@ export function mountTestAPI(ctx) {
         // Also drive escape detection so tests can step past enemies deterministically.
         // Fase-5 REQ-CMB-008: pass isoWorld + viewport geometry so the
         // screen-space escape test runs alongside the Manhattan fallback.
+        // Fase-5 REQ-CMB-010: pass viewportBounds so the lateral clamp fires.
         const camIso = { isoX: ctx.camera.getCameraX(), isoY: ctx.camera.getCameraY() }
         const vc = ctx.viewportCenter ?? { x: LOGICAL_W / 2, y: LOGICAL_H / 2 }
         const vs = ctx._viewportSize ?? { x: LOGICAL_W, y: LOGICAL_H }
-        ctx.enemies?.update?.(dtMs, camIso, tBefore + dtMs / 1000, ctx.isoWorld, vc, vs)
+        const viewportBounds = ctx._viewportBounds ?? { minX: LATERAL_MIN_PX, maxX: LATERAL_MAX_PX }
+        const updateOpts = opts && opts.skipEscape ? { skipEscape: true } : null
+        ctx.enemies?.update?.(dtMs, camIso, tBefore + dtMs / 1000, ctx.isoWorld, vc, vs, viewportBounds, updateOpts)
       }
       // F4g: also drive isoWorld.update() so the world container's position
       // and the enemy sprite positions stay in sync with the camera. Without
@@ -147,6 +150,12 @@ export function mountTestAPI(ctx) {
       return ctx.combat?.fireAtIso?.(iso.isoX, iso.isoY, { x: screenX, y: screenY })
     },
     getEnemies() { return ctx.enemies?.readAll?.() ?? [] },
+    /**
+     * Fase-5 (REQ-CMB-009): expose the TEST_LEVEL roster constant so e2e
+     * tests can assert the roster size + per-spriteId config without having
+     * to wait for time-gated spawns.
+     */
+    getTestLevel() { return ctx.testLevel ?? null },
     getIntegrity() { return ctx.integrity?.read?.() ?? { current: 3, max: 3, exhausted: false } },
     getScore() { return ctx.score?.read?.() ?? { score: 0, firmas: 0, best: null } },
     getProjectiles() { return ctx.combat?.readProjectiles?.() ?? [] },
@@ -203,6 +212,14 @@ export function mountTestAPI(ctx) {
       ctx._viewportSize = { x: w, y: h }
       ctx._viewportCenter = { x: w / 2, y: h / 2 }
       window.__zarraModules__?.setViewportSize?.(w, h)
+    },
+    /**
+     * Fase-5 (REQ-CMB-010): override the lateral clamp bounds. Default is
+     * { minX: 80, maxX: LOGICAL_W - 80 }. Tests can narrow/widen the corridor
+     * without touching the production defaults.
+     */
+    setViewportBounds(bounds) {
+      ctx._viewportBounds = bounds ?? { minX: LATERAL_MIN_PX, maxX: LATERAL_MAX_PX }
     },
     /**
      * Fase-5 (REQ-CMB-008): return the list of enemies that screen-escaped
