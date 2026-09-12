@@ -21,7 +21,7 @@
  *     pointer tap pipeline is gated; this is for tests + UI button "fire" hooks).
  */
 import { emit } from './event-bus.js?v=44'
-import { ARCHETYPES } from './enemies.js?v=44'
+import { ARCHETYPES, Enemy } from './enemies.js?v=44'
 import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=44'
 
 export const FIRE_COOLDOWN_MS = 200          // F4d: was 333 (F3) — ~40% faster fire rate
@@ -85,25 +85,50 @@ class Projectile {
 
   /**
    * Advance one frame.
+   *
+   * Per-frame HOMING — each tick, if `isoX/isoY` are finite, recompute the screen
+   * target from the current camera state so projectiles curve toward enemies that
+   * move after fire. When `isoX/isoY` are NaN/Infinity (e.g. enemy despawned and
+   * the live record was cleared), the target keeps its last value and the
+   * projectile continues in a straight line — no flicker, no freeze.
+   *
+   * Sine flutter perpendicular axis is derived from the CURRENT `gfx` position
+   * (not the spawn `origin`) so flutter stays perpendicular to live travel, not
+   * to the original firing axis.
+   *
    * @param {number} dtMs
    * @param {{x:number, y:number}} frustumMin
    * @param {{x:number, y:number}} frustumMax
+   * @param {Object} cameraIso       { isoX, isoY } — current camera iso position
+   * @param {{x:number, y:number}} viewportCenter  for isoToScreenWithCamera
+   * @param {Object} isoWorld        IsoWorld instance (has isoToScreenWithCamera)
    * @returns {boolean} true if still alive
    */
-  tick(dtMs, frustumMin, frustumMax) {
+  tick(dtMs, frustumMin, frustumMax, cameraIso, viewportCenter, isoWorld) {
     if (!this.alive) return false
     this.elapsedMs += dtMs
     const dtSec = dtMs / 1000
-    // straight-line motion toward target
-    const { vx, vy, dist } = projectVelocity(this.origin, this.target)
+
+    // HOMING — recalculate target from stored iso coords each frame so the
+    // projectile tracks moving enemies. Skip when isoX/isoY are non-finite
+    // (e.g. cleared live record) → keep last target / last velocity.
+    if (Number.isFinite(this.isoX) && Number.isFinite(this.isoY)) {
+      const ts = isoWorld.isoToScreenWithCamera(this.isoX, this.isoY, cameraIso, viewportCenter)
+      this.target.x = ts.sx
+      this.target.y = ts.sy
+    }
+
+    // straight-line motion toward (now possibly updated) target, with origin =
+    // current gfx position so flutter axis stays perpendicular to live travel.
+    const { vx, vy, dist } = projectVelocity({ x: this.gfx.x, y: this.gfx.y }, this.target)
     const moveX = vx * dtSec
     const moveY = vy * dtSec
     this.gfx.x += moveX
     this.gfx.y += moveY
-    // sine flutter perpendicular to travel axis
+    // sine flutter perpendicular to live travel axis (gfx → target, not origin → target)
     if (dist > 0) {
-      const nx = -((this.target.y - this.origin.y) / dist)
-      const ny = (this.target.x - this.origin.x) / dist
+      const nx = -((this.target.y - this.gfx.y) / dist)
+      const ny = ((this.target.x - this.gfx.x) / dist)
       const phase = (this.elapsedMs / SINE_PERIOD_MS) * Math.PI * 2
       const offset = Math.sin(phase) * SINE_AMPLITUDE_PX
       this.gfx.x += nx * offset * (dtMs / 16.6667)  // sine is dt-independent; render at every frame
@@ -200,14 +225,19 @@ export class Combat {
   setClock(fn) { this.nowMs = fn }
 
   /**
-   * Fire a papeleta toward the iso target.
-   * @param {number} isoX
-   * @param {number} isoY
+   * Fire a papeleta at the given LOGICAL SCREEN coordinates (REQ-CMB-003).
+   *
+   * This is the primary entry point for gameplay taps in fase-5+: the input
+   * pipeline already converts CSS px → logical px via `_toLogical`, so the
+   * resolver compares screen-space coords to each enemy's `getBounds()` AABB.
+   *
+   * @param {number} screenX    logical canvas X (already relative to canvas)
+   * @param {number} screenY    logical canvas Y
    * @param {{x:number,y:number}} originScreen   hand sprite screen position
-   * @param {{bypassCooldown?:boolean}=} [opts]  if true, skips cooldown (used by tests)
+   * @param {{bypassCooldown?:boolean}=} [opts]
    * @returns {{hit:boolean, enemyId:(string|null)}}
    */
-  fireAtIso(isoX, isoY, originScreen, opts = {}) {
+  fireAtScreen(screenX, screenY, originScreen, opts = {}) {
     const now = this.nowMs()
     if (!opts.bypassCooldown) {
       if ((now - this._lastFireMs) < FIRE_COOLDOWN_MS) {
@@ -216,11 +246,24 @@ export class Combat {
     }
     this._lastFireMs = now
 
-    emit('combat:fire', { isoX, isoY, sourceScreen: { ...originScreen } })
-    if (this.callbacks.onFire) this.callbacks.onFire(isoX, isoY, originScreen)
+    emit('combat:fire', { screenX, screenY, sourceScreen: { ...originScreen } })
+    if (this.callbacks.onFire) this.callbacks.onFire(screenX, screenY, originScreen)
 
-    // Resolve hit synchronously (footprint AABB + reverse-depth)
-    const target = this._resolveHit(isoX, isoY)
+    // Resolve hit synchronously against each enemy's screen-space AABB.
+    const target = this._resolveHitAtScreenPoint(screenX, screenY, this.cameraIso, this.viewportCenter, this.isoWorld)
+
+    // Homing target for the projectile — convert screen → iso so the
+    // projectile's per-frame `tick` keeps tracking the enemy if it moves.
+    // `screenToIsoWithCamera` is the camera-aware inverse of the world
+    // container's translation; the resulting isoX/isoY feed the Projectile's
+    // tick homing, which calls isoToScreenWithCamera back to a screen target.
+    let isoX = NaN, isoY = NaN
+    if (target) {
+      const iso = this.isoWorld.screenToIsoWithCamera(screenX, screenY, this.cameraIso, this.viewportCenter)
+      isoX = iso.isoX
+      isoY = iso.isoY
+    }
+
     // Camera-aware: origin (hand) and projectile gfx both use SCREEN coords
     // (hudContainer is in the HUD canvas, not the world canvas), so the target
     // must also be in screen coords. `isoWorld.isoToScreen` returns container-
@@ -228,7 +271,9 @@ export class Combat {
     // screen-coord origin is the projectile-direction bug. Use the camera-aware
     // variant: target = isoToScreen(ix, iy) + container.position
     //                          = isoToScreen(ix, iy) + viewOrigin - isoToScreen(camIso)
-    const targetScreen = this.isoWorld.isoToScreenWithCamera(isoX, isoY, this.cameraIso, this.viewportCenter)
+    const targetScreen = (target && Number.isFinite(isoX) && Number.isFinite(isoY))
+      ? this.isoWorld.isoToScreenWithCamera(isoX, isoY, this.cameraIso, this.viewportCenter)
+      : { sx: screenX, sy: screenY }
 
     // Spawn projectile (visual)
     const proj = new Projectile({
@@ -266,18 +311,47 @@ export class Combat {
       if (this.callbacks.onHit) this.callbacks.onHit(target.id, result.hpRemaining, target.archetype)
       return { hit: true, enemyId: target.id }
     } else {
-      emit('combat:miss', { isoX, isoY })
-      if (this.callbacks.onMiss) this.callbacks.onMiss(isoX, isoY)
+      emit('combat:miss', { screenX, screenY })
+      if (this.callbacks.onMiss) this.callbacks.onMiss(screenX, screenY)
       return { hit: false, enemyId: null }
     }
   }
 
   /**
-   * Pure hit-resolution: read enemies, collect footprint-AABB candidates, sort by depth desc
-   * (tie-break: id asc).
+   * Backward-compatible iso-target fire path. Converts the iso click to a screen
+   * point via `screenToIsoWithCamera` inverse + screen conversion, then
+   * delegates to `fireAtScreen`. Kept for legacy callers (existing test-api
+   * `fireAtIso` + `simulateTap`) so they continue to work after the fase-5
+   * resolver switch.
+   *
+   * @param {number} isoX
+   * @param {number} isoY
+   * @param {{x:number,y:number}} originScreen
+   * @param {{bypassCooldown?:boolean}=} [opts]
+   */
+  fireAtIso(isoX, isoY, originScreen, opts = {}) {
+    // Convert the iso target to a screen point so the resolver runs in
+    // screen-space. We project the iso cell's center via isoToScreenWithCamera
+    // (camera-aware), which is the same transform the resolver uses for the
+    // target enemy.
+    const targetScreen = this.isoWorld.isoToScreenWithCamera(isoX, isoY, this.cameraIso, this.viewportCenter)
+    return this.fireAtScreen(targetScreen.sx, targetScreen.sy, originScreen, opts)
+  }
+
+  /**
+   * Pure hit-resolution: read enemies, collect screen-space AABB candidates via
+   * `Enemy.getScreenBounds`, AABB-containment test, sort by depth desc
+   * (tie-break: id asc). REQ-CMB-003.
+   *
+   * @param {number} screenX        logical canvas X
+   * @param {number} screenY        logical canvas Y
+   * @param {{isoX:number, isoY:number}} cameraIso
+   * @param {{x:number, y:number}} viewportCenter
+   * @param {Object} isoWorld
+   * @returns {Enemy|null}
    * @private
    */
-  _resolveHit(isoX, isoY) {
+  _resolveHitAtScreenPoint(screenX, screenY, cameraIso, viewportCenter, isoWorld) {
     if (!this.enemies) return null
     const all = this.enemies._live?.() ?? null
     if (!all) return null
@@ -285,8 +359,8 @@ export class Combat {
     const candidates = []
     for (const enemy of all) {
       if (enemy.state !== 'alive') continue
-      const fp = ARCHETYPES[enemy.archetype].footprint
-      if (Math.abs(enemy.isoX - isoX) <= fp.hw && Math.abs(enemy.isoY - isoY) <= fp.hh) {
+      const b = Enemy.getScreenBounds(enemy, isoWorld, cameraIso, viewportCenter)
+      if (screenX >= b.x && screenX <= b.x + b.w && screenY >= b.y && screenY <= b.y + b.h) {
         candidates.push(enemy)
       }
     }
@@ -310,7 +384,7 @@ export class Combat {
     const max = { x: this.viewportSize.x + margin, y: this.viewportSize.y + margin }
     const next = []
     for (const p of this._projectiles) {
-      if (p.tick(dtMs, min, max)) next.push(p)
+      if (p.tick(dtMs, min, max, this.cameraIso, this.viewportCenter, this.isoWorld)) next.push(p)
     }
     this._projectiles = next
   }

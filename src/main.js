@@ -30,6 +30,7 @@ import { Overlay } from './ui/overlay.js?v=44'
 import { HUD } from './ui/hud.js?v=44'
 import { TEST_LEVEL, testLevelWaypoints, assertTestLevel, TEST_LEVEL_ENEMY_COUNT } from './levels/test-level.js?v=44'
 import { parseTestFlags, mountTestAPI } from './test-api.js?v=44'
+import { DebugHitboxes } from './debug-hitboxes.js?v=44'
 import { mulberry32, fixedClock } from './random.js?v=44'
 import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?v=44'
 import { on as busOn, emit } from './event-bus.js?v=44'
@@ -118,6 +119,12 @@ async function bootstrap() {
 
   const { inTestMode, seed } = parseTestFlags()
 
+  // F5 (REQ-CMB-007): parse ?hitboxes=1 once at boot. The keyboard `H` toggle
+  // also flips the flag at runtime. Production (`?test=0` + no `?hitboxes=1`
+  // + no `H`) MUST stay clean.
+  const urlParams = new URLSearchParams(window.location.search)
+  const hitboxesInitiallyEnabled = urlParams.has('hitboxes')
+
   // --- Pixi Application (WORLD) ---
   // F3.5: TWO separate Pixi apps stacked via CSS z-index.
   //   appWorld: iso tiles + enemy sprites (z-index 1, behind)
@@ -183,6 +190,13 @@ async function bootstrap() {
   // --- HUD: mano + corazones + papeleta (en appHud.stage) ---
   const hudContainer = new PIXI.Container(); hudContainer.name = 'hud'; hudContainer.sortableChildren = true; appHud.stage.addChild(hudContainer)
 
+  // F5 (REQ-CMB-007): debug hitbox overlay. Mounted on the HUD canvas so it
+  // draws above world sprites. Initial state honors the ?hitboxes=1 param;
+  // the keyboard `H` toggle flips it at runtime. The container is created
+  // once and reused — `setEnabled(false)` just hides it.
+  const viewportCenter = { x: LOGICAL_W / 2, y: LOGICAL_H / 2 }
+  let debugHitboxes = null
+
   // --- Manifest + sprites ---
   let manifest = { active: {}, deprecated: {} }
   try {
@@ -234,6 +248,24 @@ async function bootstrap() {
   })
   enemies.rng = inTestMode ? mulberry32(seed) : Math.random
 
+  // F5 (REQ-CMB-007): instantiate the debug hitbox overlay now that enemies +
+  // isoWorld + viewportCenter are all defined. Initial flag honors ?hitboxes=1.
+  debugHitboxes = new DebugHitboxes({
+    hudContainer: appHud.stage,
+    enemies,
+    isoWorld,
+    viewportCenter,
+    enabled: hitboxesInitiallyEnabled,
+  })
+
+  // F5 (REQ-CMB-007): keyboard `H` toggles the overlay at runtime. Only
+  // attached once — repeated `H` presses flip the flag.
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'h' || e.key === 'H') {
+      if (debugHitboxes) debugHitboxes.setEnabled(!debugHitboxes.isEnabled())
+    }
+  })
+
   const camera = new RailCamera({ waypoints: buildTestLevelPath(), loop: false })
   const input = new Input()
   // Input reads events from BOTH canvases (world and HUD); clicks on the HUD
@@ -257,15 +289,15 @@ async function bootstrap() {
   input.on('move', (x, y) => hudModule.setPointer(x, y))
 
   // Tap handler: the input handler has already converted CSS px → logical
-  // 1920x720 px (see _toLogical in input.js). Pass through to isoWorld.
+  // 1920x720 px (see _toLogical in input.js). F5 (REQ-CMB-003): the combat
+  // resolver now compares against each enemy's screen-space sprite bounds,
+  // so we pass the logical screen coords straight through — no iso conversion
+  // here.
   input.on('tap', (logicalX, logicalY) => {
     if (gameState.state !== 'gameplay') return
     if (!combat) return
-    const camIso = { isoX: camera.getCameraX(), isoY: camera.getCameraY() }
-    const vc = { x: LOGICAL_W / 2, y: LOGICAL_H / 2 }
-    const iso = isoWorld.screenToIsoWithCamera(logicalX, logicalY, camIso, vc)
     const handPos = hudModule.getHandScreenPosition() ?? { x: logicalX, y: logicalY }
-    combat.fireAtIso(iso.isoX, iso.isoY, handPos)
+    combat.fireAtScreen(logicalX, logicalY, handPos)
   })
 
   const player = new Player(appWorld, input, hudContainer, camera)
@@ -326,6 +358,7 @@ async function bootstrap() {
       bootLevel: () => bootTestLevel({ combat, isoWorld, enemies, camera, score, integrity, hud: hudModule, world }),
       isoWorld,
       viewportCenter: { x: LOGICAL_W / 2, y: LOGICAL_H / 2 },
+      debugHitboxes,
     })
   }
 
@@ -356,6 +389,11 @@ async function bootstrap() {
     }
 
     if (combat) combat.update(dt * 1000)
+
+    // F5 (REQ-CMB-007): debug hitbox overlay runs after world + enemies so
+    // getScreenBounds() sees the post-tick container positions. update() is
+    // a no-op when disabled (early return).
+    if (debugHitboxes) debugHitboxes.update(camIso)
 
     maybeFireVictory({ camera, enemies, integrity })
   }

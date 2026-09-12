@@ -27,6 +27,7 @@
 import { mulberry32 } from './random.js?v=44'
 import { on as busOn } from './event-bus.js?v=44'
 import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=44'
+import { Enemy } from './enemies.js?v=44'
 
 export const DEFAULT_TEST_SEED = 0xC0FFEE
 
@@ -58,6 +59,7 @@ export function parseTestFlags(search = window.location.search) {
  * @param {Object} ctx.clock       { now(), advance(dtMs), setTime(ms) } fixed clock for tests
  * @param {Object} ctx.testLevel   TEST_LEVEL constant
  * @param {Object} ctx.bootLevel   fn() -> void   spawns the level (test branch)
+ * @param {Object} [ctx.debugHitboxes]   DebugHitboxes instance (REQ-CMB-007)
  */
 export function mountTestAPI(ctx) {
   const api = {
@@ -111,6 +113,28 @@ export function mountTestAPI(ctx) {
     fireAtIso(x, y, opts) {
       return ctx.combat?.fireAtIso?.(x, y, { x: 0, y: 0 }, { bypassCooldown: true, ...(opts ?? {}) })
     },
+    /**
+     * F5 (REQ-CMB-003): fire at a logical screen point. The new resolver
+     * compares the click to each enemy's screen-space sprite bounds, so
+     * callers pass canvas px (not iso coords). `bypassCooldown` defaults to
+     * true so tests can rapid-fire without the 200 ms gate.
+     */
+    fireAtScreen(x, y, opts) {
+      return ctx.combat?.fireAtScreen?.(x, y, { x: 0, y: 0 }, { bypassCooldown: true, ...(opts ?? {}) })
+    },
+    /**
+     * F5 (REQ-CMB-003): read the current screen-space AABB of an enemy.
+     * Returns `{x,y,w,h}` in logical canvas px. Returns null if the enemy id
+     * is unknown.
+     */
+    getScreenBounds(enemyId) {
+      if (!ctx.enemies) return null
+      const enemy = ctx.enemies.get?.(enemyId)
+      if (!enemy) return null
+      const camIso = ctx.camera ? { isoX: ctx.camera.getCameraX(), isoY: ctx.camera.getCameraY() } : { isoX: 0, isoY: 0 }
+      const vc = ctx.viewportCenter ?? { x: LOGICAL_W / 2, y: LOGICAL_H / 2 }
+      return Enemy.getScreenBounds(enemy, ctx.isoWorld, camIso, vc)
+    },
     simulateTap(screenX, screenY) {
       const isoWorld = ctx.isoWorld
       const camIso = ctx.camera ? { isoX: ctx.camera.getCameraX(), isoY: ctx.camera.getCameraY() } : { isoX: 0, isoY: 0 }
@@ -148,6 +172,23 @@ export function mountTestAPI(ctx) {
       }
     },
     spawnEnemy(def) { return ctx.enemies?.spawn?.(def) ?? null },
+    /**
+     * F5 (REQ-CMB-007): toggle the debug hitbox overlay at runtime. Used by
+     * e2e tests to drive the overlay without firing keyboard events. No-op
+     * if `debugHitboxes` was not passed into the test-api ctx (e.g. the
+     * production stub).
+     */
+    setHitboxesEnabled(b) {
+      ctx.debugHitboxes?.setEnabled?.(b)
+    },
+    /**
+     * F5 (REQ-CMB-007): read the current per-archetype hitbox rectangles.
+     * Returns `[]` when the overlay is disabled. Each entry has
+     * `{ enemyId, archetype, x, y, w, h, color }`.
+     */
+    getHitboxRects() {
+      return ctx.debugHitboxes?.readRects?.() ?? []
+    },
   }
   window.__gameTestAPI__ = api
   return api

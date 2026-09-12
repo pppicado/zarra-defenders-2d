@@ -31,10 +31,15 @@ export const ARCHETYPES = Object.freeze({
   // half of the sprite — clicking on the visible sprite body missed the AABB
   // and the projectile whiffed. Widening hh to ~2.5 tiles makes the hit box
   // cover the sprite from iso center up to the sprite top.
-  standard:    Object.freeze({ hp: 1,  multiplier: 1,   footprint: Object.freeze({ hw: 1.5, hh: 2.5 }), flashMs: 200 }),
-  tank:        Object.freeze({ hp: 3,  multiplier: 1.5, footprint: Object.freeze({ hw: 1.7, hh: 2.7 }), flashMs: 200 }),
-  'mini-boss': Object.freeze({ hp: 10, multiplier: 2,   footprint: Object.freeze({ hw: 2.0, hh: 3.0 }), flashMs: 200 }),
-  boss:        Object.freeze({ hp: 30, multiplier: 3,   footprint: Object.freeze({ hw: 2.5, hh: 3.5 }), flashMs: 200 }),
+  //
+  // F5 (REQ-CMB-006): per-archetype `hitInset` shrinks the screen-space AABB
+  // before hit testing, so transparent-padding clicks miss. Values match the
+  // spec (16/12/10/8 px) — tighter for the larger archetypes because they have
+  // proportionally less transparent margin around the visible body.
+  standard:    Object.freeze({ hp: 1,  multiplier: 1,   footprint: Object.freeze({ hw: 1.5, hh: 2.5 }), flashMs: 200, hitInset: Object.freeze({ top: 16, right: 16, bottom: 16, left: 16 }) }),
+  tank:        Object.freeze({ hp: 3,  multiplier: 1.5, footprint: Object.freeze({ hw: 1.7, hh: 2.7 }), flashMs: 200, hitInset: Object.freeze({ top: 12, right: 12, bottom: 12, left: 12 }) }),
+  'mini-boss': Object.freeze({ hp: 10, multiplier: 2,   footprint: Object.freeze({ hw: 2.0, hh: 3.0 }), flashMs: 200, hitInset: Object.freeze({ top: 10, right: 10, bottom: 10, left: 10 }) }),
+  boss:        Object.freeze({ hp: 30, multiplier: 3,   footprint: Object.freeze({ hw: 2.5, hh: 3.5 }), flashMs: 200, hitInset: Object.freeze({ top: 8,  right: 8,  bottom: 8,  left: 8  }) }),
 })
 
 export const ARCHETYPE_IDS = Object.freeze(Object.keys(ARCHETYPES))
@@ -43,10 +48,26 @@ export class ConfigError extends Error {}
 
 /**
  * Validate that an archetype id is in the locked table. Throws ConfigError otherwise.
+ *
+ * F5 (REQ-CMB-006): also validates that the archetype's `hitInset` is present
+ * and that every side (top/right/bottom/left) is a finite number. This keeps
+ * the single source of truth honest — Enemy.getScreenBounds() reads
+ * `ARCHETYPES[name].hitInset` on every hit test, so a missing or malformed
+ * entry would silently break hit detection without surfacing an error.
  */
 export function assertArchetype(name) {
   if (!ARCHETYPES[name]) {
     throw new ConfigError(`Unknown archetype "${name}" — must be one of ${ARCHETYPE_IDS.join(', ')}`)
+  }
+  const def = ARCHETYPES[name]
+  if (!def.hitInset) {
+    throw new ConfigError(`Archetype "${name}" is missing required "hitInset" — { top, right, bottom, left } expected`)
+  }
+  for (const side of ['top', 'right', 'bottom', 'left']) {
+    const v = def.hitInset[side]
+    if (typeof v !== 'number' || !Number.isFinite(v)) {
+      throw new ConfigError(`Archetype "${name}".hitInset.${side} must be a finite number, got ${v}`)
+    }
   }
 }
 
@@ -91,6 +112,58 @@ export class Enemy {
     if (this.state === 'destroyed') return
     this.state = 'destroyed'
     this._destroyedAt = performance.now()
+  }
+
+  /**
+   * F5 (REQ-CMB-003 + REQ-CMB-006): screen-space AABB of an enemy's visible
+   * sprite, in logical canvas px. Used by Combat._resolveHitAtScreenPoint as
+   * the single source of truth for hit testing — and by DebugHitboxes to
+   * draw the overlay rectangle.
+   *
+   *   - When the enemy has a sprite (texture was preloaded), uses
+   *     `sprite.getBounds()` — PIXI's post-translate, post-scale, post-anchor
+   *     world AABB. This already accounts for DPR, tileSize, and the world-
+   *     container translation. Returns it as `{x,y,w,h}`.
+   *   - When `enemy.sprite === null` (texture failed to load / unknown spriteId),
+   *     falls back to a default AABB centered at
+   *     `isoToScreenWithCamera(enemy.isoX, enemy.isoY) ± tileSize/2`.
+   *
+   * Both branches return the SAME shrunk AABB after applying the archetype's
+   * `hitInset` (REQ-CMB-006). The combat resolver and the debug overlay see
+   * one source of truth — when hitInset changes, both update.
+   *
+   * @param {Enemy} enemy
+   * @param {Object} isoWorld   IsoWorld (for isoToScreenWithCamera fallback)
+   * @param {{isoX:number, isoY:number}} cameraIso  current camera iso position
+   * @param {{x:number, y:number}} viewportCenter  same as isoWorld._viewOrigin
+   * @returns {{x:number, y:number, w:number, h:number}}
+   */
+  static getScreenBounds(enemy, isoWorld, cameraIso, viewportCenter) {
+    let raw
+    if (enemy.sprite) {
+      const b = enemy.sprite.getBounds()
+      raw = { x: b.x, y: b.y, w: b.width, h: b.height }
+    } else {
+      // Sprite null — fallback to iso-projected default AABB.
+      const screen = isoWorld.isoToScreenWithCamera(enemy.isoX, enemy.isoY, cameraIso, viewportCenter)
+      const half = TILE_SIZE / 2
+      raw = {
+        x: screen.sx - half,
+        y: screen.sy - half,
+        w: TILE_SIZE,
+        h: TILE_SIZE,
+      }
+    }
+    // F5 (REQ-CMB-006): shrink by the archetype's hitInset so transparent-
+    // padding clicks miss. Use the locked table value; assertArchetype()
+    // already guarantees the archetype exists at construction time.
+    const ins = ARCHETYPES[enemy.archetype]?.hitInset ?? { top: 0, right: 0, bottom: 0, left: 0 }
+    return {
+      x: raw.x + ins.left,
+      y: raw.y + ins.top,
+      w: Math.max(0, raw.w - ins.left - ins.right),
+      h: Math.max(0, raw.h - ins.top - ins.bottom),
+    }
   }
 
   /**
