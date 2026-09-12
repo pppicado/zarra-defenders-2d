@@ -9,10 +9,11 @@ the per-change history lives under `openspec/changes/archive/`.
 | [iso-camera-integration/spec.md](./iso-camera-integration/spec.md) | Reinterpret `RailCamera` waypoints as iso coords; world transform; iso-plane escape detection | CAM-001, CAM-002, CAM-003, **CAM-004** | F4a (CAM-002 MODIFIED — viewport 1080→720) |
 | [iso-asset-pipeline/spec.md](./iso-asset-pipeline/spec.md) | minimax MCP batch generation + chroma-key postprocess + NEAREST downsample + bootstrap loader | ASSET-001 … ASSET-010 | F2.5.2 (ASSET-001/002/007 MODIFIED, ASSET-009/010 ADDED) |
 | [iso-gallery/spec.md](./iso-gallery/spec.md) | Dev-only asset review surface: tile/sprite cards, rotation toggle, mini-iso-demo | GAL-001, GAL-002, GAL-003 | F2.5.2 (ADDED) |
+| [combat-core/spec.md](./combat-core/spec.md) | Rail-shooter combat loop: fire/cooldown, papeleta homing, screen-space shrunk AABB hit detection, HP/score resolution, ?test=1 determinism, hitInset, debug hitbox overlay | **REQ-CMB-001, REQ-CMB-002, REQ-CMB-003, REQ-CMB-004, REQ-CMB-005, REQ-CMB-006, REQ-CMB-007** | F5-hitbox-visualization (REQ-CMB-003 MODIFIED — add hitInset; REQ-CMB-006, REQ-CMB-007 ADDED) |
 
 ## Totals
 
-- **21 requirements** total across 4 capabilities (CAM-004 brings iso-camera-integration to 4)
+- **28 requirements** total across 5 capabilities (combat-core contributes 7)
 - Tile geometry is **square iso**: `tileHalfWidth = tileHalfHeight = tileSize / 2`, with the
   45° look produced by `_worldLayer.rotation = Math.PI / 4` at the container level (on-disk PNGs stay top-down)
 - Tile set is **40 active** PNGs at 64×64 px (`manifest.totals.active === 40`)
