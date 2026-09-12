@@ -1,5 +1,22 @@
 # Delta for `iso-tile-system`
 
+> ⚠️ **DEPRECATED as of fase-6 (2026-09-12).** The tile-based isometric ground
+> renderer is no longer used in the main game. The main game now scrolls a
+> single per-stage background PNG (see `openspec/specs/scrolling-background/spec.md`).
+>
+> **The module `src/iso/tilemap.js` and the iso-math helpers (`src/iso/iso-math.js`)
+> are KEPT** for:
+>
+> - The standalone demo at `tests/tile-gallery.html` (imports `Tilemap` directly).
+> - The `screenToIsoWithCamera` / `isoToScreenWithCamera` math used by combat,
+>   enemies, and hit detection in the main game (fase-6 only disables the tile
+>   RENDERER, not the iso transforms).
+>
+> **Do NOT delete this file or `src/iso/tilemap.js`** — the standalone demo
+> will break. If you need to re-enable the tile renderer for the main game,
+> revert `src/iso/world.js` (uncomment `cullAndRender`) and `src/main.js`
+> (re-instantiate `Tilemap`).
+
 ## Purpose
 
 Replace the v0.1 flat-color placeholder with an isometric tile grid. The system MUST provide bidirectional iso ↔ screen transforms, render tiles as 64×64 square textures rotated 45° at the container level (square iso, `tileHalfWidth = tileHalfHeight = tileSize / 2`) with stable Z-order, and cull everything outside the viewport.
