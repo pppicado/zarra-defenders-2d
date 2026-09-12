@@ -394,10 +394,10 @@
       if (typeof PIXI === 'undefined') {
         throw new Error('PIXI global not loaded (cdn script missing or blocked)')
       }
-      const { Tilemap, computeCullRange } = await import('../src/iso/tilemap.js?v=26')
-      const worldModule = await import('../src/iso/world.js?v=26')
+const { Tilemap, computeCullRange } = await import('../src/iso/tilemap.js')
+      const worldModule = await import('../src/iso/world.js')
       const { IsoWorld } = worldModule
-      const isoMath = await import('../src/iso/iso-math.js?v=26')
+      const isoMath = await import('../src/iso/iso-math.js')
       const { isoToScreen } = isoMath
 
       // ---- State -----------------------------------------------------------

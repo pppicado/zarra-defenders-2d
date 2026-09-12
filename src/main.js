@@ -20,7 +20,7 @@ import { RailCamera } from './rail-camera.js?v=44'
 import { Input } from './input.js?v=44'
 import { Player } from './player.js?v=44'
 import { IsoWorld } from './iso/world.js?v=44'
-import { Tilemap } from './iso/tilemap.js?v=44'
+import { Tilemap } from './iso/tilemap.js?v=44' // eslint-disable-line no-unused-vars -- kept for tests/iso-tile-system references; no longer instantiated in main game (fase-6 BG-005)
 import { Integrity } from './integrity.js?v=44'
 import { Score } from './score.js?v=44'
 import { EnemyManager, ARCHETYPES, LATERAL_MIN_PX, LATERAL_MAX_PX } from './enemies.js?v=44'
@@ -35,6 +35,7 @@ import { mulberry32, fixedClock } from './random.js?v=44'
 import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?v=44'
 import { on as busOn, emit } from './event-bus.js?v=44'
 import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=44'
+import { BackgroundLayer, BG_SOURCE_HEIGHT_PX, BG_SCALE, BG_RENDERED_HEIGHT_PX } from './backgrounds.js?v=44'
 
 // ============================================================
 // Configuration
@@ -103,6 +104,54 @@ function buildTestLevelPath() {
 
 /** Mutated externally by main-menu + overlay. */
 const gameState = { state: 'main-menu' }   // 'main-menu' | 'gameplay' | 'overlay'
+
+/**
+ * Load a procedural placeholder bg into the given BackgroundLayer.
+ * Used during PR-1 (disable tile system + add bg placeholder) before
+ * the Minimax-generated assets land in PR-2. The placeholder is a
+ * solid-color sprite with the canonical BG_SOURCE_HEIGHT_PX × LOGICAL_W/2
+ * dimensions so it visually fills the canvas after BG_SCALE=2 upscale.
+ *
+ * Per-stage placeholder palette: sky-blue for bosque, warm-cream for
+ * pueblo, etc. (mapped via simple switch so each stage is recognisable).
+ */
+/**
+ * Load a procedural placeholder bg into the given BackgroundLayer.
+ * Used during PR-1 (disable tile system + add bg placeholder) before
+ * the Minimax-generated assets land in `assets/backgrounds/`. The placeholder
+ * is a 2-tone vertical gradient so each stage is recognisable in screenshots.
+ *
+ * Per-stage placeholder palette: olive-green for bosque, warm-cream for
+ * pueblo, etc.
+ */
+function _loadPlaceholderBg(bg, stageId) {
+  const palettes = {
+    'stage1-bosque':    { top: 0x7eaa5a, bottom: 0x4a6b30 },  // forest gradient
+    'stage2-pueblo':    { top: 0xf0d8b8, bottom: 0xb89868 },  // whitewashed village
+    'stage3-rio':       { top: 0x6ab0c8, bottom: 0x2e6680 },  // river water
+    'stage4-vertedero': { top: 0x6a6058, bottom: 0x3a3530 },  // landfill
+    'stage5-castillo':  { top: 0xd4b88c, bottom: 0x8a6c4c },  // volcanic peñón
+  }
+  const { top, bottom } = palettes[stageId] ?? { top: 0x2a3a4a, bottom: 0x182028 }
+
+  // Build the placeholder texture via a PIXI.Graphics rendered once into a
+  // RenderTexture. The resulting texture is 640×1120 (matches the future
+  // Minimax asset dimensions) so BG_SCALE=2 produces the canonical 1280×2240
+  // on-screen footprint.
+  const w = LOGICAL_W / 2
+  const h = BG_SOURCE_HEIGHT_PX
+  const g = new PIXI.Graphics()
+  g.beginFill(top, 1)
+  g.drawRect(0, 0, w, h / 2)
+  g.endFill()
+  g.beginFill(bottom, 1)
+  g.drawRect(0, h / 2, w, h / 2)
+  g.endFill()
+  const renderer = PIXI.autoDetectRenderer(w, h)
+  const tex = PIXI.RenderTexture.create({ width: w, height: h })
+  renderer.render(g, { renderTexture: tex, clear: true })
+  bg.setTexture(stageId, tex)
+}
 
 // ============================================================
 // Bootstrap
@@ -175,17 +224,20 @@ async function bootstrap() {
   })
   world.addChild(isoWorld.container)
 
-  // F3.5: pass TILE_SIZE explicitly so the tilemap renders at the same
-  // scale as IsoWorld expects for screenToIsoWithCamera / hit detection.
-  const tilemap = new Tilemap('stage1-bosque', LOGICAL_W, LOGICAL_H, { tileSize: TILE_SIZE })
-  await tilemap.load(async (variant) => {
-    const url = `assets/tiles/stage1-bosque/${variant}_alt1.png`
-    const tex = await PIXI.Assets.load(url)
-    tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
-    return tex
-  })
-  isoWorld.registerTilemap(tilemap)
-  isoWorld.setStage('stage1-bosque')
+  // fase-6 (BG-005): the tile renderer is disabled in the main game. The
+  // BackgroundLayer (loaded below) replaces it. The standalone demo at
+  // `tests/tile-gallery.html` still instantiates Tilemap directly from
+  // `../src/iso/tilemap.js` — that path is unaffected.
+  //
+  // (Previously: const tilemap = new Tilemap('stage1-bosque', ...) and
+  //  isoWorld.registerTilemap/isoWorld.setStage(...) — both removed.)
+
+  // --- Background layer (BG-001..BG-005) ---
+  // The bg is a child of `isoWorld.container` so it inherits world translation.
+  // Procedural placeholder (solid color sprite) until Minimax-generated assets
+  // land in `assets/backgrounds/`. See tools/generate-stage-backgrounds.py.
+  const bg = new BackgroundLayer({ container: isoWorld.container, viewportWidth: LOGICAL_W })
+  _loadPlaceholderBg(bg, 'stage1-bosque')
 
   // --- HUD: mano + corazones + papeleta (en appHud.stage) ---
   const hudContainer = new PIXI.Container(); hudContainer.name = 'hud'; hudContainer.sortableChildren = true; appHud.stage.addChild(hudContainer)
@@ -387,6 +439,8 @@ async function bootstrap() {
 
     const camIso = { isoX: camera.getCameraX(), isoY: camera.getCameraY() }
     if (combat) combat.setCameraIso(camIso)
+    // BG-002 — scroll the background layer at parallax 0.2.
+    bg.update(camIso)
     // Pass the enemies as verticalSprites so IsoWorld repositions their
     // sprites on each frame (anchoring them at the south point of their
     // iso cell, like the tile decorations in F2.5).
@@ -489,7 +543,7 @@ async function bootstrap() {
   }
 
   window.__zarraGameState__ = gameState
-  window.__zarraModules__ = { integrity, score, enemies, camera, input, isoWorld, hud: hudModule, overlay, appWorld, appHud, get combat() { return combat }, setViewportSize: (w, h) => { isoWorld.viewportWidth = w; isoWorld.viewportHeight = h; isoWorld._viewOrigin = { x: w / 2, y: h / 2 }; isoWorld.tileWorldOrigin = { x: Math.round(w / 2), y: Math.round(h * 0.30) }; if (combat) combat.setViewportSize(w, h); if (combat) combat.setViewportCenter({ x: w / 2, y: h / 2 }) } }
+  window.__zarraModules__ = { integrity, score, enemies, camera, input, isoWorld, hud: hudModule, overlay, appWorld, appHud, get combat() { return combat }, bg, setViewportSize: (w, h) => { isoWorld.viewportWidth = w; isoWorld.viewportHeight = h; isoWorld._viewOrigin = { x: w / 2, y: h / 2 }; isoWorld.tileWorldOrigin = { x: Math.round(w / 2), y: Math.round(h * 0.30) }; if (combat) combat.setViewportSize(w, h); if (combat) combat.setViewportCenter({ x: w / 2, y: h / 2 }) } }
 }
 
 /** Victory detector helper — emits stage:cleared exactly once. */

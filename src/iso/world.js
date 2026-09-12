@@ -4,15 +4,19 @@
  * IsoWorld orchestrator (CAM-001..CAM-003). Owns the PIXI.Container
  * that gets injected into the existing `world` layer of `src/main.js`.
  * - `container` is the only thing main.js adds to the existing `world`.
- * - `update(camera, sprites?)` applies `position.set(-csx, -csy)` and runs cull.
- * - `setStage(stageId)` swaps active tilemap + disposes previous (hard cut).
+ * - `update(camera, sprites?)` applies `position.set(-csx, -csy)` and repositions
+ *   vertical sprites. **The tile renderer (fase-2.5 `iso-tile-system`) is
+ *   disabled in the main game as of fase-6 — see BG-005 / openspec change
+ *   `2026-09-12-fase-6-scrolling-background`.**
+ * - `setStage(stageId)` / `registerTilemap()` are DEPRECATED no-ops (kept for
+ *   back-compat with the `tests/tile-gallery.html` standalone demo).
  *
  * The orchestrator does NOT mutate the camera or HUD — same separation
  * that `src/rail-camera.js` enforces.
  */
 
 import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin, escapeFrontDepth, ISO_STEP } from './iso-math.js?v=44'
-import { Tilemap, computeCullRange, computeZIndex, Z_BANDS } from './tilemap.js?v=44'
+import { Tilemap, computeCullRange, computeZIndex, Z_BANDS } from './tilemap.js?v=44' // eslint-disable-line no-unused-vars -- Tilemap imported only for the type check in registerTilemap (deprecated)
 
 export class IsoWorld {
   constructor(opts) {
@@ -59,13 +63,31 @@ export class IsoWorld {
     this._lastCameraSum = -Infinity
   }
 
+  /**
+   * @deprecated Since fase-6 (BG-005). The tile renderer is no longer used
+   *   by the main game. This method is a no-op kept for back-compat with
+   *   `tests/tile-gallery.html` (standalone demo that imports `Tilemap`
+   *   directly from `../src/iso/tilemap.js`).
+   *
+   * Duck-types the tilemap argument instead of `instanceof Tilemap` because
+   * the standalone demo imports `tilemap.js` with no cache-buster while
+   * this module imports it with `?v=44` — the resulting two module instances
+   * would otherwise fail the instanceof check even though they're the same
+   * source file.
+   */
   registerTilemap(tilemap) {
-    if (!(tilemap instanceof Tilemap)) throw new Error('registerTilemap expects Tilemap')
+    if (!tilemap || typeof tilemap.stageId !== 'string') {
+      throw new Error('registerTilemap expects an object with a stageId string')
+    }
     if (this._tilemaps.has(tilemap.stageId)) throw new Error(`tilemap "${tilemap.stageId}" already registered`)
     this._tilemaps.set(tilemap.stageId, tilemap)
   }
 
-  /** CAM-003: hard cut, dispose previous tilemap, mount new. */
+  /**
+   * @deprecated Since fase-6 (BG-005). See `registerTilemap`.
+   *   The main game never calls this — backgrounds are managed by
+   *   `BackgroundLayer` (`src/backgrounds.js`).
+   */
   setStage(stageId) {
     const next = this._tilemaps.get(stageId)
     if (!next) throw new Error(`no tilemap for "${stageId}"`)
@@ -124,8 +146,11 @@ export class IsoWorld {
     )
 
     if (this._activeTilemap) {
-      const range = computeCullRange(camIsoX, camIsoY, this.viewportWidth, this.viewportHeight, this.tileSize, this.tileWorldOrigin)
-      this._activeTilemap.cullAndRender(this._tileLayer, range, pickVariantFlat)
+      // fase-6 (BG-005): tile renderer disabled in the main game. The
+      // standalone demo `tests/tile-gallery.html` still uses Tilemap directly
+      // (bypassing this orchestrator), so this branch is intentionally a no-op.
+      // const range = computeCullRange(camIsoX, camIsoY, this.viewportWidth, this.viewportHeight, this.tileSize, this.tileWorldOrigin)
+      // this._activeTilemap.cullAndRender(this._tileLayer, range, pickVariantFlat)
     }
 
     for (const { gx, gy, sprite, offset = Z_BANDS.decoration } of verticalSprites) {
