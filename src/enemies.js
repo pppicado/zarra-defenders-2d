@@ -84,19 +84,27 @@ export const STATIC_SPRITE_IDS = Object.freeze(new Set([
 ]))
 
 /**
- * Default per-mobile-spriteId movement config (REQ-CMB-009). When a spawn
- * definition omits `speed` / `movementPattern`, these defaults are applied
- * UNLESS the spriteId is in STATIC_SPRITE_IDS.
+ * Default per-mobile-spriteId movement config (REQ-CMB-009, Fase-5-calibration).
+ *
+ * **Speed semantics under Fase-5-calibration:** for `sine` / `zigzag` patterns
+ * the `speed` value is OSCILLATION FREQUENCY in Hz (cycles per second); for
+ * `arc` it is ROTATION RATE in rad/s; for `linear` / `static` the value is
+ * IGNORED (motion = camera alone). Pre-calibration these values were iso
+ * units/sec — that triggered the immediate-escape bug because mobile enemies
+ * outran the 0.6-tile/sec camera.
+ *
+ * When a spawn definition omits `speed` / `movementPattern`, these defaults
+ * are applied UNLESS the spriteId is in STATIC_SPRITE_IDS.
  */
 export const MOBILE_DEFAULT = Object.freeze({
-  enemies_dron_fumigador:           Object.freeze({ speed: 70, movementPattern: 'sine' }),
-  enemies_camion_treco:             Object.freeze({ speed: 50, movementPattern: 'zigzag' }),
-  enemies_topadora:                 Object.freeze({ speed: 40, movementPattern: 'linear' }),
-  enemies_bidon_lixiviado:          Object.freeze({ speed: 35, movementPattern: 'arc' }),
-  enemies_camion_cisterna_residuos: Object.freeze({ speed: 30, movementPattern: 'linear' }),
-  enemies_trailer:                  Object.freeze({ speed: 45, movementPattern: 'zigzag' }),
-  enemies_tubo_lixiviado:           Object.freeze({ speed: 25, movementPattern: 'sine' }),
-  enemies_bolsa_plastico:           Object.freeze({ speed: 60, movementPattern: 'sine' }),
+  enemies_dron_fumigador:           Object.freeze({ speed: 0.8, movementPattern: 'sine' }),
+  enemies_camion_treco:             Object.freeze({ speed: 0.4, movementPattern: 'zigzag' }),
+  enemies_topadora:                 Object.freeze({ speed: 0,   movementPattern: 'linear' }),
+  enemies_bidon_lixiviado:          Object.freeze({ speed: 1.0, movementPattern: 'arc' }),
+  enemies_camion_cisterna_residuos: Object.freeze({ speed: 0,   movementPattern: 'linear' }),
+  enemies_trailer:                  Object.freeze({ speed: 0.3, movementPattern: 'zigzag' }),
+  enemies_tubo_lixiviado:           Object.freeze({ speed: 0.6, movementPattern: 'sine' }),
+  enemies_bolsa_plastico:           Object.freeze({ speed: 1.2, movementPattern: 'sine' }),
 })
 
 /**
@@ -190,6 +198,42 @@ export function assertArchetype(name) {
 let _idCounter = 0
 function _nextId() { return `e${String(++_idCounter).padStart(3, '0')}` }
 
+/**
+ * =============================================================================
+ * PATTERN SEMANTICS (Fase-5-calibration, REQ-CMB-009)
+ * =============================================================================
+ *
+ * All mobile patterns apply their motion as an OSCILLATION AROUND the enemy's
+ * spawn iso position. The enemy NEVER translates along the rail direction
+ * (`(1,1)/√2`). Apparent motion comes from:
+ *
+ *   1. The camera advancing along the iso-sum axis — the only actor that
+ *      moves the enemy's iso position relative to the camera. The enemy
+ *      appears to "come from the north" and "pass to the south" as the
+ *      camera scrolls.
+ *   2. Per-pattern oscillation perpendicular (sine/zigzag on isoY) or
+ *      radial (arc) to the rail axis — bounded amplitudes (~0.3-0.5 iso
+ *      tiles) so the lateral clamp rarely fires.
+ *
+ * PRE-CALIBRATION (the bug): `tick()` applied `isoX += 0.707 × speed × dt`
+ * and `isoY += 0.707 × speed × dt`. At `speed: 50` the enemy advanced
+ * ~35 iso tiles/sec vs the camera's 0.6 tile/sec — within one second
+ * of spawn the enemy was >6 tiles away and escaped via REQ-CMB-008.
+ * Player saw flicker-disappear, no chance to shoot.
+ *
+ * POST-CALIBRATION: speed is REINTERPRETED per pattern:
+ *   - sine    → oscillation frequency in Hz (cycles per second)
+ *   - zigzag  → oscillation rate in Hz (sign-flip rate)
+ *   - arc     → rotation rate in rad/s
+ *   - linear  → IGNORED (no self-motion; camera alone)
+ *   - static  → IGNORED (handled by early return)
+ *
+ * ============================================================================
+ * If you are tempted to reintroduce a linear advance to "make enemies move
+ * toward the player" — DON'T. Camera + oscillation IS the model. Adding a
+ * linear advance will re-trigger the immediate-escape bug.
+ * ============================================================================
+ */
 export class Enemy {
   /**
    * @param {Object} opts
@@ -224,7 +268,13 @@ export class Enemy {
     // Internal timing + arc center for parametric patterns.
     this._elapsedMs = 0
     this._arcCenter = null
-    this._spawnIsoY = isoY        // captured for sine/zigzag oscillation reference
+    // Fase-5-calibration (REQ-CMB-009 oscillation model): capture BOTH spawn
+    // iso coords at construction. tick() now applies ALL self-motion as a
+    // deviation around these fixed points — the enemy never translates along
+    // the rail direction, so the camera is the only actor that moves along
+    // (1,1)/√2. Apparent motion = camera scroll + pattern oscillation.
+    this._spawnIsoX = isoX
+    this._spawnIsoY = isoY
     // Velocity cache for lateral-clamp reflection (REQ-CMB-010). Signed
     // advance along isoX — positive means "advance toward rail end".
     this._vxIso = 0
@@ -316,18 +366,41 @@ export class Enemy {
 
   /**
    * Per-tick self-translation. Static pattern returns early (O(1)).
-   * Mobile patterns mutate `this.isoX` / `this.isoY` in place and are then
-   * projected to screen-space via `_lateralClamp` so they stay inside the
-   * `[LATERAL_MIN_PX, LATERAL_MAX_PX]` corridor.
    *
-   * Camera iso is unused here (the enemy self-translates in WORLD iso, not
-   * relative to the camera). It's accepted as part of the tick contract so
-   * future camera-aware patterns can plug in without changing the call site.
+   * **Fase-5-calibration (REQ-CMB-009 oscillation model).** The enemy does
+   * NOT translate along the rail direction — all four mobile patterns apply
+   * their motion as an OSCILLATION AROUND the spawn iso position
+   * (`_spawnIsoX`, `_spawnIsoY` captured at construction). Camera iso is
+   * the only thing that advances along `(1, 1) / √2`. Visible motion comes
+   * from (a) camera scrolling past the fixed spawn position + (b) per-
+   * pattern oscillation perpendicular to the rail axis.
+   *
+   * Pre-Fase-5-calibration this method applied `isoX += 0.707 × speed × dt`
+   * — at `speed: 50` the enemy advanced ~35 iso tiles/sec while the camera
+   * advanced 0.6 tile/sec, so the enemy outran the camera, was flagged as
+   * "escaped" by REQ-CMB-008 within 1 s of spawn, and the player never saw
+   * the chance to shoot.
+   *
+   * Pattern semantics:
+   *   - `linear`  → no self-translation. isoX/isoY stay at spawn; motion is
+   *                 camera-driven only. `speed` is ignored (kept for
+   *                 resolver compatibility).
+   *   - `sine`    → isoX LOCKED to spawnIsoX. isoY oscillates as
+   *                 `spawnIsoY + ampIsoY × sin(2π × speed × tSec)`.
+   *                 `speed` is oscillation frequency in Hz (0.0-1.5).
+   *   - `zigzag`  → isoX LOCKED. isoY flips sign every ZIGZAG_PERIOD_MS
+   *                 between `spawnIsoY ± ampIsoY`. `speed` scales rate.
+   *   - `arc`     → orbital around `_arcCenter` (captured on first tick).
+   *                 `speed` is rotation rate in rad/s.
+   *
+   * Amplitudes are bounded (~0.3-0.5 iso tiles) so oscillation NEVER trips
+   * the lateral clamp in normal play. Camera-induced iso motion still
+   * dominates lateral position visually.
    *
    * @param {number} dtMs            delta time in milliseconds
-   * @param {{isoX:number, isoY:number}} [cameraIso]   current camera iso (unused for now)
+   * @param {{isoX:number, isoY:number}} [cameraIso]   current camera iso
    * @param {{minX:number, maxX:number}} [viewportBounds] lateral screen-bounds clamp
-   * @param {Object} [isoWorld]      IsoWorld (needed by _lateralClamp for projection)
+   * @param {Object} [isoWorld]      IsoWorld (needed by _lateralClamp)
    * @param {{x:number, y:number}} [viewportCenter]   same as isoWorld._viewOrigin
    */
   tick(dtMs, cameraIso = null, viewportBounds = null, isoWorld = null, viewportCenter = null) {
@@ -336,52 +409,45 @@ export class Enemy {
     if (!Number.isFinite(dtMs) || dtMs <= 0) return
 
     this._elapsedMs += dtMs
-    const dtSec = dtMs / 1000
+    const tSec = this._elapsedMs / 1000
     const pattern = this.movementPattern
     const speed = this.speed
 
-    // The camera advances along the iso-sum axis (0,0) → (36,36). Enemies
-    // advance in the same direction so they "approach the camera" from the
-    // player's POV (their projected screen position drifts down-and-toward).
-    // dir = (1, 1) / √2  in iso units.
-    const dx = 0.7071067811865475 * speed * dtSec
-    const dy = 0.7071067811865475 * speed * dtSec
-
     if (pattern === 'linear') {
-      this.isoX += dx
-      this.isoY += dy
-      this._vxIso = +dx
+      // No self-motion. isoX/isoY stay at spawn; apparent motion = camera.
+      this.isoX = this._spawnIsoX
+      this.isoY = this._spawnIsoY
+      this._vxIso = 0
     } else if (pattern === 'sine') {
-      // Linear advance on isoX; isoY oscillates around SPAWN isoY (REQ-CMB-009
-      // scenario: "oscillates around its spawn isoY"). Amplitude scales with
-      // speed so faster drons sway more visibly, but stays bounded enough to
-      // keep the enemy inside the lateral corridor.
-      this.isoX += dx
-      const omega = 2 * Math.PI * SINE_FREQ_HZ
-      const ampIso = SINE_AMP * speed * 0.05      // empirical: speed=70 → amp≈2.1
-      this.isoY = this._spawnIsoY + ampIso * Math.sin(this._elapsedMs * 0.001 * omega)
-      this._vxIso = +dx
+      // isoY oscillates around SPAWN isoY at `speed` Hz. amplitude scales
+      // with speed but capped so it stays inside the lateral corridor.
+      // isoX is LOCKED to spawnIsoX.
+      const omega = 2 * Math.PI * speed
+      const ampIso = SINE_AMP * (0.3 + 0.5 * speed)  // 0.3..0.75 iso tiles for speed ∈ [0,1]
+      this.isoX = this._spawnIsoX
+      this.isoY = this._spawnIsoY + ampIso * Math.sin(tSec * omega)
+      this._vxIso = 0
     } else if (pattern === 'zigzag') {
-      // Linear advance on isoX; isoY sways between ±ampIso around SPAWN isoY
-      // using a triangle wave that flips sign every ZIGZAG_PERIOD_MS.
-      this.isoX += dx
-      const ampIso = ZIGZAG_AMP * speed * 0.05
-      const phase = (this._elapsedMs % (2 * ZIGZAG_PERIOD_MS)) / ZIGZAG_PERIOD_MS
+      // isoY triangle wave around SPAWN at `speed` Hz. isoX locked.
+      const ampIso = ZIGZAG_AMP * (0.3 + 0.5 * speed)
+      const period = Math.max(100, 1000 / Math.max(speed, 0.001))
+      const phase = (this._elapsedMs % (2 * period)) / period
       const sign = phase < 1 ? 1 : -1
-      const ramp = phase < 1 ? phase : (2 - phase)   // 0..1 triangle wave
-      this.isoY = this._spawnIsoY + sign * ampIso * ramp
-      this._vxIso = +dx
+      this.isoX = this._spawnIsoX
+      this.isoY = this._spawnIsoY + sign * ampIso
+      this._vxIso = 0
     } else if (pattern === 'arc') {
-      // Parametric around `_arcCenter` (captured at first tick). ix = cx + r*cos(ωt),
-      // iy = cy + r*sin(ωt). No linear advance; radius is constant.
+      // Orbital around `_arcCenter` (captured on first tick). radius is
+      // bounded (~0.25 iso tiles). No linear advance.
       if (!this._arcCenter) {
-        this._arcCenter = { isoX: this.isoX - ARC_RADIUS, isoY: this.isoY }
+        this._arcCenter = { isoX: this._spawnIsoX - ARC_RADIUS, isoY: this._spawnIsoY }
       }
-      const omega = ARC_OMEGA
-      const phase = this._elapsedMs * 0.001 * omega
+      const omega = speed  // rad/s directly (no SINE_FREQ scaling)
+      const phase = tSec * omega
       this.isoX = this._arcCenter.isoX + ARC_RADIUS * Math.cos(phase)
       this.isoY = this._arcCenter.isoY + ARC_RADIUS * Math.sin(phase)
-      this._vxIso = -ARC_RADIUS * omega * Math.sin(phase) * 0.001
+      // Cache angular velocity direction for lateral-clamp reflection hints.
+      this._vxIso = -ARC_RADIUS * omega * Math.sin(phase)
     }
 
     // Apply lateral screen-bounds clamp (REQ-CMB-010). Skipped if no

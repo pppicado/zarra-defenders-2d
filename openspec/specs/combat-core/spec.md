@@ -294,9 +294,34 @@ false escape for in-frame enemies).
 
 ### REQ-CMB-009: Per-instance enemy movement config
 
-Per-instance spawn definitions MAY include `speed` (number, iso-units/sec, `>= 0`)
-and `movementPattern` (one of `static` | `linear` | `sine` | `zigzag` | `arc`).
-`ARCHETYPES` MUST NOT carry these fields.
+Per-instance spawn definitions MAY include `speed` (number) and `movementPattern`
+(one of `static` | `linear` | `sine` | `zigzag` | `arc`). `ARCHETYPES` MUST NOT
+carry these fields.
+
+**Pattern semantics (Fase-5-calibration):** All mobile patterns SHALL oscillate
+around the enemy's SPAWN iso position (`spawnIsoX`, `spawnIsoY` captured at
+construction time). The system SHALL NOT apply any per-tick self-translation
+along the rail direction (no `+dx / +dy` advance in iso-sum). Visible motion
+SHALL come from camera-induced tile scrolling AND per-pattern oscillation
+perpendicular (isoY) or radial (arc) to the rail axis.
+
+- `static` — no self-motion at all; camera alone drives apparent motion.
+- `linear` — no self-motion (identical to `static` for self-translation;
+  enemy scrolls with camera). `speed` is ignored.
+- `sine` — `isoX` locked to `spawnIsoX`. `isoY` oscillates as
+  `spawnIsoY + amplitudeIsoY * sin(2π * speed * elapsedSec)` where `speed` is
+  oscillation frequency in Hz.
+- `zigzag` — `isoX` locked to `spawnIsoX`. `isoY` flips between
+  `spawnIsoY + amplitudeIsoY` and `spawnIsoY − amplitudeIsoY` every half-period.
+- `arc` — orbital motion around a captured `_arcCenter` fixed at construction.
+  `radius` is bounded (~0.25 iso tiles); `speed` is rotation rate (rad/s).
+
+**Why oscillation, not advance.** A linear advance against a moving camera always
+wins the iso-distance race. At `speed: 50` the enemy advances ~35 iso tiles/sec
+vs the camera's 0.6 tile/sec, so within one second of gameplay the enemy is more
+than 6 tiles away and escapes via REQ-CMB-008. Oscillation keeps the enemy
+inside the camera's tile column indefinitely — the player shoots it as the
+camera passes.
 
 **Resolution rule:** `resolveMovementConfig(spriteId, speed?, pattern?)` SHALL
 resolve the effective config. The `Enemy` constructor MUST NOT pre-default
@@ -311,33 +336,33 @@ omitted so the resolver can distinguish "user omitted" from "user chose static":
 - `effSpeed = userSpeed ?? MOBILE_DEFAULT[spriteId]?.speed ?? 0`
 - `effPattern = userPattern ?? MOBILE_DEFAULT[spriteId]?.movementPattern ?? 'static'`
 
-**`MOBILE_DEFAULT`** (applied when user omitted the field):
+**`MOBILE_DEFAULT`** (Fase-5-calibration; speeds are OSCILLATION RATE not
+linear velocity):
 
-| SpriteId | speed | pattern |
-|---|---|---|
-| `dron_fumigador` | 70 | sine |
-| `camion_treco` | 50 | zigzag |
-| `topadora` | 40 | linear |
-| `bidon_lixiviado` | 35 | arc |
-| `camion_cisterna_residuos` | 30 | linear |
-| `trailer` | 45 | zigzag |
-| `tubo_lixiviado` | 25 | sine |
-| `bolsa_plastico` | 60 | sine |
+| SpriteId | speed | pattern | semantic |
+|---|---|---|---|
+| `dron_fumigador` | 0.8 | sine | 0.8 Hz isoY oscillation |
+| `camion_treco` | 0.4 | zigzag | 0.4 Hz isoY sway |
+| `topadora` | 0 | linear | camera-driven only |
+| `bidon_lixiviado` | 1.0 | arc | 1.0 rad/s orbit |
+| `camion_cisterna_residuos` | 0 | linear | camera-driven only |
+| `trailer` | 0.3 | zigzag | 0.3 Hz sway |
+| `tubo_lixiviado` | 0.6 | sine | 0.6 Hz sway |
+| `bolsa_plastico` | 1.2 | sine | 1.2 Hz sway |
 
 **Hard rule:** `STATIC_SPRITE_IDS` (`valla_publicitaria`, `billboard_*`,
 `signage_*`, `incineradora`, `planta_treco`, `sello_burocratico`,
 `castillo_cofrentes`) MUST resolve to `speed: 0, movementPattern: 'static'`
-regardless of user-supplied values. Apparent motion comes from camera-induced
-tile scrolling only and MUST NOT change.
+regardless of user-supplied values. When `movementPattern === 'static'` the system
+SHALL NOT apply any per-tick self-translation to `enemy.isoX` or `enemy.isoY`.
 
-When `movementPattern === 'static'` the system SHALL NOT apply any per-tick
-self-translation to `enemy.isoX` or `enemy.isoY`.
-
-(Updated 2026-09-12 by fase-5-enemy-movement-fix: replaced "defaults when
-omitted" with explicit resolver contract. The prior `Enemy` ctor pre-defaulted
-`speed = 0, movementPattern = 'static'`, which short-circuited the resolver
-before `MOBILE_DEFAULT` could apply — every mobile spriteId spawned with
-`speed: 0, pattern: 'static'`.)
+(Updated 2026-09-12 by fase-5-movement-calibration: replaced linear
+iso-units/sec advance with oscillation around spawn iso. Speed semantics
+reinterpreted per pattern (Hz for sine/zigzag, rad/s for arc). MOBILE_DEFAULT
+recalibrated to 0.0-1.2 Hz/rad/s. Bug fixed: pre-calibration mobile enemies
+outran the 0.6 tile/sec camera and escaped via REQ-CMB-008 within ~1 s of
+spawn. Updated 2026-09-12 by fase-5-enemy-movement-fix: explicit resolver
+contract — `Enemy` ctor no longer pre-defaults `speed/pattern`.)
 
 #### Scenario: Static enemy isoX stays constant across 10 frames
 
@@ -352,26 +377,39 @@ before `MOBILE_DEFAULT` could apply — every mobile spriteId spawned with
 - THEN the enemy remains hittable via REQ-CMB-003
 - AND escape detection still fires per REQ-CMB-008.
 
-#### Scenario: Mobile linear enemy advances isoX each frame
+#### Scenario: Mobile linear enemy does not self-advance isoX
 
-- GIVEN a `topadora` with `speed: 40, movementPattern: 'linear'`
-- WHEN 3 ticks elapse at 16.67 ms each
-- THEN `enemy.isoX` decreases monotonically (toward the camera)
-- AND the per-frame delta is non-zero and constant within tolerance.
+- GIVEN a `topadora` with `speed: 0, movementPattern: 'linear'`
+- WHEN 3 ticks elapse at 16.67 ms each with no camera motion
+- THEN `enemy.isoX` at frame 3 equals `enemy.isoX` at frame 0 (oscillation
+  model: linear pattern carries no self-motion; apparent scroll is from
+  camera alone).
 
-#### Scenario: Sine wave enemy oscillates perpendicular to advance direction
+#### Scenario: Sine wave enemy oscillates isoY around SPAWN, isoX LOCKED
 
-- GIVEN a `dron_fumigador` with `speed: 70, movementPattern: 'sine'`
+- GIVEN a `dron_fumigador` (sine pattern, `speed: 0.8` Hz) spawning at
+  iso `(spawnIsoX, spawnIsoY)`
 - WHEN 60 ticks elapse at 16.67 ms each
-- THEN `enemy.isoY` oscillates around its spawn isoY
-- AND frame N and frame N+30 differ in sign of deviation.
+- THEN `enemy.isoY` deviates from `spawnIsoY` AND the sign of that deviation
+  flips at least once (full sine period)
+- AND `enemy.isoX` equals `spawnIsoX` at every tick (oscillation is isoY-only).
+- AND no escape fires during the 1 s window.
 
-#### Scenario: Arc enemy follows curved path (radius approx constant)
+#### Scenario: Zigzag enemy flips isoY sign over period
 
-- GIVEN a `bidon_lixiviado` with `speed: 35, movementPattern: 'arc'`
-- WHEN the enemy moves for 60 frames
-- THEN `sqrt((isoX - arcCenter.isoX)^2 + (isoY - arcCenter.isoY)^2)`
-  stays within `+/- 10%` of the spawn-time radius.
+- GIVEN a `camion_treco` (zigzag, `speed: 0.4` Hz period)
+- WHEN 50 ticks elapse at 16.67 ms each
+- THEN `enemy.isoY` flips between roughly `spawnIsoY + A` and `spawnIsoY − A`
+  at least once
+- AND `enemy.isoX` is locked to `spawnIsoX` throughout.
+
+#### Scenario: Arc enemy stays bounded around capture point
+
+- GIVEN a `bidon_lixiviado` (arc, `speed: 1.0` rad/s)
+- WHEN 60 ticks elapse at 16.67 ms each
+- THEN `sqrt((isoX − arcCenter.isoX)^2 + (isoY − arcCenter.isoY)^2)`
+  stays within `±20%` of the configured radius (~0.25 iso tiles).
+- AND no escape fires.
 
 #### Scenario: Static-rule enforcement at boot
 
@@ -383,7 +421,59 @@ before `MOBILE_DEFAULT` could apply — every mobile spriteId spawned with
 
 - GIVEN the level module loads
 - WHEN `TEST_LEVEL.enemies.length` is read
-- THEN the value equals `120` (5x of the prior 24).
+- THEN the value equals `120`.
+
+### REQ-CMB-012: Test-mode auto-advance (camera + enemies)
+
+When `?test=1` is active and the production game loop runs, the system SHALL
+auto-advance both the camera and the enemies each frame WITHOUT requiring the
+user to call `__gameTestAPI__.tick(dt)` manually. The production ticker
+(`appWorld.ticker`, `appHud.ticker`) SHALL call `camera.update(dt)` and
+`enemies.update(...)` in test mode, using the live `dt` reported by
+`performance.now()` deltas.
+
+Auto-advance SHALL spawn time-gated enemies as the camera's elapsed time
+crosses their `atSec` threshold, run the escape detection pipeline
+(`isScreenEscaped` / `isEscaped`), and coexist with
+`__gameTestAPI__.setTime(t)` + `__gameTestAPI__.tick(dt)` manual control —
+when a test calls `setTime`, the next auto-advance tick observes the new
+time and continues from there.
+
+In production (`?test=0`): no behavior change. The pre-existing
+`if (!inTestMode)` guards on `camera.update` and `enemies.update` were
+unconditionally removed in fase-5-movement-calibration (a safe simplification:
+production already advanced them, so the guards were redundant for that path).
+
+#### Scenario: `?test=1` advances the camera without manual tick
+
+- GIVEN the URL is `http://localhost:8000/?test=1`
+- WHEN the user waits ~1 second on the page (no test-api interaction)
+- THEN `camera.getTime() > 0` (camera advanced)
+- AND `__gameTestAPI__.getCameraTime()` reflects that elapsed time.
+
+#### Scenario: `?test=1` spawns time-gated enemies automatically
+
+- GIVEN the URL is `?test=1` and the test level has time-gated spawns
+- WHEN 5 seconds elapse on the page
+- THEN `enemies._timeGatedSpawns.length` decreased (spawns materialized as
+  camera time crossed their `atSec`)
+- AND `enemies._enemies.size > 0`.
+
+#### Scenario: e01 visible for ≥5 seconds in production camera traversal
+
+- GIVEN `?test=1` and `setTime(0)`
+- WHEN 5 seconds of auto-advance elapse
+- THEN `e01` is alive (`enemies._enemies.get('e01')?.state === 'alive'`)
+- AND e01 has NOT escaped (oscillation keeps it within 6-tile Manhattan
+  radius of the camera).
+
+#### Scenario: Lateral clamp is amplitude-aware
+
+- GIVEN a mobile enemy whose spawn iso projects to screen X well inside the
+  `[LATERAL_MIN_PX, LATERAL_MAX_PX]` corridor (e.g. mid-screen)
+- WHEN 30 ticks elapse (oscillation only — amplitude ≤0.5 iso tiles)
+- THEN the enemy stays inside the corridor — no clamp fires (clamp is a
+  guard, not the primary motion driver).
 
 ### REQ-CMB-010: Lateral screen-bounds clamp (mobile enemies only)
 

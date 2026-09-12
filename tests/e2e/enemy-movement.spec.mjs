@@ -1,14 +1,25 @@
 /**
  * tests/e2e/enemy-movement.spec.mjs
  *
- * Fase-5 (REQ-CMB-009 + REQ-CMB-010) — per-instance enemy self-translation.
+ * Fase-5 (REQ-CMB-009 + REQ-CMB-010 + REQ-CMB-012) — per-instance enemy
+ * self-translation + test-mode auto-advance.
  *
  * RED scenarios (TDD STRICT, written BEFORE implementation):
- *   TASK-R1: TEST_LEVEL.enemies.length === 120 (currently 24 → FAILS)
- *   TASK-R2: static valla_publicitaria isoX unchanged over 10 ticks (FAILS — no per-instance config)
- *   TASK-R3: dron_fumigador with sine pattern oscillates isoY (FAILS)
- *   TASK-R4: lateral clamp reflects velocity at viewport edge (FAILS)
- *   TASK-R5: hit detection still works on a moving enemy (FAILS — depends on movement)
+ *   TASK-R1: TEST_LEVEL.enemies.length === 120 (FAILS until F5.5)
+ *   TASK-R2: static valla_publicitaria isoX unchanged over 10 ticks
+ *   TASK-R3: dron_fumigador with sine pattern oscillates isoY around spawn
+ *            (Fase-5-calibration redefinition: isoX is LOCKED, only isoY
+ *             oscillates around spawn — REQ-CMB-009 oscillation model)
+ *   TASK-R4: lateral clamp reflects velocity at viewport edge
+ *   TASK-R5: hit detection still works on a moving enemy
+ *   TASK-R9 (fase-5-calibration NEW): camion_treco at t=0 vs t=3 has SAME
+ *            isoX (no linear advance — oscillation model)
+ *   TASK-R10 (fase-5-calibration NEW): dron_fumigador isoY sign-flip rate
+ *             matches MOBILE_DEFAULT[...].speed (Hz)
+ *   TASK-R11 (fase-5-calibration NEW): ?test=1 cameraTime > 0 after 1s
+ *             wait without manual tick() (REQ-CMB-012 auto-advance)
+ *   TASK-R12 (fase-5-calibration NEW): e01 alive at cameraTime=5 (REQ-CMB-012
+ *             + REQ-CMB-009 oscillation — enemy must survive auto-advance)
  *
  * Run: node tests/e2e/enemy-movement.spec.mjs
  */
@@ -57,13 +68,19 @@ export async function runEnemyMovementSpec() {
     throw new Error(`TASK-R2: static valla_publicitaria must keep speed=0/pattern='static' AND isoX constant — got dx=${r2.dx}, speed=${r2.speedOnInstance}, pattern=${r2.patternOnInstance}`)
   }
 
-  // TASK-R3: dron_fumigador sine — isoY oscillates around spawn isoY (sign flip at frame 30)
+  // TASK-R3: dron_fumigador sine — isoY oscillates around spawn, isoX LOCKED.
+  // Fase-5-calibration: oscillation model replaces linear advance; isoX must
+  // remain at spawn value across all 60 ticks. (Pre-calibration this asserted
+  // `advanceDelta > 0` — that was the BUG that caused enemies to escape.)
   const r3 = await runR3SineOscillation(page)
   if (r3.signFlips < 1) {
     throw new Error(`TASK-R3: sine dron_fumigador did not oscillate (sign flips: ${r3.signFlips})`)
   }
-  if (r3.advanceDelta <= 0) {
-    throw new Error(`TASK-R3: sine dron_fumigador did not advance isoX (delta: ${r3.advanceDelta})`)
+  if (r3.advanceDelta !== 0) {
+    throw new Error(`TASK-R3: oscillation model — isoX must be LOCKED to spawn; got delta=${r3.advanceDelta}`)
+  }
+  if (r3.maxIsoXDrift > 1e-9) {
+    throw new Error(`TASK-R3: isoX must remain constant across all ticks; maxIsoXDrift=${r3.maxIsoXDrift}`)
   }
 
   // TASK-R4: lateral clamp — mobile enemy at edge gets velocity reflected
@@ -82,13 +99,16 @@ export async function runEnemyMovementSpec() {
   }
 
   // TASK-R6: spawning a mobile spriteId WITHOUT speed/pattern must apply
-  //   MOBILE_DEFAULT (not the ctor's pre-defaults).
+  //   MOBILE_DEFAULT (not the ctor's pre-defaults). Fase-5-calibration:
+  //   speed is now oscillation frequency in Hz — expect 0 < speed < 2 (the
+  //   pre-calibration test asserted speed > 30, which was the linear-
+  //   velocity range).
   const r6 = await runR6_CamionTrecoDefaults(page)
   if (r6.pattern !== 'zigzag') {
     throw new Error(`TASK-R6: expected MOBILE_DEFAULT[camion_treco].movementPattern === 'zigzag', got '${r6.pattern}'`)
   }
-  if (!(r6.speed > 30)) {
-    throw new Error(`TASK-R6: expected MOBILE_DEFAULT[camion_treco].speed > 30, got ${r6.speed}`)
+  if (!(r6.speed > 0 && r6.speed < 2)) {
+    throw new Error(`TASK-R6: expected MOBILE_DEFAULT[camion_treco].speed ∈ (0, 2) Hz (oscillation), got ${r6.speed}`)
   }
 
   // TASK-R7: explicit speed=0 + pattern='static' MUST be respected on a
@@ -108,8 +128,36 @@ export async function runEnemyMovementSpec() {
     throw new Error(`TASK-R8: expected enemies._timeGatedSpawns.length > 50 after reset/retry, got ${r8.queueLen}`)
   }
 
+  // ----------------------------------------------------------------
+  // Fase-5-calibration RED scenarios (TDD STRICT — written before G1/G2/G3)
+  // ----------------------------------------------------------------
+
+  // TASK-R9: oscillation model — camion_treco isoX locked across 3s.
+  const r9 = await runR9NoAdvance(page)
+  if (!r9.passed) {
+    throw new Error(`TASK-R9: oscillation model — camion_treco isoX must equal spawn after 3s; before=${r9.ixBefore} after=${r9.ixAfter} delta=${r9.ixDelta}`)
+  }
+
+  // TASK-R10: dron_fumigador oscillation rate + isoX locked.
+  const r10 = await runR10OscillationRate(page)
+  if (!r10.passed) {
+    throw new Error(`TASK-R10: oscillation rate mismatch — speed=${r10.observedSpeed} pattern=${r10.observedPattern} signFlips=${r10.signFlips} maxIxDrift=${r10.maxIxDrift}`)
+  }
+
+  // TASK-R11: ?test=1 auto-advance — cameraTime > 0 after 1s wait.
+  const r11 = await runR11TestModeAutoAdvance(page)
+  if (!r11.passed) {
+    throw new Error(`TASK-R11: ?test=1 must auto-advance camera; tBefore=${r11.tBefore} tAfter=${r11.tAfter}`)
+  }
+
+  // TASK-R12: e01 still alive at cameraTime=5s (no immediate escape).
+  const r12 = await runR12E01AliveAt5s(page)
+  if (!r12.passed) {
+    throw new Error(`TASK-R12: e01 must remain alive at cameraTime≈5s; state=${r12.e01State} isoX=${r12.e01IsoX} cameraTime=${r12.cameraTime}`)
+  }
+
   await browser.close()
-  return { r1, r2, r3, r4, r5, r6, r7, r8 }
+  return { r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12 }
 }
 
 // ----------------------------------------------------------------
@@ -221,15 +269,18 @@ async function runR3SineOscillation(page) {
     // Detect oscillation: count sign flips of (iy - spawnIsoY).
     let signFlips = 0
     let lastSign = 0
+    let maxIsoXDrift = 0
     for (const s of samples) {
       const d = s.iy - spawnIsoY
       if (Math.abs(d) < 1e-6) continue
       const sign = d > 0 ? 1 : -1
       if (lastSign !== 0 && sign !== lastSign) signFlips++
       lastSign = sign
+      const ixDrift = Math.abs(s.ix - spawnIsoX)
+      if (ixDrift > maxIsoXDrift) maxIsoXDrift = ixDrift
     }
     const advanceDelta = samples[samples.length - 1].ix - spawnIsoX
-    return { samples: samples.length, signFlips, advanceDelta, spawnIsoY, spawnIsoX }
+    return { samples: samples.length, signFlips, advanceDelta, maxIsoXDrift, spawnIsoY, spawnIsoX }
   })
 }
 
@@ -409,6 +460,160 @@ async function runR8_RetryReloadsLevel(page) {
     cameraTime: window.__zarraModules__.camera?.getTime?.() ?? null,
     overlayHidden: window.__zarraModules__.overlay?.isVisible === false,
   }))
+}
+
+// ----------------------------------------------------------------
+// TASK-R9 (fase-5-calibration NEW) — camion_treco (zigzag, 0.4 Hz): with
+//   the oscillation model, isoX must be IDENTICAL at t=0 and t=3.
+//   Pre-calibration the linear advance pushed isoX forward by
+//   ~3 × 0.707 × 50 × 16.67ms ≈ 1.77 iso tiles per second, so this
+//   assertion FAILS until G1 lands.
+//
+//   Spawn position chosen at iso (5, 5) — well within camera reach
+//   (Manhattan 10 tiles initially, but R9 uses `skipEscape: true` on
+//   each tick to isolate the oscillation behavior from the escape
+//   detector; production escape is exercised by R12).
+// ----------------------------------------------------------------
+async function runR9NoAdvance(page) {
+  return await page.evaluate(async () => {
+    const api = window.__gameTestAPI__
+    const enemies = window.__zarraModules__.enemies
+    api.reset()
+    api.setTime(0)
+    const fixture = api.spawnEnemy({
+      id: 'r9_camion',
+      archetype: 'standard',
+      isoX: 5,
+      isoY: 5,
+      spriteId: 'enemies_camion_treco',
+    })
+    if (!fixture) throw new Error('R9 setup: spawn returned null')
+    const before = enemies.get('r9_camion')
+    const ixBefore = before.isoX
+    const iyBefore = before.isoY
+    // 3 seconds of simulation — skipEscape isolates the oscillation
+    // behavior from the screen-space escape detector (otherwise the
+    // enemy at iso (5,5) would escape via Manhattan > 6 after the
+    // camera advances).
+    for (let i = 0; i < 18; i++) api.tick(180, { skipEscape: true })
+    const after = enemies.get('r9_camion')
+    const ixAfter = after?.isoX
+    const iyAfter = after?.isoY
+    const ixDelta = (ixAfter ?? NaN) - ixBefore
+    const iyDelta = (iyAfter ?? NaN) - iyBefore
+    return {
+      ixBefore, ixAfter, iyBefore, iyAfter,
+      ixDelta, iyDelta,
+      passed: after !== null && after !== undefined && Math.abs(ixDelta) < 1e-9 && ixAfter === ixBefore,
+    }
+  })
+}
+
+// ----------------------------------------------------------------
+// TASK-R10 (fase-5-calibration NEW) — dron_fumigador oscillation rate
+//   matches MOBILE_DEFAULT[...].speed (oscillation Hz). With speed=0.8 Hz,
+//   a 1.25 s sweep should produce ≥ 1 full cycle of sign flips. Sign
+//   flips per half-period tracked via samples. Pre-calibration the sine
+//   was applied around an advancing center so the sign-flip rate was
+//   unreachable — the linear advance made the isoY walkout constant
+//   around an unobservable sine drift.
+// ----------------------------------------------------------------
+async function runR10OscillationRate(page) {
+  return await page.evaluate(() => {
+    const api = window.__gameTestAPI__
+    const enemies = window.__zarraModules__.enemies
+    api.reset()
+    api.setTime(0)
+    const fixture = api.spawnEnemy({
+      id: 'r10_dron',
+      archetype: 'tank',
+      isoX: 5,
+      isoY: 5,
+      spriteId: 'enemies_dron_fumigador',
+    })
+    if (!fixture) throw new Error('R10 setup: spawn returned null')
+    const live = enemies.get('r10_dron')
+    const spawnIsoY = live.isoY
+    const spawnIsoX = live.isoX
+    const observedSpeed = live.speed
+    const observedPattern = live.movementPattern
+    let tMs = 0
+    const samples = []
+    // Sample every 50 ms for 1.25 s — should cover ≥ 1 full period at 0.8 Hz.
+    const dtMs = 16.6667
+    for (let i = 0; i < 75; i++) {
+      api.tick(dtMs, { skipEscape: true })
+      tMs += dtMs
+      samples.push({ tMs, iy: live.isoY, ix: live.isoX })
+    }
+    let signFlips = 0
+    let lastSign = 0
+    for (const s of samples) {
+      const d = s.iy - spawnIsoY
+      if (Math.abs(d) < 1e-6) continue
+      const sign = d > 0 ? 1 : -1
+      if (lastSign !== 0 && sign !== lastSign) signFlips++
+      lastSign = sign
+    }
+    let maxIxDrift = 0
+    for (const s of samples) {
+      const drift = Math.abs(s.ix - spawnIsoX)
+      if (drift > maxIxDrift) maxIxDrift = drift
+    }
+    return {
+      observedSpeed, observedPattern, signFlips, maxIxDrift,
+      passed: signFlips >= 2 && maxIxDrift < 1e-9 && observedPattern === 'sine' && observedSpeed > 0,
+    }
+  })
+}
+
+// ----------------------------------------------------------------
+// TASK-R11 (fase-5-calibration NEW) — ?test=1 auto-advance: after 1s
+//   of waiting WITHOUT manual tick() calls, the camera time must
+//   have advanced. Pre-calibration: cameraTime stayed 0 because
+//   the test-mode `if (!inTestMode) camera.update(dt)` guard skipped
+//   the advance. Fails until G3 lands.
+// ----------------------------------------------------------------
+async function runR11TestModeAutoAdvance(page) {
+  const tBefore = await page.evaluate(() => {
+    window.__gameTestAPI__.reset()
+    window.__gameTestAPI__.setTime(0)
+    return window.__zarraModules__.camera.getTime()
+  })
+  await page.waitForTimeout(1000)
+  const tAfter = await page.evaluate(() => window.__zarraModules__.camera.getTime())
+  return {
+    tBefore, tAfter,
+    advanced: (tAfter - tBefore) > 0,
+    passed: (tAfter - tBefore) > 0,
+  }
+}
+
+// ----------------------------------------------------------------
+// TASK-R12 (fase-5-calibration NEW) — production camera traversal:
+//   after 5 seconds of auto-advance via ?test=1, e01 must still be
+//   alive (oscillation keeps it within camera reach). Pre-calibration
+//   e01 escaped within 1s because the linear advance outran the
+//   camera. Fails until G1+G2+G3 land.
+// ----------------------------------------------------------------
+async function runR12E01AliveAt5s(page) {
+  await page.evaluate(() => {
+    window.__gameTestAPI__.reset()
+    window.__gameTestAPI__.setTime(0)
+  })
+  await page.waitForTimeout(5000)
+  return await page.evaluate(() => {
+    const enemies = window.__zarraModules__.enemies
+    const e01 = enemies.get?.('e01')
+    const cameraTime = window.__zarraModules__.camera.getTime?.() ?? null
+    return {
+      e01State: e01?.state ?? 'missing',
+      e01IsoX: e01?.isoX ?? null,
+      e01IsoY: e01?.isoY ?? null,
+      cameraTime,
+      passed: !!e01 && e01.state === 'alive' && cameraTime > 4,
+    }
+  })
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

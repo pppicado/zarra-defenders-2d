@@ -377,7 +377,13 @@ async function bootstrap() {
     const dt = (now - lastTime) / 1000
     lastTime = now
 
-    if (!inTestMode) camera.update(dt)
+    // Fase-5-calibration (REQ-CMB-012): unconditionally advance the camera
+    // in both production and `?test=1`. The pre-calibration
+    // `if (!inTestMode) camera.update(dt)` guard froze the camera in test
+    // mode — tests had to manually call `__gameTestAPI__.tick(dt)` to see
+    // any motion. Now the production ticker drives both modes identically,
+    // and `tick()` still works as a deterministic override for tests.
+    camera.update(dt)
 
     const camIso = { isoX: camera.getCameraX(), isoY: camera.getCameraY() }
     if (combat) combat.setCameraIso(camIso)
@@ -391,21 +397,23 @@ async function bootstrap() {
     }))
     isoWorld.update(camera, verticalSprites)
 
-    if (!inTestMode) {
-      const elapsedSec = camera.getTime ? camera.getTime() : 0
-      // Fase-5 REQ-CMB-008: pass isoWorld + viewport geometry so the
-      // screen-space escape test runs alongside the Manhattan fallback.
-      // Fase-5 REQ-CMB-010: viewportBounds drives the lateral clamp for
-      // mobile enemies. Bounds = [80, LOGICAL_W - 80].
-      const viewportBounds = { minX: LATERAL_MIN_PX, maxX: LATERAL_MAX_PX }
-      enemies.update(
-        dt * 1000, camIso, elapsedSec,
-        isoWorld,
-        { x: LOGICAL_W / 2, y: LOGICAL_H / 2 },
-        { x: LOGICAL_W, y: LOGICAL_H },
-        viewportBounds,
-      )
-    }
+    // Fase-5-calibration (REQ-CMB-012): unconditionally update enemies every
+    // frame. The pre-calibration `if (!inTestMode)` guard kept enemies frozen
+    // in test mode unless tests manually called `__gameTestAPI__.tick(dt)`.
+    // Now enemies spawn and react identically in both modes.
+    const elapsedSec = camera.getTime ? camera.getTime() : 0
+    // Fase-5 REQ-CMB-008: pass isoWorld + viewport geometry so the
+    // screen-space escape test runs alongside the Manhattan fallback.
+    // Fase-5 REQ-CMB-010: viewportBounds drives the lateral clamp for
+    // mobile enemies. Bounds = [80, LOGICAL_W - 80].
+    const viewportBounds = { minX: LATERAL_MIN_PX, maxX: LATERAL_MAX_PX }
+    enemies.update(
+      dt * 1000, camIso, elapsedSec,
+      isoWorld,
+      { x: LOGICAL_W / 2, y: LOGICAL_H / 2 },
+      { x: LOGICAL_W, y: LOGICAL_H },
+      viewportBounds,
+    )
 
     if (combat) combat.update(dt * 1000)
 
