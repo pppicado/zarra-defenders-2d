@@ -250,7 +250,11 @@ async function bootstrap() {
   // The bg is a child of `isoWorld.container` so it inherits world translation.
   // Procedural placeholder (solid color sprite) until Minimax-generated assets
   // land in `assets/backgrounds/`. See tools/generate-stage-backgrounds.py.
-  const bg = new BackgroundLayer({ container: isoWorld.container, viewportWidth: LOGICAL_W })
+  // The bg is attached to `isoWorld._worldLayer` (the layer that used to hold
+  // the tilemap; now empty since the tile renderer is disabled) so it renders
+  // BEHIND the enemies in `isoWorld.spriteLayer`. Adding it to `isoWorld.container`
+  // would render it on top of the enemies (PIXI renders children in add order).
+  const bg = new BackgroundLayer({ container: isoWorld._worldLayer, viewportWidth: LOGICAL_W })
   // PR-2: load the real Minimax-generated background from `assets/backgrounds/`.
   // The placeholder path is kept for offline / first-boot fallback (see _loadPlaceholderBg).
   const _bgManifest = await _loadBackgroundManifest()
