@@ -108,6 +108,27 @@ export class MainMenu {
 
   /** Re-read localStorage and update the lock icons on each button. */
   _refreshLocks() {
+    // BG-005 dev shortcut: ?unlock=all pre-populates localStorage with all
+    // 5 stage clears so the user can access every level without playing
+    // through the previous one. Convenience for testing / demos.
+    try {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('unlock') === 'all') {
+        for (const stage of STAGES) {
+          if (!localStorage.getItem(STAGE_CLEAR_KEY(stage.id))) {
+            localStorage.setItem(STAGE_CLEAR_KEY(stage.id), JSON.stringify({ firmas: 99 }))
+          }
+        }
+      }
+      if (params.get('unlock') === 'reset') {
+        for (const stage of STAGES) {
+          localStorage.removeItem(STAGE_CLEAR_KEY(stage.id))
+        }
+      }
+    } catch (err) {
+      console.warn('[menu] lock shortcut failed:', err?.message ?? err)
+    }
+
     let stageIndex = 0
     for (let i = 0; i < this._buttonEls.length; i++) {
       const btn = this._buttonEls[i]
