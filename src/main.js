@@ -367,6 +367,16 @@ async function bootstrap() {
 
   input.on('move', (x, y) => hudModule.setPointer(x, y))
 
+  // BG-011 — Escape (or P) during gameplay returns to the main menu.
+  // The 'pause' event is already emitted by Input._handleKeyDown when the
+  // player presses Escape / P; we map it to `menu:back` here so the player
+  // can switch stages without having to die first.
+  input.on('pause', () => {
+    if (gameState.state === 'gameplay') {
+      emit('menu:back', {})
+    }
+  })
+
   // Tap handler: the input handler has already converted CSS px → logical
   // 1920x720 px (see _toLogical in input.js). F5 (REQ-CMB-003): the combat
   // resolver now compares against each enemy's screen-space sprite bounds,
@@ -394,6 +404,7 @@ async function bootstrap() {
     combat: null,
     enemies,
     gameState,
+    isTestMode: inTestMode,  // BG-009 — context-aware retry label
   })
 
   // --- Boot test level now (test branch) or wait for menu (production) ---

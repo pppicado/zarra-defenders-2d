@@ -41,6 +41,9 @@ export class Overlay {
     this.combat = opts.combat
     this.enemies = opts.enemies
     this.gameState = opts.gameState ?? { state: 'main-menu' }
+    // BG-009 — context-aware retry label: 'Reintentar test level' only in
+    // ?test=1 dev mode; 'Reintentar' in production.
+    this._isTestMode = opts.isTestMode ?? false
 
     this._modal = null     // 'gameover' | 'victory' | null
     this._unsubs = []
@@ -101,7 +104,7 @@ export class Overlay {
       <p class="overlay-best-line" data-role="bestLine">Mejor: \u2014 firmas</p>
       <p class="overlay-newrecord hidden" data-role="newRecord">\u00a1NUEVO R\u00c9CORD!</p>
       <div class="overlay-buttons">
-        <button type="button" class="overlay-btn overlay-btn--primary" data-role="retry">Reintentar test level</button>
+        <button type="button" class="overlay-btn overlay-btn--primary" data-role="retry">${this._isTestMode ? 'Reintentar test level' : 'Reintentar'}</button>
         <button type="button" class="overlay-btn" data-role="back">Volver al men\u00fa principal</button>
       </div>
     `

@@ -210,16 +210,28 @@ function _buildEnemyDefs() {
  */
 function _buildPostFinalWaveRoster() {
   const waves = []
-  // 3 waves × 3 mobile enemies. Each wave spawns 3 enemies in a small iso
-  // triangle around the viewport center (visible from any camera iso).
+  // BG-010 — wave positions must be VISIBLE at the rail-end camera (36, 36).
+  //
+  // Why not (33, 35), (35, 33), (34, 34)?  Those have Manhattan = 4 from the
+  // camera so they pass the iso escape test, but the screen-Y escape test
+  // (REQ-CMB-008) removes them anyway. At camera (36, 36), an iso coord
+  // with depth < 72 projects BELOW the viewport (sy > 720) — the bg is
+  // already at the deepest point, so anything "behind" the camera in iso
+  // falls off the bottom of the screen.
+  //
+  // The fix: spawn wave enemies at iso coords BEYOND the rail grid (depth
+  // > 72). Their Manhattan to camera (36, 36) is small (md ≤ 4), and the
+  // isoToScreenWithCamera Y-flip puts them ABOVE the viewport (sy < 720).
+  //
+  // 3 waves × 3 mobile enemies. Each wave spawns 3 enemies in a small
+  // iso triangle just beyond the rail end.
   for (let w = 0; w < 3; w++) {
     const t = 125 + w * 15  // 125, 140, 155 s
-    const offset = 6        // iso distance from center
-    // Triangle positions around (18, 18) — well within viewport at t=120
+    // Triangle positions BEYOND the camera at (36, 36). All have Manhattan ≤ 4.
     const positions = [
-      { isoX: 18 + offset, isoY: 18 },           // east
-      { isoX: 18,          isoY: 18 + offset },  // south
-      { isoX: 18 - 4,      isoY: 18 + 4 },       // NW (closer to camera)
+      { isoX: 38, isoY: 36 },   // md = |38-36| + |36-36| = 2 (ahead-east)
+      { isoX: 36, isoY: 38 },   // md = 2 (ahead-south)
+      { isoX: 37, isoY: 37 },   // md = 2 (ahead)
     ]
     // Cycle through mobile spriteIds (only standard + tank — no static)
     const spriteIds = [
