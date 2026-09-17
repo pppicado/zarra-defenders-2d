@@ -38,6 +38,7 @@ import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=44'
 import { BackgroundLayer, BG_SOURCE_HEIGHT_PX, BG_SCALE, BG_RENDERED_HEIGHT_PX } from './backgrounds.js?v=44'
 import { PedagogyCards } from './pedagogy/cards.js?v=44'
 import { ModalIntermedio } from './pedagogy/modal-intermedio.js?v=44'
+import { ResumenFinal } from './pedagogy/resumen-final.js?v=44'
 import { __zr } from './engine/dom-debug.js?v=44'
 
 // ============================================================
@@ -354,6 +355,25 @@ async function bootstrap() {
   busOn('combat:hit', () => modalIntermedio.recordHit())
   busOn('menu:startRequested', () => modalIntermedio.reset())
   busOn('ui:overlayShown', () => modalIntermedio.hide())
+
+  // F1.3 — resumen final navegable post-stage:cleared.
+  const resumenFinalRoot = document.getElementById('resumen-final')
+  const resumenFinal = new ResumenFinal({
+    root: resumenFinalRoot,
+    onClose: () => { /* nothing — user clicks 'Volver al menú' which goes through overlay */ },
+  })
+  let resumenUnsub = null
+  busOn('stage:cleared', () => {
+    // Defer resumen until the victory overlay is dismissed by the user.
+    if (resumenUnsub) resumenUnsub()
+    resumenUnsub = busOn('ui:overlayHidden', () => {
+      if (resumenUnsub) { resumenUnsub(); resumenUnsub = null }
+      const cards = score.read().cardsShown || []
+      resumenFinal.show(cards)
+    })
+  })
+  busOn('menu:startRequested', () => resumenFinal.hide())
+  busOn('bootTestLevel:request', () => resumenFinal.hide())
   const enemies = new EnemyManager({
     rng: inTestMode ? mulberry32(seed) : Math.random,
     scene: isoWorld.spriteLayer,

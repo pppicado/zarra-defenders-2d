@@ -571,4 +571,198 @@ canvas {
   #integrity-hud canvas { width: 160px; height: 20px; }
   #pedagogy-card { top: 8px; right: 8px; width: 240px; padding: 12px 14px 10px; font-size: 0.8rem; }
   #pedagogy-card .pedagogy-card-title { font-size: 0.95rem; }
+  #modal-intermedio { top: 60px; width: 280px; }
+  #modal-intermedio .modal-intermedio-card { padding: 14px 16px 12px; }
+  #modal-intermedio .modal-intermedio-firmas { font-size: 2rem; }
+  #modal-intermedio .modal-intermedio-mensaje { font-size: 0.85rem; }
+  #resumen-final .resumen-card { padding: 20px; max-width: 95vw; }
+  #resumen-final .resumen-card-title { font-size: 1.2rem; }
+}
+
+/* ============================================================
+   Resumen final navegable (F1.3) — overlay fullscreen post-stage
+   - z-index 250 (encima de game-overlay 200)
+   - backdrop oscuro para foco total
+   - card centrada con navegacion prev/next + dots
+   ============================================================ */
+#resumen-final {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+#resumen-final .resumen-card {
+  background: #181818;
+  border: 2px solid #f5a623;
+  border-radius: 6px;
+  padding: 32px 36px 24px;
+  width: 480px;
+  max-width: 90vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  color: #e8e8e8;
+  text-align: left;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+
+#resumen-final .resumen-btn-cerrar {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: transparent;
+  border: 0;
+  color: #f5a623;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+
+#resumen-final .resumen-btn-cerrar:hover,
+#resumen-final .resumen-btn-cerrar:focus {
+  color: #ffd28a;
+}
+
+#resumen-final .resumen-counter {
+  font-size: 0.85rem;
+  color: #a0a0a0;
+  margin: 0 0 8px 0;
+  font-family: monospace;
+}
+
+#resumen-final .resumen-card-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #f5a623;
+  margin: 0 0 12px 0;
+  padding-right: 32px;
+  text-shadow: 0 0 4px rgba(245, 166, 35, 0.4);
+}
+
+#resumen-final .resumen-card-description {
+  font-style: italic;
+  color: #d6d6d6;
+  margin: 0 0 14px 0;
+  line-height: 1.4;
+}
+
+#resumen-final .resumen-card-dato {
+  font-size: 0.95rem;
+  color: #c8c8c8;
+  border-left: 3px solid #f5a623;
+  padding-left: 10px;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+#resumen-final .resumen-card-fuente {
+  font-size: 0.8rem;
+  color: #a0a0a0;
+  margin: 0 0 20px 0;
+}
+
+#resumen-final .resumen-card-link {
+  color: #f5a623;
+  text-decoration: underline;
+  margin-left: 4px;
+}
+
+#resumen-final .resumen-card-link:hover,
+#resumen-final .resumen-card-link:focus {
+  color: #ffd28a;
+}
+
+#resumen-final .resumen-card-hashtag {
+  color: #f5a623;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+#resumen-final .resumen-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+#resumen-final .resumen-btn-nav {
+  background: rgba(245, 166, 35, 0.12);
+  color: #f5a623;
+  border: 2px solid #f5a623;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 3px;
+  min-height: 36px;
+}
+
+#resumen-final .resumen-btn-nav:hover:not([disabled]),
+#resumen-final .resumen-btn-nav:focus:not([disabled]) {
+  background: rgba(245, 166, 35, 0.2);
+}
+
+#resumen-final .resumen-btn-nav[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+#resumen-final .resumen-dots {
+  display: flex;
+  gap: 6px;
+}
+
+#resumen-final .resumen-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3a3a3a;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
+
+#resumen-final .resumen-dot--active {
+  background: #f5a623;
+}
+
+#resumen-final .resumen-btn-cerrar-bottom {
+  display: block;
+  width: 100%;
+  background: rgba(245, 166, 35, 0.12);
+  color: #f5a623;
+  border: 2px solid #f5a623;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 3px;
+  margin-top: 8px;
+}
+
+#resumen-final .resumen-btn-cerrar-bottom:hover,
+#resumen-final .resumen-btn-cerrar-bottom:focus {
+  background: rgba(245, 166, 35, 0.2);
+}
+
+#resumen-final .resumen-card--empty {
+  text-align: center;
+}
+
+#resumen-final .resumen-empty-title {
+  color: #f5a623;
+  font-size: 1.2rem;
+  margin: 0 0 12px 0;
+}
+
+#resumen-final .resumen-empty-msg {
+  color: #d6d6d6;
+  margin: 0 0 24px 0;
 }
