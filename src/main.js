@@ -41,6 +41,7 @@ import { ModalIntermedio } from './pedagogy/modal-intermedio.js?v=44'
 import { ResumenFinal } from './pedagogy/resumen-final.js?v=44'
 import { Biblioteca } from './pedagogy/biblioteca.js?v=44'
 import { DataScreen } from './pedagogy/data-screen.js?v=44'
+import { FinalScreen, FINAL_BOSS_SPRITE_ID } from './pedagogy/final-screen.js?v=44'
 import { __zr } from './engine/dom-debug.js?v=44'
 
 // ============================================================
@@ -408,6 +409,31 @@ async function bootstrap() {
   // Hide data screen on other lifecycle events
   busOn('menu:startRequested', () => dataScreen.hide())
   busOn('menu:back', () => dataScreen.hide())
+
+  // F1.7 — pantalla final con 4 enlaces (cierre del loop pedagógico).
+  const finalScreenRoot = document.getElementById('final-screen')
+  const finalScreen = new FinalScreen({
+    root: finalScreenRoot,
+    onClose: () => {
+      // Volver al menú
+      resumenFinal.hide()
+      overlay.hide()
+      modalIntermedio.hide()
+      busOn('menu:startRequested', () => { /* already handled */ })
+      emit('menu:back', {})
+    },
+  })
+  // Hide final screen on lifecycle events
+  busOn('menu:startRequested', () => finalScreen.hide())
+  busOn('bootTestLevel:request', () => finalScreen.hide())
+
+  // Trigger: when the boss final (planta_treco) is desactivado (F1.6 A7)
+  busOn('zarra:desactivacion', (detail) => {
+    if (!detail || detail.spriteId !== FINAL_BOSS_SPRITE_ID) return
+    finalScreen.show()
+    // Trigger stage:cleared-equivalent so resumen also appears after closing
+    emit('stage:cleared', { stageId: 'stage5-acuifero' })
+  })
   const enemies = new EnemyManager({
     rng: inTestMode ? mulberry32(seed) : Math.random,
     scene: isoWorld.spriteLayer,

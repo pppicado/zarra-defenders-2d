@@ -1097,3 +1097,114 @@ canvas {
   #data-screen .data-screen-card { padding: 24px 22px 20px; max-width: 95vw; }
   #data-screen .data-screen-dato { font-size: 1rem; }
 }
+
+/* ============================================================
+   Final screen con 4 enlaces (F1.7) — cierre del loop pedagógico
+   - z-index 280 (encima de todo)
+   - backdrop negro + card centrada con título, dato, 4 enlaces
+   ============================================================ */
+#final-screen {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+#final-screen .final-screen-card {
+  background: #181818;
+  border: 2px solid #f5a623;
+  border-radius: 6px;
+  padding: 36px 40px 32px;
+  width: 600px;
+  max-width: 95vw;
+  color: #e8e8e8;
+  text-align: center;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.6);
+  animation: final-screen-fade-in 480ms ease-out;
+}
+
+@keyframes final-screen-fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#final-screen .final-screen-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #f5a623;
+  margin: 0 0 20px 0;
+  text-shadow: 0 0 6px rgba(245, 166, 35, 0.4);
+}
+
+#final-screen .final-screen-dato {
+  font-size: 1.05rem;
+  color: #e8e8e8;
+  border-left: 4px solid #f5a623;
+  padding: 12px 16px;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+  text-align: left;
+  font-style: italic;
+}
+
+#final-screen .final-screen-enlaces {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 28px 0;
+  align-items: center;
+}
+
+#final-screen .final-screen-enlace {
+  font-size: 1rem;
+  background: rgba(245, 166, 35, 0.08);
+  border: 1px solid #f5a623;
+  border-radius: 4px;
+  padding: 10px 18px;
+  color: #f5a623;
+  display: inline-block;
+}
+
+#final-screen .final-screen-link {
+  color: #f5a623;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+#final-screen .final-screen-link:hover,
+#final-screen .final-screen-link:focus {
+  color: #ffd28a;
+}
+
+#final-screen .final-screen-hashtag {
+  color: #f5a623;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+#final-screen .final-screen-volver {
+  background: #f5a623;
+  color: #181818;
+  border: 2px solid #f5a623;
+  padding: 12px 32px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+#final-screen .final-screen-volver:hover,
+#final-screen .final-screen-volver:focus {
+  background: #ffd28a;
+}
+
+@media (max-width: 600px) {
+  #final-screen .final-screen-card { padding: 24px 22px 20px; }
+  #final-screen .final-screen-title { font-size: 1.4rem; }
+  #final-screen .final-screen-dato { font-size: 0.95rem; padding: 10px 12px; }
+  #final-screen .final-screen-enlace { font-size: 0.85rem; padding: 8px 12px; }
+}
