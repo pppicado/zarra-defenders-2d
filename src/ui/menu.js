@@ -33,11 +33,11 @@ export const STAGE_CLEAR_KEY = (stageId) => `zarra2d:stageClear:${stageId}`
 
 /** Stage ordering — the first stage is unlocked by default. */
 const STAGES = [
-  { id: 'stage1-bosque',    label: '1 · Bosque mediterráneo' },
-  { id: 'stage2-pueblo',    label: '2 · Pueblo de Cofrentes' },
-  { id: 'stage3-rio',       label: '3 · Río Cabriel' },
-  { id: 'stage4-vertedero', label: '4 · Vertedero TRECO' },
-  { id: 'stage5-castillo',  label: '5 · Castillo de Cofrentes' },
+  { id: 'stage1-lashoyas',  label: '1 · Las Hoyas de Caballero (Zarra)' },
+  { id: 'stage2-lahoz',     label: '2 · La Hoz del río Zarra' },
+  { id: 'stage3-lahunde',   label: '3 · Sierra de La Hunde y Palomera (Ayora)' },
+  { id: 'stage4-ayora',     label: '4 · Casco urbano de Ayora' },
+  { id: 'stage5-acuifero',  label: '5 · El Acuífero (jefe final)' },
 ]
 
 const ABOUT_TEXT = `

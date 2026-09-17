@@ -32,7 +32,7 @@ export async function runBancoEscToMenuSpec() {
   await page.addInitScript(() => { try { localStorage.clear() } catch (e) {} })
   await page.goto(baseUrl + '?unlock=all', { waitUntil: 'load' })
   await page.waitForSelector('#main-menu:not(.hidden)', { timeout: 10_000 })
-  await page.click('[data-menu-id="stage1-bosque"]')
+  await page.click('[data-menu-id="stage1-lashoyas"]')
   await new Promise(r => setTimeout(r, 2000))
 
   // Sanity: gameplay is active and menu is hidden.

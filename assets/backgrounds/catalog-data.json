@@ -1,0 +1,492 @@
+{
+  "generated_at": "2026-09-15T10:27:23.189457",
+  "base_url": "/assets/backgrounds/",
+  "stages": {
+    "1": {
+      "num": 1,
+      "name": "Las Hoyas de Caballero (Zarra)",
+      "key": "stage1-lashoyas",
+      "theme": "Encinas + almendros · suelo arcilloso-rojizo · atardecer manchego · TRECO amenazando",
+      "plan_ref": "PLAN.md §2.4 · SDD zarra-defenders §3.1",
+      "journey": "Camino rural entre encinas → campos de almendros → TRECO facility visible al fondo bajo cielo naranja",
+      "landmarks": "Encinas dispersas · almendros en flor · suelo rojizo-arcilloso · atardecer manchego naranja · silueta de facility TRECO en lontananza",
+      "definitive": {
+        "path": "stage1-lashoyas.png",
+        "size": [
+          2688,
+          1152
+        ]
+      },
+      "pick_variant": "s1-tiles-v5.jpeg",
+      "pick_label": "v5",
+      "variants": [
+        {
+          "name": "s1-tiles-v1.jpeg",
+          "label": "v1",
+          "is_pick": false,
+          "discard_reason": "camino recto sin zig-zag, falta clearing",
+          "raw_path": "v5-tiles/s1-tiles-v1.jpeg",
+          "processed_path": "v5-tiles-processed/s1-tiles-v1@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s1-tiles-v2.jpeg",
+          "label": "v2",
+          "is_pick": false,
+          "discard_reason": "borders negros, sin troncos",
+          "raw_path": "v5-tiles/s1-tiles-v2.jpeg",
+          "processed_path": "v5-tiles-processed/s1-tiles-v2@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s1-tiles-v3.jpeg",
+          "label": "v3",
+          "is_pick": false,
+          "discard_reason": "",
+          "raw_path": "v5-tiles/s1-tiles-v3.jpeg",
+          "processed_path": "v5-tiles-processed/s1-tiles-v3@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s1-tiles-v4.jpeg",
+          "label": "v4",
+          "is_pick": false,
+          "discard_reason": "menos zigzag, sin troncos",
+          "raw_path": "v5-tiles/s1-tiles-v4.jpeg",
+          "processed_path": "v5-tiles-processed/s1-tiles-v4@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s1-tiles-v5.jpeg",
+          "label": "v5",
+          "is_pick": true,
+          "discard_reason": "",
+          "raw_path": "v5-tiles/s1-tiles-v5.jpeg",
+          "processed_path": "v5-tiles-processed/s1-tiles-v5@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s1-tiles-v6.jpeg",
+          "label": "v6",
+          "is_pick": false,
+          "discard_reason": "",
+          "raw_path": "v5-tiles/s1-tiles-v6.jpeg",
+          "processed_path": "v5-tiles-processed/s1-tiles-v6@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s1-tiles-v7.jpeg",
+          "label": "v7",
+          "is_pick": false,
+          "discard_reason": "",
+          "raw_path": "v5-tiles/s1-tiles-v7.jpeg",
+          "processed_path": "v5-tiles-processed/s1-tiles-v7@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s1-tiles-v8.jpeg",
+          "label": "v8",
+          "is_pick": false,
+          "discard_reason": "",
+          "raw_path": "v5-tiles/s1-tiles-v8.jpeg",
+          "processed_path": "v5-tiles-processed/s1-tiles-v8@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        }
+      ],
+      "previous_iterations": {
+        "v3_rpg_isometric": [
+          "stage1-bosque-v1.jpeg",
+          "stage1-bosque-v2.jpeg"
+        ],
+        "v2_rpg": [
+          "stage1-bosque-v1.jpeg",
+          "stage1-bosque-v2.jpeg",
+          "stage1-bosque-v3.jpeg",
+          "stage1-bosque-v4.jpeg"
+        ]
+      },
+      "iterations_note": "3D-aligned: paraje real del polígono 11 de Zarra donde TRECO proyecta el vertedero. Boss: topadora arrancando encinas."
+    },
+    "2": {
+      "num": 2,
+      "name": "La Hoz del río Zarra",
+      "key": "stage2-lahoz",
+      "theme": "Cañón estrecho · río turquesa · paredes rocosas · vegetación de ribera · tubería de lixiviados",
+      "plan_ref": "PLAN.md §2.4 · SDD zarra-defenders §3.2",
+      "journey": "Entrar al cañón → río abajo → puente de madera sprite → tubería escupiendo lixiviados al cauce",
+      "landmarks": "Paredes de roca gris del cañón · río turquesa serpenteando · puente de madera sprite · tubería industrial sprite con lixiviados verde-oscuro",
+      "definitive": {
+        "path": "stage2-lahoz.png",
+        "size": [
+          2688,
+          1152
+        ]
+      },
+      "pick_variant": "s2-tiles-v6.jpeg",
+      "pick_label": "v6",
+      "variants": [
+        {
+          "name": "s2-tiles-v1.jpeg",
+          "label": "v1",
+          "is_pick": false,
+          "discard_reason": "plaza única, no journey",
+          "raw_path": "v5-tiles/s2-tiles-v1.jpeg",
+          "processed_path": "v5-tiles-processed/s2-tiles-v1@pc32ds2.png",
+          "palette": 32,
+          "downsample": 2
+        },
+        {
+          "name": "s2-tiles-v2.jpeg",
+          "label": "v2",
+          "is_pick": false,
+          "discard_reason": "plaza con calle, mejor pero FAR gana",
+          "raw_path": "v5-tiles/s2-tiles-v2.jpeg",
+          "processed_path": "v5-tiles-processed/s2-tiles-v2@pc32ds2.png",
+          "palette": 32,
+          "downsample": 2
+        },
+        {
+          "name": "s2-tiles-v3.jpeg",
+          "label": "v3",
+          "is_pick": false,
+          "discard_reason": "plaza estática",
+          "raw_path": "v5-tiles/s2-tiles-v3.jpeg",
+          "processed_path": "v5-tiles-processed/s2-tiles-v3@pc32ds2.png",
+          "palette": 32,
+          "downsample": 2
+        },
+        {
+          "name": "s2-tiles-v4.jpeg",
+          "label": "v4",
+          "is_pick": false,
+          "discard_reason": "un solo punto",
+          "raw_path": "v5-tiles/s2-tiles-v4.jpeg",
+          "processed_path": "v5-tiles-processed/s2-tiles-v4@pc32ds2.png",
+          "palette": 32,
+          "downsample": 2
+        },
+        {
+          "name": "s2-tiles-v5.jpeg",
+          "label": "v5",
+          "is_pick": false,
+          "discard_reason": "calle con casas pero algo estática",
+          "raw_path": "v5-tiles/s2-tiles-v5.jpeg",
+          "processed_path": "v5-tiles-processed/s2-tiles-v5@pc32ds2.png",
+          "palette": 32,
+          "downsample": 2
+        },
+        {
+          "name": "s2-tiles-v6.jpeg",
+          "label": "v6",
+          "is_pick": true,
+          "discard_reason": "",
+          "raw_path": "v5-tiles/s2-tiles-v6.jpeg",
+          "processed_path": "v5-tiles-processed/s2-tiles-v6@pc32ds2.png",
+          "palette": 32,
+          "downsample": 2
+        },
+        {
+          "name": "s2-tiles-v7.jpeg",
+          "label": "v7",
+          "is_pick": false,
+          "discard_reason": "plaza con fuentes",
+          "raw_path": "v5-tiles/s2-tiles-v7.jpeg",
+          "processed_path": "v5-tiles-processed/s2-tiles-v7@pc32ds2.png",
+          "palette": 32,
+          "downsample": 2
+        },
+        {
+          "name": "s2-tiles-v8.jpeg",
+          "label": "v8",
+          "is_pick": false,
+          "discard_reason": "calles con cruces pero menos journey",
+          "raw_path": "v5-tiles/s2-tiles-v8.jpeg",
+          "processed_path": "v5-tiles-processed/s2-tiles-v8@pc32ds2.png",
+          "palette": 32,
+          "downsample": 2
+        }
+      ],
+      "previous_iterations": {
+        "v3_rpg_isometric": [
+          "stage2-pueblo-v1.jpeg",
+          "stage2-pueblo-v2.jpeg"
+        ],
+        "v2_rpg": [
+          "stage2-pueblo-v1.jpeg",
+          "stage2-pueblo-v2.jpeg",
+          "stage2-pueblo-v3.jpeg",
+          "stage2-pueblo-v4.jpeg"
+        ]
+      },
+      "iterations_note": "3D-aligned: Barranco del Agua (La Hoz), ruta de senderismo de 13 km por el río Zarra. Boss: tubería industrial gigante."
+    },
+    "3": {
+      "num": 3,
+      "name": "Sierra de La Hunde y Palomera (Ayora)",
+      "key": "stage3-lahunde",
+      "theme": "Pinar denso · pino carrasco · romero + aliaga como sotobosque · sol entre ramas",
+      "plan_ref": "PLAN.md §2.4 · SDD zarra-defenders §3.3",
+      "journey": "Trocha forestal que se interna en el pinar denso → zigzags entre pinos carrascos → continua hacia La Palomera",
+      "landmarks": "Pino carrasco (Pinus halepensis) denso · romero plateado · aliagas grises · sol entre ramas · suelo de pinocha",
+      "definitive": {
+        "path": "stage3-lahunde.png",
+        "size": [
+          2688,
+          1152
+        ]
+      },
+      "pick_variant": "s3-tiles-v6.jpeg",
+      "pick_label": "v6",
+      "variants": [
+        {
+          "name": "s3-tiles-v1.jpeg",
+          "label": "v1",
+          "is_pick": false,
+          "discard_reason": "",
+          "raw_path": "v5-tiles/s3-tiles-v1.jpeg",
+          "processed_path": "v5-tiles-processed/s3-tiles-v1@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s3-tiles-v2.jpeg",
+          "label": "v2",
+          "is_pick": false,
+          "discard_reason": "islas rompen linearidad del río",
+          "raw_path": "v5-tiles/s3-tiles-v2.jpeg",
+          "processed_path": "v5-tiles-processed/s3-tiles-v2@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s3-tiles-v3.jpeg",
+          "label": "v3",
+          "is_pick": false,
+          "discard_reason": "limpio pero sin puente/waypoint",
+          "raw_path": "v5-tiles/s3-tiles-v3.jpeg",
+          "processed_path": "v5-tiles-processed/s3-tiles-v3@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s3-tiles-v4.jpeg",
+          "label": "v4",
+          "is_pick": false,
+          "discard_reason": "puente vertical no encaja",
+          "raw_path": "v5-tiles/s3-tiles-v4.jpeg",
+          "processed_path": "v5-tiles-processed/s3-tiles-v4@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s3-tiles-v5.jpeg",
+          "label": "v5",
+          "is_pick": false,
+          "discard_reason": "",
+          "raw_path": "v5-tiles/s3-tiles-v5.jpeg",
+          "processed_path": "v5-tiles-processed/s3-tiles-v5@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s3-tiles-v6.jpeg",
+          "label": "v6",
+          "is_pick": true,
+          "discard_reason": "",
+          "raw_path": "v5-tiles/s3-tiles-v6.jpeg",
+          "processed_path": "v5-tiles-processed/s3-tiles-v6@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s3-tiles-v7.jpeg",
+          "label": "v7",
+          "is_pick": false,
+          "discard_reason": "",
+          "raw_path": "v5-tiles/s3-tiles-v7.jpeg",
+          "processed_path": "v5-tiles-processed/s3-tiles-v7@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s3-tiles-v8.jpeg",
+          "label": "v8",
+          "is_pick": false,
+          "discard_reason": "",
+          "raw_path": "v5-tiles/s3-tiles-v8.jpeg",
+          "processed_path": "v5-tiles-processed/s3-tiles-v8@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        }
+      ],
+      "previous_iterations": {
+        "v3_rpg_isometric": [
+          "stage3-rio-v1.jpeg",
+          "stage3-rio-v2.jpeg",
+          "stage3-rio-v4.jpeg"
+        ],
+        "v2_rpg": [
+          "stage3-rio-v1.jpeg",
+          "stage3-rio-v2.jpeg",
+          "stage3-rio-v3.jpeg",
+          "stage3-rio-v4.jpeg"
+        ]
+      },
+      "iterations_note": "3D-aligned: parajes naturales protegidos al norte de Ayora, 'un pulmón que hay que proteger'. Boss: incineradora industrial móvil."
+    },
+    "4": {
+      "num": 4,
+      "name": "Casco urbano de Ayora",
+      "key": "stage4-ayora",
+      "theme": "Calles estrechas · casas blancas encaladas · tejas árabes · balcón · plaza con fuente · sol de mediodía",
+      "plan_ref": "PLAN.md §2.4 · SDD zarra-defenders §3.4",
+      "journey": "Portal de acceso al pueblo → calles empedradas → plaza con fuente central → casas con balcones → colegio/polideportivo al fondo",
+      "landmarks": "Casas blancas encaladas · tejas árabes · portal de piedra · plaza empedrada · fuente central · balcones · olivos",
+      "definitive": {
+        "path": "stage4-ayora.png",
+        "size": [
+          2688,
+          1152
+        ]
+      },
+      "pick_variant": "s4-tiles-v1.jpeg",
+      "pick_label": "v1",
+      "variants": [
+        {
+          "name": "s4-tiles-v1.jpeg",
+          "label": "v1",
+          "is_pick": true,
+          "discard_reason": "",
+          "raw_path": "v5-tiles/s4-tiles-v1.jpeg",
+          "processed_path": "v5-tiles-processed/s4-tiles-v1@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s4-tiles-v2.jpeg",
+          "label": "v2",
+          "is_pick": false,
+          "discard_reason": "buen contenido pero railroad distrae",
+          "raw_path": "v5-tiles/s4-tiles-v2.jpeg",
+          "processed_path": "v5-tiles-processed/s4-tiles-v2@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s4-tiles-v3.jpeg",
+          "label": "v3",
+          "is_pick": false,
+          "discard_reason": "gate/factory sin leachate claro",
+          "raw_path": "v5-tiles/s4-tiles-v3.jpeg",
+          "processed_path": "v5-tiles-processed/s4-tiles-v3@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s4-tiles-v4.jpeg",
+          "label": "v4",
+          "is_pick": false,
+          "discard_reason": "railroad domina demasiado",
+          "raw_path": "v5-tiles/s4-tiles-v4.jpeg",
+          "processed_path": "v5-tiles-processed/s4-tiles-v4@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        }
+      ],
+      "previous_iterations": {
+        "v3_rpg_isometric": [
+          "stage4-vertedero-v1.jpeg",
+          "stage4-vertedero-v2.jpeg"
+        ],
+        "v2_rpg": [
+          "stage4-vertedero-v1.jpeg",
+          "stage4-vertedero-v2.jpeg",
+          "stage4-vertedero-v3.jpeg",
+          "stage4-vertedero-v4.jpeg"
+        ]
+      },
+      "iterations_note": "3D-aligned: casco urbano de Ayora, donde la ruta de camiones prevista pasaría junto al colegio y el polideportivo. Boss: trailer cargado de bidones."
+    },
+    "5": {
+      "num": 5,
+      "name": "El Acuífero de la Mancha Oriental (jefe final)",
+      "key": "stage5-acuifero",
+      "theme": "Cámara subterránea · estalactitas · ríos subterráneos azul brillante · planta TRECO escupiendo residuos · boss final",
+      "plan_ref": "PLAN.md §2.4 · SDD zarra-defenders §3.5",
+      "journey": "Entrada a la cámara subterránea → estalactitas sprite → ríos subterráneos azul brillantes → planta TRECO sprite vertiendo residuos al acuífero (jefe final)",
+      "landmarks": "Piedra oscura húmeda · estalactitas sprite · río subterráneo azul brillante · planta TRECO sprite industrial · tubería sprite escupiendo residuos · NO superficie",
+      "definitive": {
+        "path": "stage5-acuifero.png",
+        "size": [
+          2688,
+          1152
+        ]
+      },
+      "pick_variant": "s5-tiles-v3.jpeg",
+      "pick_label": "v3",
+      "variants": [
+        {
+          "name": "s5-tiles-v1.jpeg",
+          "label": "v1",
+          "is_pick": false,
+          "discard_reason": "camino vertical al borde, no ascent",
+          "raw_path": "v5-tiles/s5-tiles-v1.jpeg",
+          "processed_path": "v5-tiles-processed/s5-tiles-v1@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s5-tiles-v2.jpeg",
+          "label": "v2",
+          "is_pick": false,
+          "discard_reason": "",
+          "raw_path": "v5-tiles/s5-tiles-v2.jpeg",
+          "processed_path": "v5-tiles-processed/s5-tiles-v2@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s5-tiles-v3.jpeg",
+          "label": "v3",
+          "is_pick": true,
+          "discard_reason": "",
+          "raw_path": "v5-tiles/s5-tiles-v3.jpeg",
+          "processed_path": "v5-tiles-processed/s5-tiles-v3@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        },
+        {
+          "name": "s5-tiles-v4.jpeg",
+          "label": "v4",
+          "is_pick": false,
+          "discard_reason": "sundial, camino en patio pero ascent débil",
+          "raw_path": "v5-tiles/s5-tiles-v4.jpeg",
+          "processed_path": "v5-tiles-processed/s5-tiles-v4@pc32ds4.png",
+          "palette": 32,
+          "downsample": 4
+        }
+      ],
+      "previous_iterations": {
+        "v3_rpg_isometric": [
+          "stage5-castillo-v1.jpeg",
+          "stage5-castillo-v2.jpeg"
+        ],
+        "v2_rpg": [
+          "stage5-castillo-v1.jpeg",
+          "stage5-castillo-v2.jpeg",
+          "stage5-castillo-v3.jpeg",
+          "stage5-castillo-v4.jpeg"
+        ]
+      },
+      "iterations_note": "3D-aligned: cámara simbólica del subsuelo del Valle, donde corre el Acuífero de la Mancha Oriental (8.500 km²). Boss final: planta de tratamiento TRECO. Derrotarla NO la cierra — abre pantalla final con dato + links."
+    }
+  }
+}

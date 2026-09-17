@@ -105,7 +105,7 @@ export function computeBgInitialOffset(parallax, railDepth) {
  *
  * Lifecycle:
  *   const bg = new BackgroundLayer({ container: isoWorld.container, viewportWidth: LOGICAL_W })
- *   await bg.load('stage1-bosque', 'assets/backgrounds/stage1-bosque.png')
+ *   await bg.load('stage1-lashoyas', 'assets/backgrounds/stage1-lashoyas.png')
  *   // each tick:
  *   bg.update({ isoX: camera.getCameraX(), isoY: camera.getCameraY() })
  *   // at rail end:
@@ -113,7 +113,7 @@ export function computeBgInitialOffset(parallax, railDepth) {
  *   // on retry:
  *   bg.unfreeze()         // bg resumes with current camera position
  *   // on stage swap:
- *   await bg.setStage('stage2-pueblo', 'assets/backgrounds/stage2-pueblo.png')
+ *   await bg.setStage('stage2-lahoz', 'assets/backgrounds/stage2-lahoz.png')
  *   // on teardown:
  *   bg.destroy()
  */
@@ -141,7 +141,7 @@ export class BackgroundLayer {
    * Destroys the previous texture (no GPU leak on stage swap).
    *
    * @param {string} stageId
-   * @param {string} assetPath  relative URL like 'assets/backgrounds/stage1-bosque.png'
+   * @param {string} assetPath  relative URL like 'assets/backgrounds/stage1-lashoyas.png'
    */
   async load(stageId, assetPath) {
     const tex = await PIXI.Assets.load(assetPath)

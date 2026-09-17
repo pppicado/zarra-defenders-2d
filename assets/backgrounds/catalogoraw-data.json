@@ -1,0 +1,1215 @@
+{
+  "generated_at": "2026-09-15T11:37:20.814222",
+  "groups": {
+    "v2-rpg": {
+      "label": "v2 — first RPG (subtle modular, raster paintings)",
+      "files": [
+        {
+          "name": "stage1-bosque-v1.jpeg",
+          "path": "v2-rpg/stage1-bosque-v1.jpeg",
+          "size_kb": 515.2,
+          "modified": "2026-09-14T11:15:23"
+        },
+        {
+          "name": "stage1-bosque-v2.jpeg",
+          "path": "v2-rpg/stage1-bosque-v2.jpeg",
+          "size_kb": 523.0,
+          "modified": "2026-09-14T11:15:23"
+        },
+        {
+          "name": "stage1-bosque-v3.jpeg",
+          "path": "v2-rpg/stage1-bosque-v3.jpeg",
+          "size_kb": 491.9,
+          "modified": "2026-09-14T11:15:24"
+        },
+        {
+          "name": "stage1-bosque-v4.jpeg",
+          "path": "v2-rpg/stage1-bosque-v4.jpeg",
+          "size_kb": 510.0,
+          "modified": "2026-09-14T11:15:24"
+        },
+        {
+          "name": "stage2-pueblo-v1.jpeg",
+          "path": "v2-rpg/stage2-pueblo-v1.jpeg",
+          "size_kb": 491.0,
+          "modified": "2026-09-14T11:20:04"
+        },
+        {
+          "name": "stage2-pueblo-v2.jpeg",
+          "path": "v2-rpg/stage2-pueblo-v2.jpeg",
+          "size_kb": 466.1,
+          "modified": "2026-09-14T11:20:05"
+        },
+        {
+          "name": "stage2-pueblo-v3.jpeg",
+          "path": "v2-rpg/stage2-pueblo-v3.jpeg",
+          "size_kb": 494.5,
+          "modified": "2026-09-14T11:20:05"
+        },
+        {
+          "name": "stage2-pueblo-v4.jpeg",
+          "path": "v2-rpg/stage2-pueblo-v4.jpeg",
+          "size_kb": 479.7,
+          "modified": "2026-09-14T11:20:06"
+        },
+        {
+          "name": "stage3-rio-v1.jpeg",
+          "path": "v2-rpg/stage3-rio-v1.jpeg",
+          "size_kb": 495.4,
+          "modified": "2026-09-14T11:20:06"
+        },
+        {
+          "name": "stage3-rio-v2.jpeg",
+          "path": "v2-rpg/stage3-rio-v2.jpeg",
+          "size_kb": 490.8,
+          "modified": "2026-09-14T11:20:07"
+        },
+        {
+          "name": "stage3-rio-v3.jpeg",
+          "path": "v2-rpg/stage3-rio-v3.jpeg",
+          "size_kb": 488.5,
+          "modified": "2026-09-14T11:20:08"
+        },
+        {
+          "name": "stage3-rio-v4.jpeg",
+          "path": "v2-rpg/stage3-rio-v4.jpeg",
+          "size_kb": 496.0,
+          "modified": "2026-09-14T11:20:08"
+        },
+        {
+          "name": "stage4-vertedero-v1.jpeg",
+          "path": "v2-rpg/stage4-vertedero-v1.jpeg",
+          "size_kb": 431.0,
+          "modified": "2026-09-14T11:20:09"
+        },
+        {
+          "name": "stage4-vertedero-v2.jpeg",
+          "path": "v2-rpg/stage4-vertedero-v2.jpeg",
+          "size_kb": 413.9,
+          "modified": "2026-09-14T11:20:09"
+        },
+        {
+          "name": "stage4-vertedero-v3.jpeg",
+          "path": "v2-rpg/stage4-vertedero-v3.jpeg",
+          "size_kb": 412.7,
+          "modified": "2026-09-14T11:20:10"
+        },
+        {
+          "name": "stage4-vertedero-v4.jpeg",
+          "path": "v2-rpg/stage4-vertedero-v4.jpeg",
+          "size_kb": 394.4,
+          "modified": "2026-09-14T11:20:11"
+        },
+        {
+          "name": "stage5-castillo-v1.jpeg",
+          "path": "v2-rpg/stage5-castillo-v1.jpeg",
+          "size_kb": 459.0,
+          "modified": "2026-09-14T11:20:26"
+        },
+        {
+          "name": "stage5-castillo-v2.jpeg",
+          "path": "v2-rpg/stage5-castillo-v2.jpeg",
+          "size_kb": 472.3,
+          "modified": "2026-09-14T11:20:27"
+        },
+        {
+          "name": "stage5-castillo-v3.jpeg",
+          "path": "v2-rpg/stage5-castillo-v3.jpeg",
+          "size_kb": 401.1,
+          "modified": "2026-09-14T11:20:28"
+        },
+        {
+          "name": "stage5-castillo-v4.jpeg",
+          "path": "v2-rpg/stage5-castillo-v4.jpeg",
+          "size_kb": 441.2,
+          "modified": "2026-09-14T11:20:28"
+        }
+      ],
+      "count": 20
+    },
+    "v3-rpg-isometric": {
+      "label": "v3 — isometric top-down (clean modular)",
+      "files": [
+        {
+          "name": "stage1-bosque-v1.jpeg",
+          "path": "v3-rpg-isometric/stage1-bosque-v1.jpeg",
+          "size_kb": 597.7,
+          "modified": "2026-09-14T12:26:49"
+        },
+        {
+          "name": "stage1-bosque-v2.jpeg",
+          "path": "v3-rpg-isometric/stage1-bosque-v2.jpeg",
+          "size_kb": 589.8,
+          "modified": "2026-09-14T12:26:49"
+        },
+        {
+          "name": "stage2-pueblo-v1.jpeg",
+          "path": "v3-rpg-isometric/stage2-pueblo-v1.jpeg",
+          "size_kb": 554.3,
+          "modified": "2026-09-14T12:29:35"
+        },
+        {
+          "name": "stage2-pueblo-v2.jpeg",
+          "path": "v3-rpg-isometric/stage2-pueblo-v2.jpeg",
+          "size_kb": 547.2,
+          "modified": "2026-09-14T12:29:51"
+        },
+        {
+          "name": "stage3-rio-v1.jpeg",
+          "path": "v3-rpg-isometric/stage3-rio-v1.jpeg",
+          "size_kb": 456.5,
+          "modified": "2026-09-14T12:29:52"
+        },
+        {
+          "name": "stage3-rio-v2.jpeg",
+          "path": "v3-rpg-isometric/stage3-rio-v2.jpeg",
+          "size_kb": 478.5,
+          "modified": "2026-09-14T12:30:03"
+        },
+        {
+          "name": "stage3-rio-v4.jpeg",
+          "path": "v3-rpg-isometric/stage3-rio-v4.jpeg",
+          "size_kb": 521.5,
+          "modified": "2026-09-14T12:34:41"
+        },
+        {
+          "name": "stage4-vertedero-v1.jpeg",
+          "path": "v3-rpg-isometric/stage4-vertedero-v1.jpeg",
+          "size_kb": 575.6,
+          "modified": "2026-09-14T12:30:52"
+        },
+        {
+          "name": "stage4-vertedero-v2.jpeg",
+          "path": "v3-rpg-isometric/stage4-vertedero-v2.jpeg",
+          "size_kb": 524.0,
+          "modified": "2026-09-14T12:30:53"
+        },
+        {
+          "name": "stage5-castillo-v1.jpeg",
+          "path": "v3-rpg-isometric/stage5-castillo-v1.jpeg",
+          "size_kb": 500.9,
+          "modified": "2026-09-14T12:31:09"
+        },
+        {
+          "name": "stage5-castillo-v2.jpeg",
+          "path": "v3-rpg-isometric/stage5-castillo-v2.jpeg",
+          "size_kb": 493.1,
+          "modified": "2026-09-14T12:31:17"
+        }
+      ],
+      "count": 11
+    },
+    "v4-journey": {
+      "label": "v4 — journey-focused (3-segment prompt, no FAR yet)",
+      "files": [
+        {
+          "name": "s1-v1.jpeg",
+          "path": "v4-journey/s1-v1.jpeg",
+          "size_kb": 553.1,
+          "modified": "2026-09-14T12:43:08"
+        },
+        {
+          "name": "s1-v2.jpeg",
+          "path": "v4-journey/s1-v2.jpeg",
+          "size_kb": 477.3,
+          "modified": "2026-09-14T12:43:09"
+        },
+        {
+          "name": "s1-v3.jpeg",
+          "path": "v4-journey/s1-v3.jpeg",
+          "size_kb": 515.6,
+          "modified": "2026-09-14T12:43:10"
+        },
+        {
+          "name": "s1-v4.jpeg",
+          "path": "v4-journey/s1-v4.jpeg",
+          "size_kb": 563.3,
+          "modified": "2026-09-14T12:43:11"
+        },
+        {
+          "name": "s2-far-v1.jpeg",
+          "path": "v4-journey/s2-far-v1.jpeg",
+          "size_kb": 526.6,
+          "modified": "2026-09-14T13:35:41"
+        },
+        {
+          "name": "s2-far-v2.jpeg",
+          "path": "v4-journey/s2-far-v2.jpeg",
+          "size_kb": 567.7,
+          "modified": "2026-09-14T13:35:42"
+        },
+        {
+          "name": "s2-far-v3.jpeg",
+          "path": "v4-journey/s2-far-v3.jpeg",
+          "size_kb": 557.2,
+          "modified": "2026-09-14T13:35:43"
+        },
+        {
+          "name": "s2-far-v4.jpeg",
+          "path": "v4-journey/s2-far-v4.jpeg",
+          "size_kb": 547.5,
+          "modified": "2026-09-14T13:35:43"
+        },
+        {
+          "name": "s2-v1.jpeg",
+          "path": "v4-journey/s2-v1.jpeg",
+          "size_kb": 552.5,
+          "modified": "2026-09-14T12:46:11"
+        },
+        {
+          "name": "s2-v2.jpeg",
+          "path": "v4-journey/s2-v2.jpeg",
+          "size_kb": 498.5,
+          "modified": "2026-09-14T12:46:17"
+        },
+        {
+          "name": "s2-v3.jpeg",
+          "path": "v4-journey/s2-v3.jpeg",
+          "size_kb": 582.9,
+          "modified": "2026-09-14T12:46:18"
+        },
+        {
+          "name": "s2-v4.jpeg",
+          "path": "v4-journey/s2-v4.jpeg",
+          "size_kb": 498.8,
+          "modified": "2026-09-14T12:46:19"
+        },
+        {
+          "name": "s2-v5.jpeg",
+          "path": "v4-journey/s2-v5.jpeg",
+          "size_kb": 556.3,
+          "modified": "2026-09-14T12:51:12"
+        },
+        {
+          "name": "s2-v6.jpeg",
+          "path": "v4-journey/s2-v6.jpeg",
+          "size_kb": 575.0,
+          "modified": "2026-09-14T12:51:18"
+        },
+        {
+          "name": "s2-v7.jpeg",
+          "path": "v4-journey/s2-v7.jpeg",
+          "size_kb": 545.7,
+          "modified": "2026-09-14T12:51:19"
+        },
+        {
+          "name": "s2-v8.jpeg",
+          "path": "v4-journey/s2-v8.jpeg",
+          "size_kb": 552.2,
+          "modified": "2026-09-14T12:51:22"
+        },
+        {
+          "name": "s3-v1.jpeg",
+          "path": "v4-journey/s3-v1.jpeg",
+          "size_kb": 480.6,
+          "modified": "2026-09-14T12:46:20"
+        },
+        {
+          "name": "s3-v2.jpeg",
+          "path": "v4-journey/s3-v2.jpeg",
+          "size_kb": 524.2,
+          "modified": "2026-09-14T12:46:27"
+        },
+        {
+          "name": "s3-v3.jpeg",
+          "path": "v4-journey/s3-v3.jpeg",
+          "size_kb": 526.2,
+          "modified": "2026-09-14T12:46:28"
+        },
+        {
+          "name": "s3-v4.jpeg",
+          "path": "v4-journey/s3-v4.jpeg",
+          "size_kb": 543.5,
+          "modified": "2026-09-14T12:46:29"
+        },
+        {
+          "name": "s4-v1.jpeg",
+          "path": "v4-journey/s4-v1.jpeg",
+          "size_kb": 499.2,
+          "modified": "2026-09-14T12:46:30"
+        },
+        {
+          "name": "s4-v2.jpeg",
+          "path": "v4-journey/s4-v2.jpeg",
+          "size_kb": 500.5,
+          "modified": "2026-09-14T12:46:31"
+        },
+        {
+          "name": "s4-v3.jpeg",
+          "path": "v4-journey/s4-v3.jpeg",
+          "size_kb": 509.8,
+          "modified": "2026-09-14T12:46:32"
+        },
+        {
+          "name": "s4-v4.jpeg",
+          "path": "v4-journey/s4-v4.jpeg",
+          "size_kb": 524.0,
+          "modified": "2026-09-14T12:46:33"
+        },
+        {
+          "name": "s5-v1.jpeg",
+          "path": "v4-journey/s5-v1.jpeg",
+          "size_kb": 507.6,
+          "modified": "2026-09-14T12:46:34"
+        },
+        {
+          "name": "s5-v2.jpeg",
+          "path": "v4-journey/s5-v2.jpeg",
+          "size_kb": 496.1,
+          "modified": "2026-09-14T12:46:36"
+        },
+        {
+          "name": "s5-v3.jpeg",
+          "path": "v4-journey/s5-v3.jpeg",
+          "size_kb": 537.0,
+          "modified": "2026-09-14T12:46:37"
+        },
+        {
+          "name": "s5-v4.jpeg",
+          "path": "v4-journey/s5-v4.jpeg",
+          "size_kb": 453.9,
+          "modified": "2026-09-14T12:46:44"
+        }
+      ],
+      "count": 28
+    },
+    "v5-tiles": {
+      "label": "v5 — STRONG tile-based (Diablo 2 wilderness grid + sprites)",
+      "files": [
+        {
+          "name": "s1-tiles-v1.jpeg",
+          "path": "v5-tiles/s1-tiles-v1.jpeg",
+          "size_kb": 535.0,
+          "modified": "2026-09-14T18:53:14"
+        },
+        {
+          "name": "s1-tiles-v2.jpeg",
+          "path": "v5-tiles/s1-tiles-v2.jpeg",
+          "size_kb": 559.5,
+          "modified": "2026-09-14T18:53:15"
+        },
+        {
+          "name": "s1-tiles-v3.jpeg",
+          "path": "v5-tiles/s1-tiles-v3.jpeg",
+          "size_kb": 561.6,
+          "modified": "2026-09-14T18:53:15"
+        },
+        {
+          "name": "s1-tiles-v4.jpeg",
+          "path": "v5-tiles/s1-tiles-v4.jpeg",
+          "size_kb": 590.6,
+          "modified": "2026-09-14T18:53:16"
+        },
+        {
+          "name": "s1-tiles-v5.jpeg",
+          "path": "v5-tiles/s1-tiles-v5.jpeg",
+          "size_kb": 598.0,
+          "modified": "2026-09-14T21:03:43"
+        },
+        {
+          "name": "s1-tiles-v6.jpeg",
+          "path": "v5-tiles/s1-tiles-v6.jpeg",
+          "size_kb": 598.3,
+          "modified": "2026-09-14T21:03:44"
+        },
+        {
+          "name": "s1-tiles-v7.jpeg",
+          "path": "v5-tiles/s1-tiles-v7.jpeg",
+          "size_kb": 595.6,
+          "modified": "2026-09-14T21:03:44"
+        },
+        {
+          "name": "s1-tiles-v8.jpeg",
+          "path": "v5-tiles/s1-tiles-v8.jpeg",
+          "size_kb": 589.6,
+          "modified": "2026-09-14T21:03:45"
+        },
+        {
+          "name": "s2-tiles-v1.jpeg",
+          "path": "v5-tiles/s2-tiles-v1.jpeg",
+          "size_kb": 541.4,
+          "modified": "2026-09-14T18:53:17"
+        },
+        {
+          "name": "s2-tiles-v2.jpeg",
+          "path": "v5-tiles/s2-tiles-v2.jpeg",
+          "size_kb": 511.6,
+          "modified": "2026-09-14T18:53:17"
+        },
+        {
+          "name": "s2-tiles-v3.jpeg",
+          "path": "v5-tiles/s2-tiles-v3.jpeg",
+          "size_kb": 548.4,
+          "modified": "2026-09-14T18:53:18"
+        },
+        {
+          "name": "s2-tiles-v4.jpeg",
+          "path": "v5-tiles/s2-tiles-v4.jpeg",
+          "size_kb": 542.2,
+          "modified": "2026-09-14T18:53:19"
+        },
+        {
+          "name": "s2-tiles-v5.jpeg",
+          "path": "v5-tiles/s2-tiles-v5.jpeg",
+          "size_kb": 567.3,
+          "modified": "2026-09-14T21:04:43"
+        },
+        {
+          "name": "s2-tiles-v6.jpeg",
+          "path": "v5-tiles/s2-tiles-v6.jpeg",
+          "size_kb": 549.7,
+          "modified": "2026-09-14T21:04:44"
+        },
+        {
+          "name": "s2-tiles-v7.jpeg",
+          "path": "v5-tiles/s2-tiles-v7.jpeg",
+          "size_kb": 530.5,
+          "modified": "2026-09-14T21:04:44"
+        },
+        {
+          "name": "s2-tiles-v8.jpeg",
+          "path": "v5-tiles/s2-tiles-v8.jpeg",
+          "size_kb": 552.9,
+          "modified": "2026-09-14T21:04:45"
+        },
+        {
+          "name": "s3-tiles-v1.jpeg",
+          "path": "v5-tiles/s3-tiles-v1.jpeg",
+          "size_kb": 564.4,
+          "modified": "2026-09-14T18:53:20"
+        },
+        {
+          "name": "s3-tiles-v2.jpeg",
+          "path": "v5-tiles/s3-tiles-v2.jpeg",
+          "size_kb": 606.8,
+          "modified": "2026-09-14T18:53:20"
+        },
+        {
+          "name": "s3-tiles-v3.jpeg",
+          "path": "v5-tiles/s3-tiles-v3.jpeg",
+          "size_kb": 573.7,
+          "modified": "2026-09-14T18:53:21"
+        },
+        {
+          "name": "s3-tiles-v4.jpeg",
+          "path": "v5-tiles/s3-tiles-v4.jpeg",
+          "size_kb": 635.2,
+          "modified": "2026-09-14T18:54:06"
+        },
+        {
+          "name": "s3-tiles-v5.jpeg",
+          "path": "v5-tiles/s3-tiles-v5.jpeg",
+          "size_kb": 624.2,
+          "modified": "2026-09-14T21:03:46"
+        },
+        {
+          "name": "s3-tiles-v6.jpeg",
+          "path": "v5-tiles/s3-tiles-v6.jpeg",
+          "size_kb": 583.9,
+          "modified": "2026-09-14T21:03:46"
+        },
+        {
+          "name": "s3-tiles-v7.jpeg",
+          "path": "v5-tiles/s3-tiles-v7.jpeg",
+          "size_kb": 595.1,
+          "modified": "2026-09-14T21:03:47"
+        },
+        {
+          "name": "s3-tiles-v8.jpeg",
+          "path": "v5-tiles/s3-tiles-v8.jpeg",
+          "size_kb": 606.8,
+          "modified": "2026-09-14T21:03:47"
+        },
+        {
+          "name": "s4-tiles-v1.jpeg",
+          "path": "v5-tiles/s4-tiles-v1.jpeg",
+          "size_kb": 593.2,
+          "modified": "2026-09-14T18:32:07"
+        },
+        {
+          "name": "s4-tiles-v2.jpeg",
+          "path": "v5-tiles/s4-tiles-v2.jpeg",
+          "size_kb": 577.8,
+          "modified": "2026-09-14T18:32:08"
+        },
+        {
+          "name": "s4-tiles-v3.jpeg",
+          "path": "v5-tiles/s4-tiles-v3.jpeg",
+          "size_kb": 594.6,
+          "modified": "2026-09-14T18:32:08"
+        },
+        {
+          "name": "s4-tiles-v4.jpeg",
+          "path": "v5-tiles/s4-tiles-v4.jpeg",
+          "size_kb": 608.4,
+          "modified": "2026-09-14T18:32:09"
+        },
+        {
+          "name": "s5-tiles-v1.jpeg",
+          "path": "v5-tiles/s5-tiles-v1.jpeg",
+          "size_kb": 447.7,
+          "modified": "2026-09-14T18:53:22"
+        },
+        {
+          "name": "s5-tiles-v2.jpeg",
+          "path": "v5-tiles/s5-tiles-v2.jpeg",
+          "size_kb": 436.9,
+          "modified": "2026-09-14T18:53:23"
+        },
+        {
+          "name": "s5-tiles-v3.jpeg",
+          "path": "v5-tiles/s5-tiles-v3.jpeg",
+          "size_kb": 478.5,
+          "modified": "2026-09-14T18:54:14"
+        },
+        {
+          "name": "s5-tiles-v4.jpeg",
+          "path": "v5-tiles/s5-tiles-v4.jpeg",
+          "size_kb": 489.4,
+          "modified": "2026-09-14T18:53:23"
+        }
+      ],
+      "count": 32
+    },
+    "long-bg": {
+      "label": "long-bg — segmented panoramic (3 segs × 4-5 variants × 5 stages)",
+      "files": [
+        {
+          "name": "s1-seg-a-iterA-v1.jpeg",
+          "path": "long-bg/s1-seg-a-iterA-v1.jpeg",
+          "size_kb": 556.0,
+          "modified": "2026-09-15T10:44:49"
+        },
+        {
+          "name": "s1-seg-a-iterA-v2.jpeg",
+          "path": "long-bg/s1-seg-a-iterA-v2.jpeg",
+          "size_kb": 597.2,
+          "modified": "2026-09-15T10:44:49"
+        },
+        {
+          "name": "s1-seg-a-iterA-v3.jpeg",
+          "path": "long-bg/s1-seg-a-iterA-v3.jpeg",
+          "size_kb": 585.3,
+          "modified": "2026-09-15T10:44:50"
+        },
+        {
+          "name": "s1-seg-a-iterA-v4.jpeg",
+          "path": "long-bg/s1-seg-a-iterA-v4.jpeg",
+          "size_kb": 528.8,
+          "modified": "2026-09-15T10:44:50"
+        },
+        {
+          "name": "s1-seg-a-v1.jpeg",
+          "path": "long-bg/s1-seg-a-v1.jpeg",
+          "size_kb": 471.1,
+          "modified": "2026-09-15T10:34:08"
+        },
+        {
+          "name": "s1-seg-a-v2.jpeg",
+          "path": "long-bg/s1-seg-a-v2.jpeg",
+          "size_kb": 467.1,
+          "modified": "2026-09-15T10:34:09"
+        },
+        {
+          "name": "s1-seg-a-v3.jpeg",
+          "path": "long-bg/s1-seg-a-v3.jpeg",
+          "size_kb": 394.6,
+          "modified": "2026-09-15T10:34:09"
+        },
+        {
+          "name": "s1-seg-b-iterA-v1.jpeg",
+          "path": "long-bg/s1-seg-b-iterA-v1.jpeg",
+          "size_kb": 553.4,
+          "modified": "2026-09-15T10:51:12"
+        },
+        {
+          "name": "s1-seg-b-iterA-v2.jpeg",
+          "path": "long-bg/s1-seg-b-iterA-v2.jpeg",
+          "size_kb": 524.5,
+          "modified": "2026-09-15T10:51:13"
+        },
+        {
+          "name": "s1-seg-b-iterA-v3.jpeg",
+          "path": "long-bg/s1-seg-b-iterA-v3.jpeg",
+          "size_kb": 528.6,
+          "modified": "2026-09-15T10:51:13"
+        },
+        {
+          "name": "s1-seg-b-iterA-v4.jpeg",
+          "path": "long-bg/s1-seg-b-iterA-v4.jpeg",
+          "size_kb": 544.0,
+          "modified": "2026-09-15T10:51:14"
+        },
+        {
+          "name": "s1-seg-b-v1.jpeg",
+          "path": "long-bg/s1-seg-b-v1.jpeg",
+          "size_kb": 444.7,
+          "modified": "2026-09-15T10:34:10"
+        },
+        {
+          "name": "s1-seg-b-v2.jpeg",
+          "path": "long-bg/s1-seg-b-v2.jpeg",
+          "size_kb": 447.6,
+          "modified": "2026-09-15T10:34:10"
+        },
+        {
+          "name": "s1-seg-b-v3.jpeg",
+          "path": "long-bg/s1-seg-b-v3.jpeg",
+          "size_kb": 402.6,
+          "modified": "2026-09-15T10:34:11"
+        },
+        {
+          "name": "s1-seg-c-iterA-v1.jpeg",
+          "path": "long-bg/s1-seg-c-iterA-v1.jpeg",
+          "size_kb": 438.5,
+          "modified": "2026-09-15T10:51:15"
+        },
+        {
+          "name": "s1-seg-c-iterA-v2.jpeg",
+          "path": "long-bg/s1-seg-c-iterA-v2.jpeg",
+          "size_kb": 447.9,
+          "modified": "2026-09-15T10:51:16"
+        },
+        {
+          "name": "s1-seg-c-iterA-v3.jpeg",
+          "path": "long-bg/s1-seg-c-iterA-v3.jpeg",
+          "size_kb": 420.5,
+          "modified": "2026-09-15T10:51:16"
+        },
+        {
+          "name": "s1-seg-c-iterA-v4.jpeg",
+          "path": "long-bg/s1-seg-c-iterA-v4.jpeg",
+          "size_kb": 438.5,
+          "modified": "2026-09-15T10:51:17"
+        },
+        {
+          "name": "s1-seg-c-v1.jpeg",
+          "path": "long-bg/s1-seg-c-v1.jpeg",
+          "size_kb": 379.9,
+          "modified": "2026-09-15T10:34:12"
+        },
+        {
+          "name": "s1-seg-c-v2.jpeg",
+          "path": "long-bg/s1-seg-c-v2.jpeg",
+          "size_kb": 308.7,
+          "modified": "2026-09-15T10:34:12"
+        },
+        {
+          "name": "s1-seg-c-v3.jpeg",
+          "path": "long-bg/s1-seg-c-v3.jpeg",
+          "size_kb": 340.6,
+          "modified": "2026-09-15T10:34:13"
+        },
+        {
+          "name": "s2-seg-a-iterA-v1.jpeg",
+          "path": "long-bg/s2-seg-a-iterA-v1.jpeg",
+          "size_kb": 537.2,
+          "modified": "2026-09-15T10:52:07"
+        },
+        {
+          "name": "s2-seg-a-iterA-v2.jpeg",
+          "path": "long-bg/s2-seg-a-iterA-v2.jpeg",
+          "size_kb": 505.7,
+          "modified": "2026-09-15T10:52:08"
+        },
+        {
+          "name": "s2-seg-a-iterA-v3.jpeg",
+          "path": "long-bg/s2-seg-a-iterA-v3.jpeg",
+          "size_kb": 550.8,
+          "modified": "2026-09-15T10:52:09"
+        },
+        {
+          "name": "s2-seg-a-iterA-v4.jpeg",
+          "path": "long-bg/s2-seg-a-iterA-v4.jpeg",
+          "size_kb": 538.2,
+          "modified": "2026-09-15T10:52:09"
+        },
+        {
+          "name": "s2-seg-a-v1.jpeg",
+          "path": "long-bg/s2-seg-a-v1.jpeg",
+          "size_kb": 467.2,
+          "modified": "2026-09-15T10:40:27"
+        },
+        {
+          "name": "s2-seg-a-v2.jpeg",
+          "path": "long-bg/s2-seg-a-v2.jpeg",
+          "size_kb": 455.6,
+          "modified": "2026-09-15T10:40:28"
+        },
+        {
+          "name": "s2-seg-a-v3.jpeg",
+          "path": "long-bg/s2-seg-a-v3.jpeg",
+          "size_kb": 453.1,
+          "modified": "2026-09-15T10:40:29"
+        },
+        {
+          "name": "s2-seg-b-iterA-v1.jpeg",
+          "path": "long-bg/s2-seg-b-iterA-v1.jpeg",
+          "size_kb": 499.1,
+          "modified": "2026-09-15T10:52:10"
+        },
+        {
+          "name": "s2-seg-b-iterA-v2.jpeg",
+          "path": "long-bg/s2-seg-b-iterA-v2.jpeg",
+          "size_kb": 517.3,
+          "modified": "2026-09-15T10:52:11"
+        },
+        {
+          "name": "s2-seg-b-iterA-v3.jpeg",
+          "path": "long-bg/s2-seg-b-iterA-v3.jpeg",
+          "size_kb": 527.8,
+          "modified": "2026-09-15T10:52:11"
+        },
+        {
+          "name": "s2-seg-b-iterA-v4.jpeg",
+          "path": "long-bg/s2-seg-b-iterA-v4.jpeg",
+          "size_kb": 512.3,
+          "modified": "2026-09-15T10:52:12"
+        },
+        {
+          "name": "s2-seg-b-v1.jpeg",
+          "path": "long-bg/s2-seg-b-v1.jpeg",
+          "size_kb": 467.2,
+          "modified": "2026-09-15T10:40:29"
+        },
+        {
+          "name": "s2-seg-b-v2.jpeg",
+          "path": "long-bg/s2-seg-b-v2.jpeg",
+          "size_kb": 459.8,
+          "modified": "2026-09-15T10:40:30"
+        },
+        {
+          "name": "s2-seg-b-v3.jpeg",
+          "path": "long-bg/s2-seg-b-v3.jpeg",
+          "size_kb": 445.7,
+          "modified": "2026-09-15T10:40:30"
+        },
+        {
+          "name": "s2-seg-c-iterA-v1.jpeg",
+          "path": "long-bg/s2-seg-c-iterA-v1.jpeg",
+          "size_kb": 510.0,
+          "modified": "2026-09-15T10:52:13"
+        },
+        {
+          "name": "s2-seg-c-iterA-v2.jpeg",
+          "path": "long-bg/s2-seg-c-iterA-v2.jpeg",
+          "size_kb": 467.1,
+          "modified": "2026-09-15T10:52:13"
+        },
+        {
+          "name": "s2-seg-c-iterA-v3.jpeg",
+          "path": "long-bg/s2-seg-c-iterA-v3.jpeg",
+          "size_kb": 495.2,
+          "modified": "2026-09-15T10:52:14"
+        },
+        {
+          "name": "s2-seg-c-iterA-v4.jpeg",
+          "path": "long-bg/s2-seg-c-iterA-v4.jpeg",
+          "size_kb": 440.3,
+          "modified": "2026-09-15T10:52:15"
+        },
+        {
+          "name": "s2-seg-c-v1.jpeg",
+          "path": "long-bg/s2-seg-c-v1.jpeg",
+          "size_kb": 444.6,
+          "modified": "2026-09-15T10:40:31"
+        },
+        {
+          "name": "s2-seg-c-v2.jpeg",
+          "path": "long-bg/s2-seg-c-v2.jpeg",
+          "size_kb": 464.3,
+          "modified": "2026-09-15T10:40:31"
+        },
+        {
+          "name": "s2-seg-c-v3.jpeg",
+          "path": "long-bg/s2-seg-c-v3.jpeg",
+          "size_kb": 472.5,
+          "modified": "2026-09-15T10:40:32"
+        },
+        {
+          "name": "s3-seg-a-iterA-v1.jpeg",
+          "path": "long-bg/s3-seg-a-iterA-v1.jpeg",
+          "size_kb": 543.9,
+          "modified": "2026-09-15T10:52:15"
+        },
+        {
+          "name": "s3-seg-a-iterA-v2.jpeg",
+          "path": "long-bg/s3-seg-a-iterA-v2.jpeg",
+          "size_kb": 589.0,
+          "modified": "2026-09-15T10:52:16"
+        },
+        {
+          "name": "s3-seg-a-iterA-v3.jpeg",
+          "path": "long-bg/s3-seg-a-iterA-v3.jpeg",
+          "size_kb": 529.4,
+          "modified": "2026-09-15T10:52:17"
+        },
+        {
+          "name": "s3-seg-a-iterA-v4.jpeg",
+          "path": "long-bg/s3-seg-a-iterA-v4.jpeg",
+          "size_kb": 570.6,
+          "modified": "2026-09-15T10:52:18"
+        },
+        {
+          "name": "s3-seg-a-v1.jpeg",
+          "path": "long-bg/s3-seg-a-v1.jpeg",
+          "size_kb": 540.5,
+          "modified": "2026-09-15T10:40:33"
+        },
+        {
+          "name": "s3-seg-a-v2.jpeg",
+          "path": "long-bg/s3-seg-a-v2.jpeg",
+          "size_kb": 526.2,
+          "modified": "2026-09-15T10:40:33"
+        },
+        {
+          "name": "s3-seg-a-v3.jpeg",
+          "path": "long-bg/s3-seg-a-v3.jpeg",
+          "size_kb": 550.7,
+          "modified": "2026-09-15T10:40:34"
+        },
+        {
+          "name": "s3-seg-b-iterA-v1.jpeg",
+          "path": "long-bg/s3-seg-b-iterA-v1.jpeg",
+          "size_kb": 579.3,
+          "modified": "2026-09-15T10:52:18"
+        },
+        {
+          "name": "s3-seg-b-iterA-v2.jpeg",
+          "path": "long-bg/s3-seg-b-iterA-v2.jpeg",
+          "size_kb": 583.0,
+          "modified": "2026-09-15T10:52:19"
+        },
+        {
+          "name": "s3-seg-b-iterA-v3.jpeg",
+          "path": "long-bg/s3-seg-b-iterA-v3.jpeg",
+          "size_kb": 574.9,
+          "modified": "2026-09-15T10:52:20"
+        },
+        {
+          "name": "s3-seg-b-iterA-v4.jpeg",
+          "path": "long-bg/s3-seg-b-iterA-v4.jpeg",
+          "size_kb": 558.0,
+          "modified": "2026-09-15T10:52:20"
+        },
+        {
+          "name": "s3-seg-b-v1.jpeg",
+          "path": "long-bg/s3-seg-b-v1.jpeg",
+          "size_kb": 389.2,
+          "modified": "2026-09-15T10:40:34"
+        },
+        {
+          "name": "s3-seg-b-v2.jpeg",
+          "path": "long-bg/s3-seg-b-v2.jpeg",
+          "size_kb": 438.1,
+          "modified": "2026-09-15T10:40:35"
+        },
+        {
+          "name": "s3-seg-b-v3.jpeg",
+          "path": "long-bg/s3-seg-b-v3.jpeg",
+          "size_kb": 439.4,
+          "modified": "2026-09-15T10:40:36"
+        },
+        {
+          "name": "s3-seg-c-iterA-v1.jpeg",
+          "path": "long-bg/s3-seg-c-iterA-v1.jpeg",
+          "size_kb": 520.7,
+          "modified": "2026-09-15T10:52:21"
+        },
+        {
+          "name": "s3-seg-c-iterA-v2.jpeg",
+          "path": "long-bg/s3-seg-c-iterA-v2.jpeg",
+          "size_kb": 468.3,
+          "modified": "2026-09-15T10:52:22"
+        },
+        {
+          "name": "s3-seg-c-iterA-v3.jpeg",
+          "path": "long-bg/s3-seg-c-iterA-v3.jpeg",
+          "size_kb": 482.4,
+          "modified": "2026-09-15T10:52:22"
+        },
+        {
+          "name": "s3-seg-c-iterA-v4.jpeg",
+          "path": "long-bg/s3-seg-c-iterA-v4.jpeg",
+          "size_kb": 1.2,
+          "modified": "2026-09-15T10:52:23"
+        },
+        {
+          "name": "s3-seg-c-v1.jpeg",
+          "path": "long-bg/s3-seg-c-v1.jpeg",
+          "size_kb": 395.5,
+          "modified": "2026-09-15T10:40:36"
+        },
+        {
+          "name": "s3-seg-c-v2.jpeg",
+          "path": "long-bg/s3-seg-c-v2.jpeg",
+          "size_kb": 371.3,
+          "modified": "2026-09-15T10:40:37"
+        },
+        {
+          "name": "s3-seg-c-v3.jpeg",
+          "path": "long-bg/s3-seg-c-v3.jpeg",
+          "size_kb": 415.4,
+          "modified": "2026-09-15T10:40:37"
+        },
+        {
+          "name": "s4-seg-a-iterA-v1.jpeg",
+          "path": "long-bg/s4-seg-a-iterA-v1.jpeg",
+          "size_kb": 561.0,
+          "modified": "2026-09-15T10:53:13"
+        },
+        {
+          "name": "s4-seg-a-iterA-v2.jpeg",
+          "path": "long-bg/s4-seg-a-iterA-v2.jpeg",
+          "size_kb": 559.1,
+          "modified": "2026-09-15T10:53:14"
+        },
+        {
+          "name": "s4-seg-a-iterA-v3.jpeg",
+          "path": "long-bg/s4-seg-a-iterA-v3.jpeg",
+          "size_kb": 578.5,
+          "modified": "2026-09-15T10:53:15"
+        },
+        {
+          "name": "s4-seg-a-iterA-v4.jpeg",
+          "path": "long-bg/s4-seg-a-iterA-v4.jpeg",
+          "size_kb": 559.4,
+          "modified": "2026-09-15T10:53:15"
+        },
+        {
+          "name": "s4-seg-a-v1.jpeg",
+          "path": "long-bg/s4-seg-a-v1.jpeg",
+          "size_kb": 486.0,
+          "modified": "2026-09-15T10:41:26"
+        },
+        {
+          "name": "s4-seg-a-v2.jpeg",
+          "path": "long-bg/s4-seg-a-v2.jpeg",
+          "size_kb": 478.4,
+          "modified": "2026-09-15T10:41:27"
+        },
+        {
+          "name": "s4-seg-a-v3.jpeg",
+          "path": "long-bg/s4-seg-a-v3.jpeg",
+          "size_kb": 428.1,
+          "modified": "2026-09-15T10:41:28"
+        },
+        {
+          "name": "s4-seg-b-iterA-v1.jpeg",
+          "path": "long-bg/s4-seg-b-iterA-v1.jpeg",
+          "size_kb": 485.3,
+          "modified": "2026-09-15T10:53:16"
+        },
+        {
+          "name": "s4-seg-b-iterA-v2.jpeg",
+          "path": "long-bg/s4-seg-b-iterA-v2.jpeg",
+          "size_kb": 512.0,
+          "modified": "2026-09-15T10:53:17"
+        },
+        {
+          "name": "s4-seg-b-iterA-v3.jpeg",
+          "path": "long-bg/s4-seg-b-iterA-v3.jpeg",
+          "size_kb": 504.8,
+          "modified": "2026-09-15T10:53:17"
+        },
+        {
+          "name": "s4-seg-b-iterA-v4.jpeg",
+          "path": "long-bg/s4-seg-b-iterA-v4.jpeg",
+          "size_kb": 460.9,
+          "modified": "2026-09-15T10:53:18"
+        },
+        {
+          "name": "s4-seg-b-v1.jpeg",
+          "path": "long-bg/s4-seg-b-v1.jpeg",
+          "size_kb": 496.2,
+          "modified": "2026-09-15T10:41:28"
+        },
+        {
+          "name": "s4-seg-b-v2.jpeg",
+          "path": "long-bg/s4-seg-b-v2.jpeg",
+          "size_kb": 531.7,
+          "modified": "2026-09-15T10:41:29"
+        },
+        {
+          "name": "s4-seg-b-v3.jpeg",
+          "path": "long-bg/s4-seg-b-v3.jpeg",
+          "size_kb": 518.4,
+          "modified": "2026-09-15T10:41:30"
+        },
+        {
+          "name": "s4-seg-c-iterA-v1.jpeg",
+          "path": "long-bg/s4-seg-c-iterA-v1.jpeg",
+          "size_kb": 488.3,
+          "modified": "2026-09-15T10:53:19"
+        },
+        {
+          "name": "s4-seg-c-iterA-v2.jpeg",
+          "path": "long-bg/s4-seg-c-iterA-v2.jpeg",
+          "size_kb": 544.3,
+          "modified": "2026-09-15T10:53:19"
+        },
+        {
+          "name": "s4-seg-c-iterA-v3.jpeg",
+          "path": "long-bg/s4-seg-c-iterA-v3.jpeg",
+          "size_kb": 459.3,
+          "modified": "2026-09-15T10:53:20"
+        },
+        {
+          "name": "s4-seg-c-iterA-v4.jpeg",
+          "path": "long-bg/s4-seg-c-iterA-v4.jpeg",
+          "size_kb": 533.6,
+          "modified": "2026-09-15T10:53:20"
+        },
+        {
+          "name": "s4-seg-c-v1.jpeg",
+          "path": "long-bg/s4-seg-c-v1.jpeg",
+          "size_kb": 429.6,
+          "modified": "2026-09-15T10:41:30"
+        },
+        {
+          "name": "s4-seg-c-v2.jpeg",
+          "path": "long-bg/s4-seg-c-v2.jpeg",
+          "size_kb": 1.2,
+          "modified": "2026-09-15T10:41:31"
+        },
+        {
+          "name": "s4-seg-c-v3.jpeg",
+          "path": "long-bg/s4-seg-c-v3.jpeg",
+          "size_kb": 508.1,
+          "modified": "2026-09-15T10:41:31"
+        },
+        {
+          "name": "s5-seg-a-iterA-v1.jpeg",
+          "path": "long-bg/s5-seg-a-iterA-v1.jpeg",
+          "size_kb": 383.8,
+          "modified": "2026-09-15T10:53:21"
+        },
+        {
+          "name": "s5-seg-a-iterA-v2.jpeg",
+          "path": "long-bg/s5-seg-a-iterA-v2.jpeg",
+          "size_kb": 376.5,
+          "modified": "2026-09-15T10:53:22"
+        },
+        {
+          "name": "s5-seg-a-iterA-v3.jpeg",
+          "path": "long-bg/s5-seg-a-iterA-v3.jpeg",
+          "size_kb": 398.1,
+          "modified": "2026-09-15T10:53:22"
+        },
+        {
+          "name": "s5-seg-a-iterA-v4.jpeg",
+          "path": "long-bg/s5-seg-a-iterA-v4.jpeg",
+          "size_kb": 389.1,
+          "modified": "2026-09-15T10:53:23"
+        },
+        {
+          "name": "s5-seg-a-v1.jpeg",
+          "path": "long-bg/s5-seg-a-v1.jpeg",
+          "size_kb": 349.8,
+          "modified": "2026-09-15T10:41:32"
+        },
+        {
+          "name": "s5-seg-a-v2.jpeg",
+          "path": "long-bg/s5-seg-a-v2.jpeg",
+          "size_kb": 389.1,
+          "modified": "2026-09-15T10:41:32"
+        },
+        {
+          "name": "s5-seg-a-v3.jpeg",
+          "path": "long-bg/s5-seg-a-v3.jpeg",
+          "size_kb": 314.8,
+          "modified": "2026-09-15T10:41:33"
+        },
+        {
+          "name": "s5-seg-b-iterA-v1.jpeg",
+          "path": "long-bg/s5-seg-b-iterA-v1.jpeg",
+          "size_kb": 425.7,
+          "modified": "2026-09-15T10:53:23"
+        },
+        {
+          "name": "s5-seg-b-iterA-v2.jpeg",
+          "path": "long-bg/s5-seg-b-iterA-v2.jpeg",
+          "size_kb": 442.2,
+          "modified": "2026-09-15T10:53:24"
+        },
+        {
+          "name": "s5-seg-b-iterA-v3.jpeg",
+          "path": "long-bg/s5-seg-b-iterA-v3.jpeg",
+          "size_kb": 431.1,
+          "modified": "2026-09-15T10:53:24"
+        },
+        {
+          "name": "s5-seg-b-iterA-v4.jpeg",
+          "path": "long-bg/s5-seg-b-iterA-v4.jpeg",
+          "size_kb": 412.5,
+          "modified": "2026-09-15T10:53:25"
+        },
+        {
+          "name": "s5-seg-b-v1.jpeg",
+          "path": "long-bg/s5-seg-b-v1.jpeg",
+          "size_kb": 374.0,
+          "modified": "2026-09-15T10:41:34"
+        },
+        {
+          "name": "s5-seg-b-v2.jpeg",
+          "path": "long-bg/s5-seg-b-v2.jpeg",
+          "size_kb": 383.5,
+          "modified": "2026-09-15T10:41:34"
+        },
+        {
+          "name": "s5-seg-b-v3.jpeg",
+          "path": "long-bg/s5-seg-b-v3.jpeg",
+          "size_kb": 390.9,
+          "modified": "2026-09-15T10:41:35"
+        },
+        {
+          "name": "s5-seg-c-iterA-v1.jpeg",
+          "path": "long-bg/s5-seg-c-iterA-v1.jpeg",
+          "size_kb": 415.7,
+          "modified": "2026-09-15T10:53:26"
+        },
+        {
+          "name": "s5-seg-c-iterA-v2.jpeg",
+          "path": "long-bg/s5-seg-c-iterA-v2.jpeg",
+          "size_kb": 409.6,
+          "modified": "2026-09-15T10:53:26"
+        },
+        {
+          "name": "s5-seg-c-iterA-v3.jpeg",
+          "path": "long-bg/s5-seg-c-iterA-v3.jpeg",
+          "size_kb": 455.4,
+          "modified": "2026-09-15T10:53:27"
+        },
+        {
+          "name": "s5-seg-c-iterA-v4.jpeg",
+          "path": "long-bg/s5-seg-c-iterA-v4.jpeg",
+          "size_kb": 457.6,
+          "modified": "2026-09-15T10:53:27"
+        },
+        {
+          "name": "s5-seg-c-v1.jpeg",
+          "path": "long-bg/s5-seg-c-v1.jpeg",
+          "size_kb": 400.7,
+          "modified": "2026-09-15T10:41:35"
+        },
+        {
+          "name": "s5-seg-c-v2.jpeg",
+          "path": "long-bg/s5-seg-c-v2.jpeg",
+          "size_kb": 415.0,
+          "modified": "2026-09-15T10:41:36"
+        },
+        {
+          "name": "s5-seg-c-v3.jpeg",
+          "path": "long-bg/s5-seg-c-v3.jpeg",
+          "size_kb": 463.8,
+          "modified": "2026-09-15T10:41:37"
+        }
+      ],
+      "count": 105
+    }
+  },
+  "totals": {
+    "files": 196,
+    "size_mb": 94.42
+  }
+}

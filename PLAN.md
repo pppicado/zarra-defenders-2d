@@ -61,17 +61,19 @@
 
 ### 2.4. Stages / niveles
 
-Propuesta de 5 stages, cada uno en una zona del Valle:
+**Re-alineado con zarra-defenders 3D (`/projects/personal/zarra-defenders/plan.md §3`)**: las 5 etapas coinciden en orden + toponimia real del Valle de Ayora-Cofrentes. El Castillo de Cofrentes deja de ser un stage y pasa a ser referencia de skyline (visible en La Hunde/Ayora) — en el 3D aparece al fondo en niveles 3-4.
 
-| # | Stage | Ambientación | Enemigos principales | Sprite del bg |
+| # | Stage | Ambientación (3D-aligned) | Enemigos principales | Sprite del bg |
 |---|---|---|---|---|
-| 1 | **Bosque mediterráneo** | Pinos, encinas, almendros | topadora cortando árboles, dron fumigador | bosque.png (generar) |
-| 2 | **Pueblo de Cofrentes** | Casas blancas, castillo al fondo | camión TRECO, valla publicitaria | pueblo.png (generar) |
-| 3 | **Río Cabriel** | Ribera, agua, rocas | tubos de lixiviado vertiendo, **camión cisterna de residuos** | rio.png (generar) |
-| 4 | **Vertedero TRECO** | Macrovertedero, montañas de basura | planta TRECO (boss), bidón lixiviado, incineradora, bolsa plástica | vertedero.png (generar) |
-| 5 | **Castillo de Cofrentes** | El peñón con el castillo y el pueblo | sello burocrático (mini-boss), trailer de obra | castillo.png (generar — ya lo tenemos) |
+| 1 | **Las Hoyas de Caballero** (Zarra) | Encinas + almendros · suelo arcilloso-rojizo · atardecer manchego · TRECO amenazando | topadora arrancando encinas (boss), camión TRECO, taladros de prospección, vallas TRECO | stage1-lashoyas.png (Las Hoyas, Zarra, polígono 11) |
+| 2 | **La Hoz del río Zarra** | Cañón estrecho · río turquesa · paredes rocosas · tubería de lixiviados | bidones lixiviados (boss: tubería gigante), drones fumigadores, tuberías clandestinas | stage2-lahoz.png (Barranco del Agua, 13 km) |
+| 3 | **Sierra de La Hunde y Palomera** (Ayora) | Pinar denso · pino carrasco · romero + aliaga como sotobosque · sol entre ramas | motosierras, talas, plataformas solares, camiones oruga (boss: incineradora móvil) | stage3-lahunde.png (parajes protegidos, "pulmón a proteger") |
+| 4 | **Casco urbano de Ayora** | Casas blancas encaladas · tejas árabes · balcón · plaza con fuente · sol de mediodía | convoy de trailers (boss: trailer bidones), humo tóxico, plásticos volados | stage4-ayora.png (junto al colegio y polideportivo) |
+| 5 | **El Acuífero de la Mancha Oriental** (jefe final) | Cámara subterránea · estalactitas · ríos subterráneos azul brillante · planta TRECO escupiendo residuos al acuífero | drones de vigilancia, extractores de agua, tuberías centrales (boss: planta TRECO — NO muere, abre pantalla final) | stage5-acuifero.png (8.500 km² subterráneos) |
 
-**Total:** 12 enemigos distintos + 1 boss = 13 tipos.
+**Total:** 12 enemigos distintos + 1 boss final = 13 tipos.
+
+**Boss final diferenciado del 3D:** en el 3D la planta TRECO se "desactiva" (lifecycle='desactivacion') y abre pantalla final con dato + link a plataforma vecinal. En el 2D se mantiene este contrato pedagógico.
 
 ### 2.5. Pedagogía in-game
 

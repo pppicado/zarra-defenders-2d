@@ -140,11 +140,11 @@ async function _loadBackgroundManifest() {
  */
 function _loadPlaceholderBg(bg, stageId) {
   const palettes = {
-    'stage1-bosque':    { top: 0x7eaa5a, bottom: 0x4a6b30 },  // forest gradient
-    'stage2-pueblo':    { top: 0xf0d8b8, bottom: 0xb89868 },  // whitewashed village
-    'stage3-rio':       { top: 0x6ab0c8, bottom: 0x2e6680 },  // river water
-    'stage4-vertedero': { top: 0x6a6058, bottom: 0x3a3530 },  // landfill
-    'stage5-castillo':  { top: 0xd4b88c, bottom: 0x8a6c4c },  // volcanic peñón
+    'stage1-lashoyas': { top: 0xe07040, bottom: 0xb04a20 },  // Las Hoyas sunset manchego (encinas+almendros+sunset)
+    'stage2-lahoz':    { top: 0x4a5a4a, bottom: 0x2e3a2e },  // La Hoz canyon walls (grey rock + turquoise river)
+    'stage3-lahunde':  { top: 0x2e5a3a, bottom: 0x1a4020 },  // La Hunde dense pine forest
+    'stage4-ayora':    { top: 0xf0d8b8, bottom: 0xb89868 },  // Ayora casco (whitewashed houses + cobblestone)
+    'stage5-acuifero': { top: 0x1a2a3a, bottom: 0x0a1a2a },  // Acuífero underground (dark wet stone + glowing blue water)
   }
   const { top, bottom } = palettes[stageId] ?? { top: 0x2a3a4a, bottom: 0x182028 }
 
@@ -243,7 +243,7 @@ async function bootstrap() {
   // `tests/tile-gallery.html` still instantiates Tilemap directly from
   // `../src/iso/tilemap.js` — that path is unaffected.
   //
-  // (Previously: const tilemap = new Tilemap('stage1-bosque', ...) and
+  // (Previously: const tilemap = new Tilemap('stage1-lashoyas', ...) and
   //  isoWorld.registerTilemap/isoWorld.setStage(...) — both removed.)
 
   // --- Background layer (BG-001..BG-005) ---
@@ -258,12 +258,12 @@ async function bootstrap() {
   // PR-2: load the real Minimax-generated background from `assets/backgrounds/`.
   // The placeholder path is kept for offline / first-boot fallback (see _loadPlaceholderBg).
   const _bgManifest = await _loadBackgroundManifest()
-  const stage1Path = _bgManifest['stage1-bosque'] ?? 'assets/backgrounds/stage1-bosque.png'
+  const stage1Path = _bgManifest['stage1-lashoyas'] ?? 'assets/backgrounds/stage1-lashoyas.png'
   try {
-    await bg.load('stage1-bosque', stage1Path)
+    await bg.load('stage1-lashoyas', stage1Path)
   } catch (err) {
     console.warn('[main] bg load failed, falling back to procedural placeholder:', err?.message ?? err)
-    _loadPlaceholderBg(bg, 'stage1-bosque')
+    _loadPlaceholderBg(bg, 'stage1-lashoyas')
   }
 
   // --- HUD: mano + corazones + papeleta (en appHud.stage) ---

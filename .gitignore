@@ -30,3 +30,30 @@ tests/out/*.png
 node_modules/
 assets/sprites/_heart-attempts/
 assets/sprites/_hand-attempts/
+
+# ────────────────────────────────────────────────────────────────────
+# Raw minimax image generations (preserved on disk but NOT in git;
+# regenerate via tools/postprocess-v4-journey.py + tools/build-catalogoraw.py
+# using cache at assets/backgrounds/long-bg/ and assets/backgrounds/v*-{rpg,journey,tiles}/).
+# Los JPEGs originales de minimax pesan ~95 MB; mantenerlos en git
+# inflaría el repo innecesariamente ya que están regenerables.
+assets/backgrounds/v2-rpg/
+assets/backgrounds/v3-rpg-isometric/
+assets/backgrounds/v4-journey/*.jpeg
+assets/backgrounds/v5-tiles/*.jpeg
+assets/backgrounds/long-bg/*.jpeg
+
+# Definitivos pixel-art versionados (regenerables con tools/postprocess-v4-journey.py)
+assets/backgrounds/v4-journey-processed/
+assets/backgrounds/v5-tiles-processed/
+assets/backgrounds/long-bg-composites/*.raw.png
+
+# Dev / screenshot artifacts (Playwright, lightbox tests, manual review)
+catalog-after-fix.png
+catalog-long-final.png
+catalog-stage1-zoom.png
+catalogoraw-final.png
+catalogoraw-page.png
+lightbox-1080p.png
+lightbox-improved.png
+lightbox-test.png

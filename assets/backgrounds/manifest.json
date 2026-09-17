@@ -1,7 +1,7 @@
 {
-  "stage1-bosque": "assets/backgrounds/stage1-bosque.png",
-  "stage2-pueblo": "assets/backgrounds/stage2-pueblo.png",
-  "stage3-rio": "assets/backgrounds/stage3-rio.png",
-  "stage4-vertedero": "assets/backgrounds/stage4-vertedero.png",
-  "stage5-castillo": "assets/backgrounds/stage5-castillo.png"
+  "stage1-lashoyas": "assets/backgrounds/stage1-lashoyas.png",
+  "stage2-lahoz": "assets/backgrounds/stage2-lahoz.png",
+  "stage3-lahunde": "assets/backgrounds/stage3-lahunde.png",
+  "stage4-ayora": "assets/backgrounds/stage4-ayora.png",
+  "stage5-acuifero": "assets/backgrounds/stage5-acuifero.png"
 }

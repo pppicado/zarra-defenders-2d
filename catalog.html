@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zarra Defenders 2D — Fondos RPG (auto-discovery catalog)</title>
+  <link rel="icon" href="data:,">
+  <meta http-equiv="refresh" content="30">
+  <style>
+    :root {
+      --bg: #0e0e10;
+      --surface: #111827;
+      --surface-2: #1f2937;
+      --border: #374151;
+      --text: #e5e7eb;
+      --text-muted: #9ca3af;
+      --text-strong: #f3f4f6;
+      --accent: #fbbf24;
+      --accent-soft: #fde68a;
+      --green: #4ade80;
+      --red: #ef4444;
+      --blue: #93c5fd;
+      --code-bg: #0b1020;
+      --discarded: #6b7280;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 28px 32px 80px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    h1 { font-size: 22px; margin: 0 0 6px; color: var(--text-strong); }
+    h2 {
+      font-size: 14px; margin: 36px 0 12px; color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px; letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    h3 { font-size: 13px; margin: 18px 0 8px; color: var(--accent-soft); }
+    p.note { font-size: 13px; color: var(--text-muted); margin: 0 0 14px; }
+    code, .mono {
+      background: var(--code-bg); color: var(--text-strong);
+      padding: 1px 6px; border-radius: 3px;
+      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 12px;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 24px; flex-wrap: wrap;
+      margin-bottom: 24px; padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-meta {
+      font-size: 12px; color: var(--text-muted);
+      font-family: ui-monospace, monospace; text-align: right; line-height: 1.7;
+    }
+    .header-meta a { display: block; }
+    .header-meta .ts { color: var(--accent); }
+
+    .stage {
+      margin: 0 0 36px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .stage-header {
+      padding: 14px 18px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 16px; flex-wrap: wrap;
+    }
+    .stage-title { display: flex; flex-direction: column; gap: 2px; }
+    .stage-title .name { font-size: 16px; font-weight: 600; color: var(--text-strong); }
+    .stage-title .theme { font-size: 12px; color: var(--text-muted); }
+    .stage-stats {
+      font-family: ui-monospace, monospace; font-size: 11px;
+      color: var(--text-muted); text-align: right; line-height: 1.6;
+    }
+    .stage-stats .dim { color: var(--accent-soft); }
+    .stage-body { padding: 16px 18px 18px; }
+
+    .stage-main img {
+      display: block; width: 100%; height: auto;
+      image-rendering: pixelated; image-rendering: crisp-edges;
+      border-radius: 4px; border: 1px solid var(--border);
+    }
+    .stage-variants {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .stage-variants.cols-12 { grid-template-columns: repeat(6, 1fr); }
+    .stage-variants.cols-8  { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 1400px) { .stage-variants.cols-12 { grid-template-columns: repeat(4, 1fr); } }
+    @media (max-width: 900px)  { .stage-variants { grid-template-columns: repeat(2, 1fr); } }
+
+    .stage-variants figure {
+      margin: 0; padding: 4px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+    .stage-variants figure.picked {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+    .stage-variants img {
+      display: block; width: 100%; height: auto; image-rendering: pixelated;
+    }
+    .stage-variants figcaption {
+      margin-top: 4px; font-size: 10px;
+      font-family: ui-monospace, monospace; color: var(--text-muted); text-align: center;
+    }
+    .stage-variants figure.picked figcaption { color: var(--accent); font-weight: 600; }
+
+    .findings {
+      margin-top: 14px; padding: 10px 14px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 4px;
+      font-size: 12px; line-height: 1.6; color: var(--text);
+    }
+    .findings strong { color: var(--accent-soft); }
+    .findings .src {
+      display: block; margin-top: 4px; font-size: 11px;
+      color: var(--text-muted); font-family: ui-monospace, monospace;
+    }
+
+    .legend {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px; margin-bottom: 16px; font-size: 12px; color: var(--text-muted);
+    }
+
+    .refresh-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      padding: 8px 14px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .refresh-banner button {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: ui-monospace, monospace;
+    }
+    .refresh-banner button:hover { background: var(--border); }
+
+    .loading {
+      padding: 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-family: ui-monospace, monospace;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div>
+      <h1>Zarra Defenders 2D — Fondos RPG (auto-discovery catalog)</h1>
+      <p class="note">
+        <strong>Catálogo dinámico:</strong> escanea <code>assets/backgrounds/v4-journey/*.jpeg</code>
+        cada vez que se regenera con <code>tools/build-catalog.py</code>. <strong>Regenerá el JSON
+        después de cada generación de imagen</strong> y aparecerá acá automáticamente.
+        Auto-refresh cada 30s via <code>&lt;meta http-equiv="refresh"&gt;</code>.
+      </p>
+      <p class="note">
+        Pipeline: <code>minimax image-01 (21:9 → 1344×576)</code> →
+        <code>quantize 32 colores</code> + <code>4× downsample</code> (Stage 2: <code>2× override</code>) +
+        <code>NEAREST upscale 2×</code> → <code>2688×1152</code> final.
+      </p>
+    </div>
+    <div class="header-meta">
+      <a href="/">/ (juego)</a>
+      <a href="/?test=1">/?test=1 (test level)</a>
+      <span>Server: <code>http://localhost:8000</code></span>
+      <span>Tailscale: <code>http://100.116.137.66:8000</code></span>
+      <span class="ts" id="generated-at">…</span>
+    </div>
+  </header>
+
+  <div class="legend">
+    <div><span style="color:var(--accent)">★ DEFINITIVA</span> = variante elegida para producción</div>
+    <div><span style="color:var(--discarded)">DESCARTADA</span> = iteración con motivo de descarte</div>
+    <div>Stage 2 tiene 2 rondas: <strong>v1-v8</strong> close-up + <strong>far-v1..v4</strong> "from far" iteration</div>
+    <div>Stages 1/3/4/5 con 4× downsample · Stage 2 con 2× override (preserva archway/fuente)</div>
+  </div>
+
+  <div class="refresh-banner">
+    <span id="status">Cargando catálogo…</span>
+    <span>
+      <button onclick="loadCatalog(true)">↻ Refrescar ahora</button>
+      <button onclick="location.href='/assets/backgrounds/catalog-data.json'">Ver JSON</button>
+    </span>
+  </div>
+
+  <div id="catalog-body">
+    <div class="loading">Cargando <code>assets/backgrounds/catalog-data.json</code>…</div>
+  </div>
+
+  <script>
+    const BASE = '/assets/backgrounds/';
+    const DATA_URL = BASE + 'catalog-data.json';
+
+    function escHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderStage(stage) {
+      const variantsCount = stage.variants.length;
+      const isStage2 = stage.num === 2 && variantsCount >= 10;
+      const gridClass = isStage2 ? 'cols-12' : (variantsCount > 4 ? 'cols-8' : '');
+
+      const def = stage.definitive;
+      const defSize = def.size ? `${def.size[0]} × ${def.size[1]}` : '—';
+
+      // LONG panoramic composite (8064×1152) — 3 segments stitched horizontally
+      // Generated by tools/postprocess-long-bg.py from long-bg/ segments
+      const longMap = {
+        1: { id: 'lashoyas', title: 'Las Hoyas — entry → middle → TRECO arrival' },
+        2: { id: 'lahoz',    title: 'La Hoz — canyon entry → pipe midpoint → leachate boss' },
+        3: { id: 'lahunde',  title: 'La Hunde — pine forest → central clearing → incineradora' },
+        4: { id: 'ayora',    title: 'Casco urbano Ayora — archway → plaza → trailer' },
+        5: { id: 'acuifero', title: 'El Acuífero — entrance → chambers → TRECO boss' },
+      };
+      const longInfo = longMap[stage.num];
+      const longSrc = longInfo ? `${BASE}long-bg-composites/long-stage${stage.num}-${longInfo.id}.png` : null;
+      const longRawSrc = longInfo ? `${BASE}long-bg-composites/long-stage${stage.num}-${longInfo.id}.raw.png` : null;
+      const longSection = longInfo ? `
+        <div class="long-panorama" style="margin:16px 0">
+          <div class="long-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <h3 style="margin:0;color:var(--accent-soft);font-size:13px">▸ LONG panoramic (rail scroll)</h3>
+            <div style="font-size:10px;color:var(--text-muted);font-family:monospace">
+              ${longInfo.title} · 8064×1152 px (≈7:1) · arrastrá para desplazarte
+            </div>
+          </div>
+          <div class="long-scroller" style="overflow-x:auto;background:#000;border:1px solid var(--border);border-radius:4px;cursor:grab">
+            <img src="${escHtml(longSrc)}" alt="Stage ${stage.num} long panoramic" style="display:block;width:8064px;height:1152px;max-width:none;image-rendering:pixelated">
+          </div>
+          <div style="margin-top:6px;font-size:11px;color:var(--text-muted)">
+            <a href="${escHtml(longSrc)}" target="_blank">ver procesado</a>
+            ·
+            <a href="${escHtml(longRawSrc)}" target="_blank">ver raw (sin pixel-art)</a>
+            ·
+            segmentos en <code>assets/backgrounds/long-bg/s{N}-seg-{{a,b,c}}-iterA-v{{1..4}}.jpeg</code>
+          </div>
+        </div>` : '';
+
+      const variantsHtml = stage.variants.map(v => {
+        const isPick = v.is_pick;
+        const cls = isPick ? 'picked' : '';
+        // Prefer the processed PNG (pixel art) as the displayed image.
+        // If not yet processed, fall back to the raw JPEG.
+        const procSrc = v.processed_path ? `${BASE}${v.processed_path}` : null;
+        const rawSrc = `${BASE}${v.raw_path}`;
+        const imgSrc = procSrc || rawSrc;
+        const procNote = procSrc
+          ? `pc${v.palette}/ds${v.downsample} pixel-art`
+          : 'raw (no procesado)';
+        const cap = isPick
+          ? `★ ${v.label} DEFINITIVA · ${procNote}`
+          : `${v.label} descartada · ${procNote}${v.discard_reason ? ' — ' + v.discard_reason : ''}`;
+        const capStyle = isPick ? '' : ' style="color:var(--discarded)"';
+        const links = `<a href="${escHtml(rawSrc)}" target="_blank" style="font-size:9px;color:var(--blue)">raw</a>${procSrc ? ` · <a href="${escHtml(procSrc)}" target="_blank" style="font-size:9px;color:var(--blue)">proc</a>` : ''}`;
+        return `<figure class="${cls}">
+          <img src="${escHtml(imgSrc)}" alt="${escHtml(v.name)}" loading="lazy">
+          <figcaption${capStyle}>${escHtml(cap)}<br>${links}</figcaption>
+        </figure>`;
+      }).join('');
+
+      const itNote = stage.iterations_note
+        ? `<p class="note"><strong>Iteración especial:</strong> ${escHtml(stage.iterations_note)}</p>`
+        : '';
+
+      const prev = stage.previous_iterations || {};
+      const hasV3 = prev.v3_rpg_isometric && prev.v3_rpg_isometric.length > 0;
+      const hasV2 = prev.v2_rpg && prev.v2_rpg.length > 0;
+      const prevSection = (hasV3 || hasV2) ? `
+        <details style="margin-top:14px">
+          <summary style="cursor:pointer;color:var(--text-muted);font-size:12px;font-family:monospace">
+            Historial iteraciones anteriores
+            ${hasV3 ? `(${prev.v3_rpg_isometric.length} v3 isometric)` : ''}
+            ${hasV2 ? `(${prev.v2_rpg.length} v2 rpg)` : ''}
+          </summary>
+          <div style="margin-top:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+            ${[...(prev.v3_rpg_isometric || []), ...(prev.v2_rpg || [])].map(f =>
+              `<figure style="margin:0;padding:3px;background:var(--surface-2);border:1px solid var(--border);border-radius:3px">
+                <img src="${BASE}v3-rpg-isometric/${escHtml(f)}" loading="lazy" style="display:block;width:100%;image-rendering:pixelated">
+                <figcaption style="font-size:9px;color:var(--text-muted);font-family:monospace;text-align:center">${escHtml(f)}</figcaption>
+              </figure>`
+            ).join('')}
+          </div>
+        </details>` : '';
+
+      return `<section class="stage">
+        <div class="stage-header">
+          <div class="stage-title">
+            <span class="name">Stage ${stage.num} — ${escHtml(stage.name)}</span>
+            <span class="theme">${escHtml(stage.theme)}</span>
+          </div>
+          <div class="stage-stats">
+            <div><span class="dim">${defSize}</span> px (21:9 standalone)</div>
+            <div>long: <span class="dim">8064 × 1152</span></div>
+            <div>pick: <code>${escHtml(stage.pick_variant)}</code></div>
+            <div>${variantsCount} variants in v5-tiles</div>
+          </div>
+        </div>
+        <div class="stage-body">
+          ${longSection}
+          <div class="stage-main">
+            <img src="${BASE}${escHtml(def.path)}" alt="Stage ${stage.num} definitivo (21:9 standalone)">
+          </div>
+          ${itNote}
+          <div class="stage-variants ${gridClass}">
+            ${variantsHtml}
+          </div>
+          <div class="findings">
+            <strong>Recorrido esperado:</strong> ${escHtml(stage.journey)}
+            <span class="src">${escHtml(stage.plan_ref)} · ${escHtml(stage.landmarks)}</span>
+          </div>
+          ${prevSection}
+        </div>
+      </section>`;
+    }
+
+    async function loadCatalog(forceReload = false) {
+      const status = document.getElementById('status');
+      const body = document.getElementById('catalog-body');
+      const ts = document.getElementById('generated-at');
+      try {
+        const url = forceReload ? DATA_URL + '?_=' + Date.now() : DATA_URL;
+        const r = await fetch(url, { cache: 'no-store' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const data = await r.json();
+        ts.textContent = 'generated: ' + (data.generated_at || '').replace('T', ' ').slice(0, 19);
+        status.textContent = `OK · ${Object.keys(data.stages).length} stages · ${Object.values(data.stages).reduce((acc, s) => acc + s.variants.length, 0)} variants · ${data.generated_at ? 'updated ' + data.generated_at.slice(0, 19) : ''}`;
+
+        const stages = Object.values(data.stages).sort((a, b) => a.num - b.num);
+        body.innerHTML = stages.map(renderStage).join('');
+      } catch (e) {
+        status.textContent = 'ERROR: ' + e.message;
+        body.innerHTML = `<div class="loading">No se pudo cargar <code>${DATA_URL}</code>.<br>
+          Ejecutá <code>python3 tools/build-catalog.py</code> para regenerar el JSON.</div>`;
+      }
+    }
+
+    // Auto-refresh the data on visibility change (when user returns to tab)
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) loadCatalog(true);
+    });
+
+    // Initial load
+    loadCatalog();
+  </script>
+</body>
+</html>
