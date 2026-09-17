@@ -39,6 +39,7 @@ import { BackgroundLayer, BG_SOURCE_HEIGHT_PX, BG_SCALE, BG_RENDERED_HEIGHT_PX }
 import { PedagogyCards } from './pedagogy/cards.js?v=44'
 import { ModalIntermedio } from './pedagogy/modal-intermedio.js?v=44'
 import { ResumenFinal } from './pedagogy/resumen-final.js?v=44'
+import { Biblioteca } from './pedagogy/biblioteca.js?v=44'
 import { __zr } from './engine/dom-debug.js?v=44'
 
 // ============================================================
@@ -364,6 +365,8 @@ async function bootstrap() {
   })
   let resumenUnsub = null
   busOn('stage:cleared', () => {
+    // F1.4 — persist cards to biblioteca before showing resumen
+    biblioteca.recordCards(score.read().cardsShown || [])
     // Defer resumen until the victory overlay is dismissed by the user.
     if (resumenUnsub) resumenUnsub()
     resumenUnsub = busOn('ui:overlayHidden', () => {
@@ -374,6 +377,13 @@ async function bootstrap() {
   })
   busOn('menu:startRequested', () => resumenFinal.hide())
   busOn('bootTestLevel:request', () => resumenFinal.hide())
+
+  // F1.4 — biblioteca pedagógica (accessible desde menú principal).
+  const bibliotecaRoot = document.getElementById('biblioteca')
+  const biblioteca = new Biblioteca({ root: bibliotecaRoot })
+  busOn('menu:bibliotecaRequested', () => biblioteca.show())
+  busOn('menu:startRequested', () => biblioteca.hide())
+  busOn('stage:cleared', () => biblioteca.hide())
   const enemies = new EnemyManager({
     rng: inTestMode ? mulberry32(seed) : Math.random,
     scene: isoWorld.spriteLayer,

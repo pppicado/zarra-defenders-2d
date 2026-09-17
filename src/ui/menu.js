@@ -199,8 +199,9 @@ export class MainMenu {
         id: s.id,
         label: s.label,
       })),
-      { kind: 'modal', id: 'about',      label: STRINGS.menu.modalAcercaDe },
-      { kind: 'modal', id: 'disclaimer', label: STRINGS.menu.modalDisclaimer },
+      { kind: 'modal', id: 'about',       label: STRINGS.menu.modalAcercaDe },
+      { kind: 'modal', id: 'disclaimer',  label: STRINGS.menu.modalDisclaimer },
+      { kind: 'biblioteca', id: 'biblioteca', label: STRINGS.menu.modalBiblioteca },
     ]
     for (let i = 0; i < DEFS.length; i++) {
       const def = DEFS[i]
@@ -259,6 +260,10 @@ export class MainMenu {
     const def = { kind: btn.dataset.kind, id: btn.dataset.menuId }
     if (def.kind === 'modal') {
       this._openModalInline(def.id)
+      return
+    }
+    if (def.kind === 'biblioteca') {
+      emit('menu:bibliotecaRequested', {})
       return
     }
     // Stage button — only fire if unlocked

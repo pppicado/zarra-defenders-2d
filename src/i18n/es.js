@@ -75,6 +75,7 @@ export const STRINGS = {
     cerrarAriaLabel: 'Cerrar',
     modalAcercaDe: 'Acerca de',
     modalDisclaimer: 'Disclaimer',
+    modalBiblioteca: 'Biblioteca pedagógica',
   },
 
   // ============================================================
