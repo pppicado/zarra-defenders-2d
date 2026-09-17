@@ -207,6 +207,20 @@ export const STRINGS = {
         descripcion: 'Has firmado contra la burocracia que autoriza sin consulta vinculante. La administración también se firma.',
       },
     },
+    // Modal intermedio cada 5 enemigos (Fase 1.2) — overlay breve con resumen
+    // acumulativo del impacto pedagógico. Mensaje dinámico según # firmas.
+    modalIntermedio: {
+      subtitulo: 'Sigue sumando. Tu papeleta se suma a la lucha vecinal.',
+      // El mensaje principal se construye dinámicamente según # firmas
+      // (ver buildModalMessage en src/pedagogy/modal-intermedio.js).
+      mensaje: (firmas, shownCount) => {
+        if (firmas < 10) return `${firmas} firmas recogidas contra el proyecto. Cada papeleta se suma a la lucha vecinal del Valle.`
+        if (firmas < 25) return `${firmas} firmas sumadas. El Valle de Ayora-Cofrentes se planta ante TRECO.`
+        if (firmas < 50) return `${firmas} firmas — un acto colectivo. La comarca recuerda: en 2002 ya pararon un vertedero igual.`
+        return `${firmas} firmas. La presión vecinal crece. Sigue sumando.`
+      },
+    },
+
     // Final screen (Fase 1.7) — los 4 enlaces de cierre del loop pedagógico.
     // A6 contract: URLs centralizadas acá, cero literales en código.
     final: {

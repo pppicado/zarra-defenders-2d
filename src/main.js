@@ -37,6 +37,7 @@ import { on as busOn, emit } from './event-bus.js?v=44'
 import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=44'
 import { BackgroundLayer, BG_SOURCE_HEIGHT_PX, BG_SCALE, BG_RENDERED_HEIGHT_PX } from './backgrounds.js?v=44'
 import { PedagogyCards } from './pedagogy/cards.js?v=44'
+import { ModalIntermedio } from './pedagogy/modal-intermedio.js?v=44'
 import { __zr } from './engine/dom-debug.js?v=44'
 
 // ============================================================
@@ -342,6 +343,17 @@ async function bootstrap() {
       archetype: detail.archetype,
     })
   })
+
+  // F1.2 — modal intermedio cada 5 hits.
+  const modalIntermedioRoot = document.getElementById('modal-intermedio')
+  const modalIntermedio = new ModalIntermedio({
+    root: modalIntermedioRoot,
+    triggerEvery: 5,
+    dismissMs: 5000,
+  })
+  busOn('combat:hit', () => modalIntermedio.recordHit())
+  busOn('menu:startRequested', () => modalIntermedio.reset())
+  busOn('ui:overlayShown', () => modalIntermedio.hide())
   const enemies = new EnemyManager({
     rng: inTestMode ? mulberry32(seed) : Math.random,
     scene: isoWorld.spriteLayer,
