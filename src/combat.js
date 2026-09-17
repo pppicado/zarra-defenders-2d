@@ -287,13 +287,14 @@ export class Combat {
     proj.hit = target != null
     this._projectiles.push(proj)
 
-    if (target) {
+if (target) {
       const result = target.applyHit(1)
       const mult = ARCHETYPES[target.archetype].multiplier
       const scoreDelta = Math.round(10 * mult)
       const firmasDelta = 1
       emit('combat:hit', {
         enemyId: target.id,
+        spriteId: target.spriteId ?? null,  // F1.1 — pedagogy cards need to lookup by spriteId
         hpRemaining: result.hpRemaining,
         archetype: target.archetype,
         damage: 1,
@@ -304,6 +305,7 @@ export class Combat {
       if (result.destroyed) {
         emit('enemy:destroyed', {
           enemyId: target.id,
+          spriteId: target.spriteId ?? null,
           archetype: target.archetype,
           score: scoreDelta,
           firmas: firmasDelta,

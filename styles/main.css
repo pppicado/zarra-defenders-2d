@@ -382,6 +382,100 @@ canvas {
 }
 
 /* ============================================================
+   Pedagogy card (F1.1) — overlay flotante al destruir enemigo
+   - z-index 150 (entre integridad HUD 50 y game-overlay 200)
+   - top-right para no bloquear el crosshair central
+   - slide-in desde la derecha + auto-dismiss 3s
+   ============================================================ */
+#pedagogy-card {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 320px;
+  max-width: 90vw;
+  background: rgba(24, 24, 24, 0.94);
+  border: 2px solid #f5a623;
+  border-radius: 4px;
+  padding: 16px 18px 14px;
+  color: #e8e8e8;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  z-index: 150;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.6);
+  cursor: pointer;            /* click-to-dismiss */
+  user-select: none;
+  animation: pedagogy-card-slide-in 240ms ease-out;
+}
+
+@keyframes pedagogy-card-slide-in {
+  from { transform: translateX(120%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+#pedagogy-card .pedagogy-card-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: transparent;
+  border: 0;
+  color: #f5a623;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+#pedagogy-card .pedagogy-card-close:hover,
+#pedagogy-card .pedagogy-card-close:focus {
+  color: #ffd28a;
+}
+
+#pedagogy-card .pedagogy-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f5a623;
+  margin: 0 24px 8px 0;        /* espacio para el botón close */
+  text-shadow: 0 0 4px rgba(245, 166, 35, 0.4);
+}
+
+#pedagogy-card .pedagogy-card-description {
+  font-style: italic;
+  color: #d6d6d6;
+  margin: 0 0 10px 0;
+}
+
+#pedagogy-card .pedagogy-card-dato {
+  font-size: 0.85rem;
+  color: #c8c8c8;
+  border-left: 3px solid #f5a623;
+  padding-left: 8px;
+  margin: 0 0 10px 0;
+}
+
+#pedagogy-card .pedagogy-card-fuente {
+  font-size: 0.75rem;
+  color: #a0a0a0;
+  margin: 0;
+}
+
+#pedagogy-card .pedagogy-card-link {
+  color: #f5a623;
+  text-decoration: underline;
+  margin-left: 4px;
+}
+
+#pedagogy-card .pedagogy-card-link:hover,
+#pedagogy-card .pedagogy-card-link:focus {
+  color: #ffd28a;
+}
+
+#pedagogy-card .pedagogy-card-hashtag {
+  color: #f5a623;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+/* ============================================================
    Responsive — viewports < 600 px wide
    ============================================================ */
 @media (max-width: 600px) {
@@ -391,4 +485,6 @@ canvas {
   #game-overlay .overlay-card { padding: 20px; }
   #game-overlay .overlay-title { font-size: 1.4rem; }
   #integrity-hud canvas { width: 160px; height: 20px; }
+  #pedagogy-card { top: 8px; right: 8px; width: 240px; padding: 12px 14px 10px; font-size: 0.8rem; }
+  #pedagogy-card .pedagogy-card-title { font-size: 0.95rem; }
 }

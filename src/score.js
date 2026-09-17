@@ -36,12 +36,24 @@ export class Score {
     this.score = 0
     this.firmas = 0
     this.best = null  // { score, firmas, date } | null
+    /** @type {Array<{cardId:string, enemyId:string, spriteId:string|null, stageId:string|null, titulo:string, fuente:string, url:string, timestamp:number}>} */
+    this.cardsShown = []  // F1.1 — pedagogy cards shown in this run
     this._storage = opts.storage ?? (typeof localStorage !== 'undefined' ? localStorage : null)
   }
 
-  /** @returns {{score:number, firmas:number, best: object|null}} */
+  /** @returns {{score:number, firmas:number, best: object|null, cardsShown: Array}} */
   read() {
-    return { score: this.score, firmas: this.firmas, best: this.best }
+    return { score: this.score, firmas: this.firmas, best: this.best, cardsShown: this.cardsShown }
+  }
+
+  /**
+   * F1.1 — Record a pedagogy card that was shown to the player.
+   * @param {{cardId:string, enemyId:string, spriteId:string|null, stageId:string|null, titulo:string, fuente:string, url:string, timestamp:number}} payload
+   */
+  addCardShown(payload) {
+    if (!payload || typeof payload !== 'object') return
+    this.cardsShown.push({ ...payload })
+    emit('score:changed', { score: this.score, firmas: this.firmas, best: this.best, cardsShown: this.cardsShown })
   }
 
   /**
@@ -62,7 +74,8 @@ export class Score {
   reset() {
     this.score = 0
     this.firmas = 0
-    emit('score:changed', { score: this.score, firmas: this.firmas, best: this.best })
+    this.cardsShown = []
+    emit('score:changed', { score: this.score, firmas: this.firmas, best: this.best, cardsShown: this.cardsShown })
   }
 
   /**

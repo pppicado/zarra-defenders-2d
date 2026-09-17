@@ -36,6 +36,7 @@ import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?
 import { on as busOn, emit } from './event-bus.js?v=44'
 import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=44'
 import { BackgroundLayer, BG_SOURCE_HEIGHT_PX, BG_SCALE, BG_RENDERED_HEIGHT_PX } from './backgrounds.js?v=44'
+import { PedagogyCards } from './pedagogy/cards.js?v=44'
 import { __zr } from './engine/dom-debug.js?v=44'
 
 // ============================================================
@@ -321,6 +322,26 @@ async function bootstrap() {
   const integrity = new Integrity({ scoreReader: () => score.read() })
   const score = new Score({})
   score.loadBest()
+
+  // F1.1 — pedagogy cards (one card visible at a time, auto-dismiss 3s).
+  const pedagogyCardRoot = document.getElementById('pedagogy-card')
+  const pedagogyCards = new PedagogyCards({
+    root: pedagogyCardRoot,
+    dismissMs: 3000,
+    onCardShown: (payload) => score.addCardShown(payload),
+  })
+  // Hide card whenever game leaves gameplay state (menu, overlay).
+  busOn('ui:overlayShown', () => pedagogyCards.hide())
+  busOn('menu:startRequested', () => pedagogyCards.hide())
+  // Show card on each enemy destroyed.
+  busOn('enemy:destroyed', (detail) => {
+    if (!detail) return
+    pedagogyCards.show({
+      id: detail.enemyId,
+      spriteId: detail.spriteId ?? null,
+      archetype: detail.archetype,
+    })
+  })
   const enemies = new EnemyManager({
     rng: inTestMode ? mulberry32(seed) : Math.random,
     scene: isoWorld.spriteLayer,

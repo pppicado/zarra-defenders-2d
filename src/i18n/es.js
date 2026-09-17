@@ -137,22 +137,75 @@ export const STRINGS = {
         url: 'https://valenciaplaza.com/valenciaplaza/comarca-y-empresa/crece-el-rechazo-contra-el-macrovertedero-de-zarra-tras-la-ultima-concentracion-de-casi-mil-personas',
       },
     },
-    // Por enemigo: array de cards (cada card = texto + fuente + url).
-    // Las keys corresponden a `spriteId` en assets/sprites/manifest.json.
-    // Llenaremos en Fase 1.1 cuando implementemos `src/pedagogy/cards.js`.
+    // Por enemigo: {stageId, titulo, descripcion}. La card se construye en
+    // runtime: muestra el dato del stage + la descripción específica del
+    // enemigo + el link a la fuente. Las keys corresponden a `spriteId`
+    // en assets/sprites/manifest.json (prefijo `enemies_`).
+    //
+    // Pedagogía: cada descripción conecta el enemigo con su impacto real.
+    // Las fuentes y URLs vienen de STRINGS.pedagogy.datos[stageId] (las 6
+    // verificadas en research/fuentes.md).
     enemigos: {
-      camion_treco: [],
-      bidon_lixiviado: [],
-      bolsa_plastico: [],
-      valla_publicitaria: [],
-      dron_fumigador: [],
-      camion_cisterna_residuos: [],
-      tubo_lixiviado: [],
-      sello_burocratico: [],
-      topadora: [],
-      incineradora: [],
-      trailer: [],
-      planta_treco: [],
+      enemies_camion_treco: {
+        stageId: 'stage1-lashoyas',
+        titulo: 'Camión TRECO',
+        descripcion: 'Has firmado contra la logística del proyecto. Cada camión pesado es +contaminación y +ruido para el Valle.',
+      },
+      enemies_bidon_lixiviado: {
+        stageId: 'stage2-lahoz',
+        titulo: 'Bidón de lixiviados',
+        descripcion: 'Has firmado contra la contaminación tóxica del acuífero. Cada bidón filtrado envenena el agua por generaciones.',
+      },
+      enemies_bolsa_plastico: {
+        stageId: 'stage1-lashoyas',
+        titulo: 'Bolsa de plástico',
+        descripcion: 'Has firmado contra la contaminación cotidiana. El plástico ya está en el Valle; el vertedero lo multiplicaría.',
+      },
+      enemies_tubo_lixiviado: {
+        stageId: 'stage2-lahoz',
+        titulo: 'Tubo de lixiviados',
+        descripcion: 'Has firmado contra los vertidos clandestinos al río Cabriel. Cada tubo conecta el vertedero con el acuífero.',
+      },
+      enemies_valla_publicitaria: {
+        stageId: 'stage1-lashoyas',
+        titulo: 'Valla publicitaria',
+        descripcion: 'Has firmado contra el lavado de imagen del proyecto. "Complejo Medioambiental" no es lo que parece.',
+      },
+      enemies_dron_fumigador: {
+        stageId: 'stage3-lahunde',
+        titulo: 'Dron fumigador',
+        descripcion: 'Has firmado contra la fumigación industrial. La comarca ya es zona de sacrificio —no necesita más químicos.',
+      },
+      enemies_camion_cisterna_residuos: {
+        stageId: 'stage2-lahoz',
+        titulo: 'Camión cisterna de residuos',
+        descripcion: 'Has firmado contra el transporte de residuos tóxicos por carreteras comarcales. Cada fuga contamina 1000 m³ de suelo.',
+      },
+      enemies_topadora: {
+        stageId: 'stage1-lashoyas',
+        titulo: 'Topadora',
+        descripcion: 'Has firmado contra la destrucción de encinas. Las encinas del Valle tienen siglos; la topadora las arranca en minutos.',
+      },
+      enemies_incineradora: {
+        stageId: 'stage3-lahunde',
+        titulo: 'Incineradora móvil',
+        descripcion: 'Has firmado contra la quema de residuos. La incineración libera dioxinas — la comarca ya convive con la nuclear.',
+      },
+      enemies_trailer: {
+        stageId: 'stage4-ayora',
+        titulo: 'Trailer',
+        descripcion: 'Has firmado contra el paso de camiones junto al colegio y el polideportivo de Ayora. Los niños respiran ese aire.',
+      },
+      enemies_planta_treco: {
+        stageId: 'stage5-acuifero',
+        titulo: 'Planta TRECO',
+        descripcion: 'Has firmado contra la planta de tratamiento. En 2002 los vecinos ya pararon un vertedero igual. Se puede volver a parar.',
+      },
+      enemies_sello_burocratico: {
+        stageId: 'stage4-ayora',
+        titulo: 'Sello burocrático',
+        descripcion: 'Has firmado contra la burocracia que autoriza sin consulta vinculante. La administración también se firma.',
+      },
     },
     // Final screen (Fase 1.7) — los 4 enlaces de cierre del loop pedagógico.
     // A6 contract: URLs centralizadas acá, cero literales en código.
