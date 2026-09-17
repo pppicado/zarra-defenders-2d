@@ -27,6 +27,8 @@
  *   - menu:disclaimerRequested
  */
 import { emit } from '../event-bus.js?v=44'
+import { __zr } from '../engine/dom-debug.js?v=44'
+import { STRINGS } from '../i18n/es.js?v=44'
 
 /** localStorage key for "stage N cleared" marker. */
 export const STAGE_CLEAR_KEY = (stageId) => `zarra2d:stageClear:${stageId}`
@@ -100,7 +102,7 @@ export class MainMenu {
       const best = this.score.loadBest?.()
       const bestEl = this.root.querySelector('[data-role="best"]')
       if (bestEl) {
-        bestEl.textContent = best ? `Mejor: ${best.firmas} firmas` : 'Mejor: \u2014 firmas'
+        bestEl.textContent = best ? STRINGS.menu.mejorFirmas(best.firmas) : STRINGS.menu.mejorVacio
       }
     }
     this._refreshLocks()
@@ -126,7 +128,7 @@ export class MainMenu {
         }
       }
     } catch (err) {
-      console.warn('[menu] lock shortcut failed:', err?.message ?? err)
+      __zr.warn('[menu] lock shortcut failed:', err?.message ?? err)
     }
 
     let stageIndex = 0
@@ -143,7 +145,7 @@ export class MainMenu {
         icon = document.createElement('span')
         icon.className = 'lock-icon'
         icon.setAttribute('aria-hidden', 'true')
-        icon.textContent = '🔒 '
+        icon.textContent = STRINGS.menu.lockIcon
         btn.prepend(icon)
       } else if (unlocked && icon) {
         icon.remove()
@@ -177,12 +179,12 @@ export class MainMenu {
 
     const title = document.createElement('h1')
     title.className = 'menu-title'
-    title.textContent = 'Zarra Defenders 2D'
+    title.textContent = STRINGS.app.nombre
     this.root.appendChild(title)
 
     const subtitle = document.createElement('p')
     subtitle.className = 'menu-subtitle'
-    subtitle.textContent = 'Defensores del Valle de Ayora-Cofrentes'
+    subtitle.textContent = STRINGS.app.tagline
     this.root.appendChild(subtitle)
 
     const nav = document.createElement('nav')
@@ -197,8 +199,8 @@ export class MainMenu {
         id: s.id,
         label: s.label,
       })),
-      { kind: 'modal', id: 'about',      label: 'Acerca de' },
-      { kind: 'modal', id: 'disclaimer', label: 'Disclaimer' },
+      { kind: 'modal', id: 'about',      label: STRINGS.menu.modalAcercaDe },
+      { kind: 'modal', id: 'disclaimer', label: STRINGS.menu.modalDisclaimer },
     ]
     for (let i = 0; i < DEFS.length; i++) {
       const def = DEFS[i]
@@ -219,7 +221,7 @@ export class MainMenu {
     const best = document.createElement('p')
     best.className = 'menu-best'
     best.dataset.role = 'best'
-    best.textContent = 'Mejor: \u2014 firmas'
+    best.textContent = STRINGS.menu.mejorVacio
     this.root.appendChild(best)
 
     // Modal containers (Acerca de / Disclaimer)
@@ -228,7 +230,7 @@ export class MainMenu {
     aboutModal.dataset.modal = 'about'
     aboutModal.innerHTML = `
       <div class="menu-modal-card" role="dialog" aria-modal="true">
-        <button type="button" class="menu-modal-close" aria-label="Cerrar">\u2715</button>
+        <button type="button" class="menu-modal-close" aria-label={STRINGS.menu.cerrarAriaLabel}>{STRINGS.menu.cerrarModal}</button>
         <div class="menu-modal-body">${ABOUT_TEXT}</div>
       </div>
     `
@@ -240,7 +242,7 @@ export class MainMenu {
     disclaimerModal.dataset.modal = 'disclaimer'
     disclaimerModal.innerHTML = `
       <div class="menu-modal-card" role="dialog" aria-modal="true">
-        <button type="button" class="menu-modal-close" aria-label="Cerrar">\u2715</button>
+        <button type="button" class="menu-modal-close" aria-label={STRINGS.menu.cerrarAriaLabel}>{STRINGS.menu.cerrarModal}</button>
         <div class="menu-modal-body">${DISCLAIMER_TEXT}</div>
       </div>
     `

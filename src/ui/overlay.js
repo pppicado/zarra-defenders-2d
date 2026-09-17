@@ -20,6 +20,7 @@
  */
 import { emit } from '../event-bus.js?v=44'
 import { on } from '../event-bus.js?v=44'
+import { STRINGS } from '../i18n/es.js?v=44'
 
 export class Overlay {
   /**
@@ -56,18 +57,18 @@ export class Overlay {
 
   showGameOver() {
     this._showModal('gameover', {
-      title: 'Stage failed',
-      titleClass: 'overlay-title--fail',
-      verb: 'firmas perdidas',
+      title: STRINGS.overlay.gameOver.titulo,
+      titleClass: STRINGS.overlay.gameOver.tituloClass,
+      verb: STRINGS.overlay.gameOver.verb,
     })
   }
 
   showVictory() {
     if (this.score && this.score.tryWriteBest) this.score.tryWriteBest()
     this._showModal('victory', {
-      title: 'Stage cleared',
-      titleClass: 'overlay-title--win',
-      verb: 'firmas recogidas',
+      title: STRINGS.overlay.victory.titulo,
+      titleClass: STRINGS.overlay.victory.tituloClass,
+      verb: STRINGS.overlay.victory.verb,
     })
   }
 
@@ -98,14 +99,14 @@ export class Overlay {
     card.setAttribute('role', 'dialog')
     card.setAttribute('aria-modal', 'true')
     card.innerHTML = `
-      <h2 class="overlay-title" data-role="title">Stage failed</h2>
-      <p class="overlay-score-line" data-role="scoreLine">Puntuaci\u00f3n: 0</p>
-      <p class="overlay-firmas-line" data-role="firmasLine">Firmas recogidas: 0</p>
-      <p class="overlay-best-line" data-role="bestLine">Mejor: \u2014 firmas</p>
-      <p class="overlay-newrecord hidden" data-role="newRecord">\u00a1NUEVO R\u00c9CORD!</p>
+      <h2 class="overlay-title" data-role="title">${STRINGS.overlay.gameOver.titulo}</h2>
+      <p class="overlay-score-line" data-role="scoreLine">${STRINGS.overlay.scoreLine(0)}</p>
+      <p class="overlay-firmas-line" data-role="firmasLine">${STRINGS.overlay.firmasLine(STRINGS.overlay.victory.verb, 0)}</p>
+      <p class="overlay-best-line" data-role="bestLine">${STRINGS.overlay.mejorVacio}</p>
+      <p class="overlay-newrecord hidden" data-role="newRecord">${STRINGS.overlay.newRecord}</p>
       <div class="overlay-buttons">
-        <button type="button" class="overlay-btn overlay-btn--primary" data-role="retry">${this._isTestMode ? 'Reintentar test level' : 'Reintentar'}</button>
-        <button type="button" class="overlay-btn" data-role="back">Volver al men\u00fa principal</button>
+        <button type="button" class="overlay-btn overlay-btn--primary" data-role="retry">${this._isTestMode ? STRINGS.overlay.retryTest : STRINGS.overlay.retry}</button>
+        <button type="button" class="overlay-btn" data-role="back">${STRINGS.overlay.back}</button>
       </div>
     `
     this.root.appendChild(card)
@@ -135,12 +136,12 @@ export class Overlay {
 
   _refreshStats(verb) {
     const score = this.score?.read?.() ?? { score: 0, firmas: 0, best: null }
-    this.root.querySelector('[data-role="scoreLine"]').textContent = `Puntuaci\u00f3n: ${score.score}`
-    this.root.querySelector('[data-role="firmasLine"]').textContent = `Firmas ${verb}: ${score.firmas}`
+    this.root.querySelector('[data-role="scoreLine"]').textContent = STRINGS.overlay.scoreLine(score.score)
+    this.root.querySelector('[data-role="firmasLine"]').textContent = STRINGS.overlay.firmasLine(verb, score.firmas)
 
     const best = score.best ?? this.score?.loadBest?.() ?? null
     const bestLine = this.root.querySelector('[data-role="bestLine"]')
-    bestLine.textContent = best ? `Mejor: ${best.firmas} firmas` : 'Mejor: \u2014 firmas'
+    bestLine.textContent = best ? STRINGS.overlay.mejorLine(best.firmas) : STRINGS.overlay.mejorVacio
 
     // New-record badge: only show if current run beats stored best (only meaningful for victory)
     const newRecordEl = this.root.querySelector('[data-role="newRecord"]')

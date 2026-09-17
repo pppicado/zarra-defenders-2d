@@ -25,6 +25,7 @@
  *   - stage:cleared (handled by main.js calling tryWriteBest)
  */
 import { emit } from './event-bus.js?v=44'
+import { __zr } from './engine/dom-debug.js?v=44'
 
 export const BEST_KEY = 'zarra2d:best:test_level'
 
@@ -85,7 +86,7 @@ export class Score {
       return true
     } catch (err) {
       // quota / SecurityError / etc — silent fallback
-      console.warn('[Score] localStorage write failed:', err?.message ?? err)
+      __zr.warn('[Score] localStorage write failed:', err?.message ?? err)
       return false
     }
   }
@@ -100,7 +101,7 @@ export class Score {
     try {
       raw = this._storage.getItem(BEST_KEY)
     } catch (err) {
-      console.warn('[Score] localStorage read failed:', err?.message ?? err)
+      __zr.warn('[Score] localStorage read failed:', err?.message ?? err)
       return null
     }
     if (!raw) return null

@@ -29,7 +29,7 @@
         </g>
       </svg>
     </div>
-    <p>Por favor, gira el móvil para jugar</p>
+    <p data-i18n="orientation.rotarMovil">Por favor, gira el móvil para jugar</p>
   </div>
 
   <!-- Contenedor principal del juego con ratio 16:9 bloqueado -->
@@ -49,7 +49,7 @@
   </div>
 
   <!-- Botones de utilidad en los márgenes del letterbox/pillarbox -->
-  <button id="fullscreen-btn" class="hidden" type="button" aria-label="Pantalla completa">
+  <button id="fullscreen-btn" class="hidden" type="button" aria-label="Pantalla completa" data-i18n-aria="fullscreen.ariaLabel">
     <!-- Icono SVG inline: 4 esquinas + flechas hacia afuera -->
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
       <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -63,6 +63,8 @@
 
   <!-- Pixi.js v7 estable (cargado desde CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js"></script>
+  <!-- Bootstrap i18n: aplica STRINGS al DOM estático antes del main. -->
+  <script type="module" src="src/ui/i18n-bootstrap.js?v=44"></script>
   <!-- Nuestro código (ES modules, sin build step) — query string para forzar no-cache durante dev -->
   <script type="module" src="src/main.js?v=44"></script>
 </body>

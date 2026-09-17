@@ -17,6 +17,7 @@
 
 import { isoToScreen, screenToIso, computeTileSize, computeWorldOrigin, escapeFrontDepth, ISO_STEP } from './iso-math.js?v=44'
 import { Tilemap, computeCullRange, computeZIndex, Z_BANDS } from './tilemap.js?v=44' // eslint-disable-line no-unused-vars -- Tilemap imported only for the type check in registerTilemap (deprecated)
+import { __zr } from '../engine/dom-debug.js?v=44'
 
 export class IsoWorld {
   constructor(opts) {
@@ -118,7 +119,7 @@ export class IsoWorld {
     // (sum drops below the previous frame) means the camera moved backward
     // unexpectedly — warn.
     if (sum < this._lastCameraSum && this._lastCameraSum !== -Infinity) {
-      console.warn(`[IsoWorld] camera depth regressed: ${this._lastCameraSum} → ${sum}`)
+      __zr.warn(`[IsoWorld] camera depth regressed: ${this._lastCameraSum} → ${sum}`)
     }
     this._lastCameraSum = sum
 

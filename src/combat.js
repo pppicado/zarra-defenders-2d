@@ -23,6 +23,7 @@
 import { emit } from './event-bus.js?v=44'
 import { ARCHETYPES, Enemy } from './enemies.js?v=44'
 import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=44'
+import { __zr } from './engine/dom-debug.js?v=44'
 
 export const FIRE_COOLDOWN_MS = 200          // F4d: was 333 (F3) — ~40% faster fire rate
 export const PROJECTILE_SPEED = 2400         // F4f: was 800 (F3-F4d) — 3x faster per user request
@@ -204,7 +205,7 @@ export class Combat {
           this._papeletaTex = tex
         })
         .catch(err => {
-          console.warn('[Combat] papeleta_firmada texture failed to load, falling back to procedural Graphics:', err?.message ?? err)
+          __zr.warn('[Combat] papeleta_firmada texture failed to load, falling back to procedural Graphics:', err?.message ?? err)
         })
     }
   }

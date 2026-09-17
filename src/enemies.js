@@ -25,6 +25,7 @@
  */
 import { emit } from './event-bus.js?v=44'
 import { TILE_SIZE, LOGICAL_W } from './canvas.js?v=44'
+import { __zr } from './engine/dom-debug.js?v=44'
 
 /**
  * ~1 tile visual warning (REQ-CMB-008); 0.6 tile/s × 32 px ≈ 0.5 s buffer.
@@ -633,15 +634,15 @@ export class EnemyManager {
     for (const def of roster) {
       // BG-006 safety: reject static spriteIds from the wave roster.
       if (def.spriteId && STATIC_SPRITE_IDS.has(def.spriteId)) {
-        console.warn(`[EnemyManager.spawnWave] rejected static spriteId ${def.spriteId} from wave`)
+        __zr.warn(`[EnemyManager.spawnWave] rejected static spriteId ${def.spriteId} from wave`)
         continue
       }
       if (def.archetype === 'mini-boss' || def.archetype === 'boss') {
-        console.warn(`[EnemyManager.spawnWave] rejected ${def.archetype} archetype from wave (only standard/tank allowed)`)
+        __zr.warn(`[EnemyManager.spawnWave] rejected ${def.archetype} archetype from wave (only standard/tank allowed)`)
         continue
       }
       if (typeof def.spawnAtSec !== 'number') {
-        console.warn(`[EnemyManager.spawnWave] entry ${def.id} has no spawnAtSec, spawning immediately`)
+        __zr.warn(`[EnemyManager.spawnWave] entry ${def.id} has no spawnAtSec, spawning immediately`)
       }
       this.spawn(def)
       queued++

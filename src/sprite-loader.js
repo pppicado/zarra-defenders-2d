@@ -9,6 +9,7 @@
  * Production boot calls loadSpriteManifest() once at boot to know what to mount.
  */
 import { BEST_KEY } from './score.js?v=44'
+import { __zr } from './engine/dom-debug.js?v=44'
 
 const MANIFEST_URL = 'assets/sprites/manifest.json'
 
@@ -40,7 +41,7 @@ export async function preloadManifestTextures(manifest, basePath = '') {
       tex.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST
       out.set(id, tex)
     } catch (err) {
-      console.warn(`[sprite-loader] failed to load ${id} (${def.path}):`, err?.message ?? err)
+      __zr.warn(`[sprite-loader] failed to load ${id} (${def.path}):`, err?.message ?? err)
     }
   }))
   return out

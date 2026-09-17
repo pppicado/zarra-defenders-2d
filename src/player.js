@@ -31,6 +31,8 @@ const CROSSHAIR_SIZE = 24               // px en pantalla (no mundo)
 const CROSSHAIR_COLOR = 0x00ffff        // cyan
 const CROSSHAIR_OUTLINE = 0x000000      // negro
 
+import { __zr } from './engine/dom-debug.js?v=44'
+
 export class Player {
   /**
    * @param {PIXI.Application} app
@@ -122,12 +124,12 @@ export class Player {
     // En Fase 2 solo registramos el tap. En Fase 3 aquí se dispara el proyectil.
     this._lastTapTime = performance.now()
     this._tapCount++
-    console.log(`[Player] Tap #${this._tapCount} at (${Math.round(screenX)}, ${Math.round(screenY)})`)
+    __zr.log(`[Player] Tap #${this._tapCount} at (${Math.round(screenX)}, ${Math.round(screenY)})`)
   }
 
   _handlePause() {
     this._paused = !this._paused
-    console.log(`[Player] Pausa: ${this._paused}`)
+    __zr.log(`[Player] Pausa: ${this._paused}`)
     // En Fase 7: mostrar overlay de pausa
   }
 

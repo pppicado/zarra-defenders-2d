@@ -78,7 +78,7 @@ test('manifest: plataforma_solar is deprecated', async () => {
   assert.ok(json.deprecated?.plataforma_solar, 'plataforma_solar must be marked deprecated')
 })
 
-test('manifest: enemies_camion_cisterna_residuos is placeholder=true tank', async () => {
+test('manifest: enemies_camion_cisterna_residuos is real=true tank (regenerated Fase 0.3)', async () => {
   const fs = await import('node:fs/promises')
   const path = await import('node:path')
   const url = await import('node:url')
@@ -86,6 +86,7 @@ test('manifest: enemies_camion_cisterna_residuos is placeholder=true tank', asyn
   const manifestPath = path.resolve(here, '../../assets/sprites/manifest.json')
   const json = JSON.parse(await fs.readFile(manifestPath, 'utf-8'))
   const e = json.active.enemies_camion_cisterna_residuos
-  assert.equal(e.placeholder, true)
+  assert.equal(e.real, true, 'cisterna must be real after Fase 0.3 sprite regen')
+  assert.equal(e.placeholder, undefined, 'placeholder flag removed after Fase 0.3')
   assert.equal(e.archetype, 'tank')
 })

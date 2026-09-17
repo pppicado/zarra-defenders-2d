@@ -31,7 +31,8 @@
     "enemies_camion_cisterna_residuos": {
       "path": "assets/sprites/camion_cisterna_residuos.png",
       "archetype": "tank",
-      "placeholder": true
+      "real": true,
+      "note": "Fase 0.3 — regenerated via minimax + chroma-key pipeline. Replaces plataforma_solar (decision 2026-09-03 — renewable energies cannot be enemies)."
     },
     "enemies_trailer": {
       "path": "assets/sprites/enemies_trailer.png",

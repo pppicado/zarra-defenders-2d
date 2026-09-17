@@ -36,6 +36,7 @@ import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?
 import { on as busOn, emit } from './event-bus.js?v=44'
 import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=44'
 import { BackgroundLayer, BG_SOURCE_HEIGHT_PX, BG_SCALE, BG_RENDERED_HEIGHT_PX } from './backgrounds.js?v=44'
+import { __zr } from './engine/dom-debug.js?v=44'
 
 // ============================================================
 // Configuration
@@ -126,7 +127,7 @@ async function _loadBackgroundManifest() {
     if (!res.ok) return {}
     return await res.json()
   } catch (err) {
-    console.warn('[main] bg manifest load failed:', err?.message ?? err)
+    __zr.warn('[main] bg manifest load failed:', err?.message ?? err)
     return {}
   }
 }
@@ -173,7 +174,7 @@ function _loadPlaceholderBg(bg, stageId) {
 
 async function bootstrap() {
   if (typeof PIXI === 'undefined') {
-    console.error('Pixi.js no cargó desde el CDN. Verificar conexión o tag <script>')
+    __zr.error('Pixi.js no cargó desde el CDN. Verificar conexión o tag <script>')
     return
   }
 
@@ -262,7 +263,7 @@ async function bootstrap() {
   try {
     await bg.load('stage1-lashoyas', stage1Path)
   } catch (err) {
-    console.warn('[main] bg load failed, falling back to procedural placeholder:', err?.message ?? err)
+    __zr.warn('[main] bg load failed, falling back to procedural placeholder:', err?.message ?? err)
     _loadPlaceholderBg(bg, 'stage1-lashoyas')
   }
 
@@ -281,7 +282,7 @@ async function bootstrap() {
   try {
     manifest = await loadSpriteManifest()
   } catch (err) {
-    console.warn('[main] sprite manifest load failed:', err?.message ?? err)
+    __zr.warn('[main] sprite manifest load failed:', err?.message ?? err)
   }
   const textureMap = await preloadManifestTextures(manifest)
 
@@ -301,7 +302,7 @@ async function bootstrap() {
     handSprite.anchor.set(0.5, 0.85)
     handSprite.scale.set(1.2)
   } else {
-    console.warn('[main] hand_pen texture missing — using procedural fallback')
+    __zr.warn('[main] hand_pen texture missing — using procedural fallback')
     const g = new PIXI.Graphics()
     g.lineStyle(1, 0x111111, 1)
     g.beginFill(0xfff5d6, 1)
@@ -313,8 +314,8 @@ async function bootstrap() {
   // --- Heart textures ---
   const heartFullTex = textureMap.get('heart_full') ?? null
   const heartEmptyTex = textureMap.get('heart_empty') ?? null
-  if (!heartFullTex) console.warn('[main] heart_full texture missing — using procedural fallback')
-  if (!heartEmptyTex) console.warn('[main] heart_empty texture missing — using procedural fallback')
+  if (!heartFullTex) __zr.warn('[main] heart_full texture missing — using procedural fallback')
+  if (!heartEmptyTex) __zr.warn('[main] heart_empty texture missing — using procedural fallback')
 
   // --- Modules ---
   const integrity = new Integrity({ scoreReader: () => score.read() })
@@ -433,7 +434,7 @@ async function bootstrap() {
       try {
         await bg.setStage(stageId, newPath)
       } catch (err) {
-        console.warn(`[main] bg.setStage(${stageId}) failed:`, err?.message ?? err)
+        __zr.warn(`[main] bg.setStage(${stageId}) failed:`, err?.message ?? err)
         _loadPlaceholderBg(bg, stageId)
       }
     }
@@ -550,13 +551,13 @@ async function bootstrap() {
       try {
         localStorage.setItem(`zarra2d:stageClear:${stageId}`, JSON.stringify({ firmas: score.read().firmas }))
       } catch (err) {
-        console.warn('[main] localStorage write failed:', err?.message ?? err)
+        __zr.warn('[main] localStorage write failed:', err?.message ?? err)
       }
     }
     overlay.showVictory()
   })
 
-  console.log('[ZarraDefenders2D] Bootstrap OK. F3.5 two-canvas + tileSize=128.')
+  __zr.log('[ZarraDefenders2D] Bootstrap OK. F3.5 two-canvas + tileSize=128.')
 
   async function bootTestLevel(ctx) {
     if (combat) { combat.reset() }
@@ -615,7 +616,7 @@ async function bootstrap() {
     bg.freeze()
     const queued = enemies.spawnWave(TEST_LEVEL.postFinalWaveRoster)
     emit('stage:finaleStarted', { stageId: bg.stageId, wavesQueued: queued })
-    console.log(`[ZarraDefenders2D] finale started — bg frozen, ${queued} wave enemies scheduled`)
+    __zr.log(`[ZarraDefenders2D] finale started — bg frozen, ${queued} wave enemies scheduled`)
   }
 
   function maybeFireVictory({ camera, enemies, integrity }) {
@@ -695,7 +696,7 @@ function setupFullscreenButton() {
         if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen()
         else if (document.documentElement.webkitRequestFullscreen) document.documentElement.webkitRequestFullscreen()
       }
-    } catch (err) { console.warn('[ZarraDefenders2D] No se pudo alternar fullscreen:', err) }
+    } catch (err) { __zr.warn('[ZarraDefenders2D] No se pudo alternar fullscreen:', err) }
   }
   btn.addEventListener('click', toggle)
   document.addEventListener('fullscreenchange', updateIcon)
@@ -704,7 +705,7 @@ function setupFullscreenButton() {
 }
 
 bootstrap().catch(err => {
-  console.error('[ZarraDefenders2D] Error fatal en bootstrap:', err)
+  __zr.error('[ZarraDefenders2D] Error fatal en bootstrap:', err)
 })
 
 // ============================================================

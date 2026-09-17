@@ -27,6 +27,8 @@
 const TAP_MAX_DISTANCE = 10         // px: distancia entre touchstart y touchend para considerar tap
 const TAP_MAX_DURATION_MS = 300     // ms: duración máxima para considerar tap
 
+import { __zr } from './engine/dom-debug.js?v=44'
+
 export class Input {
   constructor() {
     this.canvas = null
@@ -77,7 +79,7 @@ export class Input {
     if (this.listeners[event]) {
       this.listeners[event].push(callback)
     } else {
-      console.warn(`[Input] Evento desconocido: ${event}`)
+      __zr.warn(`[Input] Evento desconocido: ${event}`)
     }
   }
 
@@ -211,7 +213,7 @@ export class Input {
       try {
         cb(...args)
       } catch (err) {
-        console.error(`[Input] Error en listener de '${event}':`, err)
+        __zr.error(`[Input] Error en listener de '${event}':`, err)
       }
     }
   }
