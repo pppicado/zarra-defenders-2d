@@ -180,6 +180,8 @@ function _buildEnemyDefs() {
       isoX,
       isoY,
       spriteId: 'enemies_planta_treco',
+      // F1.6 — A7 contract: plant_treco se desactiva (no explota) en HP=0.
+      lifecycle: 'desactivacion',
     })
   }
 

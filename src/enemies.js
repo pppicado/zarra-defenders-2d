@@ -249,7 +249,7 @@ export class Enemy {
    * @param {'static'|'linear'|'sine'|'zigzag'|'arc'} [opts.movementPattern]
    *        NOT pre-defaulted to 'static' here — same reason as speed.
    */
-  constructor({ id, archetype, isoX, isoY, spriteId, speed, movementPattern }) {
+  constructor({ id, archetype, isoX, isoY, spriteId, speed, movementPattern, lifecycle }) {
     assertArchetype(archetype)
     this.id = id ?? _nextId()
     this.archetype = archetype
@@ -257,8 +257,9 @@ export class Enemy {
     this.isoY = isoY
     this.spriteId = spriteId ?? null
     this.hp = ARCHETYPES[archetype].hp
-    this.state = 'alive'   // 'alive' | 'destroyed'
-    this._destroyedAt = 0  // performance.now() ms when transitioned to destroyed
+    this.state = 'alive'   // 'alive' | 'destroyed' | 'desactivated'
+    this.lifecycle = lifecycle ?? 'destroyed'  // A7: 'destroyed' | 'desactivacion'
+    this._destroyedAt = 0  // performance.now() ms when transitioned to destroyed/desactivated
     // Fase-5 (REQ-CMB-009): resolve effective movement config (handles the
     // static-spriteId hard rule and per-spriteId defaults). Speed and
     // movementPattern are passed through undefined when omitted so the
@@ -283,21 +284,65 @@ export class Enemy {
 
   /**
    * Apply a hit. Damage is fixed at 1 per spec.
-   * @returns {{ hpRemaining:number, destroyed:boolean }}
+   * Returns `{ hpRemaining, destroyed, desactivated }`. destroyed OR desactivated is true on terminal hit.
    */
   applyHit(damage = 1) {
-    if (this.state !== 'alive') return { hpRemaining: this.hp, destroyed: false }
+    if (this.state !== 'alive') return { hpRemaining: this.hp, destroyed: false, desactivated: false }
     this.hp = Math.max(0, this.hp - damage)
-    const destroyed = this.hp === 0
-    if (destroyed) this.markDestroyed()
-    return { hpRemaining: this.hp, destroyed }
+    if (this.hp === 0) {
+      // Terminal hit — branch by lifecycle contract (A7)
+      if (this.lifecycle === 'desactivacion') {
+        this.markDesactivated()
+        return { hpRemaining: 0, destroyed: false, desactivated: true }
+      } else {
+        this.markDestroyed()
+        return { hpRemaining: 0, destroyed: true, desactivated: false }
+      }
+    }
+    return { hpRemaining: this.hp, destroyed: false, desactivated: false }
   }
 
   /** Transition to destroyed (idempotent). Records destruction timestamp. */
   markDestroyed() {
-    if (this.state === 'destroyed') return
+    if (this.state === 'destroyed' || this.state === 'desactivated') return
     this.state = 'destroyed'
     this._destroyedAt = performance.now()
+  }
+
+  /**
+   * F1.6 — A7 contract: transition to desactivated (NOT destroyed).
+   * Boss bosses with lifecycle='desactivacion' use this path. Applies:
+   *   - state = 'desactivated'
+   *   - Halt all motion (speed=0, pattern='static')
+   *   - Apply PIXI desaturate tint on the sprite (grayscale 0x808080)
+   *   - Dispatch `zarra:desactivacion` event
+   *   - NO explosion, NO fire, NO debris, NO particles
+   * Idempotent.
+   */
+  markDesactivated() {
+    if (this.state === 'desactivated') return
+    const wasAlive = this.state === 'alive'
+    this.state = 'desactivated'
+    this._destroyedAt = performance.now()
+    // A7: halt all motion (motion = camera + oscillation only).
+    this.speed = 0
+    this.movementPattern = 'static'
+    // A7: apply PIXI desaturate tint on the sprite (best-effort).
+    // The sprite is on this.sprite (set by EnemyManager.spawn). It may be
+    // null in headless tests; guard accordingly.
+    if (this.sprite && typeof this.sprite.tint !== 'undefined') {
+      // 0x808080 = 50% gray = desaturate effect (PixiJS tint multiplies).
+      // We use a gray tint to simulate desaturation without a filter
+      // (which would require extra render setup).
+      this.sprite.tint = 0x808080
+    }
+    if (wasAlive) {
+      emit('zarra:desactivacion', {
+        enemyId: this.id,
+        spriteId: this.spriteId,
+        archetype: this.archetype,
+      })
+    }
   }
 
   /**
@@ -777,7 +822,7 @@ export class EnemyManager {
     // Garbage-collect expired destroyed enemies
     const now = performance.now()
     for (const enemy of this._live()) {
-      if (enemy.state === 'destroyed' && enemy.isExpired(now)) {
+      if ((enemy.state === 'destroyed' || enemy.state === 'desactivated') && enemy.isExpired(now)) {
         this._destroySprite(enemy)
         this._enemies.delete(enemy.id)
       }

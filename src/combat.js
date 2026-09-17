@@ -302,13 +302,17 @@ if (target) {
         firmasDelta,
       })
       if (this.score) this.score.addHit(mult)
-      if (result.destroyed) {
+      // F1.6 — A7 contract: emit enemy:destroyed for BOTH destroyed AND
+      // desactivated (the card pedagogy system needs to react to both;
+      // the desaturated visual is applied inside enemies.js).
+      if (result.destroyed || result.desactivated) {
         emit('enemy:destroyed', {
           enemyId: target.id,
           spriteId: target.spriteId ?? null,
           archetype: target.archetype,
           score: scoreDelta,
           firmas: firmasDelta,
+          desactivated: !!result.desactivated,
         })
       }
       if (this.callbacks.onHit) this.callbacks.onHit(target.id, result.hpRemaining, target.archetype)
