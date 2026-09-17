@@ -989,3 +989,111 @@ canvas {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ============================================================
+   Data screen pre-nivel (F1.5) — overlay pre-stage con dato
+   - z-index 270 (encima de biblioteca 260)
+   - card centrada con stage label, dato, fuente, botón Continuar
+   - Esc/Space/click → continuar
+   ============================================================ */
+#data-screen {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 270;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+#data-screen .data-screen-card {
+  background: #181818;
+  border: 2px solid #f5a623;
+  border-radius: 6px;
+  padding: 32px 36px 28px;
+  width: 560px;
+  max-width: 90vw;
+  color: #e8e8e8;
+  text-align: left;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.6);
+  animation: data-screen-fade-in 320ms ease-out;
+}
+
+@keyframes data-screen-fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#data-screen .data-screen-stage {
+  font-size: 0.85rem;
+  color: #a0a0a0;
+  margin: 0 0 8px 0;
+  font-family: monospace;
+}
+
+#data-screen .data-screen-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f5a623;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+#data-screen .data-screen-dato {
+  font-size: 1.15rem;
+  color: #e8e8e8;
+  border-left: 4px solid #f5a623;
+  padding-left: 16px;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+#data-screen .data-screen-fuente {
+  font-size: 0.85rem;
+  color: #c8c8c8;
+  margin: 0 0 24px 0;
+}
+
+#data-screen .data-screen-link {
+  color: #f5a623;
+  text-decoration: underline;
+  margin-left: 4px;
+}
+
+#data-screen .data-screen-link:hover,
+#data-screen .data-screen-link:focus {
+  color: #ffd28a;
+}
+
+#data-screen .data-screen-hashtag {
+  color: #f5a623;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+#data-screen .data-screen-continue {
+  display: block;
+  width: 100%;
+  background: rgba(245, 166, 35, 0.12);
+  color: #f5a623;
+  border: 2px solid #f5a623;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 3px;
+  text-align: center;
+}
+
+#data-screen .data-screen-continue:hover,
+#data-screen .data-screen-continue:focus {
+  background: rgba(245, 166, 35, 0.22);
+}
+
+@media (max-width: 600px) {
+  #data-screen .data-screen-card { padding: 24px 22px 20px; max-width: 95vw; }
+  #data-screen .data-screen-dato { font-size: 1rem; }
+}

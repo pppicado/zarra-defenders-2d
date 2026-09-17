@@ -40,6 +40,7 @@ import { PedagogyCards } from './pedagogy/cards.js?v=44'
 import { ModalIntermedio } from './pedagogy/modal-intermedio.js?v=44'
 import { ResumenFinal } from './pedagogy/resumen-final.js?v=44'
 import { Biblioteca } from './pedagogy/biblioteca.js?v=44'
+import { DataScreen } from './pedagogy/data-screen.js?v=44'
 import { __zr } from './engine/dom-debug.js?v=44'
 
 // ============================================================
@@ -384,6 +385,29 @@ async function bootstrap() {
   busOn('menu:bibliotecaRequested', () => biblioteca.show())
   busOn('menu:startRequested', () => biblioteca.hide())
   busOn('stage:cleared', () => biblioteca.hide())
+
+  // F1.5 — data screen pre-nivel (muestra el dato del stage antes de jugar).
+  const dataScreenRoot = document.getElementById('data-screen')
+  const dataScreen = new DataScreen({
+    root: dataScreenRoot,
+    onContinue: async (stageId) => {
+      mainMenu.hide()
+      // Swap the bg texture for the requested stage
+      const newPath = _bgManifest[stageId]
+      if (newPath && stageId !== bg.stageId) {
+        try {
+          await bg.setStage(stageId, newPath)
+        } catch (err) {
+          __zr.warn(`[main] bg.setStage(${stageId}) failed:`, err?.message ?? err)
+          _loadPlaceholderBg(bg, stageId)
+        }
+      }
+      await bootTestLevel({ combat, isoWorld, enemies, camera, score, integrity, hud: hudModule, world, overlay })
+    },
+  })
+  // Hide data screen on other lifecycle events
+  busOn('menu:startRequested', () => dataScreen.hide())
+  busOn('menu:back', () => dataScreen.hide())
   const enemies = new EnemyManager({
     rng: inTestMode ? mulberry32(seed) : Math.random,
     scene: isoWorld.spriteLayer,
@@ -489,19 +513,9 @@ async function bootstrap() {
   })
 
   // BG-005 — fase-6 stage selector. Each unlocked stage button emits this.
-  busOn('menu:startStage', async ({ stageId }) => {
-    mainMenu.hide()
-    // Swap the bg texture for the requested stage (if it differs).
-    const newPath = _bgManifest[stageId]
-    if (newPath && stageId !== bg.stageId) {
-      try {
-        await bg.setStage(stageId, newPath)
-      } catch (err) {
-        __zr.warn(`[main] bg.setStage(${stageId}) failed:`, err?.message ?? err)
-        _loadPlaceholderBg(bg, stageId)
-      }
-    }
-    await bootTestLevel({ combat, isoWorld, enemies, camera, score, integrity, hud: hudModule, world, overlay })
+  // F1.5 — intercept to show data screen first; onContinue boots the stage.
+  busOn('menu:startStage', ({ stageId }) => {
+    dataScreen.show(stageId)
   })
 
   // REQ-CMB-011: Overlay emits `bootTestLevel:request` when the user clicks

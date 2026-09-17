@@ -208,6 +208,13 @@ export const STRINGS = {
         descripcion: 'Has firmado contra la burocracia que autoriza sin consulta vinculante. La administración también se firma.',
       },
     },
+    // Data screen pre-nivel (Fase 1.5) — overlay con dato + citation antes de jugar.
+    dataScreen: {
+      titulo: 'Dato pedagógico',
+      fuente: 'Fuente',
+      continuar: 'Continuar',
+    },
+
     // Modal intermedio cada 5 enemigos (Fase 1.2) — overlay breve con resumen
     // acumulativo del impacto pedagógico. Mensaje dinámico según # firmas.
     modalIntermedio: {
