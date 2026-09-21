@@ -374,16 +374,26 @@ http://127.0.0.1:8000/?unlock=reset
 http://127.0.0.1:8000/?test=1&seed=42&hitboxes=1&unlock=all
 ```
 
-**Tailscale (100.116.137.66) — verificado que la interfaz tailscale0 tiene esa
-IP y que responde HTTP 200 desde el server**:
+**Tailscale (100.116.137.66) — lo verificado y lo NO verificado**:
+
+- ✅ La interfaz `tailscale0` tiene la IP `100.116.137.66/32` (`ip -4 addr`)
+- ✅ El server responde HTTP 200 en esa IP cuando se hace `curl` desde el sandbox
+  (loopback con la IP de Tailscale — el kernel rutea localmente; **esto NO
+  prueba que un peer Tailscale externo pueda llegar al server**)
+- ❌ Reachability Tailscale end-to-end desde otro peer — **NO verificado**
+  desde el sandbox. El usuario debe verificar desde su máquina antes de
+  usar la URL:
 
 ```
-http://100.116.137.66:8000/
+curl http://100.116.137.66:8000/?test=1&seed=42&hitboxes=1&unlock=all
 ```
 
-```
-http://100.116.137.66:8000/?test=1&seed=42&hitboxes=1&unlock=all
-```
+Si la reachability falla, alternativas más confiables que Tailscale DERP para
+tráfico de dev:
+
+- SSH port-forwarding desde la máquina del usuario al sandbox
+- ngrok / cloudflared tunnel hacia `http://127.0.0.1:8000/`
+- Levantar el server con `--bind 0.0.0.0` en una IP pública reachable
 
 ### Query params soportados
 
