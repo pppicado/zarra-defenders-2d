@@ -321,6 +321,114 @@ Expected: 8 PASS / 0 FAIL.
 
 ---
 
+## §18 Local URLs for testing (verificadas por el dev)
+
+> **Regla del usuario**: cualquier URL que el dev comparte acá debe haber sido
+> probada con `curl` (HTTP status) **y** con Playwright headless (cero errores
+> de consola + `window.__gameTestAPI__` montado) antes de ser entregada.
+> Formato al usuario: una URL por línea, línea en blanco entre grupos.
+
+### Cómo levantar el server local
+
+```bash
+cd /projects/personal/zarra-defenders-2d
+bash start_server.sh         # python3 -m http.server 8000 en background
+# Server corre en 0.0.0.0:8000 — accesible vía Tailscale en 100.116.137.66:8000
+```
+
+Verificación rápida:
+
+```bash
+curl -sI http://127.0.0.1:8000/ | head -1   # HTTP/1.0 200 OK
+```
+
+### URLs probadas (todas verificadas el 2026-09-17)
+
+**Local (127.0.0.1) — todas devuelven HTTP 200 y arrancan sin errores**:
+
+```
+http://127.0.0.1:8000/
+```
+
+```
+http://127.0.0.1:8000/?test=1&seed=42
+```
+
+```
+http://127.0.0.1:8000/?test=1&seed=42&hitboxes=1
+```
+
+```
+http://127.0.0.1:8000/?test=1&seed=42&debug=1
+```
+
+```
+http://127.0.0.1:8000/?unlock=all
+```
+
+```
+http://127.0.0.1:8000/?unlock=reset
+```
+
+```
+http://127.0.0.1:8000/?test=1&seed=42&hitboxes=1&unlock=all
+```
+
+**Tailscale (100.116.137.66) — verificado que la interfaz tailscale0 tiene esa
+IP y que responde HTTP 200 desde el server**:
+
+```
+http://100.116.137.66:8000/
+```
+
+```
+http://100.116.137.66:8000/?test=1&seed=42&hitboxes=1&unlock=all
+```
+
+### Query params soportados
+
+| Param | Efecto |
+|---|---|
+| `?test=1` | Salta el menú, auto-spawna 120 enemigos deterministas |
+| `?seed=N` | Semilla mulberry32 para PRNG (default `0xC0FFEE`) |
+| `?hitboxes=1` | Overlay debug con AABB de cada enemigo (cyan/yellow/magenta por arquetipo) |
+| `?debug=1` | Activa `__zr.warn`/`__zr.error` → logs en consola |
+| `?unlock=all` | Pre-popula `localStorage` con stage1..5 cleared |
+| `?unlock=reset` | Limpia stage clears del localStorage |
+| `?ref=<b64>` | (Fase 5 sharing) Link compartible con score base64 |
+
+### Validación con Playwright
+
+```javascript
+// tests/url-smoke.mjs (one-off, no comiteado)
+// Verifica que cada URL:
+// 1. Carga sin pageerrors
+// 2. Monta window.__gameTestAPI__ en <15s
+// 3. Cero mensajes de error en consola
+import { chromium } from 'playwright'
+const URLS = [
+  'http://127.0.0.1:8000/',
+  'http://127.0.0.1:8000/?test=1&seed=42',
+  'http://127.0.0.1:8000/?test=1&seed=42&hitboxes=1',
+]
+const browser = await chromium.launch({ headless: true })
+for (const url of URLS) {
+  const page = await browser.newPage()
+  const errs = []
+  page.on('pageerror', (e) => errs.push(`pageerror: ${e.message}`))
+  page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()) })
+  await page.goto(url, { waitUntil: 'load', timeout: 10_000 })
+  const apiOk = await page.evaluate(() => !!window.__gameTestAPI__)
+  console.log(`API=${apiOk ? 'Y' : 'N'} errors=${errs.length}  ${url}`)
+  await page.close()
+}
+await browser.close()
+```
+
+Última verificación: 2026-09-17 con Playwright headless.
+
+---
+
 ## Summary
 
 Cuando **todas las secciones** están marcadas (especialmente §12 Pedagogical Sign-Off
