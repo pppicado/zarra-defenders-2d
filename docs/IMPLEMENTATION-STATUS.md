@@ -49,7 +49,7 @@
 | REQ-12 | Combo ×5 cap + 2s decay | ❌ | `combat-core/spec.md:107` solo `points = 10 × archetype_multiplier` por hit | Sin combo, sin decay timer, sin cap |
 | REQ-13 | STRINGS centralizado en data.js | ❌ | `grep -r STRINGS src/` = 0 hits; `docs/` directorio VACÍO | Strings hardcoded en `ui/menu.js`, `ui/overlay.js`, `ui/hud.js` |
 | REQ-14 | Final screen + desactivación planta_treco + 4 enlaces | ❌ | `src/levels/test-level.js:265-266` `finalBossId:'e24'`; final screen NO existe | Sin dato final, sin links |
-| REQ-15 | Manual playthrough + verify.sh | ❌ | `MANUAL_PLAYTHROUGH.md` no existe; `scripts/verify.sh` no existe | Aceptación es 16 Playwright e2e |
+| REQ-15 | Manual playthrough + verify.sh | 🟡 | `MANUAL_PLAYTHROUGH.md` existe en raíz (Fase 2.1 ✅ ubicación, ⏳ sign-off pedagógico); `scripts/verify.sh` no existe (Fase 2.2 pendiente) | Aceptación es 16 Playwright e2e |
 
 ### A.2. Decisiones arquitectónicas A1-A9
 
@@ -171,7 +171,7 @@
 | 25 | **Audio/música** (jota o Suno) | ❌ | `src/audio/music.js` | 0 archivos audio en repo |
 | 26 | **SFX procedurales** | ❌ | `src/audio/sfx.js` | Web Audio API procedural |
 | 27 | **Pause overlay dedicado** (3 botones) | ❌ | `src/ui/pause.js` | Solo back-to-menu actual |
-| 28 | **`MANUAL_PLAYTHROUGH.md`** formal | ❌ | Acceptance tipo 3D | Aceptación pedagógica |
+| 28 | **`MANUAL_PLAYTHROUGH.md`** formal | 🟡 | Ubicación ✅ raíz; secciones §0–§18 completas; sign-off pedagógico ⏳ | Aceptación pedagógica |
 | 29 | **`scripts/verify.sh`** estructural | ❌ | 8 checks adaptados al 2D | Bloqueante de archive |
 | 30 | **Folleto del Valle / QR imprimible** | ❌ | SVG estático | Del 3D: assets/qr-zarra-defenders.svg |
 | 31 | **Volumen master + `[`/`]`/`M`** | ❌ | HUD overlay | Aplica post-audio |
@@ -215,7 +215,7 @@
 
 ### C.3. Pedagogical sign-off — checklist
 
-**No existe** en el 2D. El 3D tiene `MANUAL_PLAYTHROUGH.md §12` con 6 entradas que el pedagogo (usuario) debe firmar:
+**Existe** en el 2D (`MANUAL_PLAYTHROUGH.md` en raíz, §12) pero **sin firmar**. El 3D tiene la misma sección §12 con 6 entradas que el pedagogo (usuario) debe firmar:
 
 | Key | Revisado? | Pedagogo sign-off |
 |---|---|---|
@@ -361,7 +361,7 @@ const gameState = { state: 'main-menu' }
 
 ### F.3. Manual playthrough
 
-**No existe** `MANUAL_PLAYTHROUGH.md` en 2D. Comparación con 3D:
+**Existe** `MANUAL_PLAYTHROUGH.md` en raíz 2D (§0–§18). Comparación con 3D:
 
 | Sección 3D | Estado 2D |
 |---|---|

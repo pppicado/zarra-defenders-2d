@@ -316,11 +316,11 @@ zarra-defenders-2d/
 ├── index.html                      (existente)
 ├── start_server.sh                 (existente)
 ├── MANIFEST.md                     (este documento — visión)
+├── MANUAL_PLAYTHROUGH.md           (acceptance formal, tipo 3D — raíz)
 ├── docs/
 │   ├── VISION.md                   ← este archivo
 │   ├── IMPLEMENTATION-STATUS.md    (qué está hecho, qué no)
 │   ├── ROADMAP.md                  (plan priorizado en fases)
-│   ├── MANUAL_PLAYTHROUGH.md       (acceptance formal, tipo 3D)
 │   ├── pedagogy-data.json          (datos pedagógicos con citas)
 │   └── i18n/es.json                (strings centralizados)
 ├── research/
