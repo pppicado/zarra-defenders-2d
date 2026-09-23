@@ -126,6 +126,7 @@ export class PedagogyCards {
           : `<a class="pedagogy-card-link" href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(payload.fuente)} \u2197</a>`
         }
       </p>
+      <p class="pedagogy-card-footer">${escapeHtml(STRINGS.pedagogy.cards.footerFuentes)}</p>
     `
     this.root.dataset.cardId = payload.cardId
     this.root.classList.remove('hidden')

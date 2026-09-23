@@ -58,6 +58,7 @@ export class DataScreen {
           }
         </p>
         <button type="button" class="data-screen-continue" data-role="continue">${escapeHtml(STRINGS.pedagogy.dataScreen.continuar)}</button>
+        <p class="data-screen-footer">${escapeHtml(STRINGS.pedagogy.cards.footerFuentes)}</p>
       </div>
     `
     this.root.classList.remove('hidden')

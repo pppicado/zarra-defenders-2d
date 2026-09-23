@@ -10,6 +10,7 @@
  * all user-facing strings live in `src/i18n/es.js`.
  */
 import { STRINGS } from '../i18n/es.js?v=44'
+import { maybeShowDisclaimerSplash } from './disclaimer-splash.js?v=44'
 
 function apply() {
   // Orientation modal text
@@ -24,6 +25,13 @@ function apply() {
   if (document.title !== STRINGS.app.nombre) {
     document.title = STRINGS.app.nombre
   }
+
+  // F3.3 — disclaimer splash (cold-load only; suppressed if user opted out).
+  // Skipped in ?test=1 mode so e2e harnesses don't have to dismiss it before
+  // exercising gameplay UI. ?test=1 already disables main-menu flow (see
+  // src/test-api.js), so this is consistent with the existing test contract.
+  const testMode = new URLSearchParams(window.location.search).has('test')
+  if (!testMode) maybeShowDisclaimerSplash()
 }
 
 if (document.readyState === 'loading') {

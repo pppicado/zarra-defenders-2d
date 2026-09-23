@@ -121,6 +121,7 @@ export class ResumenFinal {
           <button type="button" class="resumen-btn-nav resumen-btn-next" data-role="next" ${idx === total - 1 ? 'disabled' : ''}>${escapeHtml(R.next)}</button>
         </div>
         <button type="button" class="resumen-btn-cerrar-bottom" data-role="cerrar-bottom">${escapeHtml(R.volverMenu)}</button>
+        <p class="resumen-card-footer">${escapeHtml(STRINGS.pedagogy.cards.footerFuentes)}</p>
       </div>
     `
     this.root.classList.remove('hidden')

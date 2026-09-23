@@ -196,6 +196,7 @@ export class Biblioteca {
             </button>
           `).join('')}
         </div>
+        <p class="biblioteca-grid-footer">${escapeHtml(STRINGS.pedagogy.cards.footerFuentes)}</p>
       </div>
     `
     this.root.classList.remove('hidden')
@@ -257,6 +258,7 @@ export class Biblioteca {
           <button type="button" class="biblioteca-btn-nav" data-role="prev" ${idx === 0 ? 'disabled' : ''}>${escapeHtml(B.prev)}</button>
           <button type="button" class="biblioteca-btn-nav" data-role="next" ${idx === total - 1 ? 'disabled' : ''}>${escapeHtml(B.next)}</button>
         </div>
+        <p class="biblioteca-detail-footer">${escapeHtml(STRINGS.pedagogy.cards.footerFuentes)}</p>
       </div>
     `
     this.root.classList.remove('hidden')

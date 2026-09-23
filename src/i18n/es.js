@@ -259,6 +259,8 @@ export const STRINGS = {
     // Cards in-game (Fase 1.1) — overlay flotante con dato + fuente citada.
     cards: {
       cerrarAriaLabel: 'Cerrar tarjeta',
+      // F3.3: footer pedagogical sign-off (per-card)
+      footerFuentes: 'Datos basados en fuentes públicas verificables.',
     },
 
     // Biblioteca pedagógica (Fase 1.4) — grid de cards acumulado + detail view.
@@ -342,6 +344,7 @@ vertederos. Las fuentes citadas se incluyen en las tarjetas pedagógicas (F6).</
 proyecto.</p>
 `,
     splashTitulo: 'Aviso legal',
+    splashAceptar: 'Aceptar',
     splashCheckbox: 'No volver a mostrar este aviso',
   },
 

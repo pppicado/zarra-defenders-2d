@@ -443,6 +443,107 @@ canvas {
   pointer-events: none;
 }
 
+/* ============================================================
+   Disclaimer splash (F3.3) — cold-load modal.
+   z-index 9500 (debajo de orientation-warning 9999; encima de todo lo demás).
+   ============================================================ */
+#disclaimer-splash {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.72);
+  z-index: 9500;
+  padding: 16px;
+}
+#disclaimer-splash .disclaimer-splash-card {
+  background: #181818;
+  border: 2px solid #f5a623;
+  border-radius: 4px;
+  width: 640px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  color: #e8e8e8;
+  text-align: left;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.6);
+}
+#disclaimer-splash .disclaimer-splash-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #f5a623;
+}
+#disclaimer-splash .disclaimer-splash-body {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+#disclaimer-splash .disclaimer-splash-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+#disclaimer-splash .disclaimer-splash-checkbox-label input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+#disclaimer-splash .disclaimer-splash-buttons {
+  display: flex;
+  justify-content: flex-end;
+}
+#disclaimer-splash .disclaimer-splash-btn {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 24px;
+  min-height: 44px;
+  background: rgba(245, 166, 35, 0.12);
+  color: #f5a623;
+  border: 2px solid #f5a623;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+#disclaimer-splash .disclaimer-splash-btn:hover,
+#disclaimer-splash .disclaimer-splash-btn:focus {
+  background: rgba(245, 166, 35, 0.85);
+  color: #0a0a0a;
+  outline: none;
+}
+#disclaimer-splash .disclaimer-splash-btn--primary {
+  background: rgba(245, 166, 35, 0.85);
+  color: #0a0a0a;
+}
+#disclaimer-splash .disclaimer-splash-btn--primary:hover {
+  background: #f5a623;
+}
+
+/* ============================================================
+   Pedagogy card footer (F3.3) — "Datos basados en fuentes públicas
+   verificables" rendered at the bottom of every pedagogical card
+   surface (in-game, resumen, biblioteca, data-screen).
+   ============================================================ */
+.pedagogy-card-footer,
+.resumen-card-footer,
+.biblioteca-detail-footer,
+.biblioteca-grid-footer,
+.data-screen-footer {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(245, 166, 35, 0.4);
+  font-size: 0.78rem;
+  font-style: italic;
+  color: #b89868;
+  text-align: center;
+}
+
 /* When menu/overlay is visible, disable canvas pointer events so taps reach the DOM. */
 #main-menu:not(.hidden) ~ #game-canvas-wrapper canvas,
 #game-overlay:not(.hidden) ~ #game-canvas-wrapper canvas {
