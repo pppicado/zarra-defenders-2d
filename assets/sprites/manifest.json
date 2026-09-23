@@ -66,6 +66,11 @@
     "heart_empty": {
       "path": "assets/sprites/heart_empty.png",
       "real": true
+    },
+    "crosshair": {
+      "path": "assets/sprites/crosshair.png",
+      "real": true,
+      "note": "F3.4 — 128x128 pixel art crosshair (32 native * 4x upscale), chroma-key magenta removed via tools/postprocess-crosshair.py logic; replaces PIXI.Graphics vector crosshair in src/player.js."
     }
   },
   "deprecated": {

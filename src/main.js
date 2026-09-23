@@ -322,6 +322,10 @@ async function bootstrap() {
   const heartFullTex = textureMap.get('heart_full') ?? null
   const heartEmptyTex = textureMap.get('heart_empty') ?? null
   if (!heartFullTex) __zr.warn('[main] heart_full texture missing — using procedural fallback')
+
+  // F3.4 — crosshair sprite (replaces the prior PIXI.Graphics vector crosshair)
+  const crosshairTex = textureMap.get('crosshair') ?? null
+  if (!crosshairTex) __zr.warn('[main] crosshair texture missing — player.js will use vector fallback')
   if (!heartEmptyTex) __zr.warn('[main] heart_empty texture missing — using procedural fallback')
 
   // --- Modules ---
@@ -513,7 +517,7 @@ async function bootstrap() {
     combat.fireAtScreen(logicalX, logicalY, handPos)
   })
 
-  const player = new Player(appWorld, input, hudContainer, camera)
+  const player = new Player(appWorld, input, hudContainer, camera, crosshairTex)
 
   let combat = null
   let finaleStarted = false  // BG-006 — true after the first finale frame; reset on boot

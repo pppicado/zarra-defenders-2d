@@ -2,7 +2,7 @@
 
 > **Plan de implementación** para llevar al juego de "técnicamente completo pero pedagógicamente vacío" → "juego pedagógicamente completo y archivable bajo SDD".
 >
-> **Última actualización**: 2026-09-23 (F3.2 marcada como rechazada; F3.1 implementada)
+> **Última actualización**: 2026-09-23 (F3.1 pause overlay ✅, F3.2 rechazada ⚪, F3.3 disclaimer splash ✅, F3.4 crosshair sprite ✅)
 >
 > **Criterios de decisión**:
 > - **T-shirt sizing**: S (1 sesión), M (2-3 sesiones), L (4-6 sesiones), XL (>1 semana)
