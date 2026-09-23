@@ -2,7 +2,7 @@
 
 > **Plan de implementación** para llevar al juego de "técnicamente completo pero pedagógicamente vacío" → "juego pedagógicamente completo y archivable bajo SDD".
 >
-> **Última actualización**: 2026-09-23 (F3.1 pause overlay ✅, F3.2 rechazada ⚪, F3.3 disclaimer splash ✅, F3.4 crosshair sprite ✅)
+> **Última actualización**: 2026-09-23 (F3.1-3.4 ✅ + F3.2 ⚪ + F3.5 polish iterations añadidas, pendiente implementación)
 >
 > **Criterios de decisión**:
 > - **T-shirt sizing**: S (1 sesión), M (2-3 sesiones), L (4-6 sesiones), XL (>1 semana)
@@ -364,7 +364,81 @@
 
 **Acceptance criterios**:
 - ✅ Crosshair sprite PNG visible durante menús/pausa
-- ✅ Oculto durante gameplay (mano es el indicador)
+- ⚠ Divergencia 2D: el crosshair SIGUE visible durante gameplay (el rail-shooter necesita aim con mouse; el sprite de mano hace overlay). En 3D rule original solo menus/pause.
+
+---
+
+## Fase 3.5 — Polish iterations (post-F3, 2026-09-23)
+
+Tres refinamientos UX pedidos después de cerrar la Fase 3 original.
+Documentados aquí para que el rationale quede visible (no solo en memoria).
+
+### 3.5.1 Auto-pausa por orientación portrait
+
+Cuando el viewport pasa a portrait (alto > ancho), el juego se pausa
+automáticamente con el mismo path que el pause overlay (Esc). Al volver
+a landscape, si la pausa fue auto-abierta por orientación, se cierra
+auto; si fue abierta por Esc, persiste.
+
+**Por qué**: si el jugador rota accidentalmente el móvil mientras
+dispara, sin pausa automática podría perder integridad / firmas antes
+de darse cuenta. El warning CSS ya existía (3D convention) pero no
+pausaba nada.
+
+**Implementación**: matchMedia('(orientation: portrait)') con change
+listener. Reutiliza el motor de pauseOverlay (no nuevo módulo). El
+warning CSS existente sigue siendo la señal visual de "rotar".
+
+**Aceptación**:
+- ✅ Portrait durante gameplay → pause auto + warning visible
+- ✅ Landscape de vuelta → pause auto se cierra (si vino de orientación)
+- ✅ Esc durante gameplay → pausa manual sigue funcionando independiente
+
+### 3.5.2 Pedagogía cards compactas en bottom-right
+
+La tarjeta in-game (F1.1 — PedagogyCards) se reescribe:
+
+- **Tamaño**: footprint similar a los 3 corazones (3 hearts bottom-left)
+- **Posición**: bottom-right
+- **Default state**: aparece al destruir enemigo, no auto-dismiss
+- **Click en la tarjeta**: pausa el juego (mismo motor pauseOverlay)
+- **Click fuera de la tarjeta**: cierra la tarjeta; si el juego estaba
+  pausado POR la tarjeta, se reanuda
+
+**Por qué**: la card actual es grande, se cierra sola a los 3s, no
+permite lectura atenta. El jugador con prisa puede descartarla con un
+click fuera; el jugador curioso puede pausar para leer. Compact + esquina
+libera el centro del HUD para el crosshair y la mano.
+
+**Aceptación**:
+- ✅ Card aparece bottom-right al destruir enemigo
+- ✅ Click en card = pausa juego (mismo gameState 'paused')
+- ✅ Click fuera = cierra card; si gameState era 'paused' por la card,
+  vuelve a 'gameplay'
+- ✅ Manual §13 + §A5 (fuentes pre-researched) siguen válidos
+
+### 3.5.3 Menu restructure + background image dedicado
+
+El menú principal deja de superponerse al juego corriendo. Ahora:
+
+- Cuando gameState === 'main-menu', los canvases Pixi se ocultan
+- Se muestra una imagen background dedicada (`assets/backgrounds/menu_bg.png`,
+  actualmente re-crop de stage1 — si querés otra, regeneramos)
+- El menú UI se encima con el mismo dim overlay (rgba(0,0,0,0.55)) que
+  ya usa game-overlay
+- Layout responsive: sin scroll, sin elementos off-screen; flexbox +
+  CSS clamp + media queries para adaptar a mobile/desktop
+
+**Por qué**: estéticamente, el menú debe sentirse como una pantalla
+propia del juego, no como un overlay pegado sobre acción congelada. Y
+el scroll aparece cuando el viewport es chico — limitamos a viewport
+enorme => scroll horizontal/vertical.
+
+**Aceptación**:
+- ✅ Menu con bg image, no juego debajo
+- ✅ UI atenuada encima del bg
+- ✅ Sin scroll ni elementos cortados en mobile/desktop
+- ✅ Inicia gameplay => bg se oculta, canvases vuelven
 
 ---
 
