@@ -203,7 +203,7 @@ El juego requiere servidor HTTP — `file://` no permite Pointer Lock ni Pixi.js
 | `STRINGS.pedagogy.datos['stage2-lahoz'].texto` | "El Acuífero de la Mancha Oriental tiene 8.500 km² — una de las mayores masas de agua subterránea de Europa. Abastece a Ayora, Zarra, Teresa de Cofrentes y Jarafuel." | [ ] | [ ] |
 | `STRINGS.pedagogy.datos['stage2-lahoz'].fuente` | "Agencia del Agua de Castilla-La Mancha (s/f)" | [ ] | [ ] |
 | `STRINGS.pedagogy.datos['stage2-lahoz'].url` | https://agenciadelagua.castillalamancha.es/el-agua-en-castilla-la-mancha/situacion-del-agua-en-clm/acuiferos | [ ] | [ ] |
-| **4 cards de enemigos en stage2** (bidon_lixiviado, tubo_lixiviado, camion_cisterna_residuos) | Pedagogía conecta con impacto real | [ ] | [ ] |
+| **3 cards de enemigos en stage2** (bidon_lixiviado, tubo_lixiviado, camion_cisterna_residuos) | Pedagogía conecta con impacto real | [ ] | [ ] |
 
 ### §12.3 Stage 3 — Sierra de La Hunde y Palomera (Ayora)
 
