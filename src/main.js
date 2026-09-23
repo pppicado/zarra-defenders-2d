@@ -42,6 +42,7 @@ import { ResumenFinal } from './pedagogy/resumen-final.js?v=44'
 import { Biblioteca } from './pedagogy/biblioteca.js?v=44'
 import { DataScreen } from './pedagogy/data-screen.js?v=44'
 import { FinalScreen, FINAL_BOSS_SPRITE_ID } from './pedagogy/final-screen.js?v=44'
+import { PauseOverlay } from './ui/pause.js?v=44'
 import { __zr } from './engine/dom-debug.js?v=44'
 
 // ============================================================
@@ -110,7 +111,7 @@ function buildTestLevelPath() {
 }
 
 /** Mutated externally by main-menu + overlay. */
-const gameState = { state: 'main-menu' }   // 'main-menu' | 'gameplay' | 'overlay'
+const gameState = { state: 'main-menu' }   // 'main-menu' | 'gameplay' | 'overlay' | 'paused'
 
 /**
  * Load a procedural placeholder bg into the given BackgroundLayer.
@@ -481,13 +482,22 @@ async function bootstrap() {
 
   input.on('move', (x, y) => hudModule.setPointer(x, y))
 
-  // BG-011 — Escape (or P) during gameplay returns to the main menu.
-  // The 'pause' event is already emitted by Input._handleKeyDown when the
-  // player presses Escape / P; we map it to `menu:back` here so the player
-  // can switch stages without having to die first.
+  // BG-011 / F3.1 — Escape (or P) toggles the pause overlay.
+  //   - During gameplay: show the pause overlay (3 buttons).
+  //   - With overlay visible: hide it (= "Continuar").
+  // 'menu:back' is now invoked only when the user clicks "Salir al menu"
+  // explicitly inside the pause overlay (PauseOverlay._onBack).
+  const pauseOverlayRoot = document.getElementById('pause')
+  const pauseOverlay = new PauseOverlay({
+    root: pauseOverlayRoot,
+    camera,
+    gameState,
+  })
   input.on('pause', () => {
     if (gameState.state === 'gameplay') {
-      emit('menu:back', {})
+      pauseOverlay.show()
+    } else if (gameState.state === 'paused') {
+      pauseOverlay.hide()
     }
   })
 

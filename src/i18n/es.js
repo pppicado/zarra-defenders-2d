@@ -315,6 +315,18 @@ export const STRINGS = {
   },
 
   // ============================================================
+  // Pause overlay (Fase 3.1) — REQ-10: 3 botones durante gameplay.
+  // Trigger: Esc / P durante gameplay → muestra overlay.
+  // Esc adicional con overlay visible = "Continuar".
+  // ============================================================
+  pause: {
+    titulo: 'Pausa',
+    continuar: 'Continuar',
+    reiniciarStage: 'Reiniciar stage',
+    salirMenu: 'Salir al menú',
+  },
+
+  // ============================================================
   // Disclaimer legal (Art. 20 CE + Art. 11 CDFUE)
   // ============================================================
   disclaimer: {
