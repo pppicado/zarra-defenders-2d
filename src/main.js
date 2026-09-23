@@ -505,6 +505,37 @@ async function bootstrap() {
     }
   })
 
+  // F3.5.1 — orientation auto-pause. matchMedia('(orientation: portrait)')
+  // fires whenever the viewport taller-than-wide state flips; resize covers
+  // cases where matchMedia doesn't emit (older browsers, edge resize via
+  // devtools). When portrait, pause the game via the same pauseOverlay.show()
+  // path that Esc uses; mark the pause as auto-opened so the landscape handler
+  // closes it without clobbering a user-initiated Esc-pause.
+  //
+  // Declared at bootstrap scope so bootTestLevel can call it directly after
+  // setting gameState.state = 'gameplay' (the initial sync otherwise fires
+  // before gameplay starts).
+  let syncOrientationAutoPause = () => {}
+  if (typeof window.matchMedia === 'function') {
+    syncOrientationAutoPause = () => {
+      const portrait = window.matchMedia('(orientation: portrait)').matches
+      if (portrait) {
+        if (gameState.state === 'gameplay') {
+          pauseOverlay._autoPaused = true
+          pauseOverlay.show()
+        }
+      } else {
+        if (pauseOverlay._autoPaused && pauseOverlay.isVisible) {
+          pauseOverlay.hide()
+          pauseOverlay._autoPaused = false
+        }
+      }
+    }
+    window.matchMedia('(orientation: portrait)').addEventListener('change', syncOrientationAutoPause)
+    window.addEventListener('resize', syncOrientationAutoPause)
+    syncOrientationAutoPause()
+  }
+
   // Tap handler: the input handler has already converted CSS px → logical
   // 1920x720 px (see _toLogical in input.js). F5 (REQ-CMB-003): the combat
   // resolver now compares against each enemy's screen-space sprite bounds,
@@ -718,6 +749,10 @@ async function bootstrap() {
 
     hudModule.setHandVisible(true)
     gameState.state = 'gameplay'
+    // F3.5.1: re-sync orientation auto-pause now that we're in gameplay.
+    // The initial sync ran before state was 'gameplay' (during bootstrap),
+    // so portrait users wouldn't have been auto-paused on cold load.
+    syncOrientationAutoPause()
   }
 
   function maybeFireFinale({ camera, bg }) {
