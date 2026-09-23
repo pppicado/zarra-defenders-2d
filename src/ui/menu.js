@@ -4,15 +4,15 @@
  * Main menu DOM overlay (BG-005 — fase-6 stage selector).
  *
  * Stage buttons (locked/unlocked based on localStorage clears):
- *   1. Bosque mediterráneo     (default unlocked)
- *   2. Pueblo de Cofrentes     (locked until stage 1 cleared)
- *   3. Río Cabriel             (locked until stage 2 cleared)
- *   4. Vertedero TRECO         (locked until stage 3 cleared)
- *   5. Castillo de Cofrentes   (locked until stage 4 cleared)
+ *   1. Mediterranean forest   (default unlocked)
+ *   2. Cofrentes town         (locked until stage 1 cleared)
+ *   3. Cabriel river          (locked until stage 2 cleared)
+ *   4. TRECO dump             (locked until stage 3 cleared)
+ *   5. Cofrentes castle       (locked until stage 4 cleared)
  *
  * Plus:
- *   - Acerca de                (scrollable inline modal)
- *   - Disclaimer               (scrollable inline modal)
+ *   - About        (scrollable inline modal)
+ *   - Disclaimer   (scrollable inline modal)
  *
  * Keyboard:
  *   ArrowDown / ArrowUp   : cycle focus
@@ -30,40 +30,9 @@ import { emit } from '../event-bus.js?v=44'
 import { __zr } from '../engine/dom-debug.js?v=44'
 import { STRINGS } from '../i18n/es.js?v=44'
 
-/** localStorage key for "stage N cleared" marker. */
 export const STAGE_CLEAR_KEY = (stageId) => `zarra2d:stageClear:${stageId}`
 
-/** Stage ordering — the first stage is unlocked by default. */
-const STAGES = [
-  { id: 'stage1-lashoyas',  label: '1 · Las Hoyas de Caballero (Zarra)' },
-  { id: 'stage2-lahoz',     label: '2 · La Hoz del río Zarra' },
-  { id: 'stage3-lahunde',   label: '3 · Sierra de La Hunde y Palomera (Ayora)' },
-  { id: 'stage4-ayora',     label: '4 · Casco urbano de Ayora' },
-  { id: 'stage5-acuifero',  label: '5 · El Acuífero (jefe final)' },
-]
-
-const ABOUT_TEXT = `
-<h2>Acerca de</h2>
-<p><strong>Zarra Defenders 2D</strong> — on-rails shooter pedag\u00f3gico sobre el proyecto de macrovertedero
-TRECO GESTI\u00d3N DE RESIDUOS S.L. en el Valle de Ayora-Cofrentes (Valencia).</p>
-<p>Este juego convierte la lucha vecinal contra el vertedero en una experiencia arcade:
-firm\u00e1s papeletas de recogida en lugar de disparar balas. Cada firma es una firma real
-contra la destrucci\u00f3n del territorio.</p>
-<p>Inspirado en <em>House of the Dead</em>, <em>Time Crisis</em> y <em>Virtua Cop</em>.</p>
-<p>Versi\u00f3n: F6 \u2014 scrolling pixel-art backgrounds (2026).</p>
-`
-
-const DISCLAIMER_TEXT = `
-<h2>Disclaimer</h2>
-<p><strong>Este es un juego con intenci\u00f3n pol\u00edtica y pedag\u00f3gica.</strong> Toda la informaci\u00f3n
-presentada sobre el proyecto TRECO, sus impactos y los agentes involucrados est\u00e1 basada en
-fuentes p\u00fablicas y se ofrece como material educativo.</p>
-<p>El juego no representa, endosa ni ataca a ninguna persona f\u00edsica. Los enemigos son
-met\u00e1foras del impacto ambiental: topadoras, camiones, drones de fumigaci\u00f3n, incineradoras,
-vertederos. Las fuentes citadas se incluyen en las tarjetas pedag\u00f3gicas (F6).</p>
-<p>Zarra Defenders 2D es software libre. C\u00f3digo y assets disponibles en el repositorio del
-proyecto.</p>
-`
+const STAGES = STRINGS.menu.stages
 
 /**
  * A stage is unlocked if its own clear key exists OR if the previous stage's
@@ -232,7 +201,7 @@ export class MainMenu {
     aboutModal.innerHTML = `
       <div class="menu-modal-card" role="dialog" aria-modal="true">
         <button type="button" class="menu-modal-close" aria-label={STRINGS.menu.cerrarAriaLabel}>{STRINGS.menu.cerrarModal}</button>
-        <div class="menu-modal-body">${ABOUT_TEXT}</div>
+        <div class="menu-modal-body">${STRINGS.about.full}</div>
       </div>
     `
     this.root.appendChild(aboutModal)
@@ -244,7 +213,7 @@ export class MainMenu {
     disclaimerModal.innerHTML = `
       <div class="menu-modal-card" role="dialog" aria-modal="true">
         <button type="button" class="menu-modal-close" aria-label={STRINGS.menu.cerrarAriaLabel}>{STRINGS.menu.cerrarModal}</button>
-        <div class="menu-modal-body">${DISCLAIMER_TEXT}</div>
+        <div class="menu-modal-body">${STRINGS.disclaimer.full}</div>
       </div>
     `
     this.root.appendChild(disclaimerModal)

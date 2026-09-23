@@ -1,19 +1,19 @@
 /**
  * src/pedagogy/data-screen.js
  *
- * Dato pre-nivel — Fase 1.5 (ROADMAP).
+ * Pre-stage data screen — Phase 1.5 (ROADMAP).
  *
- * Overlay que aparece ANTES de cada stage mostrando el dato del conflicto
- * correspondiente al stage. El jugador lee el dato + fuente y luego
- * presiona "Continuar" (o Esc/Space) para empezar a jugar.
+ * Overlay that appears BEFORE each stage showing the conflict data
+ * corresponding to that stage. The player reads the data + source and
+ * then presses "Continuar" (or Esc/Space) to start playing.
  *
- * Pedagogía:
- *   - Antes de cada stage, 5s de dato + citation visible
- *   - El jugador llega al gameplay con contexto pedagógico fresco
- *   - Fuente citada visible, refuerza el contrato A5 (fuentes pre-researched)
+ * Pedagogy:
+ *   - Before each stage, 5s of data + citation visible
+ *   - Player arrives at gameplay with fresh pedagogical context
+ *   - Cited source visible, reinforces A5 contract (pre-researched sources)
  *
- * Trigger: stage:aboutToStart { stageId } (emitido por main.js antes de
- * bootTestLevel). Después de Continuar, main.js arranca el stage.
+ * Trigger: stage:aboutToStart { stageId } (emitted by main.js before
+ * bootTestLevel). After Continuar, main.js starts the stage.
  */
 
 import { STRINGS } from '../i18n/es.js?v=44'
@@ -46,7 +46,7 @@ export class DataScreen {
     }
     this._stageId = stageId
     this.root.innerHTML = `
-      <div class="data-screen-card" role="dialog" aria-live="polite" aria-label="Dato pedagógico del nivel">
+      <div class="data-screen-card" role="dialog" aria-live="polite" aria-label="${escapeAttr(STRINGS.pedagogy.dataScreen.ariaLabel)}">
         <p class="data-screen-stage">${escapeHtml(this._stageLabel(stageId))}</p>
         <h2 class="data-screen-title">${escapeHtml(STRINGS.pedagogy.dataScreen.titulo)}</h2>
         <blockquote class="data-screen-dato">${escapeHtml(data.texto)}</blockquote>
@@ -106,13 +106,7 @@ export class DataScreen {
   }
 
   _stageLabel(stageId) {
-    const map = {
-      'stage1-lashoyas': '1 · Las Hoyas de Caballero (Zarra)',
-      'stage2-lahoz': '2 · La Hoz del río Zarra',
-      'stage3-lahunde': '3 · Sierra de La Hunde y Palomera (Ayora)',
-      'stage4-ayora': '4 · Casco urbano de Ayora',
-      'stage5-acuifero': '5 · El Acuífero (jefe final)',
-    }
+    const map = STRINGS.pedagogy.dataScreen.stageLabels
     return map[stageId] || stageId || '?'
   }
 

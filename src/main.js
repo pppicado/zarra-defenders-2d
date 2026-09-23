@@ -147,11 +147,11 @@ async function _loadBackgroundManifest() {
  */
 function _loadPlaceholderBg(bg, stageId) {
   const palettes = {
-    'stage1-lashoyas': { top: 0xe07040, bottom: 0xb04a20 },  // Las Hoyas sunset manchego (encinas+almendros+sunset)
+    'stage1-lashoyas': { top: 0xe07040, bottom: 0xb04a20 },  // Las Hoyas manchego sunset (encinas + almendros + sunset)
     'stage2-lahoz':    { top: 0x4a5a4a, bottom: 0x2e3a2e },  // La Hoz canyon walls (grey rock + turquoise river)
     'stage3-lahunde':  { top: 0x2e5a3a, bottom: 0x1a4020 },  // La Hunde dense pine forest
     'stage4-ayora':    { top: 0xf0d8b8, bottom: 0xb89868 },  // Ayora casco (whitewashed houses + cobblestone)
-    'stage5-acuifero': { top: 0x1a2a3a, bottom: 0x0a1a2a },  // Acuífero underground (dark wet stone + glowing blue water)
+    'stage5-acuifero': { top: 0x1a2a3a, bottom: 0x0a1a2a },  // Acuifero underground (dark wet stone + glowing blue water)
   }
   const { top, bottom } = palettes[stageId] ?? { top: 0x2a3a4a, bottom: 0x182028 }
 
@@ -180,7 +180,7 @@ function _loadPlaceholderBg(bg, stageId) {
 
 async function bootstrap() {
   if (typeof PIXI === 'undefined') {
-    __zr.error('Pixi.js no cargó desde el CDN. Verificar conexión o tag <script>')
+    __zr.error(STRINGS.error.pixiNotLoaded)
     return
   }
 
@@ -363,7 +363,7 @@ async function bootstrap() {
   const resumenFinalRoot = document.getElementById('resumen-final')
   const resumenFinal = new ResumenFinal({
     root: resumenFinalRoot,
-    onClose: () => { /* nothing — user clicks 'Volver al menú' which goes through overlay */ },
+    onClose: () => { /* nothing — user clicks "Volver al menu" which goes through overlay */ },
   })
   let resumenUnsub = null
   busOn('stage:cleared', () => {
@@ -380,7 +380,7 @@ async function bootstrap() {
   busOn('menu:startRequested', () => resumenFinal.hide())
   busOn('bootTestLevel:request', () => resumenFinal.hide())
 
-  // F1.4 — biblioteca pedagógica (accessible desde menú principal).
+  // F1.4 — pedagogical library (accessible from main menu).
   const bibliotecaRoot = document.getElementById('biblioteca')
   const biblioteca = new Biblioteca({ root: bibliotecaRoot })
   busOn('menu:bibliotecaRequested', () => biblioteca.show())
@@ -410,12 +410,12 @@ async function bootstrap() {
   busOn('menu:startRequested', () => dataScreen.hide())
   busOn('menu:back', () => dataScreen.hide())
 
-  // F1.7 — pantalla final con 4 enlaces (cierre del loop pedagógico).
+  // F1.7 — final screen with 4 links (closes the pedagogical loop).
   const finalScreenRoot = document.getElementById('final-screen')
   const finalScreen = new FinalScreen({
     root: finalScreenRoot,
     onClose: () => {
-      // Volver al menú
+      // Back to menu
       resumenFinal.hide()
       overlay.hide()
       modalIntermedio.hide()

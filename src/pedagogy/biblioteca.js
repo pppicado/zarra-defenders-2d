@@ -1,20 +1,20 @@
 /**
  * src/pedagogy/biblioteca.js
  *
- * Biblioteca pedagógica — Fase 1.4 (ROADMAP).
+ * Pedagogical library — Phase 1.4 (ROADMAP).
  *
- * Modal fullscreen accesible desde el menú principal. Acumula TODAS las
- * cards pedagógicas que el jugador ha visto en partidas previas (más
- * las 12 del catálogo inicial). Persistencia en localStorage.
+ * Fullscreen modal accessible from the main menu. Accumulates ALL
+ * pedagogical cards the player has seen in previous runs (plus
+ * the 12 from the initial catalog). Persistence in localStorage.
  *
- * Comportamiento:
- *   - Botón "Biblioteca" en el menú principal
- *   - Modal con grid de cards (filtrable por stage)
- *   - Click en card abre detail view (reusa patrón de ResumenFinal)
- *   - Persistencia: cada stage:cleared copia las cards a localStorage
- *   - Cards iniciales del catálogo (12) están siempre desbloqueadas
+ * Behavior:
+ *   - "Biblioteca" button in the main menu
+ *   - Modal with a cards grid (filterable by stage)
+ *   - Clicking a card opens detail view (reuses ResumenFinal pattern)
+ *   - Persistence: each stage:cleared copies cards to localStorage
+ *   - Initial catalog cards (12) are always unlocked
  *
- * Schema localStorage:
+ * localStorage schema:
  *   key: 'zarra2d:biblioteca:unlocked'
  *   value: [{ cardId, enemyId, spriteId, stageId, titulo, descripcion,
  *            datoTexto, fuente, url, timestamp }, ...]
@@ -175,27 +175,20 @@ export class Biblioteca {
   _renderGrid() {
     const all = this._allCards
     const filtered = filterByStage(all, this._stageFilter)
-
-    const stages = [
-      { id: 'all', label: 'Todas' },
-      { id: 'stage1-lashoyas', label: '1. Las Hoyas' },
-      { id: 'stage2-lahoz', label: '2. La Hoz' },
-      { id: 'stage3-lahunde', label: '3. La Hunde' },
-      { id: 'stage4-ayora', label: '4. Ayora' },
-      { id: 'stage5-acuifero', label: '5. Acuífero' },
-    ]
+    const B = STRINGS.pedagogy.biblioteca
+    const stages = B.filtros
 
     this.root.innerHTML = `
-      <div class="biblioteca-card" role="dialog" aria-label="Biblioteca pedagógica">
-        <button type="button" class="biblioteca-btn-cerrar" data-role="cerrar" aria-label="Cerrar biblioteca">\u2715</button>
-        <h2 class="biblioteca-title">Biblioteca pedagógica</h2>
+      <div class="biblioteca-card" role="dialog" aria-label="${escapeAttr(B.ariaLabel)}">
+        <button type="button" class="biblioteca-btn-cerrar" data-role="cerrar" aria-label="${escapeAttr(B.ariaLabel)}">\u2715</button>
+        <h2 class="biblioteca-title">${escapeHtml(B.title)}</h2>
         <p class="biblioteca-counter">${filtered.length} de ${all.length} cards</p>
         <div class="biblioteca-filters">
           ${stages.map(s => `<button type="button" class="biblioteca-filter ${s.id === this._stageFilter ? 'biblioteca-filter--active' : ''}" data-role="filter-${s.id}">${escapeHtml(s.label)}</button>`).join('')}
         </div>
         <div class="biblioteca-grid">
           ${filtered.length === 0 ? `
-            <p class="biblioteca-empty">No hay cards para este filtro. Juega un stage para desbloquear contenido pedagógico.</p>
+            <p class="biblioteca-empty">${escapeHtml(B.empty)}</p>
           ` : filtered.map((c, i) => `
             <button type="button" class="biblioteca-grid-item" data-role="grid-item-${i}" data-card-id="${escapeAttr(c.cardId)}">
               <p class="biblioteca-grid-titulo">${escapeHtml(c.titulo || '')}</p>
@@ -243,25 +236,26 @@ export class Biblioteca {
     }
     const idx = this._detailIndex
     const total = this._allCards.length
+    const B = STRINGS.pedagogy.biblioteca
 
     this.root.innerHTML = `
-      <div class="biblioteca-card" role="dialog" aria-live="polite" aria-label="Biblioteca card ${idx + 1} de ${total}">
-        <button type="button" class="biblioteca-btn-cerrar" data-role="cerrar" aria-label="Cerrar">\u2715</button>
-        <button type="button" class="biblioteca-btn-back" data-role="back">\u2190 Volver a la biblioteca</button>
+      <div class="biblioteca-card" role="dialog" aria-live="polite" aria-label="${escapeAttr(B.detailAriaLabel(idx + 1, total))}">
+        <button type="button" class="biblioteca-btn-cerrar" data-role="cerrar" aria-label="${escapeAttr(B.ariaLabel)}">\u2715</button>
+        <button type="button" class="biblioteca-btn-back" data-role="back">${escapeHtml(B.back)}</button>
         <p class="biblioteca-counter">${idx + 1} / ${total}</p>
         <h3 class="biblioteca-detail-title">${escapeHtml(card.titulo || '')}</h3>
         <p class="biblioteca-detail-description">${escapeHtml(card.descripcion || '')}</p>
         <p class="biblioteca-detail-dato">${escapeHtml(card.datoTexto || '')}</p>
         <p class="biblioteca-detail-fuente">
-          Fuente:
+          ${escapeHtml(STRINGS.pedagogy.dataScreen.fuente)}:
           ${card.url && card.url.startsWith('#')
             ? `<span class="biblioteca-detail-hashtag">${escapeHtml(card.fuente || '')}</span>`
             : `<a class="biblioteca-detail-link" href="${escapeAttr(card.url || '#')}" target="_blank" rel="noopener noreferrer">${escapeHtml(card.fuente || '')} \u2197</a>`
           }
         </p>
         <div class="biblioteca-detail-nav">
-          <button type="button" class="biblioteca-btn-nav" data-role="prev" ${idx === 0 ? 'disabled' : ''}>\u2190 Anterior</button>
-          <button type="button" class="biblioteca-btn-nav" data-role="next" ${idx === total - 1 ? 'disabled' : ''}>Siguiente \u2192</button>
+          <button type="button" class="biblioteca-btn-nav" data-role="prev" ${idx === 0 ? 'disabled' : ''}>${escapeHtml(B.prev)}</button>
+          <button type="button" class="biblioteca-btn-nav" data-role="next" ${idx === total - 1 ? 'disabled' : ''}>${escapeHtml(B.next)}</button>
         </div>
       </div>
     `
@@ -280,13 +274,7 @@ export class Biblioteca {
   }
 
   _stageLabel(stageId) {
-    const map = {
-      'stage1-lashoyas': 'Las Hoyas',
-      'stage2-lahoz': 'La Hoz',
-      'stage3-lahunde': 'La Hunde',
-      'stage4-ayora': 'Ayora',
-      'stage5-acuifero': 'Acuífero',
-    }
+    const map = STRINGS.pedagogy.biblioteca.shortStageLabels
     return map[stageId] || stageId || '?'
   }
 }

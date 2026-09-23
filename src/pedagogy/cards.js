@@ -1,28 +1,28 @@
 /**
  * src/pedagogy/cards.js
  *
- * Cards pedagógicas in-game — Fase 1.1 (ROADMAP).
+ * In-game pedagogical cards — Phase 1.1 (ROADMAP).
  *
- * Cada vez que el jugador destruye un enemigo, aparece una card flotante con:
- *   - Título del enemigo (ej: "Bidón de lixiviados")
- *   - Descripción específica del enemigo (1 frase, conecta con impacto real)
- *   - Dato del conflicto del stage (de `STRINGS.pedagogy.datos[stageId]`)
- *   - Link clickeable a la fuente citada (target="_blank, rel=noopener")
- *   - Botón de cierre (✕)
+ * Each time the player destroys an enemy, a floating card appears with:
+ *   - Enemy title (e.g. "Bidon de lixiviados")
+ *   - Enemy-specific description (1 sentence, connecting to real impact)
+ *   - Stage conflict data (from `STRINGS.pedagogy.datos[stageId]`)
+ *   - Clickable link to the cited source (target="_blank, rel=noopener")
+ *   - Close button (✕)
  *
- * Comportamiento:
- *   - Una sola card visible a la vez (reemplaza la anterior si llega otra)
- *   - Auto-dismiss a `dismissMs` (default 3000)
- *   - Click en cualquier parte de la card dismiss inmediato
- *   - Click en link de fuente NO dismiss (se abre nueva pestaña)
+ * Behavior:
+ *   - Only one card visible at a time (replaces the previous if another arrives)
+ *   - Auto-dismiss at `dismissMs` (default 3000)
+ *   - Click anywhere on the card dismisses immediately
+ *   - Click on source link does NOT dismiss (opens new tab)
  *   - `onCardShown({ enemyId, spriteId, stageId, titulo, fuente, url, timestamp })`
- *     callback que main.js usa para tracking de `cardsShown` en Score
+ *     callback that main.js uses for tracking `cardsShown` in Score
  *
- * Pedagogía (Fase 1.1 MVP):
- *   - Cada enemigo tiene una descripción específica (no copy genérica)
- *   - Cada card cita una fuente real (research/fuentes.md) con link verificado
- *   - El dato del stage aparece debajo de la descripción
- *   - Pedagogical sign-off pendiente: revisar las 12 descripciones en MANUAL_PLAYTHROUGH §12
+ * Pedagogy (Phase 1.1 MVP):
+ *   - Each enemy has a specific description (no generic copy)
+ *   - Each card cites a real source (research/fuentes.md) with a verified link
+ *   - The stage data appears below the description
+ *   - Pedagogical sign-off pending: review the 12 descriptions in MANUAL_PLAYTHROUGH §12
  */
 
 import { STRINGS } from '../i18n/es.js?v=44'
@@ -115,12 +115,12 @@ export class PedagogyCards {
     const isHashLink = payload.isHashLink
 
     this.root.innerHTML = `
-      <button type="button" class="pedagogy-card-close" aria-label="Cerrar tarjeta">\u2715</button>
+      <button type="button" class="pedagogy-card-close" aria-label="${escapeAttr(STRINGS.pedagogy.cards.cerrarAriaLabel)}">\u2715</button>
       <h3 class="pedagogy-card-title" id="pedagogy-card-title">${escapeHtml(payload.titulo)}</h3>
       <p class="pedagogy-card-description">${escapeHtml(payload.descripcion)}</p>
       <p class="pedagogy-card-dato">${escapeHtml(payload.datoTexto)}</p>
       <p class="pedagogy-card-fuente">
-        Fuente:
+        ${escapeHtml(STRINGS.pedagogy.dataScreen.fuente)}:
         ${isHashLink
           ? `<span class="pedagogy-card-hashtag">${escapeHtml(payload.fuente)}</span>`
           : `<a class="pedagogy-card-link" href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(payload.fuente)} \u2197</a>`

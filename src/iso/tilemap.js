@@ -188,7 +188,7 @@ export class Tilemap {
 // the loader looks up the PNG by the resolved URL in main.js.
 export const STAGE_VARIANTS = Object.freeze({
   'stage1-lashoyas': ['encina_redonda_sombra_2x','almendro_blossom_rosa_2x','suelo_arcilloso_rojizo_2x','trocha_rural_compactada_2x','matorral_coscoja_romero_2x','piedra_suelta_camino_2x','horizonte_atardecer_manchego_2x','cerro_treco_silueta_2x'],
-  'stage2-lahoz': ['roca_canyon_pared_gris_2x','agua_turquesa_rio_zarra_2x','puente_madera_2x','tubería_lixiviados_industrial_2x','chopo_ribera_2x','canto_rodado_orilla_2x','sedimento_aluvial_2x','musgo_humedo_pared_2x'],
+  'stage2-lahoz': ['roca_canyon_pared_gris_2x','agua_turquesa_rio_zarra_2x','puente_madera_2x','tuberia_lixiviados_industrial_2x','chopo_ribera_2x','canto_rodado_orilla_2x','sedimento_aluvial_2x','musgo_humedo_pared_2x'],
   'stage3-lahunde': ['pino_carrasco_denso_2x','pino_underbrush_dark_2x','romero_silver_sotobosque_2x','aliaga_spiny_grey_2x','suelo_pinocha_2x','trocha_forestal_compactada_2x','sol_entre_ramas_dappled_2x','castillo_cofrentes_skyline_2x'],
   'stage4-ayora': ['cal_blanca_pared_2x','teja_arabe_roja_2x','adoquin_plaza_empedrada_2x','porton_piedra_dintel_2x','balcon_hierro_forjado_2x','fuente_piedra_central_2x','olivo_borde_2x','sombra_calle_estrecha_2x'],
   'stage5-acuifero': ['piedra_oscura_humeda_2x','estalactita_amber_techo_2x','agua_subterranea_azul_brillante_2x','planta_treco_industrial_2x','tuberia_central_residuos_2x','pavimento_subterraneo_2x','glow_azul_acuifero_2x','chimenea_subterranea_2x'],

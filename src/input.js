@@ -1,31 +1,31 @@
 /**
  * src/input.js
  *
- * Input unificado de mouse + touch para Zarra Defenders 2D.
+ * Unified mouse + touch input for Zarra Defenders 2D.
  *
- * Por qué unificamos: las pistolas de luz HID se comportan como mouse en PC,
- * y los touch events en móvil exponen prácticamente la misma API que el mouse
- * (con `touchstart`/`touchmove`/`touchend` en lugar de `mousedown`/...).
- * Usamos Pointer Events cuando están disponibles (chrome, firefox, safari modernos)
- * y caemos a touch + mouse como fallback.
+ * Why we unify: HID light guns behave like a mouse on PC, and touch
+ * events on mobile expose practically the same API as the mouse
+ * (with `touchstart`/`touchmove`/`touchend` instead of `mousedown`/...).
+ * We use Pointer Events when available (chrome, firefox, modern safari)
+ * and fall back to touch + mouse.
  *
- * Decisión confirmada (2026-09-03):
- *   - Auto-fire en móvil: OFF (disparo manual con tap explícito)
- *   - Tap vs drag: distancia < umbral y duración < 300ms → tap (dispara)
- *                       si no → drag (solo apunta, no dispara)
- *   - Light gun = mouse normal (sin código especial)
+ * Confirmed decision (2026-09-03):
+ *   - Auto-fire on mobile: OFF (manual fire with explicit tap)
+ *   - Tap vs drag: distance < threshold and duration < 300ms → tap (fire)
+ *                       else → drag (just aim, don't fire)
+ *   - Light gun = normal mouse (no special code)
  *
- * API expuesta (al GameState desde main.js):
- *   Input.on('move', callback(x, y))         -> cada movimiento de puntero
- *   Input.on('tap', callback(x, y))           -> tap detectado (PC click o mobile tap)
- *   Input.on('pause', callback())              -> tecla Escape o P
- *   Input.getPointerX(), getPointerY()        -> posición actual del puntero
- *   Input.isPointerInsideCanvas()              -> true si está dentro del canvas
- *   Input.setCanvas(canvasElement)            -> vincular al canvas (llamar al inicio)
+ * API exposed (to GameState from main.js):
+ *   Input.on('move', callback(x, y))         -> every pointer movement
+ *   Input.on('tap', callback(x, y))           -> tap detected (PC click or mobile tap)
+ *   Input.on('pause', callback())              -> Escape or P key
+ *   Input.getPointerX(), getPointerY()        -> current pointer position
+ *   Input.isPointerInsideCanvas()              -> true if inside the canvas
+ *   Input.setCanvas(canvasElement)            -> bind to canvas (call at start)
  */
 
-const TAP_MAX_DISTANCE = 10         // px: distancia entre touchstart y touchend para considerar tap
-const TAP_MAX_DURATION_MS = 300     // ms: duración máxima para considerar tap
+const TAP_MAX_DISTANCE = 10         // px: distance between touchstart and touchend to consider it a tap
+const TAP_MAX_DURATION_MS = 300     // ms: max duration to consider it a tap
 
 import { __zr } from './engine/dom-debug.js?v=44'
 
@@ -79,7 +79,7 @@ export class Input {
     if (this.listeners[event]) {
       this.listeners[event].push(callback)
     } else {
-      __zr.warn(`[Input] Evento desconocido: ${event}`)
+      __zr.warn(`[Input] Unknown event: ${event}`)
     }
   }
 
@@ -165,13 +165,13 @@ export class Input {
 
   _handlePointerDown(e) {
     if (e.pointerType === 'touch') {
-      // En touch, guardamos posición y tiempo para detectar tap vs drag después
+      // On touch, save position and time to detect tap vs drag later
       const { x, y } = this._toLogical(e.clientX, e.clientY)
       this.touchStartX = x
       this.touchStartY = y
       this.touchStartTime = performance.now()
     } else {
-      // Mouse / pen: tap = click directo (sin distancia, sin duración relevante)
+      // Mouse / pen: tap = direct click (no distance, no duration relevant)
       const { x, y } = this._toLogical(e.clientX, e.clientY)
       this._emit('tap', x, y)
     }
@@ -179,7 +179,7 @@ export class Input {
 
   _handlePointerUp(e) {
     if (e.pointerType === 'touch') {
-      // Detectar tap en touch: poca distancia + poco tiempo
+      // Detect tap on touch: short distance + short time
       const { x: endX, y: endY } = this._toLogical(e.clientX, e.clientY)
       const dx = endX - this.touchStartX
       const dy = endY - this.touchStartY
@@ -189,13 +189,13 @@ export class Input {
       if (dist <= TAP_MAX_DISTANCE && dur <= TAP_MAX_DURATION_MS) {
         this._emit('tap', endX, endY)
       }
-      // Si no se cumple, fue un drag, no emitimos tap (pero el move ya se emitió)
+      // If not satisfied, it was a drag; we do not emit tap (but the move was already emitted)
     }
-    // Para mouse/pen, el tap ya se emitió en pointerdown
+    // For mouse/pen, the tap was already emitted on pointerdown
   }
 
   _handlePointerCancel() {
-    // Si el navegador cancela el touch (ej. scroll抢占), resetear estado
+    // If the browser cancels the touch (e.g. scroll preempt), reset state
     this.touchStartTime = 0
   }
 
@@ -213,7 +213,7 @@ export class Input {
       try {
         cb(...args)
       } catch (err) {
-        __zr.error(`[Input] Error en listener de '${event}':`, err)
+        __zr.error(`[Input] Error in '${event}' listener:`, err)
       }
     }
   }

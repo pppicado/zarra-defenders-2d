@@ -44,6 +44,13 @@ export const STRINGS = {
   },
 
   // ============================================================
+  // Errores de bootstrap (mostrados al usuario si algo crítico falla)
+  // ============================================================
+  error: {
+    pixiNotLoaded: 'Pixi.js no cargó desde el CDN. Verificar conexión o tag <script>',
+  },
+
+  // ============================================================
   // Modal de orientación (portrait < 360 px side)
   // ============================================================
   orientation: {
@@ -213,6 +220,14 @@ export const STRINGS = {
       titulo: 'Dato pedagógico',
       fuente: 'Fuente',
       continuar: 'Continuar',
+      ariaLabel: 'Dato pedagógico del nivel',
+      stageLabels: {
+        'stage1-lashoyas': '1 · Las Hoyas de Caballero (Zarra)',
+        'stage2-lahoz': '2 · La Hoz del río Zarra',
+        'stage3-lahunde': '3 · Sierra de La Hunde y Palomera (Ayora)',
+        'stage4-ayora': '4 · Casco urbano de Ayora',
+        'stage5-acuifero': '5 · El Acuífero (jefe final)',
+      },
     },
 
     // Modal intermedio cada 5 enemigos (Fase 1.2) — overlay breve con resumen
@@ -226,6 +241,49 @@ export const STRINGS = {
         if (firmas < 25) return `${firmas} firmas sumadas. El Valle de Ayora-Cofrentes se planta ante TRECO.`
         if (firmas < 50) return `${firmas} firmas — un acto colectivo. La comarca recuerda: en 2002 ya pararon un vertedero igual.`
         return `${firmas} firmas. La presión vecinal crece. Sigue sumando.`
+      },
+    },
+
+    // Resumen final post-stage (Fase 1.3) — overlay navegable con las cards vistas.
+    resumenFinal: {
+      ariaLabel: (idx, total) => `Resumen pedagógico card ${idx} de ${total}`,
+      cerrarAriaLabel: 'Cerrar resumen',
+      prev: '\u2190 Anterior',
+      next: 'Siguiente \u2192',
+      volverMenu: 'Volver al menú',
+      emptyTitle: 'Sin cards pedagógicas',
+      emptyMsg: 'No has firmado contra ningún enemigo este run.',
+      emptyCerrar: 'Volver',
+    },
+
+    // Cards in-game (Fase 1.1) — overlay flotante con dato + fuente citada.
+    cards: {
+      cerrarAriaLabel: 'Cerrar tarjeta',
+    },
+
+    // Biblioteca pedagógica (Fase 1.4) — grid de cards acumulado + detail view.
+    biblioteca: {
+      ariaLabel: 'Biblioteca pedagógica',
+      detailAriaLabel: (idx, total) => `Biblioteca card ${idx} de ${total}`,
+      title: 'Biblioteca pedagógica',
+      empty: 'No hay cards para este filtro. Juega un stage para desbloquear contenido pedagógico.',
+      back: '\u2190 Volver a la biblioteca',
+      prev: '\u2190 Anterior',
+      next: 'Siguiente \u2192',
+      filtros: [
+        { id: 'all',           label: 'Todas' },
+        { id: 'stage1-lashoyas', label: '1. Las Hoyas' },
+        { id: 'stage2-lahoz',    label: '2. La Hoz' },
+        { id: 'stage3-lahunde',  label: '3. La Hunde' },
+        { id: 'stage4-ayora',    label: '4. Ayora' },
+        { id: 'stage5-acuifero', label: '5. Acuífero' },
+      ],
+      shortStageLabels: {
+        'stage1-lashoyas': 'Las Hoyas',
+        'stage2-lahoz': 'La Hoz',
+        'stage3-lahunde': 'La Hunde',
+        'stage4-ayora': 'Ayora',
+        'stage5-acuifero': 'Acuífero',
       },
     },
 

@@ -1,33 +1,33 @@
 /**
  * src/rail-camera.js
  *
- * Cámara de rail shooter para Zarra Defenders 2D.
+ * Rail shooter camera for Zarra Defenders 2D.
  *
- * En un rail shooter, la cámara sigue un path FIJO predefinido por el stage.
- * El jugador NO controla el movimiento — solo la mira y el disparo.
+ * In a rail shooter, the camera follows a FIXED path predefined per stage.
+ * The player does NOT control movement — only aim and fire.
  *
- * Esta clase:
- *   - Define un path como lista de waypoints (cada uno con `t` en segundos
- *     y `x` en píxeles del mundo, `y` en píxeles del mundo).
- *   - Interpola linealmente entre waypoints según el tiempo elapsed.
- *   - Expone `getCameraX()` y `getCameraY()` para que el renderer posicione
- *     sprites restándoles la posición de la cámara (efecto parallax).
+ * This class:
+ *   - Defines a path as a list of waypoints (each with `t` in seconds
+ *     and `x`/`y` in world pixels).
+ *   - Linearly interpolates between waypoints based on elapsed time.
+ *   - Exposes `getCameraX()` and `getCameraY()` so the renderer positions
+ *     sprites by subtracting the camera position (parallax effect).
  *
- * Diseño extensible: para Fase 1 usamos un path recto de 2 waypoints.
- * En Fases futuras podemos añadir curvas Bezier, easing, pausas por trigger, etc.
+ * Extensible design: for Phase 1 we use a straight path of 2 waypoints.
+ * In future phases we can add Bezier curves, easing, trigger pauses, etc.
  */
 
 export class RailCamera {
   /**
    * @param {Object} config
    * @param {Array<{t: number, x: number, y: number}>} config.waypoints
-   *        Lista ordenada de puntos del path. `t` es tiempo en segundos desde
-   *        el inicio del stage. `x` y `y` son posición en píxeles del mundo.
-   * @param {boolean} config.loop  Si true, la cámara vuelve al inicio al llegar al final.
+   *        Ordered list of path points. `t` is time in seconds from
+   *        the start of the stage. `x` and `y` are position in world pixels.
+   * @param {boolean} config.loop  If true, the camera wraps back to start at end.
    */
   constructor(config) {
     if (!config || !Array.isArray(config.waypoints) || config.waypoints.length < 2) {
-      throw new Error('RailCamera: se requieren al menos 2 waypoints')
+      throw new Error('RailCamera: at least 2 waypoints are required')
     }
     this.waypoints = config.waypoints
     this.loop = config.loop ?? true
@@ -36,16 +36,16 @@ export class RailCamera {
   }
 
   /**
-   * Avanza la cámara según el delta time. Llamar desde el game loop.
+   * Advance the camera by delta time. Call from the game loop.
    * No-op when halted (F3 halt semantics — see halt()).
-   * @param {number} dt  Delta time en segundos.
+   * @param {number} dt  Delta time in seconds.
    */
   update(dt) {
     if (this._halted) return
     this.elapsed += dt
   }
 
-  /** Reinicia la cámara al inicio del path (para reinicio de stage). */
+  /** Reset the camera to the start of the path (for stage restart). */
   reset() {
     this.elapsed = 0
     this.startTime = performance.now()
@@ -76,33 +76,33 @@ export class RailCamera {
   /** @returns {boolean} */
   isHalted() { return !!this._halted }
 
-  /** Posición X actual de la cámara en píxeles del mundo. */
+  /** Current camera X position in world pixels. */
   getCameraX() {
     return this._interpolate('x')
   }
 
-  /** Posición Y actual de la cámara en píxeles del mundo. */
+  /** Current camera Y position in world pixels. */
   getCameraY() {
     return this._interpolate('y')
   }
 
   /**
-   * @returns {number} progreso del path de 0 a 1 (o más si loop está activo)
+   * @returns {number} path progress from 0 to 1 (or more if loop is active)
    */
   getProgress() {
     return this.elapsed / this._totalDuration()
   }
 
   /**
-   * @returns {number} duración total del path en segundos
+   * @returns {number} total path duration in seconds
    */
   _totalDuration() {
     return this.waypoints[this.waypoints.length - 1].t
   }
 
   /**
-   * Interpolación lineal entre el par de waypoints que contienen
-   * el tiempo actual.
+   * Linear interpolation between the pair of waypoints that contain
+   * the current time.
    * @param {'x'|'y'} prop
    * @returns {number}
    */
@@ -110,17 +110,17 @@ export class RailCamera {
     const t = this.elapsed
     const totalT = this._totalDuration()
 
-    // Si loop y nos pasamos, hacemos wrap
+    // If loop and we overshoot, wrap
     let localT = t
     if (this.loop && t > totalT) {
       localT = t % totalT
     } else if (!this.loop && t > totalT) {
-      // Sin loop: nos quedamos en el último waypoint
+      // No loop: stay at the last waypoint
       const last = this.waypoints[this.waypoints.length - 1]
       return last[prop]
     }
 
-    // Buscar segmento activo
+    // Find the active segment
     for (let i = 0; i < this.waypoints.length - 1; i++) {
       const a = this.waypoints[i]
       const b = this.waypoints[i + 1]
@@ -132,7 +132,7 @@ export class RailCamera {
       }
     }
 
-    // Edge case: tiempo negativo o anterior al primer waypoint
+    // Edge case: negative time or before the first waypoint
     return this.waypoints[0][prop]
   }
 }

@@ -1,27 +1,27 @@
 /**
  * src/pedagogy/modal-intermedio.js
  *
- * Modal intermedio cada N enemigos destruidos — Fase 1.2 (ROADMAP).
+ * Intermediate modal every N enemies destroyed — Phase 1.2 (ROADMAP).
  *
- * Mecanismo: cada vez que el jugador destruye N enemigos, aparece un overlay
- * breve (top-center) con un resumen acumulativo del impacto pedagógico:
+ * Mechanism: every time the player destroys N enemies, a brief overlay
+ * appears (top-center) with a cumulative summary of pedagogical impact:
  *
- *   "Llevas 5 firmas contra el proyecto TRECO. Cada papeleta se suma a la
- *    lucha vecinal del Valle de Ayora-Cofrentes."
+ *   "You have 5 signatures against the TRECO project. Each slip adds up
+ *    to the Valle de Ayora-Cofrentes' neighborhood fight."
  *
- * Comportamiento:
- *   - Trigger configurable (default cada 5 enemigos)
- *   - Auto-dismiss a `dismissMs` (default 5000 ms)
+ * Behavior:
+ *   - Configurable trigger (default every 5 enemies)
+ *   - Auto-dismiss at `dismissMs` (default 5000 ms)
  *   - Click-to-dismiss
- *   - Z-index menor que la card (180 < card's 150 → modal ENCIMA de card? no, card 150 modal 140)
- *     Actually modal es full-width top-center, no compite visualmente
- *   - NO bloquea disparo (pointer-events: none en el overlay, solo el botón close)
- *   - Reset en cada nuevo stage (llamar `reset()` cuando cambia stage)
+ *   - Z-index lower than the card (180 < card's 150? no, card 150 modal 140)
+ *     Actually the modal is full-width top-center, doesn't visually compete
+ *   - Does NOT block firing (pointer-events: none on overlay, only the close button)
+ *   - Reset on each new stage (call `reset()` when stage changes)
  *
- * Pedagogía:
- *   - Refuerza la metáfora "cada firma se suma" — refuerza que el acto suma.
- *   - Mensaje siempre genérico (no caricature, no llama a violencia).
- *   - Cita el número de firmas acumuladas para que el jugador sienta progreso.
+ * Pedagogy:
+ *   - Reinforces the "each signature adds up" metaphor — reinforces that the act sums up.
+ *   - Message is always generic (no caricature, no call to violence).
+ *   - Quotes the number of signatures accumulated so the player feels progress.
  */
 
 import { STRINGS } from '../i18n/es.js?v=44'
@@ -143,7 +143,8 @@ export class ModalIntermedio {
 
 /**
  * Pure function — compute the message for a given hit count.
- * Exported for unit testing.
+ * Exported for unit testing. Delegates to STRINGS so the pedagogical
+ * template is centralized (A2 contract).
  *
  * @param {number} firmas       total hits so far
  * @param {number} shownCount   which modal this is (1st, 2nd, ...)
@@ -151,16 +152,7 @@ export class ModalIntermedio {
  */
 export function buildModalMessage(firmas, shownCount) {
   if (firmas <= 0) return ''
-  if (firmas < 10) {
-    return `${firmas} firmas recogidas contra el proyecto. Cada papeleta se suma a la lucha vecinal del Valle.`
-  }
-  if (firmas < 25) {
-    return `${firmas} firmas sumadas. El Valle de Ayora-Cofrentes se planta ante TRECO.`
-  }
-  if (firmas < 50) {
-    return `${firmas} firmas — un acto colectivo. La comarca recuerda: en 2002 ya pararon un vertedero igual.`
-  }
-  return `${firmas} firmas. La presión vecinal crece. Sigue sumando.`
+  return STRINGS.pedagogy.modalIntermedio.mensaje(firmas, shownCount ?? 1)
 }
 
 function escapeHtml(str) {

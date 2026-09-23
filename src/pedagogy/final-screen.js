@@ -1,26 +1,26 @@
 /**
  * src/pedagogy/final-screen.js
  *
- * Pantalla final con 4 enlaces — Fase 1.7 (ROADMAP).
+ * Final screen with 4 links — Phase 1.7 (ROADMAP).
  *
- * Cierre del loop pedagógico. Cuando el boss final (planta_treco) se
- * desactiva (F1.6 A7 contract), aparece esta pantalla con:
+ * Closes the pedagogical loop. When the final boss (planta_treco) is
+ * deactivated (F1.6 A7 contract), this screen appears with:
  *
- *   - Título: "El Valle se planta"
- *   - Dato final del conflicto (de STRINGS.pedagogy.datos.final)
- *   - 4 enlaces a recursos cívicos reales:
- *       1. Plataforma vecinal (nomacrovertederozarra.com)
- *       2. Formulario de alegaciones
- *       3. Asociación Naturalista de Ayora y la Valle
- *       4. Hashtag #NoAlMacrovertederoDeZarra (texto seleccionable)
- *   - Botón "Volver a jugar" → menú principal
+ *   - Title: "El Valle se planta"
+ *   - Final conflict data (from STRINGS.pedagogy.datos.final)
+ *   - 4 links to real civic resources:
+ *       1. Neighborhood platform (nomacrovertederozarra.com)
+ *       2. Allegations form
+ *       3. Asociacion Naturalista de Ayora y la Valle
+ *       4. Hashtag #NoAlMacrovertederoDeZarra (selectable text)
+ *   - "Volver a jugar" button → main menu
  *
- * Trigger: zarra:desactivacion con spriteId='enemies_planta_treco'.
+ * Trigger: zarra:desactivacion with spriteId='enemies_planta_treco'.
  *
- * A6 contract: las URLs vienen de STRINGS, cero literales en código.
+ * A6 contract: URLs come from STRINGS, zero literals in code.
  *
- * Pedagogía: el juego no se "gana" — se rechaza en la calle y en las
- * alegaciones. Esta pantalla es el altavoz, no el premio.
+ * Pedagogy: the game is not "won" — it's rejected on the streets and in
+ * allegations. This screen is the loudspeaker, not the prize.
  */
 
 import { STRINGS } from '../i18n/es.js?v=44'

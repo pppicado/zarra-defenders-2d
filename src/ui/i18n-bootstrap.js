@@ -1,13 +1,13 @@
 /**
  * src/ui/i18n-bootstrap.js
  *
- * Mini-bootstrap que aplica STRINGS al DOM estático de index.html.
- * Se carga como `<script type="module">` ANTES del main.js para que los
- * strings críticos (orientation modal, fullscreen aria-label) estén
- * disponibles desde el primer paint.
+ * Mini-bootstrap that applies STRINGS to the static DOM of index.html.
+ * Loaded as `<script type="module">` BEFORE main.js so the critical
+ * strings (orientation modal, fullscreen aria-label) are available
+ * from the first paint.
  *
- * Mantiene el contrato A2: cero prosa española libre en index.html;
- * todos los strings user-facing viven en `src/i18n/es.js`.
+ * Maintains the A2 contract: zero free Spanish prose in index.html;
+ * all user-facing strings live in `src/i18n/es.js`.
  */
 import { STRINGS } from '../i18n/es.js?v=44'
 

@@ -1,25 +1,27 @@
 /**
  * src/pedagogy/resumen-final.js
  *
- * Resumen navegable al final del stage — Fase 1.3 (ROADMAP).
+ * Stage-end navigable summary — Phase 1.3 (ROADMAP).
  *
- * Mecanismo: cuando el jugador completa un stage (trigger: stage:cleared),
- * aparece un overlay fullscreen con todas las cards pedagógicas que vio
- * durante el run. Cada card muestra:
+ * Mechanism: when the player completes a stage (trigger: stage:cleared),
+ * a fullscreen overlay appears with all pedagogical cards the player saw
+ * during the run. Each card shows:
  *
- *   - Título del enemigo
- *   - Descripción específica
- *   - Dato del stage + link a fuente
+ *   - Enemy title
+ *   - Specific description
+ *   - Stage data + source link
  *
- * Navegación:
- *   - Una card visible a la vez
+ * Navigation:
+ *   - One card visible at a time
  *   - Prev / Next buttons + arrow keys (← →)
- *   - Indicador "X / N" abajo
- *   - Click en dot indicator para saltar a esa card
+ *   - "X / N" indicator at the bottom
+ *   - Click on a dot indicator to jump to that card
  *
- * Pedagogía: el resumen funciona como "debrief" — el jugador revisa lo que
- * aprendió antes de volver al menú. CardsShown vienen de `score.cardsShown`.
+ * Pedagogy: the summary acts as a "debrief" — the player reviews what
+ * they learned before returning to the menu. CardsShown comes from
+ * `score.cardsShown`.
  */
+import { STRINGS } from '../i18n/es.js?v=44'
 
 const DEFAULT_DISMISS_MS = 30000
 
@@ -80,12 +82,13 @@ export class ResumenFinal {
   }
 
   _render() {
+    const R = STRINGS.pedagogy.resumenFinal
     if (!this._cards.length) {
       this.root.innerHTML = `
         <div class="resumen-card resumen-card--empty" role="dialog">
-          <h3 class="resumen-empty-title">Sin cards pedagógicas</h3>
-          <p class="resumen-empty-msg">No has firmado contra ningún enemigo este run.</p>
-          <button type="button" class="resumen-btn-resumen resumen-btn-cerrar" data-role="cerrar">Volver</button>
+          <h3 class="resumen-empty-title">${escapeHtml(R.emptyTitle)}</h3>
+          <p class="resumen-empty-msg">${escapeHtml(R.emptyMsg)}</p>
+          <button type="button" class="resumen-btn-resumen resumen-btn-cerrar" data-role="cerrar">${escapeHtml(R.emptyCerrar)}</button>
         </div>
       `
       this.root.querySelector('[data-role="cerrar"]').addEventListener('click', () => this._close())
@@ -97,27 +100,27 @@ export class ResumenFinal {
     const total = this._cards.length
 
     this.root.innerHTML = `
-      <div class="resumen-card" role="dialog" aria-live="polite" aria-label="Resumen pedagógico card ${idx + 1} de ${total}">
-        <button type="button" class="resumen-btn-cerrar" data-role="cerrar" aria-label="Cerrar resumen">\u2715</button>
+      <div class="resumen-card" role="dialog" aria-live="polite" aria-label="${escapeAttr(R.ariaLabel(idx + 1, total))}">
+        <button type="button" class="resumen-btn-cerrar" data-role="cerrar" aria-label="${escapeAttr(R.cerrarAriaLabel)}">\u2715</button>
         <p class="resumen-counter">${idx + 1} / ${total}</p>
         <h3 class="resumen-card-title">${escapeHtml(card.titulo || '')}</h3>
         <p class="resumen-card-description">${escapeHtml(card.descripcion || '')}</p>
         <p class="resumen-card-dato">${escapeHtml(card.datoTexto || '')}</p>
         <p class="resumen-card-fuente">
-          Fuente:
+          ${escapeHtml(STRINGS.pedagogy.dataScreen.fuente)}:
           ${card.url && card.url.startsWith('#')
             ? `<span class="resumen-card-hashtag">${escapeHtml(card.fuente || '')}</span>`
             : `<a class="resumen-card-link" href="${escapeAttr(card.url || '#')}" target="_blank" rel="noopener noreferrer">${escapeHtml(card.fuente || '')} \u2197</a>`
           }
         </p>
         <div class="resumen-nav">
-          <button type="button" class="resumen-btn-nav resumen-btn-prev" data-role="prev" ${idx === 0 ? 'disabled' : ''}>\u2190 Anterior</button>
+          <button type="button" class="resumen-btn-nav resumen-btn-prev" data-role="prev" ${idx === 0 ? 'disabled' : ''}>${escapeHtml(R.prev)}</button>
           <div class="resumen-dots">
-            ${Array.from({ length: total }, (_, i) => `<button type="button" class="resumen-dot ${i === idx ? 'resumen-dot--active' : ''}" data-role="dot-${i}" aria-label="Card ${i + 1}"></button>`).join('')}
+            ${Array.from({ length: total }, (_, i) => `<button type="button" class="resumen-dot ${i === idx ? 'resumen-dot--active' : ''}" data-role="dot-${i}" aria-label="${escapeAttr(STRINGS.pedagogy.dataScreen.fuente)} ${i + 1}"></button>`).join('')}
           </div>
-          <button type="button" class="resumen-btn-nav resumen-btn-next" data-role="next" ${idx === total - 1 ? 'disabled' : ''}>Siguiente \u2192</button>
+          <button type="button" class="resumen-btn-nav resumen-btn-next" data-role="next" ${idx === total - 1 ? 'disabled' : ''}>${escapeHtml(R.next)}</button>
         </div>
-        <button type="button" class="resumen-btn-cerrar-bottom" data-role="cerrar-bottom">Volver al menú</button>
+        <button type="button" class="resumen-btn-cerrar-bottom" data-role="cerrar-bottom">${escapeHtml(R.volverMenu)}</button>
       </div>
     `
     this.root.classList.remove('hidden')
