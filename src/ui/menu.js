@@ -122,18 +122,23 @@ export class MainMenu {
     }
   }
 
-  /** Show the menu (display:flex) + focus the default button (stage 1). */
+  /** Show the menu (display:flex) + focus the default button (stage 1).
+   *  F3.5.3: also flags body.menu-mode so CSS hides the game canvases
+   *  (the menu has its own dedicated background image). */
   show() {
     this.root.classList.remove('hidden')
     this.root.setAttribute('aria-hidden', 'false')
+    document.body.classList.add('menu-mode')
     this._refreshLocks()
     this._setFocus(0)
   }
 
-  /** Hide the menu (display:none) + close any open modal. */
+  /** Hide the menu (display:none) + close any open modal.
+   *  F3.5.3: clears body.menu-mode so the game canvases show again. */
   hide() {
     this.root.classList.add('hidden')
     this.root.setAttribute('aria-hidden', 'true')
+    document.body.classList.remove('menu-mode')
     this._closeModal()
   }
 

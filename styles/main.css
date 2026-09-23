@@ -189,6 +189,9 @@ canvas {
 }
 
 #main-menu {
+  /* F3.5.3: dedicated background image + dim overlay instead of the running
+     game canvas. Responsive layout: no scroll, no off-screen elements,
+     adapts to viewport via clamp() + flex. */
   position: absolute;
   inset: 0;
   display: flex;
@@ -196,45 +199,66 @@ canvas {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  background-color: rgba(10, 10, 10, 0.92);
-  background-image:
-    repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(245, 166, 35, 0.04) 2px, rgba(245, 166, 35, 0.04) 4px);
+  background-color: #0a0a0a;
+  background-image: url('../assets/backgrounds/menu_bg.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
   z-index: 100;
-  padding: 24px;
+  padding: clamp(12px, 3vw, 32px);
+  overflow: hidden;
 }
-
+#main-menu::before {
+  /* Same dim as game-overlay (rgba(0,0,0,0.55)) so the bg image is
+     atmospheric but the menu UI stays readable. */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  z-index: -1;
+}
 #main-menu.menu-root { color: #e8e8e8; }
 
 #main-menu .menu-title {
-  font-size: 2.4rem;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
   font-weight: 700;
   color: #f5a623;
   text-shadow: 0 3px 0 #000;
-  margin-bottom: 4px;
+  margin: 0 0 4px;
   letter-spacing: 2px;
+  text-align: center;
 }
 
 #main-menu .menu-subtitle {
-  font-size: 1rem;
+  font-size: clamp(0.85rem, 2vw, 1.05rem);
   color: #d6d6d6;
-  margin-bottom: 24px;
+  margin: 0 0 clamp(12px, 2vw, 24px);
   text-shadow: 0 2px 0 #000;
+  text-align: center;
 }
 
 #main-menu .menu-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 320px;
-  max-width: 90vw;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(4px, 0.8vw, 10px);
+  width: min(560px, 92vw);
+  max-height: calc(100vh - 160px);  /* room for title/subtitle/best + padding */
+  overflow: hidden;  /* F3.5.3: never scroll */
+}
+@media (min-width: 640px) {
+  /* 2 columns on wider viewports — 8 buttons fit in 4 rows */
+  #main-menu .menu-nav {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 #main-menu .menu-btn {
   font-family: inherit;
-  font-size: 1.05rem;
+  font-size: clamp(0.72rem, 1.2vw, 0.95rem);
   font-weight: 600;
-  padding: 18px 24px;
-  min-height: 64px;
+  padding: clamp(6px, 1vw, 12px) clamp(10px, 1.6vw, 18px);
+  min-height: clamp(28px, 3vw, 42px);
   background: rgba(245, 166, 35, 0.12);
   color: #f5a623;
   border: 2px solid #f5a623;
@@ -242,6 +266,10 @@ canvas {
   cursor: pointer;
   text-align: center;
   transition: background 0.15s ease, color 0.15s ease;
+  /* Ensure the text never overflows on tiny screens */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 #main-menu .menu-btn:hover,
 #main-menu .menu-btn:focus {
@@ -251,10 +279,11 @@ canvas {
 }
 
 #main-menu .menu-best {
-  margin-top: 24px;
-  font-size: 0.95rem;
+  margin: clamp(8px, 1.5vw, 16px) 0 0;
+  font-size: clamp(0.8rem, 1.5vw, 0.95rem);
   color: #d6d6d6;
   text-shadow: 0 2px 0 #000;
+  text-align: center;
 }
 
 #main-menu .menu-modal {
@@ -544,6 +573,14 @@ canvas {
   text-align: center;
 }
 
+/* F3.5.3: when the main menu is visible, hide the game canvases entirely.
+   The menu has its own dedicated background image (#main-menu.bg) so the
+   running game is no longer seen behind the menu UI. */
+body.menu-mode #game-canvas-wrapper,
+body.menu-mode #game-hud-wrapper {
+  display: none;
+}
+
 /* When menu/overlay is visible, disable canvas pointer events so taps reach the DOM. */
 #main-menu:not(.hidden) ~ #game-canvas-wrapper canvas,
 #game-overlay:not(.hidden) ~ #game-canvas-wrapper canvas {
@@ -744,7 +781,9 @@ canvas {
 @media (max-width: 600px) {
   #main-menu .menu-title { font-size: 1.8rem; }
   #main-menu .menu-nav { width: 90vw; }
-  #main-menu .menu-btn { min-height: 64px; padding: 16px 20px; }
+  /* F3.5.3: override the clamp() defaults below 600px so the nav fits on
+     tiny phones (320x568 etc.) without scrolling. */
+  #main-menu .menu-btn { min-height: clamp(28px, 6vw, 38px); padding: 6px 12px; font-size: 0.78rem; }
   #game-overlay .overlay-card { padding: 20px; }
   #game-overlay .overlay-title { font-size: 1.4rem; }
   #integrity-hud canvas { width: 160px; height: 20px; }
