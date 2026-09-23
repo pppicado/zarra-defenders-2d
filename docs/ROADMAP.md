@@ -2,7 +2,7 @@
 
 > **Plan de implementación** para llevar al juego de "técnicamente completo pero pedagógicamente vacío" → "juego pedagógicamente completo y archivable bajo SDD".
 >
-> **Última actualización**: 2026-09-17
+> **Última actualización**: 2026-09-23 (F3.2 marcada como rechazada; F3.1 implementada)
 >
 > **Criterios de decisión**:
 > - **T-shirt sizing**: S (1 sesión), M (2-3 sesiones), L (4-6 sesiones), XL (>1 semana)
@@ -312,8 +312,13 @@
 
 ### 3.2 Aliados ambientales (penalizar disparo)
 
+> ⚪ **Rechazada en esta iteración** (decisión del pedagogo, 2026-09-23).
+> Ver Engram `#observation` para la rationale. Si se retoma en v2, revisar el
+> conflicto pedagógico con la metáfora "cada firma = contra TRECO"; un aliado
+> drenando integridad puede confundir el mensaje.
+
 **T-shirt**: M (~300 LOC)
-**Prioridad**: 🟠 Should
+**Prioridad**: 🟠 Should (dejó de aplicar)
 **Dependencias**: —
 
 **Tareas**:
