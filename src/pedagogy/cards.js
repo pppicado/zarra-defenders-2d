@@ -3,54 +3,69 @@
  *
  * In-game pedagogical cards — Phase 1.1 (ROADMAP).
  *
- * Each time the player destroys an enemy, a floating card appears with:
- *   - Enemy title (e.g. "Bidon de lixiviados")
- *   - Enemy-specific description (1 sentence, connecting to real impact)
+ * Each time the player destroys an enemy, a card appears with the enemy's
+ * pedagogical context. F3.5.2 changed the card's interaction model:
+ *
+ * OLD: large card top-right, auto-dismiss 3s, click-anywhere-to-dismiss.
+ * NEW (F3.5.2): compact card bottom-right (paired with the 3 hearts),
+ *      NO auto-dismiss. Click on the card pauses the game for focused
+ *      reading; click outside the card closes it and resumes the game
+ *      if it was paused by the card. Pressing Esc also closes the card.
+ *
+ * Each card shows:
+ *   - Title of the enemy
+ *   - Description (specific to the enemy)
  *   - Stage conflict data (from `STRINGS.pedagogy.datos[stageId]`)
- *   - Clickable link to the cited source (target="_blank, rel=noopener")
- *   - Close button (✕)
+ *   - Clickable source citation
+ *   - Footer "Datos basados en fuentes publicas verificables"
  *
- * Behavior:
- *   - Only one card visible at a time (replaces the previous if another arrives)
- *   - Auto-dismiss at `dismissMs` (default 3000)
- *   - Click anywhere on the card dismisses immediately
- *   - Click on source link does NOT dismiss (opens new tab)
- *   - `onCardShown({ enemyId, spriteId, stageId, titulo, fuente, url, timestamp })`
- *     callback that main.js uses for tracking `cardsShown` in Score
+ * Behavior (F3.5.2):
+ *   - Single card visible at a time (a new enemy replaces the prior)
+ *   - NO auto-dismiss; card persists until dismissed by user
+ *   - Click on card body (not link / not close button): pause game
+ *   - Click on card link: open in new tab (does NOT pause / close)
+ *   - Click on close button: close + auto-resume
+ *   - Click outside the card: close + auto-resume (if paused by card)
+ *   - Esc when card visible: close + auto-resume
  *
- * Pedagogy (Phase 1.1 MVP):
+ * Pedagogy (Phase 1.1 MVP, preserved in F3.5.2):
  *   - Each enemy has a specific description (no generic copy)
- *   - Each card cites a real source (research/fuentes.md) with a verified link
- *   - The stage data appears below the description
- *   - Pedagogical sign-off pending: review the 12 descriptions in MANUAL_PLAYTHROUGH §12
+ *   - Each card cites a real source with a verified link
+ *   - Footer reminds the player that the data comes from public sources
+ *
+ * Pedagogical sign-off: review the 12 enemy descriptions in
+ * MANUAL_PLAYTHROUGH §12 (still pending as of the original Fase 1).
  */
-
 import { STRINGS } from '../i18n/es.js?v=44'
 import { __zr } from '../engine/dom-debug.js?v=44'
-
-const DEFAULT_DISMISS_MS = 3000
 
 export class PedagogyCards {
   /**
    * @param {Object} opts
    * @param {HTMLElement} opts.root       existing <div id="pedagogy-card"> element
-   * @param {number}      [opts.dismissMs=3000]
-   * @param {Function}    [opts.onCardShown]  callback({ enemyId, spriteId, stageId, titulo, fuente, url, timestamp })
-   * @param {Function}    [opts.clock]        injected clock for tests (returns ms). Default: () => Date.now()
+   * @param {Object}      [opts.gameState] mutable { state: 'main-menu'|'gameplay'|'overlay'|'paused' }
+   * @param {Object}      [opts.camera]   RailCamera (halt/unHalt for F3.5.2 pause integration)
+   * @param {Function}    [opts.onCardShown] callback({...payload}) on every show()
+   * @param {Function}    [opts.clock]    injected clock for tests (returns ms). Default: () => Date.now()
    */
   constructor(opts) {
     if (!opts || !opts.root) throw new Error('PedagogyCards requires root element')
     this.root = opts.root
-    this.dismissMs = opts.dismissMs ?? DEFAULT_DISMISS_MS
+    this.gameState = opts.gameState ?? null
+    this.camera = opts.camera ?? null
     this.onCardShown = opts.onCardShown ?? null
     this._clock = opts.clock ?? (() => Date.now())
 
-    /** @type {number|null} timeout id of pending auto-dismiss */
-    this._dismissTimer = null
     /** @type {Object|null} current card payload (for tests) */
     this._current = null
     /** @type {number} counter for cards shown in session */
     this._shownCount = 0
+    /** @type {boolean} tracks if the current card pause was initiated by clicking it */
+    this._pausedByCard = false
+    /** @type {Function|null} document-level click listener (outside-click detection) */
+    this._outsideClickHandler = null
+    /** @type {Function|null} window keydown listener (Esc to close) */
+    this._escHandler = null
 
     this._build()
   }
@@ -58,8 +73,8 @@ export class PedagogyCards {
   /**
    * Show a card for the given enemy. If a card is already visible, replaces it.
    * @param {Object} enemy
-   * @param {string} enemy.id          unique enemy instance id (e.g. "e01")
-   * @param {string|null} enemy.spriteId   spriteId from manifest (e.g. "enemies_camion_treco") — may be null
+   * @param {string} enemy.id            unique enemy instance id (e.g. "e01")
+   * @param {string|null} enemy.spriteId spriteId from manifest (e.g. "enemies_camion_treco")
    * @param {string} [enemy.archetype]
    */
   show(enemy) {
@@ -73,11 +88,15 @@ export class PedagogyCards {
 
   /** Hide the current card immediately. */
   hide() {
-    this._clearDismissTimer()
+    this._uninstallGlobalListeners()
     this.root.classList.add('hidden')
     this.root.setAttribute('aria-hidden', 'true')
     this.root.innerHTML = ''
     this._current = null
+    // F3.5.2: closing the card auto-resumes if we paused because of it
+    if (this._pausedByCard) {
+      this._resume()
+    }
   }
 
   get isVisible() {
@@ -96,21 +115,18 @@ export class PedagogyCards {
 
   /** Cleanup. */
   destroy() {
-    this._clearDismissTimer()
+    this._uninstallGlobalListeners()
     this.root.innerHTML = ''
   }
 
   // ============== Internal =================
 
   _build() {
-    // Set initial aria state
     this.root.setAttribute('aria-hidden', 'true')
+    this.root.classList.add('hidden')
   }
 
   _render(payload) {
-    // Cancel any pending auto-dismiss from the previous card
-    this._clearDismissTimer()
-
     const url = payload.url
     const isHashLink = payload.isHashLink
 
@@ -132,37 +148,71 @@ export class PedagogyCards {
     this.root.classList.remove('hidden')
     this.root.setAttribute('aria-hidden', 'false')
 
-    // Wire close button + click-to-dismiss on the card itself
-    this.root.querySelector('.pedagogy-card-close').addEventListener('click', (e) => {
-      e.stopPropagation()
-      this.hide()
-    })
-    // Click on card body (not on link or close button) dismisses
+    // F3.5.2: 3 click targets inside the card
+    //   - link: opens in new tab; do NOT pause / close
+    //   - close button (✕): explicitly closes; resumes if we paused
+    //   - body click: pauses the game if playing
     this.root.addEventListener('click', (e) => {
-      if (e.target.closest('.pedagogy-card-link')) return  // link opens, don't dismiss
-      if (e.target.closest('.pedagogy-card-close')) return  // close button already handled
-      this.hide()
+      if (e.target.closest('.pedagogy-card-link')) return
+      if (e.target.closest('.pedagogy-card-close')) {
+        this.hide()
+        return
+      }
+      // Body click — pause if currently playing
+      if (this.gameState && this.gameState.state === 'gameplay') {
+        e.stopPropagation()
+        this._pause()
+      }
     })
 
-    // Track current payload for tests + callback
+    // Document-level outside-click detection. Bubble phase so it runs AFTER
+    // the card-internal handler (whose e.stopPropagation prevents outside
+    // dispatch when the body is clicked).
+    this._outsideClickHandler = (e) => {
+      if (!this.root.contains(e.target)) {
+        this.hide()
+      }
+    }
+    document.addEventListener('click', this._outsideClickHandler)
+
+    // Esc closes the card when visible (without showing the pause overlay)
+    this._escHandler = (e) => {
+      if (e.key !== 'Escape') return
+      if (!this.isVisible) return
+      e.preventDefault()
+      this.hide()
+    }
+    window.addEventListener('keydown', this._escHandler)
+
     this._current = payload
     this._shownCount++
 
-    // Notify consumer (Score tracking via main.js)
     if (this.onCardShown) this.onCardShown(payload)
-
-    // Auto-dismiss after dismissMs
-    this._dismissTimer = setTimeout(() => {
-      this._dismissTimer = null
-      this.hide()
-    }, this.dismissMs)
   }
 
-  _clearDismissTimer() {
-    if (this._dismissTimer != null) {
-      clearTimeout(this._dismissTimer)
-      this._dismissTimer = null
+  _uninstallGlobalListeners() {
+    if (this._outsideClickHandler) {
+      document.removeEventListener('click', this._outsideClickHandler)
+      this._outsideClickHandler = null
     }
+    if (this._escHandler) {
+      window.removeEventListener('keydown', this._escHandler)
+      this._escHandler = null
+    }
+  }
+
+  _pause() {
+    if (!this.gameState) return
+    this.gameState.state = 'paused'
+    if (this.camera?.halt) this.camera.halt()
+    this._pausedByCard = true
+  }
+
+  _resume() {
+    if (!this.gameState) return
+    this.gameState.state = 'gameplay'
+    if (this.camera?.unHalt) this.camera.unHalt()
+    this._pausedByCard = false
   }
 }
 
@@ -191,19 +241,6 @@ function escapeAttr(str) {
  * @param {{id: string, spriteId: string|null}} enemy
  * @param {() => number} clock
  * @param {Object} strings  STRINGS global (injectable for tests)
- * @returns {{
- *   cardId: string,
- *   enemyId: string,
- *   spriteId: string|null,
- *   stageId: string|null,
- *   titulo: string,
- *   descripcion: string,
- *   datoTexto: string,
- *   fuenteLabel: string,
- *   fuenteUrl: string,
- *   timestamp: number,
- *   isHashLink: boolean,
- * } | null}
  */
 export function buildCardPayload(enemy, clock, strings) {
   if (!enemy || typeof enemy !== 'object') return null

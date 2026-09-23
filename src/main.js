@@ -33,7 +33,7 @@ import { parseTestFlags, mountTestAPI } from './test-api.js?v=44'
 import { DebugHitboxes } from './debug-hitboxes.js?v=44'
 import { mulberry32, fixedClock } from './random.js?v=44'
 import { loadSpriteManifest, preloadManifestTextures } from './sprite-loader.js?v=44'
-import { on as busOn, emit } from './event-bus.js?v=44'
+import { on as busOn, emit, eventBus } from './event-bus.js?v=44'
 import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=44'
 import { BackgroundLayer, BG_SOURCE_HEIGHT_PX, BG_SCALE, BG_RENDERED_HEIGHT_PX } from './backgrounds.js?v=44'
 import { PedagogyCards } from './pedagogy/cards.js?v=44'
@@ -194,6 +194,7 @@ async function bootstrap() {
   // also flips the flag at runtime. Production (`?test=0` + no `?hitboxes=1`
   // + no `H`) MUST stay clean.
   const urlParams = new URLSearchParams(window.location.search)
+  if (inTestMode) window.eventBus = eventBus
   const hitboxesInitiallyEnabled = urlParams.has('hitboxes')
 
   // --- Pixi Application (WORLD) ---
@@ -333,25 +334,10 @@ async function bootstrap() {
   const score = new Score({})
   score.loadBest()
 
-  // F1.1 — pedagogy cards (one card visible at a time, auto-dismiss 3s).
-  const pedagogyCardRoot = document.getElementById('pedagogy-card')
-  const pedagogyCards = new PedagogyCards({
-    root: pedagogyCardRoot,
-    dismissMs: 3000,
-    onCardShown: (payload) => score.addCardShown(payload),
-  })
-  // Hide card whenever game leaves gameplay state (menu, overlay).
-  busOn('ui:overlayShown', () => pedagogyCards.hide())
-  busOn('menu:startRequested', () => pedagogyCards.hide())
-  // Show card on each enemy destroyed.
-  busOn('enemy:destroyed', (detail) => {
-    if (!detail) return
-    pedagogyCards.show({
-      id: detail.enemyId,
-      spriteId: detail.spriteId ?? null,
-      archetype: detail.archetype,
-    })
-  })
+  // F1.1 + F3.5.2 — pedagogy cards. Constructed LATER (after camera) since
+  // F3.5.2 added a `camera` reference for the click-pause path; construction
+  // before camera creation hits TDZ.
+  let pedagogyCards = null
 
   // F1.2 — modal intermedio cada 5 hits.
   const modalIntermedioRoot = document.getElementById('modal-intermedio')
@@ -549,6 +535,26 @@ async function bootstrap() {
   })
 
   const player = new Player(appWorld, input, hudContainer, camera, crosshairTex)
+
+  // F1.1 + F3.5.2 — pedagogy cards (instantiated here, after `camera` is in
+  // scope; F3.5.2 click handler uses camera.halt/unHalt to pause/resume).
+  const pedagogyCardRoot = document.getElementById('pedagogy-card')
+  pedagogyCards = new PedagogyCards({
+    root: pedagogyCardRoot,
+    gameState,
+    camera,
+    onCardShown: (payload) => score.addCardShown(payload),
+  })
+  busOn('ui:overlayShown', () => pedagogyCards.hide())
+  busOn('menu:startRequested', () => pedagogyCards.hide())
+  busOn('enemy:destroyed', (detail) => {
+    if (!detail) return
+    pedagogyCards.show({
+      id: detail.enemyId,
+      spriteId: detail.spriteId ?? null,
+      archetype: detail.archetype,
+    })
+  })
 
   let combat = null
   let finaleStarted = false  // BG-006 — true after the first finale frame; reset on boot
