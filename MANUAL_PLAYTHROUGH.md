@@ -435,7 +435,7 @@ for (const url of URLS) {
 await browser.close()
 ```
 
-Última verificación: 2026-09-17 con Playwright headless.
+Última verificación: 2026-09-25 con Playwright headless (Fase 4/5/6 cerradas en commits `46859fc`, `27f325a`, `faba09b`, `fe94948`).
 
 ---
 
@@ -449,5 +449,49 @@ cumplidos), el proyecto está listo para `sdd-archive` (Fase 7).
 
 ---
 
+## §19 Audio (Fase 4 — cerrada)
+
+Cómo verificar manualmente:
+1. Menú principal → click "Jugar" → debería escucharse jota regional sintetizada (110 BPM en stage1, sube hasta 138 en stage5).
+2. Disparar → SFX `fire` (noise + sine sweep).
+3. Destruir enemigo → SFX `hit` + SFX `card` cuando aparece la card pedagógica.
+4. `M` → silencio total (master mute). Toast "🔇 Mute" 900ms.
+5. `[` / `]` → volumen ±10%. Toast "🔊 Vol N%" 900ms.
+6. Pause (Esc) → música pausa (timer se detiene, `_playing` permanece true). Resume → música continúa.
+7. Game over → música se detiene completamente.
+8. Victoria → música se detiene + SFX `victory`.
+
+Referencia: `src/audio/music.js`, `src/audio/sfx.js`, `src/audio/audio-context.js`. Tests: `tests/unit/audio-{music,sfx}.spec.mjs`, `tests/e2e/audio-flow.spec.mjs`. Music track inspiration: 6 jotas/tonadas del Archivo sonoro Diputación de Valencia en `music_raw/` (CC BY-SA 4.0).
+
+---
+
+## §20 Accessibility panel + sharing (Fases 5 + 5.4 — cerradas)
+
+Cómo verificar manualmente:
+1. Pause (Esc) → click "Ajustes de accesibilidad" → panel con 4 secciones:
+   - **TTS**: toggle on/off + slider velocidad (0.5x–2x) + botón "Probar voz". Persiste en localStorage `zarra2d:settings:tts`.
+   - **Modo alto contraste**: toggle aplica clase `contrast-high` al `<html>` con paleta dalton WCAG AAA. Persiste en `zarra2d:settings:contrast`.
+   - **Reducir movimiento**: toggle activa clase `reduced-motion` que desactiva parallax/sine flutter. Respeta OS pref-reduced-motion. Persiste en `zarra2d:settings:motion`.
+2. En cualquier card pedagógica → botón "🔊 Escuchar" → TTS lee título + dato (voz es-ES).
+3. Victoria → bloque "Comparte tu aportación" con 4 botones: Twitter / Facebook / Copiar / Compartir (este último solo con `navigator.share`). URL `?ref=<base64>` con `{firmas, score, stageId}`.
+
+Referencia: `src/accessibility/{tts,contrast,reduced-motion}.js`, `src/sharing/share.js`. Tests: `tests/unit/{accessibility-*,sharing-share}.spec.mjs`.
+
+---
+
+## §21 Per-stage rosters + menu backgrounds (Fase 6 — cerrada)
+
+Cómo verificar manualmente:
+1. Menú principal → background = panorama del Valle desde Castillo de Cofrentes (`menu-panorama-cofrentes.png`).
+2. Iniciar stage1-lashoyas → roster específico (topadora boss + convoy camion_treco + dron_fumigador). Stage cambia → bg de gameplay cambia, pero menú y overlays usan sus bgs dedicados.
+3. Biblioteca (menú principal) → fondo = mapa cartográfico del Valle (`menu-mapa-cartografico.png`).
+4. Game over → fondo = vertedero TRECO satírico (`menu-vertedero-satirico.png`).
+5. Final screen / Victoria → fondo = río Cabriel (`menu-rio-cabriel.png`).
+6. DevTools → Network → ver que `vendor/pixi.min.js` (446KB) se carga localmente, sin requests al CDN.
+
+Cada stage tiene un `finalBossSpriteId` único (topadora, tubo_lixiviado, incineradora, trailer, planta_treco). Test: `tests/unit/levels-stage-rosters.spec.mjs`.
+
+---
+
 **Mantenedor**: usuario (pedagogo + dev)
-**Próxima revisión**: tras Fase 1 completa (1.2–1.7)
+**Próxima revisión**: tras Fase 7 (v1 release + archive final)

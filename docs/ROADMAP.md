@@ -2,7 +2,7 @@
 
 > **Plan de implementación** para llevar al juego de "técnicamente completo pero pedagógicamente vacío" → "juego pedagógicamente completo y archivable bajo SDD".
 >
-> **Última actualización**: 2026-09-23 (F3.1-3.4 ✅ + F3.2 ⚪ + F3.5 polish iterations añadidas, pendiente implementación)
+> **Última actualización**: 2026-09-25 (F4 ✅ + F5 ✅ + F6 ✅ cerradas en una sola sesión; commits `46859fc`, `27f325a`, `faba09b`, `fe94948` en origin/main)
 >
 > **Criterios de decisión**:
 > - **T-shirt sizing**: S (1 sesión), M (2-3 sesiones), L (4-6 sesiones), XL (>1 semana)
@@ -21,12 +21,14 @@
 | **1** | Pedagogía core (la "pía" del juego) | L | 🔴 Must | Pedagógico | 🔲 Por hacer |
 | **2** | Aceptación formal (SDD) | M | 🔴 Must | Archive | 🔲 Por hacer |
 | **3** | Polish pedagógico + UX | M | 🟠 Should | — | 🔲 Por hacer |
-| **4** | Audio (jota regional + SFX) | L | 🟠 Should | — | 🔲 Por hacer |
-| **5** | Accesibilidad + sharing | M | 🟡 Could | — | 🔲 Por hacer |
-| **6** | Per-stage rosters + menú visuals | L | 🟡 Could | — | 🔲 Por hacer |
+| **4** | Audio (jota regional + SFX) | L | 🟠 Should | — | ✅ Cerrada (46859fc) |
+| **5** | Accesibilidad + sharing | M | 🟡 Could | — | ✅ Cerrada (27f325a) |
+| **6** | Per-stage rosters + menú visuals | L | 🟡 Could | — | ✅ Cerrada (faba09b + fe94948) |
 | **7** | v1 release + archive | S | 🔴 Must | — | 🔲 Por hacer |
 
 **Total estimado**: ~12-17 sesiones de trabajo (3-4 semanas).
+**Sesiones consumidas hasta cierre F6**: 6 (F4 + F5 + F6 en 1 sesión, F3.1-F3.5 + F3 polish en 4 sesiones, F0-F2 en 1 sesión previa).
+
 
 ---
 
@@ -442,9 +444,11 @@ enorme => scroll horizontal/vertical.
 
 ---
 
-## Fase 4 — Audio (jota regional + SFX)
+## Fase 4 — Audio (jota regional + SFX) — ✅ Cerrada (commit 46859fc, 2026-09-24)
 
 **Goal**: dar identidad sonora al Valle con música regional y SFX claros.
+
+**Estado final**: 30 tests unit nuevos (15 music + 15 sfx) PASS, 9/9 escenarios e2e audio PASS, verify.sh 8/8, 0 console errors headless. Archivo SDD: `openspec/changes/archive/2026-09-25-fase-4-audio/`. Spec: `openspec/specs/audio/spec.md`.
 
 ### 4.1 Música procedural jota regional (Fase A)
 
@@ -513,9 +517,11 @@ enorme => scroll horizontal/vertical.
 
 ---
 
-## Fase 5 — Accesibilidad + sharing
+## Fase 5 — Accesibilidad + sharing — ✅ Cerrada (commit 27f325a, 2026-09-24)
 
 **Goal**: hacer el juego inclusivo y compartible.
+
+**Estado final**: 67 tests unit nuevos (19 TTS + 13 contrast + 16 motion + 19 share) PASS. Verify.sh 8/8, e2e smoke 0 console errors. Archivo SDD: `openspec/changes/archive/2026-09-25-fase-5-a11y-share/`. Specs: `openspec/specs/{accessibility,sharing}/spec.md`.
 
 ### 5.1 TTS accesibilidad con Web Speech API
 
@@ -585,9 +591,11 @@ enorme => scroll horizontal/vertical.
 
 ---
 
-## Fase 6 — Per-stage rosters + menú visuals
+## Fase 6 — Per-stage rosters + menú visuals — ✅ Cerrada (commits faba09b + fe94948, 2026-09-25)
 
 **Goal**: diferenciar visualmente los 5 stages con rosters enemigos específicos.
+
+**Estado final**: 18 tests unit nuevos (stage-rosters) PASS, verify.sh 8/8, headless verification de 4 backgrounds de menú y Pixi v7.4.0 cargando local. Archivo SDD: `openspec/changes/archive/2026-09-25-fase-6-stages-menus/`. Specs: `openspec/specs/{stage-rosters,menu-visuals,pixi-offline}/spec.md`.
 
 ### 6.1 Per-stage enemy rosters
 
