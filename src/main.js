@@ -51,6 +51,7 @@ import { ttsEngine, TTSEngine } from './accessibility/tts.js?v=44'
 import { contrastEngine } from './accessibility/contrast.js?v=44'
 import { motionEngine } from './accessibility/reduced-motion.js?v=44'
 import { shareEngine } from './sharing/share.js?v=44'
+import { getRosterForStage } from './levels/stage-rosters.js?v=44'
 
 // ============================================================
 // Audio engines (Fase 4 — ROADMAP §4.1 + §4.2)
@@ -822,7 +823,15 @@ async function bootstrap() {
 
     assertTestLevel()
     assertStaticSpriteIds()
-    enemies.loadLevel(TEST_LEVEL.enemies)
+    // F6.1 — per-stage rosters: when bg.stageId matches a stage roster, use it;
+    // otherwise fall back to the canonical TEST_LEVEL (preserves ?test=1 path).
+    const stageId = bg && bg.stageId
+    const roster = getRosterForStage(stageId)
+    if (roster) {
+      enemies.loadLevel(roster.enemies)
+    } else {
+      enemies.loadLevel(TEST_LEVEL.enemies)
+    }
 
     // F4h: do NOT re-create the Combat instance on every reset. The test-api
     // captures `combat` once at mount-time and rebinding it via

@@ -282,9 +282,8 @@ canvas {
 }
 
 #main-menu {
-  /* F3.5.3: dedicated background image + dim overlay instead of the running
-     game canvas. Responsive layout: no scroll, no off-screen elements,
-     adapts to viewport via clamp() + flex. */
+  /* F6.2: dedicated menu background — Valle panorama from Castillo de Cofrentes.
+     Replaces the generic menu_bg.png from F3.5.3 with the per-menu panorama. */
   position: absolute;
   inset: 0;
   display: flex;
@@ -293,7 +292,7 @@ canvas {
   justify-content: center;
   gap: 12px;
   background-color: #0a0a0a;
-  background-image: url('../assets/backgrounds/menu_bg.png');
+  background-image: url('../assets/menu_bg/menu-panorama-cofrentes.png');
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
@@ -429,7 +428,12 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.55);  /* dim world 0.5 + slight black wash */
+  background-color: #0a0a0a;
+  /* F6.2: dedicated satirical vertedero background for game-over variant */
+  background-image: url('../assets/menu_bg/menu-vertedero-satirico.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
   z-index: 200;
   padding: 16px;
 }
@@ -1245,7 +1249,12 @@ body.menu-mode #game-hud-wrapper {
 #biblioteca {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.92);
+  background-color: #0a0a0a;
+  /* F6.2: cartographic map background */
+  background-image: url('../assets/menu_bg/menu-mapa-cartografico.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
   z-index: 260;
   display: flex;
   align-items: center;
@@ -1469,7 +1478,12 @@ body.menu-mode #game-hud-wrapper {
 #data-screen {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background-color: #0a0a0a;
+  /* F6.2: panoramic view background for pre-stage data screen */
+  background-image: url('../assets/menu_bg/menu-panorama-cofrentes.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
   z-index: 270;
   display: flex;
   align-items: center;
@@ -1576,7 +1590,12 @@ body.menu-mode #game-hud-wrapper {
 #final-screen {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.92);
+  background-color: #0a0a0a;
+  /* F6.2: Rio Cabriel background for final screen / victory */
+  background-image: url('../assets/menu_bg/menu-rio-cabriel.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
   z-index: 280;
   display: flex;
   align-items: center;

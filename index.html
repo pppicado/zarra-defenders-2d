@@ -79,8 +79,10 @@
     </svg>
   </button>
 
-  <!-- Pixi.js v7 estable (cargado desde CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js"></script>
+  <!-- Pixi.js v7 estable — local-first (F6.3 offline fallback).
+       Local file in /vendor/ for offline / Tailscale-only deployments;
+       CDN fallback if the local copy fails to load (e.g. fresh deploy). -->
+  <script src="vendor/pixi.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js'"></script>
   <!-- Bootstrap i18n: aplica STRINGS al DOM estático antes del main. -->
   <script type="module" src="src/ui/i18n-bootstrap.js?v=44"></script>
   <!-- Nuestro código (ES modules, sin build step) — query string para forzar no-cache durante dev -->
