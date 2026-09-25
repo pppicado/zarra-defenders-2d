@@ -57,3 +57,7 @@ catalogoraw-page.png
 lightbox-1080p.png
 lightbox-improved.png
 lightbox-test.png
+
+# Raw AI-generated menu backgrounds (regenerable from minimax MCP, postprocess with PIL)
+assets/menu_bg/raw/
+menu-*.jpeg
