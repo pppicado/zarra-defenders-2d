@@ -42,6 +42,7 @@ export class Overlay {
     this.combat = opts.combat
     this.enemies = opts.enemies
     this.gameState = opts.gameState ?? { state: 'main-menu' }
+    this.share = opts.share ?? null  // F5.4 ShareEngine instance (optional)
     // BG-009 — context-aware retry label: 'Reintentar test level' only in
     // ?test=1 dev mode; 'Reintentar' in production.
     this._isTestMode = opts.isTestMode ?? false
@@ -104,6 +105,16 @@ export class Overlay {
       <p class="overlay-firmas-line" data-role="firmasLine">${STRINGS.overlay.firmasLine(STRINGS.overlay.victory.verb, 0)}</p>
       <p class="overlay-best-line" data-role="bestLine">${STRINGS.overlay.mejorVacio}</p>
       <p class="overlay-newrecord hidden" data-role="newRecord">${STRINGS.overlay.newRecord}</p>
+      <div class="overlay-share hidden" data-role="share-block">
+        <p class="overlay-share-hint">${STRINGS.share?.hint ?? 'Comparte'}</p>
+        <div class="overlay-share-buttons">
+          <button type="button" class="overlay-share-btn" data-role="share-twitter" aria-label="Compartir en Twitter">𝕏 Twitter</button>
+          <button type="button" class="overlay-share-btn" data-role="share-facebook" aria-label="Compartir en Facebook">Facebook</button>
+          <button type="button" class="overlay-share-btn" data-role="share-clipboard" aria-label="Copiar al portapapeles">Copiar</button>
+          <button type="button" class="overlay-share-btn hidden" data-role="share-native" aria-label="Compartir nativo del sistema">Compartir</button>
+        </div>
+        <p class="overlay-share-status hidden" data-role="share-status" aria-live="polite"></p>
+      </div>
       <div class="overlay-buttons">
         <button type="button" class="overlay-btn overlay-btn--primary" data-role="retry">${this._isTestMode ? STRINGS.overlay.retryTest : STRINGS.overlay.retry}</button>
         <button type="button" class="overlay-btn" data-role="back">${STRINGS.overlay.back}</button>
@@ -168,6 +179,62 @@ export class Overlay {
     emit('menu:back', {})
     this.gameState.state = 'main-menu'
   }
+
+  // ============== F5.4 Sharing =================
+
+  /**
+   * Populate the share block in the victory overlay with computed text + url.
+   * Called by main.js when 'stage:cleared' fires. No-op if share engine was not injected.
+   */
+  populateShare(scoreData, stageId) {
+    if (!this.share) return
+    const block = this.root.querySelector('[data-role="share-block"]')
+    if (!block) return
+    const enriched = { ...(scoreData || {}), stageId: stageId ?? '' }
+    const shareUrl = this.share.buildShareUrl(enriched)
+    const shareText = this.share.buildShareText(enriched, shareUrl)
+    const showNative = this.share.hasNativeShare()
+    block.classList.remove('hidden')
+    const nativeBtn = this.root.querySelector('[data-role="share-native"]')
+    if (nativeBtn) {
+      if (showNative) nativeBtn.classList.remove('hidden')
+      else nativeBtn.classList.add('hidden')
+    }
+    const tw = this.root.querySelector('[data-role="share-twitter"]')
+    if (tw) tw.onclick = () => this.share.openTwitter(shareText, shareUrl)
+    const fb = this.root.querySelector('[data-role="share-facebook"]')
+    if (fb) fb.onclick = () => this.share.openFacebook(shareUrl)
+    const clip = this.root.querySelector('[data-role="share-clipboard"]')
+    if (clip) {
+      clip.onclick = async () => {
+        const ok = await this.share.copyToClipboard(shareText)
+        this._showShareStatus(ok ? this._shareStatusOk() : this._shareStatusFail(), ok)
+      }
+    }
+    if (nativeBtn && showNative) {
+      nativeBtn.onclick = async () => {
+        const ok = await this.share.nativeShare({
+          title: this.share.getTitle(),
+          text: shareText,
+          url: shareUrl,
+        })
+        if (ok) this._showShareStatus(this._shareStatusNative(), true)
+      }
+    }
+  }
+
+  _showShareStatus(text, ok) {
+    const el = this.root.querySelector('[data-role="share-status"]')
+    if (!el) return
+    el.textContent = text
+    el.classList.remove('hidden')
+    el.style.color = ok ? '#4ade80' : '#fca5a5'
+    setTimeout(() => el.classList.add('hidden'), 2400)
+  }
+
+  _shareStatusOk() { return STRINGS.share?.copyOk ?? 'Copiado' }
+  _shareStatusFail() { return STRINGS.share?.copyFail ?? 'No se pudo copiar' }
+  _shareStatusNative() { return STRINGS.share?.shareOk ?? 'Compartido' }
 
   _attachListeners() {
     this._unsubs.push(on('integrity:exhausted', () => {

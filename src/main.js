@@ -47,6 +47,10 @@ import { __zr } from './engine/dom-debug.js?v=44'
 import { MusicEngine } from './audio/music.js?v=44'
 import { SFXEngine } from './audio/sfx.js?v=44'
 import { ensureAudioContext, setMasterVolume, toggleMute, getMasterVolume, getAudioContext, isMuted as isAudioMuted } from './audio/audio-context.js?v=44'
+import { ttsEngine, TTSEngine } from './accessibility/tts.js?v=44'
+import { contrastEngine } from './accessibility/contrast.js?v=44'
+import { motionEngine } from './accessibility/reduced-motion.js?v=44'
+import { shareEngine } from './sharing/share.js?v=44'
 
 // ============================================================
 // Audio engines (Fase 4 — ROADMAP §4.1 + §4.2)
@@ -532,6 +536,9 @@ async function bootstrap() {
     root: pauseOverlayRoot,
     camera,
     gameState,
+    tts: ttsEngine,
+    contrast: contrastEngine,
+    motion: motionEngine,
   })
   input.on('pause', () => {
     if (gameState.state === 'gameplay') {
@@ -588,12 +595,14 @@ async function bootstrap() {
 
   // F1.1 + F3.5.2 — pedagogy cards (instantiated here, after `camera` is in
   // scope; F3.5.2 click handler uses camera.halt/unHalt to pause/resume).
+  // F5.1 — TTS engine (Web Speech API) injected for "Escuchar" button.
   const pedagogyCardRoot = document.getElementById('pedagogy-card')
   pedagogyCards = new PedagogyCards({
     root: pedagogyCardRoot,
     gameState,
     camera,
     onCardShown: (payload) => score.addCardShown(payload),
+    tts: ttsEngine,
   })
   busOn('ui:overlayShown', () => pedagogyCards.hide())
   busOn('menu:startRequested', () => pedagogyCards.hide())
@@ -646,6 +655,7 @@ async function bootstrap() {
     enemies,
     gameState,
     isTestMode: inTestMode,  // BG-009 — context-aware retry label
+    share: shareEngine,      // F5.4 — sharing buttons populated on stage:cleared
   })
 
   // --- Boot test level now (test branch) or wait for menu (production) ---
@@ -786,6 +796,14 @@ async function bootstrap() {
       }
     }
     overlay.showVictory()
+    // F5.4 — populate share buttons in the victory overlay
+    if (overlay.populateShare && typeof overlay.populateShare === 'function') {
+      try {
+        overlay.populateShare(score.read(), stageId)
+      } catch (err) {
+        __zr.warn('[main] populateShare failed:', err?.message ?? err)
+      }
+    }
   })
 
   __zr.log('[ZarraDefenders2D] Bootstrap OK. F3.5 two-canvas + tileSize=128.')

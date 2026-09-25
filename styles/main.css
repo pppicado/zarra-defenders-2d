@@ -7,6 +7,99 @@
    - Pixel-perfect rendering (image-rendering: pixelated)
    ============================================================ */
 
+/* F5.3: prefers-reduced-motion — disables parallax + screen shake + sine flutter
+   when OS reports it OR when user manually toggles via pause menu (.reduced-motion class). */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --rm-parallax: 0;
+    --rm-shake: 0;
+  }
+}
+:root.reduced-motion,
+:root.reduced-motion * {
+  --rm-parallax: 0;
+  --rm-shake: 0;
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+:root.reduced-motion .pedagogy-card,
+:root.reduced-motion .modal-intermedio,
+:root.reduced-motion .audio-toast {
+  animation: none !important;
+}
+:root.reduced-motion .integrity-hud-heart {
+  animation: none !important;
+}
+
+/* F5.2: High-contrast palette (color-blind friendly) — applied via .contrast-high class
+   on <html>. Uses high-luminance primaries with strong hue separation rather than
+   adjacent tones; foreground/background contrast > 7:1 per WCAG AAA. */
+:root.contrast-high {
+  --bg: #000000;
+  --text: #ffffff;
+  --text-muted: #e5e5e5;
+  --accent: #ffd700;
+  --accent-soft: #fff4b0;
+  --green: #00ff7f;
+  --red: #ff5252;
+  --blue: #00d4ff;
+  --border: #ffffff;
+}
+:root.contrast-high body {
+  background: #000000;
+  color: #ffffff;
+}
+:root.contrast-high a,
+:root.contrast-high a:hover {
+  color: #00d4ff;
+  text-decoration: underline;
+}
+:root.contrast-high button {
+  border-color: #ffffff !important;
+}
+:root.contrast-high .pause-card,
+:root.contrast-high .modal-intermedio,
+:root.contrast-high .pedagogy-card,
+:root.contrast-high .biblioteca-card,
+:root.contrast-high .data-screen-card,
+:root.contrast-high .final-screen-card,
+:root.contrast-high .disclaimer-splash-card,
+:root.contrast-high .menu-card,
+:root.contrast-high .game-overlay-card {
+  background: #000000 !important;
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+}
+:root.contrast-high .pause-btn,
+:root.contrast-high .pedagogy-card-tts {
+  background: #000000 !important;
+  color: #ffd700 !important;
+  border: 2px solid #ffd700 !important;
+}
+:root.contrast-high .pause-btn--primary {
+  background: #ffd700 !important;
+  color: #000000 !important;
+}
+:root.contrast-high .pedagogy-card-title,
+:root.contrast-high .pedagogy-card-link {
+  color: #ffd700 !important;
+}
+:root.contrast-high .pedagogy-card-description,
+:root.contrast-high .pedagogy-card-dato,
+:root.contrast-high .pedagogy-card-fuente {
+  color: #ffffff !important;
+}
+:root.contrast-high .integrity-hud-heart--empty {
+  opacity: 0.3;
+}
+:root.contrast-high .menu-title,
+:root.contrast-high .data-screen-title,
+:root.contrast-high .final-screen-title {
+  color: #ffd700 !important;
+}
+
 /* --- Reset --- */
 *, *::before, *::after {
   margin: 0;
@@ -404,6 +497,65 @@ canvas {
   background: #f5a623;
 }
 
+/* F5.4: sharing block + buttons inside victory overlay */
+#game-overlay .overlay-share {
+  margin: 16px 0 8px;
+  padding: 12px 8px;
+  border-top: 1px solid #3a3a3a;
+  border-bottom: 1px solid #3a3a3a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+#game-overlay .overlay-share.hidden {
+  display: none;
+}
+#game-overlay .overlay-share-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #a0a0a0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+#game-overlay .overlay-share-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+#game-overlay .overlay-share-btn {
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #e5e5e5;
+  border: 1px solid #555;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+#game-overlay .overlay-share-btn:hover,
+#game-overlay .overlay-share-btn:focus {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #f5a623;
+  color: #f5a623;
+  outline: none;
+}
+#game-overlay .overlay-share-btn.hidden {
+  display: none;
+}
+#game-overlay .overlay-share-status {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #4ade80;
+  font-weight: 600;
+}
+#game-overlay .overlay-share-status.hidden {
+  display: none;
+}
+
 /* ============================================================
    Pause overlay (F3.1) — 3 botones durante gameplay.
    z-index 220 (encima de game-overlay 200, debajo de data/resumen/final).
@@ -470,6 +622,83 @@ canvas {
 /* While pause overlay is visible, disable canvas pointer events so taps reach the DOM. */
 #pause:not(.hidden) ~ #game-canvas-wrapper canvas {
   pointer-events: none;
+}
+
+/* F5.1: accessibility settings panel inside pause overlay */
+#pause .pause-btn--settings {
+  background: transparent;
+  color: #f5a623;
+  border-color: #f5a623;
+}
+#pause .pause-btn--settings:hover,
+#pause .pause-btn--settings:focus {
+  background: #f5a623;
+  color: #181818;
+}
+#pause .pause-a11y-panel {
+  margin-top: 14px;
+  padding: 14px 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: #d0d0d0;
+}
+#pause .pause-a11y-panel.hidden {
+  display: none;
+}
+#pause .pause-a11y-title {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  color: #f5a623;
+  letter-spacing: 0.5px;
+}
+#pause .pause-a11y-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+}
+#pause .pause-a11y-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #f5a623;
+  cursor: pointer;
+}
+#pause .pause-a11y-row input[type="range"] {
+  flex: 1;
+  accent-color: #f5a623;
+}
+#pause .pause-a11y-rate-val {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  color: #f5a623;
+  min-width: 36px;
+  text-align: right;
+}
+#pause .pause-a11y-note {
+  margin: 0;
+  padding: 6px 8px;
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+#pause .pause-btn--test {
+  background: transparent;
+  color: #f5a623;
+  border-color: #f5a623;
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  min-height: 36px;
+}
+#pause .pause-btn--test:disabled,
+#pause .pause-btn--settings:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* ============================================================
@@ -689,6 +918,29 @@ body.menu-mode #game-hud-wrapper {
   color: #f5a623;
   font-weight: 600;
   margin-left: 4px;
+}
+
+/* F5.1: TTS button inside pedagogy cards */
+#pedagogy-card .pedagogy-card-tts {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 4px;
+  padding: 6px 14px;
+  background: rgba(245, 166, 35, 0.12);
+  color: #f5a623;
+  border: 1px solid #f5a623;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+#pedagogy-card .pedagogy-card-tts:hover,
+#pedagogy-card .pedagogy-card-tts:focus {
+  background: #f5a623;
+  color: #181818;
 }
 
 /* ============================================================

@@ -363,4 +363,18 @@ contra la destrucción del territorio.</p>
 <p>Versión: F6 — scrolling pixel-art backgrounds (2026).</p>
 `,
   },
+
+  // ============================================================
+  // F5.4 Sharing (victory overlay)
+  // ============================================================
+  share: {
+    title: 'Zarra Defenders 2D — Firmas recogidas',
+    template: 'Acabo de recoger {firmas} firmas contra el vertedero de TRECO en el Valle de Ayora-Cofrentes. Cada papeleta cuenta. Sumate: {url}',
+    twitterIntent: 'https://twitter.com/intent/tweet?text={text}&url={url}',
+    facebookIntent: 'https://www.facebook.com/sharer/sharer.php?u={url}',
+    hint: 'Comparte tu aportacion',
+    copyOk: 'Copiado al portapapeles',
+    copyFail: 'No se pudo copiar',
+    shareOk: 'Compartido',
+  },
 };

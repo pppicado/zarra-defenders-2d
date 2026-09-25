@@ -47,6 +47,8 @@ export class PedagogyCards {
    * @param {Object}      [opts.camera]   RailCamera (halt/unHalt for F3.5.2 pause integration)
    * @param {Function}    [opts.onCardShown] callback({...payload}) on every show()
    * @param {Function}    [opts.clock]    injected clock for tests (returns ms). Default: () => Date.now()
+   * @param {Object}      [opts.tts]      TTSEngine instance (F5.1). When provided, card shows
+   *                                       a "Escuchar" button that speaks the dato via Web Speech API.
    */
   constructor(opts) {
     if (!opts || !opts.root) throw new Error('PedagogyCards requires root element')
@@ -55,6 +57,7 @@ export class PedagogyCards {
     this.camera = opts.camera ?? null
     this.onCardShown = opts.onCardShown ?? null
     this._clock = opts.clock ?? (() => Date.now())
+    this._tts = opts.tts ?? null
 
     /** @type {Object|null} current card payload (for tests) */
     this._current = null
@@ -142,6 +145,7 @@ export class PedagogyCards {
           : `<a class="pedagogy-card-link" href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(payload.fuente)} \u2197</a>`
         }
       </p>
+      <button type="button" class="pedagogy-card-tts" aria-label="Escuchar el dato" data-role="tts">\ud83d\udd0a Escuchar</button>
       <p class="pedagogy-card-footer">${escapeHtml(STRINGS.pedagogy.cards.footerFuentes)}</p>
     `
     this.root.dataset.cardId = payload.cardId
@@ -152,10 +156,19 @@ export class PedagogyCards {
     //   - link: opens in new tab; do NOT pause / close
     //   - close button (✕): explicitly closes; resumes if we paused
     //   - body click: pauses the game if playing
+    //   - tts button: speaks the dato via Web Speech API (F5.1)
     this.root.addEventListener('click', (e) => {
       if (e.target.closest('.pedagogy-card-link')) return
       if (e.target.closest('.pedagogy-card-close')) {
         this.hide()
+        return
+      }
+      if (e.target.closest('[data-role="tts"]')) {
+        e.stopPropagation()
+        if (this._tts) {
+          this._tts.cancel()
+          this._tts.speak(`${payload.titulo}. ${payload.datoTexto}`)
+        }
         return
       }
       // Body click — pause if currently playing
