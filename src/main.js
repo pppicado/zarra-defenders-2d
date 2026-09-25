@@ -44,6 +44,15 @@ import { DataScreen } from './pedagogy/data-screen.js?v=44'
 import { FinalScreen, FINAL_BOSS_SPRITE_ID } from './pedagogy/final-screen.js?v=44'
 import { PauseOverlay } from './ui/pause.js?v=44'
 import { __zr } from './engine/dom-debug.js?v=44'
+import { MusicEngine } from './audio/music.js?v=44'
+import { SFXEngine } from './audio/sfx.js?v=44'
+import { ensureAudioContext, setMasterVolume, toggleMute, getMasterVolume, getAudioContext, isMuted as isAudioMuted } from './audio/audio-context.js?v=44'
+
+// ============================================================
+// Audio engines (Fase 4 — ROADMAP §4.1 + §4.2)
+// ============================================================
+const musicEngine = new MusicEngine()
+const sfxEngine = new SFXEngine()
 
 // ============================================================
 // Configuration
@@ -444,11 +453,52 @@ async function bootstrap() {
 
   // F5 (REQ-CMB-007): keyboard `H` toggles the overlay at runtime. Only
   // attached once — repeated `H` presses flip the flag.
+  // F4: M / [ / ] control master volume; first user gesture unlocks AudioContext.
+  let _audioUnlocked = false
+  function _unlockAudioIfNeeded() {
+    if (_audioUnlocked) return
+    ensureAudioContext()
+    _audioUnlocked = true
+  }
+  function _showVolumeToast() {
+    const muted = isAudioMuted()
+    const pct = muted ? 0 : Math.round(getMasterVolume() * 100)
+    const el = document.getElementById('audio-toast')
+    if (!el) return
+    el.textContent = muted ? '🔇 Mute' : `🔊 Vol ${pct}%`
+    el.classList.remove('hidden')
+    clearTimeout(el._t)
+    el._t = setTimeout(() => el.classList.add('hidden'), 900)
+  }
   window.addEventListener('keydown', (e) => {
     if (e.key === 'h' || e.key === 'H') {
       if (debugHitboxes) debugHitboxes.setEnabled(!debugHitboxes.isEnabled())
+      return
+    }
+    if (e.key === 'm' || e.key === 'M') {
+      _unlockAudioIfNeeded()
+      toggleMute()
+      _showVolumeToast()
+      return
+    }
+    if (e.key === '[') {
+      _unlockAudioIfNeeded()
+      const cur = getMasterVolume()
+      setMasterVolume(Math.max(0, cur - 0.1))
+      if (isAudioMuted()) toggleMute()
+      _showVolumeToast()
+      return
+    }
+    if (e.key === ']') {
+      _unlockAudioIfNeeded()
+      const cur = getMasterVolume()
+      setMasterVolume(Math.min(1, cur + 0.1))
+      if (isAudioMuted()) toggleMute()
+      _showVolumeToast()
+      return
     }
   })
+  window.addEventListener('pointerdown', () => _unlockAudioIfNeeded(), { once: false })
 
   const camera = new RailCamera({ waypoints: buildTestLevelPath(), loop: false })
   const input = new Input()
@@ -556,6 +606,32 @@ async function bootstrap() {
     })
   })
 
+  // ============================================================
+  // Fase 4 (ROADMAP §4.1 + §4.2) — audio hooks
+  // ============================================================
+  busOn('combat:fire', () => sfxEngine.play('fire'))
+  busOn('combat:hit', () => sfxEngine.play('hit'))
+  busOn('enemy:destroyed', () => sfxEngine.play('card'))
+  busOn('menu:bibliotecaRequested', () => sfxEngine.play('click'))
+  busOn('menu:startStage', () => sfxEngine.play('click'))
+  busOn('stage:finaleStarted', () => sfxEngine.play('transition'))
+  busOn('integrity:exhausted', () => {
+    sfxEngine.play('gameover')
+    musicEngine.stop()
+  })
+  busOn('stage:cleared', () => {
+    sfxEngine.play('victory')
+    musicEngine.stop()
+  })
+  busOn('zarra:desactivacion', () => sfxEngine.play('error'))
+
+  busOn('ui:overlayShown', () => {
+    if (gameState.state === 'paused') musicEngine.pause()
+  })
+  busOn('ui:overlayHidden', () => {
+    if (gameState.state === 'gameplay') musicEngine.resume()
+  })
+
   let combat = null
   let finaleStarted = false  // BG-006 — true after the first finale frame; reset on boot
 
@@ -610,6 +686,7 @@ async function bootstrap() {
     score.reset()
     camera.setTime(0)
     gameState.state = 'main-menu'
+    musicEngine.stop()
     mainMenu.show()
   })
 
@@ -759,6 +836,8 @@ async function bootstrap() {
     // The initial sync ran before state was 'gameplay' (during bootstrap),
     // so portrait users wouldn't have been auto-paused on cold load.
     syncOrientationAutoPause()
+    // F4 — start procedural jota music for this stage.
+    if (bg && bg.stageId) musicEngine.start(bg.stageId)
   }
 
   function maybeFireFinale({ camera, bg }) {
@@ -791,8 +870,26 @@ async function bootstrap() {
     }
   }
 
-  window.__zarraGameState__ = gameState
-  window.__zarraModules__ = { integrity, score, enemies, camera, input, isoWorld, hud: hudModule, overlay, appWorld, appHud, get combat() { return combat }, bg, setViewportSize: (w, h) => { isoWorld.viewportWidth = w; isoWorld.viewportHeight = h; isoWorld._viewOrigin = { x: w / 2, y: h / 2 }; isoWorld.tileWorldOrigin = { x: Math.round(w / 2), y: Math.round(h * 0.30) }; if (combat) combat.setViewportSize(w, h); if (combat) combat.setViewportCenter({ x: w / 2, y: h / 2 }) } }
+window.__zarraGameState__ = gameState
+  window.__zarraEventBus__ = eventBus
+  window.__zarraEmit__ = emit
+  window.__zarraModules__ = {
+    integrity, score, enemies, camera, input, isoWorld, hud: hudModule, overlay, appWorld, appHud,
+    get combat() { return combat },
+    bg,
+    musicEngine,
+    sfxEngine,
+    audioIsMuted: () => isAudioMuted(),
+    audioGetVolume: () => getMasterVolume(),
+    setViewportSize: (w, h) => {
+      isoWorld.viewportWidth = w
+      isoWorld.viewportHeight = h
+      isoWorld._viewOrigin = { x: w / 2, y: h / 2 }
+      isoWorld.tileWorldOrigin = { x: Math.round(w / 2), y: Math.round(h * 0.30) }
+      if (combat) combat.setViewportSize(w, h)
+      if (combat) combat.setViewportCenter({ x: w / 2, y: h / 2 })
+    },
+  }
 }
 
 /** Victory detector helper — emits stage:cleared exactly once. */

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zarra Defenders 2D — Catálogo music_raw (folklore libre)</title>
+  <link rel="icon" href="data:,">
+  <meta http-equiv="refresh" content="30">
+  <style>
+    :root {
+      --bg: #0e0e10;
+      --surface: #111827;
+      --surface-2: #1f2937;
+      --border: #374151;
+      --text: #e5e7eb;
+      --text-muted: #9ca3af;
+      --text-strong: #f3f4f6;
+      --accent: #fbbf24;
+      --accent-soft: #fde68a;
+      --green: #4ade80;
+      --red: #ef4444;
+      --blue: #93c5fd;
+      --code-bg: #0b1020;
+      --orange: #fb923c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 28px 32px 80px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    h1 { font-size: 22px; margin: 0 0 6px; color: var(--text-strong); }
+    h2 {
+      font-size: 14px; margin: 36px 0 12px; color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px; letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    h3 { font-size: 13px; margin: 0 0 6px; color: var(--accent-soft); }
+    p.note { font-size: 13px; color: var(--text-muted); margin: 0 0 14px; }
+    code, .mono {
+      background: var(--code-bg); color: var(--text-strong);
+      padding: 1px 6px; border-radius: 3px;
+      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 12px;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 24px; flex-wrap: wrap;
+      margin-bottom: 24px; padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-meta {
+      font-size: 12px; color: var(--text-muted);
+      font-family: ui-monospace, monospace; text-align: right; line-height: 1.7;
+    }
+    .header-meta .ts { color: var(--accent); }
+    .header-meta a { display: block; }
+
+    .track {
+      margin: 0 0 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .track-header {
+      padding: 12px 16px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: baseline;
+      gap: 16px; flex-wrap: wrap;
+    }
+    .track-title { font-size: 15px; font-weight: 600; color: var(--text-strong); }
+    .track-meta { font-size: 11px; color: var(--text-muted); font-family: ui-monospace, monospace; }
+    .track-meta .pill {
+      display: inline-block; padding: 1px 7px; margin-left: 4px;
+      border-radius: 10px; font-size: 10px; letter-spacing: 0.3px;
+      background: var(--code-bg); color: var(--accent); border: 1px solid var(--border);
+    }
+    .track-body { padding: 14px 16px; }
+    .track-body audio {
+      width: 100%; max-width: 520px; height: 38px; margin-bottom: 10px;
+    }
+    .track-grid {
+      display: grid; grid-template-columns: max-content 1fr;
+      gap: 4px 12px; font-size: 12px;
+    }
+    .track-grid dt { color: var(--text-muted); }
+    .track-grid dd { margin: 0; color: var(--text); word-break: break-word; }
+
+    .ref-card {
+      margin: 0 0 14px; padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--orange);
+      border-radius: 6px;
+    }
+    .ref-card .name { font-size: 14px; font-weight: 600; color: var(--text-strong); margin-bottom: 4px; }
+    .ref-card .why { font-size: 12px; color: var(--text-muted); }
+    .ref-card a { font-size: 12px; }
+
+    .summary {
+      padding: 14px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+    .summary strong { color: var(--text-strong); }
+    .summary ul { margin: 6px 0 0; padding-left: 20px; }
+    .summary li { margin: 2px 0; }
+
+    .pill-cc { color: var(--green) !important; border-color: var(--green) !important; }
+    .pill-pd { color: var(--accent) !important; }
+
+    .play-all {
+      margin-left: auto; font-size: 11px; color: var(--accent);
+      background: transparent; border: 1px solid var(--accent);
+      padding: 3px 10px; border-radius: 4px; cursor: pointer;
+      font-family: inherit;
+    }
+    .play-all:hover { background: var(--accent); color: var(--bg); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>Catálogo music_raw — folklore libre para Fase 4 (Audio)</h1>
+      <p class="note">
+        Piezas descargadas del Archivo sonoro de la Diputación de Valencia (vía Wikimedia Commons)
+        para trabajar identidad sonora del Valle de Ayora. Las 6 son jotas valencianas/castellanas
+        de pueblos de la provincia — género idéntico al que se toca en el Valle, aunque ninguna
+        procede específicamente de Ayora/Zarra/Jarafuel/Teresa (esos pueblos no han digitalizado
+        su folklore con licencia libre).
+      </p>
+    </div>
+    <div class="header-meta">
+      <span class="ts">Generado 2026-09-24</span><br>
+      <span>Total descargado: 27 MB · 6 piezas</span><br>
+      <a href="../index.html">← Volver al juego</a>
+      <a href="catalogoraw.html">Catálogo de fondos (catalogoraw.html)</a>
+    </div>
+  </div>
+
+  <div class="summary">
+    <strong>Notas para uso en Fase 4 (ROADMAP §4.1):</strong>
+    <ul>
+      <li>Las 6 piezas están en OGG Vorbis stereo 44.1 kHz — convertir a MP3/OGG con `ffmpeg` antes de empaquetar (Pixi app ya carga audio HTML5).</li>
+      <li><strong>Licencia: CC BY-SA 4.0</strong> en todas. Atribución obligatoria a los artistas listados; obra derivada del juego debe heredar CC BY-SA (compatible con el LICENSE del repo MIT/CC mixto actual — revisar).</li>
+      <li><strong>Ninguna procede del Valle de Ayora</strong>: vienen de Titaguas (Los Serranos) y Macastre (Hoya de Buñol/Chiva). El folklore del Valle está en cintas privadas sin digitalizar.</li>
+      <li><strong>SFX del juego</strong> (fire/hit/card/gameover/victory/click/transition/error) NO se descargan — el plan acordado (ROADMAP §4.2) es Web Audio API sintetizada, sin dependencias externas.</li>
+    </ul>
+  </div>
+
+  <h2>Piezas descargadas (6)</h2>
+
+  <div class="track">
+    <div class="track-header">
+      <div>
+        <div class="track-title">Jota Parada — Titaguas</div>
+        <div class="track-meta">
+          Rondalla de Titaguas · 1975 · 3.7 MB
+          <span class="pill pill-cc">CC BY-SA 4.0</span>
+        </div>
+      </div>
+    </div>
+    <div class="track-body">
+      <audio controls preload="metadata" src="jota-parada-titaguas.ogg"></audio>
+      <dl class="track-grid">
+        <dt>Intérprete</dt><dd>Rondalla de Titaguas (músicos del pueblo)</dd>
+        <dt>Tipo</dt><dd>Jota parada (sin baile, vocal+instrumental)</dd>
+        <dt>Pueblo origen</dt><dd>Titaguas, comarca Los Serranos (provincia Valencia)</dd>
+        <dt>Año grabación</dt><dd>1975</dd>
+        <dt>Fuente archivo</dt><dd>Archivo sonoro de música y literatura popular — Diputación de Valencia</dd>
+        <dt>Wikimedia Commons</dt>
+        <dd><a href="https://commons.wikimedia.org/wiki/File:Jota_Parada_-_Titaguas_(8-A).ogg" target="_blank" rel="noopener">commons.wikimedia.org/wiki/File:Jota_Parada_-_Titaguas_(8-A).ogg</a></dd>
+        <dt>Licencia URL</dt><dd><a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener">creativecommons.org/licenses/by-sa/4.0</a></dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="track">
+    <div class="track-header">
+      <div>
+        <div class="track-title">Jota de Baile — Titaguas</div>
+        <div class="track-meta">
+          Rondalla de Titaguas · 1975 · 7.0 MB
+          <span class="pill pill-cc">CC BY-SA 4.0</span>
+        </div>
+      </div>
+    </div>
+    <div class="track-body">
+      <audio controls preload="metadata" src="jota-baile-titaguas.ogg"></audio>
+      <dl class="track-grid">
+        <dt>Intérprete</dt><dd>Rondalla de Titaguas</dd>
+        <dt>Tipo</dt><dd>Jota de baile (con ritmo marcado para acompañamiento)</dd>
+        <dt>Pueblo origen</dt><dd>Titaguas, Los Serranos (Valencia)</dd>
+        <dt>Año grabación</dt><dd>1975</dd>
+        <dt>Fuente archivo</dt><dd>Archivo sonoro Diputación de Valencia</dd>
+        <dt>Wikimedia Commons</dt>
+        <dd><a href="https://commons.wikimedia.org/wiki/File:Jota_de_Baile_-_Titaguas_(8-A).ogg" target="_blank" rel="noopener">commons.wikimedia.org/wiki/File:Jota_de_Baile_-_Titaguas_(8-A).ogg</a></dd>
+        <dt>Licencia URL</dt><dd><a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener">creativecommons.org/licenses/by-sa/4.0</a></dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="track">
+    <div class="track-header">
+      <div>
+        <div class="track-title">La virgen tiene corona — Jota parada, Macastre</div>
+        <div class="track-meta">
+          Josefa Sierra Broch "Tia Pepica" · 1975 · 1.7 MB
+          <span class="pill pill-cc">CC BY-SA 4.0</span>
+        </div>
+      </div>
+    </div>
+    <div class="track-body">
+      <audio controls preload="metadata" src="jota-virgen-corona-macastre.ogg"></audio>
+      <dl class="track-grid">
+        <dt>Intérprete</dt><dd>Josefa Sierra Broch, "Tia Pepica" de Macastre (n. 9-1-1905)</dd>
+        <dt>Tipo</dt><dd>Jota parada con letra — "La virgen tiene corona"</dd>
+        <dt>Pueblo origen</dt><dd>Macastre, Hoya de Buñol/Chiva (Valencia)</dd>
+        <dt>Año grabación</dt><dd>1975</dd>
+        <dt>Fuente archivo</dt><dd>Archivo sonoro Diputación de Valencia — voz de campo, etnomusicología</dd>
+        <dt>Wikimedia Commons</dt>
+        <dd><a href="https://commons.wikimedia.org/wiki/File:La_virgen_tiene_corona_-_Jota_parada_-_Macastre_(8-A).ogg" target="_blank" rel="noopener">commons.wikimedia.org/wiki/File:La_virgen_tiene_corona_-_Jota_parada_-_Macastre_(8-A).ogg</a></dd>
+        <dt>Licencia URL</dt><dd><a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener">creativecommons.org/licenses/by-sa/4.0</a></dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="track">
+    <div class="track-header">
+      <div>
+        <div class="track-title">Tonada 1 — Jota de baile, Macastre</div>
+        <div class="track-meta">
+          Tia Pepica de Macastre · 1975 · 8.1 MB
+          <span class="pill pill-cc">CC BY-SA 4.0</span>
+        </div>
+      </div>
+    </div>
+    <div class="track-body">
+      <audio controls preload="metadata" src="tonada1-baile-macastre.ogg"></audio>
+      <dl class="track-grid">
+        <dt>Intérprete</dt><dd>Josefa Sierra Broch "Tia Pepica"</dd>
+        <dt>Tipo</dt><dd>Jota de baile (tonada 1 de la serie)</dd>
+        <dt>Pueblo origen</dt><dd>Macastre, Hoya de Buñol/Chiva (Valencia)</dd>
+        <dt>Año grabación</dt><dd>1975</dd>
+        <dt>Fuente archivo</dt><dd>Archivo sonoro Diputación de Valencia</dd>
+        <dt>Wikimedia Commons</dt>
+        <dd><a href="https://commons.wikimedia.org/wiki/File:Tonada_1_-_Jota_de_baile_-_Macastre_(8-A).ogg" target="_blank" rel="noopener">commons.wikimedia.org/wiki/File:Tonada_1_-_Jota_de_baile_-_Macastre_(8-A).ogg</a></dd>
+        <dt>Licencia URL</dt><dd><a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener">creativecommons.org/licenses/by-sa/4.0</a></dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="track">
+    <div class="track-header">
+      <div>
+        <div class="track-title">Tonada 2 — Jota de baile, Macastre</div>
+        <div class="track-meta">
+          Tia Pepica de Macastre · 1975 · 3.6 MB
+          <span class="pill pill-cc">CC BY-SA 4.0</span>
+        </div>
+      </div>
+    </div>
+    <div class="track-body">
+      <audio controls preload="metadata" src="tonada2-baile-macastre.ogg"></audio>
+      <dl class="track-grid">
+        <dt>Intérprete</dt><dd>Josefa Sierra Broch "Tia Pepica"</dd>
+        <dt>Tipo</dt><dd>Jota de baile (tonada 2 — variante rítmica)</dd>
+        <dt>Pueblo origen</dt><dd>Macastre, Hoya de Buñol/Chiva (Valencia)</dd>
+        <dt>Año grabación</dt><dd>1975</dd>
+        <dt>Fuente archivo</dt><dd>Archivo sonoro Diputación de Valencia</dd>
+        <dt>Wikimedia Commons</dt>
+        <dd><a href="https://commons.wikimedia.org/wiki/File:Tonada_2_-_Jota_de_baile_-_Macastre_(8-A).ogg" target="_blank" rel="noopener">commons.wikimedia.org/wiki/File:Tonada_2_-_Jota_de_baile_-_Macastre_(8-A).ogg</a></dd>
+        <dt>Licencia URL</dt><dd><a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener">creativecommons.org/licenses/by-sa/4.0</a></dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="track">
+    <div class="track-header">
+      <div>
+        <div class="track-title">Yo entré un día a ver la Virgen — Jota parada, Macastre</div>
+        <div class="track-meta">
+          Tia Pepica de Macastre · 1975 · 2.8 MB
+          <span class="pill pill-cc">CC BY-SA 4.0</span>
+        </div>
+      </div>
+    </div>
+    <div class="track-body">
+      <audio controls preload="metadata" src="jota-entre-virgen-macastre.ogg"></audio>
+      <dl class="track-grid">
+        <dt>Intérprete</dt><dd>Josefa Sierra Broch "Tia Pepica"</dd>
+        <dt>Tipo</dt><dd>Jota parada con letra devocional — "Yo entré un día a ver la Virgen"</dd>
+        <dt>Pueblo origen</dt><dd>Macastre, Hoya de Buñol/Chiva (Valencia)</dd>
+        <dt>Año grabación</dt><dd>1975</dd>
+        <dt>Fuente archivo</dt><dd>Archivo sonoro Diputación de Valencia</dd>
+        <dt>Wikimedia Commons</dt>
+        <dd><a href="https://commons.wikimedia.org/wiki/File:Yo_entr%C3%A9_un_d%C3%ADa_a_ver_la_Virgen_-_Jota_parada_-_Macastre_(8-A).ogg" target="_blank" rel="noopener">commons.wikimedia.org/wiki/File:Yo_entr%C3%A9_un_d%C3%ADa_a_ver_la_Virgen_-_Jota_parada_-_Macastre_(8-A).ogg</a></dd>
+        <dt>Licencia URL</dt><dd><a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener">creativecommons.org/licenses/by-sa/4.0</a></dd>
+      </dl>
+    </div>
+  </div>
+
+  <h2>Referencias (no descargadas — citadas para Fase 4)</h2>
+
+  <div class="ref-card">
+    <div class="name">Fermín Pardo Pardo — Cinta 237-A</div>
+    <div class="why">
+      Archivo sonoro de música y literatura popular · 116 MB · CC BY-SA 4.0 · Contiene "jota valenciana de trabajo", entre otras piezas.
+      <strong>Por qué no se descarga</strong>: la cinta es una sesión de grabación de campo completa con múltiples piezas concatenadas (>2h), no apta como素材 de loop de música de juego sin edición.
+      <strong>Para Fase 4</strong>: citar como fuente etnomusicológica de referencia; contactar a la Diputación de Valencia si se quiere una edición limpia de una pista concreta.
+    </div>
+    <a href="https://commons.wikimedia.org/wiki/File:Ferm%C3%ADn_Pardo_-_Cinta_237-A.ogg" target="_blank" rel="noopener">commons.wikimedia.org/wiki/File:Fermín_Pardo_-_Cinta_237-A.ogg</a>
+  </div>
+
+  <div class="ref-card">
+    <div class="name">Fermín Pardo Pardo — Cinta 164-A</div>
+    <div class="why">
+      Archivo sonoro Diputación · 38 MB · CC BY-SA 4.0 · Contiene "Torrás y Jota (Fuenterrobles)", "Valencianas de quintos", "Valenciana de siega" — Fuenterrobles está en la comarca vecina Requena-Utiel (mismo continuo cultural castellano).
+      Mismo motivo para no descargar: sesión completa, no pieza aislada.
+    </div>
+    <a href="https://commons.wikimedia.org/wiki/File:Ferm%C3%ADn_Pardo_-_Cinta_164-A.ogg" target="_blank" rel="noopener">commons.wikimedia.org/wiki/File:Fermín_Pardo_-_Cinta_164-A.ogg</a>
+  </div>
+
+  <div class="ref-card">
+    <div class="name">Antología del Folklore Musical de España (varios)</div>
+    <div class="why">
+      Internet Archive · mediatype:audio · Contiene recopilaciones etnográficas del folklore español. Licencia no clara en el resultado de búsqueda — verificar caso por caso antes de usar.
+    </div>
+    <a href="https://archive.org/details/lp_antologa-del-folklore-musical-de-espaa-pri_various" target="_blank" rel="noopener">archive.org/details/lp_antologa-del-folklore-musical-de-espaa-pri_various</a>
+  </div>
+
+  <div class="ref-card">
+    <div class="name">Marcha de la Senyera</div>
+    <div class="why">
+      Internet Archive · CC-PD (public domain) · Marcha ceremonial, no jota, pero incluida como referencia de música valenciana libre.
+    </div>
+    <a href="https://archive.org/details/marcha-de-la-senyera" target="_blank" rel="noopener">archive.org/details/marcha-de-la-senyera</a>
+  </div>
+
+  <h2>SFX del juego — nota</h2>
+  <p class="note">
+    Los efectos de sonido del juego (<code>fire</code>, <code>hit</code>, <code>card</code>,
+    <code>gameover</code>, <code>victory</code>, <code>click</code>, <code>transition</code>,
+    <code>error</code>) NO se descargan de internet. El plan acordado en
+    <code>docs/ROADMAP.md §4.2</code> es sintetizarlos con Web Audio API procedural
+    (oscillator + noise + envelope + filter) — esto da control total sobre timbre, evita
+    dependencias externas y mantiene el bundle ligero. Si en algún momento quieres
+    reemplazarlos por samples reales, candidatos son OpenGameArt (CC0) y Kenney.nl (CC0).
+  </p>
+
+  <h2>Atribuciones obligatorias (CC BY-SA 4.0)</h2>
+  <p class="note">
+    Cualquier obra derivada del juego que incorpore estas pistas debe mantener la licencia
+    CC BY-SA 4.0 y exhibir atribución a:
+  </p>
+  <ul style="font-size: 12px; color: var(--text-muted); padding-left: 20px;">
+    <li><strong>Rondalla de Titaguas</strong> — Jota Parada · Jota de Baile · 1975 (vía Diputación de Valencia)</li>
+    <li><strong>Josefa Sierra Broch "Tia Pepica" de Macastre</strong> — La virgen tiene corona · Tonada 1 · Tonada 2 · Yo entré un día a ver la Virgen · 1975 (vía Diputación de Valencia)</li>
+    <li><strong>Fuente archivo</strong>: Archivo sonoro de música y literatura popular — Diputación de Valencia</li>
+    <li><strong>Plataforma</strong>: Wikimedia Commons (CC BY-SA 4.0)</li>
+  </ul>
+
+  <p class="note" style="margin-top: 32px; font-size: 11px; text-align: center;">
+    Catálogo generado para <code>zarra-defenders-2d</code> · sesión 2026-09-24<br>
+    Característica: 6 OGG Vorbis stereo 44.1 kHz en <code>music_raw/</code>
+  </p>
+</body>
+</html>

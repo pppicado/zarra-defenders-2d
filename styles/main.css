@@ -1426,3 +1426,35 @@ body.menu-mode #game-hud-wrapper {
   #final-screen .final-screen-dato { font-size: 0.95rem; padding: 10px 12px; }
   #final-screen .final-screen-enlace { font-size: 0.85rem; padding: 8px 12px; }
 }
+
+/* ============================================================
+   F4: audio volume toast — feedback visual para [/]/M
+   ============================================================ */
+.audio-toast {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9600;
+  padding: 10px 22px;
+  background: rgba(15, 15, 20, 0.92);
+  color: #fbbf24;
+  border: 2px solid #fbbf24;
+  border-radius: 6px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  animation: audio-toast-in 0.18s ease-out;
+}
+
+.audio-toast.hidden {
+  display: none;
+}
+
+@keyframes audio-toast-in {
+  from { opacity: 0; transform: translate(-50%, -8px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
