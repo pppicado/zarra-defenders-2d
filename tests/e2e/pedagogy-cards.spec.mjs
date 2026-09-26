@@ -7,8 +7,9 @@
  * Scenarios:
  *   1. After destroying an enemy, the #pedagogy-card becomes visible with
  *      title + description + dato + link to fuente.
- *   2. The card auto-dismisses after `dismissMs` (3000 ms default).
- *   3. Clicking on the card body dismisses it immediately.
+ *   2. The card does NOT auto-dismiss (F3.5.2 changed behavior; card persists
+ *      until user closes it via ✕ button, click-outside, or Esc).
+ *   3. Clicking on the card body PAUSES the game (F3.5.2) — does NOT dismiss.
  *   4. The fuente link has correct href (https://), target (_blank),
  *      rel (noopener noreferrer).
  *   5. The score.cardsShown[] array grows by 1 per destroyed enemy.
@@ -238,7 +239,7 @@ async function main() {
   // ============================================================
   // 2. Auto-dismiss after dismissMs (~3s)
   // ============================================================
-  await passOrSkip('2. auto-dismiss after dismissMs', cardsAfter1 > 0, async () => {
+  await passOrSkip('2. card does NOT auto-dismiss (F3.5.2)', cardsAfter1 > 0, async () => {
     const before = await cardIsVisible(page)
     if (!before) {
       console.log('  (no card visible — re-destroying first)')
@@ -246,19 +247,25 @@ async function main() {
     }
     await page.waitForTimeout(3500)
     const after = await cardIsVisible(page)
-    if (after) throw new Error('card still visible after 3.5s — auto-dismiss failed')
+    if (!after) throw new Error('card disappeared after 3.5s — auto-dismiss should be disabled')
   })
 
   // ============================================================
-  // 3. Click on card body dismisses immediately
+  // 3. Click on card body pauses the game (F3.5.2) — does NOT dismiss
   // ============================================================
-  await passOrSkip('3. click on card body dismisses immediately', true, async () => {
+  await passOrSkip('3. click on card body pauses game (F3.5.2)', true, async () => {
     const r = await destroyFirstEnemyUntilDestroyed(page, 30)
     if (!r.ok) throw new Error(`could not destroy enemy: ${r.reason}`)
     if (!(await cardIsVisible(page))) throw new Error('card not visible')
+    const stateBefore = await page.evaluate(() => window.__zarraGameState__?.state)
     await page.click('.pedagogy-card-description')
     await page.waitForTimeout(100)
-    if (await cardIsVisible(page)) throw new Error('card not dismissed by click')
+    const stateAfter = await page.evaluate(() => window.__zarraGameState__?.state)
+    if (stateBefore !== 'gameplay') throw new Error(`expected gameplay before click, got ${stateBefore}`)
+    if (stateAfter !== 'paused') throw new Error(`expected paused after click, got ${stateAfter}`)
+    if (!(await cardIsVisible(page))) throw new Error('card should still be visible after click')
+    // Unpause for next test
+    await page.evaluate(() => window.__zarraGameState__.state = 'gameplay')
   })
 
   // ============================================================

@@ -43,13 +43,18 @@ function _spawnTime(depth) {
   return Math.max(0, ((depth - 5) / RAIL_DEPTH_MAX) * RAIL_LENGTH_S)
 }
 
-function _enemy(archetype, isoX, isoY, spriteId, idSuffix) {
-  return { archetype, isoX, isoY, spriteId, id: idSuffix }
+function _enemy(archetype, isoX, isoY, spriteId, idSuffix, spawnTimeSec) {
+  return { archetype, isoX, isoY, spriteId, id: idSuffix, spawnTimeSec }
 }
 
 /**
  * Spread N enemies along the rail for one spriteId + archetype combination.
  * Varies isoX/isoY so sprites don't all line up vertically.
+ * Each enemy carries a `spawnTimeSec` (time-gated spawn) — derived from its
+ * depth via the same formula test-level.js uses: ((depth - 5) / 72) * 120.
+ * Without spawnTimeSec, every enemy would materialize at boot, the camera
+ * hasn't advanced, and the iso Manhattan escape test would drain integrity to
+ * 0 in one tick (regression fixed in F6.1).
  */
 function _spread(archetype, spriteId, count, startDepth, depthStep, idPrefix) {
   const out = []
@@ -57,7 +62,8 @@ function _spread(archetype, spriteId, count, startDepth, depthStep, idPrefix) {
     const depth = startDepth + i * depthStep
     const isoX = Math.min(34, Math.max(1, Math.floor(depth / 2) + (i % 3)))
     const isoY = depth - isoX
-    out.push(_enemy(archetype, isoX, isoY, spriteId, `${idPrefix}_${i + 1}`))
+    const spawnTimeSec = Math.max(0, ((depth - 5) / 72) * 120)
+    out.push(_enemy(archetype, isoX, isoY, spriteId, `${idPrefix}_${i + 1}`, spawnTimeSec))
   }
   return out
 }
@@ -84,16 +90,25 @@ function _buildRoster({
   for (const { spriteId, count, startDepth, step } of (mobile.filter(m => m.tank) || [])) {
     items.push(..._spread('tank', spriteId, count, startDepth, step, `${stageId}_tank_${spriteId}`))
   }
-  // Mini-bosses (static)
+  // Mini-bosses (static). spawnTimeSec = depth-derived so they materialize when
+  // the camera reaches their depth — without it, undefined !== null evaluates to
+  // false in loose-equality mode and the enemy materializes immediately at boot
+  // (and escapes before the camera has advanced).
   for (const mb of miniBosses) {
-    items.push(_enemy('mini-boss', mb.isoX, mb.isoY, mb.spriteId, mb.id))
+    const mbDepth = mb.isoX + mb.isoY
+    const mbSpawnTime = Math.max(0, ((mbDepth - 5) / 72) * 120)
+    items.push(_enemy('mini-boss', mb.isoX, mb.isoY, mb.spriteId, mb.id, mbSpawnTime))
   }
   // Final boss (static) — sits at end of rail
   const bossEntry = boss
-  items.push(_enemy('boss', bossEntry.isoX, bossEntry.isoY, bossEntry.spriteId, bossEntry.id))
+  const bossDepth = bossEntry.isoX + bossEntry.isoY
+  const bossSpawnTime = Math.max(0, ((bossDepth - 5) / 72) * 120)
+  items.push(_enemy('boss', bossEntry.isoX, bossEntry.isoY, bossEntry.spriteId, bossEntry.id, bossSpawnTime))
   // Optional secondary boss if defined
   if (bossEntry.secondary) {
-    items.push(_enemy('boss', bossEntry.secondary.isoX, bossEntry.secondary.isoY, bossEntry.secondary.spriteId, bossEntry.secondary.id))
+    const secDepth = bossEntry.secondary.isoX + bossEntry.secondary.isoY
+    const secSpawnTime = Math.max(0, ((secDepth - 5) / 72) * 120)
+    items.push(_enemy('boss', bossEntry.secondary.isoX, bossEntry.secondary.isoY, bossEntry.secondary.spriteId, bossEntry.secondary.id, secSpawnTime))
   }
   return {
     railPath: [

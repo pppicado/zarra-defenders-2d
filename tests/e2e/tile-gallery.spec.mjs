@@ -75,11 +75,11 @@ async function main() {
   // Capture a screenshot for visual review.
   await page.screenshot({ path: '/tmp/zarra-tile-gallery.png', fullPage: true })
 
-  // Switch stage to stage2-lahoz to test the stage-switch path.
+  // Switch stage to stage2-pueblo to test the stage-switch path.
   let stageSwitchOk = true
   let stageSwitchError = null
   try {
-    await page.selectOption('#stage-select', 'stage2-lahoz')
+    await page.selectOption('#stage-select', 'stage2-pueblo')
     await page.waitForTimeout(800)
   } catch (err) {
     stageSwitchOk = false

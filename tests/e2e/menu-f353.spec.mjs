@@ -86,7 +86,7 @@ try {
         bodyHasMenuMode: document.body.classList.contains('menu-mode'),
         canvasDisplay: cwStyle.display,
         hudDisplay: hwStyle.display,
-        bgImage: menuStyle.backgroundImage.includes('menu_bg.png'),
+        bgImage: /menu_bg\/menu-(panorama-cofrentes|mapa-cartografico|vertedero-satirico|rio-cabriel)\.png/.test(menuStyle.backgroundImage),
         bgImageLoaded,
         navScrollH: navEl?.scrollHeight,
         navClientH: navEl?.clientHeight,

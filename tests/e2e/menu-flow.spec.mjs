@@ -39,7 +39,7 @@ export async function runMenuFlowSpec() {
   // Wait for the menu to mount.
   await page.waitForSelector('#main-menu:not(.hidden)', { timeout: 10_000 })
 
-  // Expect 7 menu buttons (5 stages + Acerca de + Disclaimer).
+  // Expect 8 menu buttons (5 stages + Acerca de + Disclaimer + Biblioteca — F3.5.3).
   const buttons = await page.$$eval('#main-menu .menu-btn', els =>
     els.map(e => ({
       text: e.textContent.trim(),
@@ -47,18 +47,19 @@ export async function runMenuFlowSpec() {
       locked: e.dataset.locked,
       focused: document.activeElement === e,
     })))
-  if (buttons.length !== 7) throw new Error(`expected 7 menu buttons, got ${buttons.length}`)
+  if (buttons.length !== 8) throw new Error(`expected 8 menu buttons, got ${buttons.length}`)
   // Stage 1 must be the first button, unlocked.
   const stage1 = buttons[0]
-  if (!stage1.text.includes('Bosque mediterráneo')) throw new Error(`expected stage 1 first, got ${stage1.text}`)
+  if (!stage1.text.includes('Las Hoyas')) throw new Error(`expected stage 1 first (Las Hoyas de Caballero), got ${stage1.text}`)
   if (stage1.locked !== 'false') throw new Error(`stage 1 should be unlocked, got locked=${stage1.locked}`)
   // Stages 2-5 must be locked.
   for (let i = 1; i <= 4; i++) {
     if (buttons[i].locked !== 'true') throw new Error(`stage ${i + 1} should be locked, got ${buttons[i].locked}`)
   }
-  // Acerca de + Disclaimer are modals.
-  if (buttons[5].kind !== 'modal') throw new Error(`button 6 should be modal, got ${buttons[5].kind}`)
-  if (buttons[6].kind !== 'modal') throw new Error(`button 7 should be modal, got ${buttons[6].kind}`)
+  // Acerca de + Disclaimer are modals; Biblioteca opens its own surface.
+  if (buttons[5].kind !== 'modal') throw new Error(`button 6 (Acerca de) should be modal, got ${buttons[5].kind}`)
+  if (buttons[6].kind !== 'modal') throw new Error(`button 7 (Disclaimer) should be modal, got ${buttons[6].kind}`)
+  if (buttons[7].kind !== 'biblioteca') throw new Error(`button 8 (Biblioteca) should be biblioteca, got ${buttons[7].kind}`)
 
   // ArrowDown → focus moves to second button (stage 2).
   await page.keyboard.press('ArrowDown')
@@ -94,9 +95,17 @@ export async function runMenuFlowSpec() {
     return btns[0] && document.activeElement === btns[0]
   }, { timeout: 2_000 })
 
-  // Enter → stage 1 starts → menu hides, gameplay begins.
+  // Enter → data screen appears first (F1.5) → menu stays visible until
+  // the user clicks "Continuar" which boots the stage and hides the menu.
   await page.keyboard.press('Enter')
-  await page.waitForFunction(() => document.getElementById('main-menu')?.classList.contains('hidden'), { timeout: 2_000 })
+  await page.waitForSelector('#data-screen:not(.hidden)', { timeout: 5_000 })
+  // Menu is still visible during the data screen step.
+  const menuHiddenAfterDataScreen = await page.evaluate(() =>
+    document.getElementById('main-menu')?.classList.contains('hidden'))
+  if (menuHiddenAfterDataScreen) throw new Error('menu should remain visible during data screen')
+  // Click "Continuar" to actually start the stage.
+  await page.click('#data-screen [data-role="continue"]')
+  await page.waitForFunction(() => document.getElementById('main-menu')?.classList.contains('hidden'), { timeout: 5_000 })
 
   await browser.close()
   return { buttons, baseUrl }

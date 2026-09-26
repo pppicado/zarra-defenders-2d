@@ -86,7 +86,8 @@ try {
   const initial = await readPause(page)
   check('1. pause hidden initially', initial.exists && initial.hidden === true)
 
-  // 2. Esc opens with 3 buttons
+  // 2. Esc opens with 5 buttons (F5.1 added "Ajustes de accesibilidad" + "Probar voz"
+  // to the panel; the 3 original action buttons are still first).
   await page.keyboard.press('Escape')
   await page.waitForTimeout(200)
   const afterEsc = await readPause(page)
@@ -96,11 +97,13 @@ try {
     `title="${afterEsc.title}", buttons=${afterEsc.buttonLabels.join(' | ')}`
   )
   check(
-    '2b. 3 buttons with right labels',
-    afterEsc.buttonLabels.length === 3 &&
+    '2b. 5 buttons with right labels (3 action + 2 a11y)',
+    afterEsc.buttonLabels.length === 5 &&
       afterEsc.buttonLabels[0] === 'Continuar' &&
       afterEsc.buttonLabels[1] === 'Reiniciar stage' &&
-      afterEsc.buttonLabels[2] === 'Salir al menú',
+      afterEsc.buttonLabels[2] === 'Salir al menú' &&
+      afterEsc.buttonLabels[3] === 'Ajustes de accesibilidad' &&
+      afterEsc.buttonLabels[4] === 'Probar voz',
   )
   check('2c. aria-hidden=false', afterEsc.ariaHidden === 'false')
 

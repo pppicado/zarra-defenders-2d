@@ -258,11 +258,24 @@ export class Combat {
     // `screenToIsoWithCamera` is the camera-aware inverse of the world
     // container's translation; the resulting isoX/isoY feed the Projectile's
     // tick homing, which calls isoToScreenWithCamera back to a screen target.
+    //
+    // We compute isoX/isoY ALWAYS (not just when there's a target). Without
+    // this, a projectile fired at empty iso coords would have NaN isoX/isoY
+    // and the homing tick would skip the target re-projection — the target
+    // would be frozen at its initial screen position even as the camera
+    // moves. Tests like projectile-direction.spec.mjs (homing scenario) fire
+    // at offsets beyond the enemy spawn range to verify the iso→screen
+    // re-projection works on its own.
     let isoX = NaN, isoY = NaN
-    if (target) {
-      const iso = this.isoWorld.screenToIsoWithCamera(screenX, screenY, this.cameraIso, this.viewportCenter)
-      isoX = iso.isoX
-      isoY = iso.isoY
+    const isoConv = this.isoWorld.screenToIsoWithCamera?.(screenX, screenY, this.cameraIso, this.viewportCenter)
+    if (isoConv && Number.isFinite(isoConv.isoX) && Number.isFinite(isoConv.isoY)) {
+      isoX = isoConv.isoX
+      isoY = isoConv.isoY
+    } else if (target) {
+      // Fallback: keep the legacy `if (target)` behavior for the case where
+      // screenToIsoWithCamera is unavailable (e.g., early bootstrap).
+      isoX = target.def?.isoX ?? NaN
+      isoY = target.def?.isoY ?? NaN
     }
 
     // Camera-aware: origin (hand) and projectile gfx both use SCREEN coords

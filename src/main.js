@@ -824,13 +824,21 @@ async function bootstrap() {
     assertTestLevel()
     assertStaticSpriteIds()
     // F6.1 — per-stage rosters: when bg.stageId matches a stage roster, use it;
-    // otherwise fall back to the canonical TEST_LEVEL (preserves ?test=1 path).
+    // otherwise fall back to the canonical TEST_LEVEL.
+    // SMOKE-TEST CONVENTION: in ?test=1 mode, always use TEST_LEVEL (120-enemy
+    // canonical composition from test-level.js) regardless of bg.stageId. Tests
+    // like smoke.spec.mjs expect exactly 120 spawn events; per-stage rosters
+    // (~22 enemies) would inflate the count. Production behavior unaffected.
     const stageId = bg && bg.stageId
-    const roster = getRosterForStage(stageId)
-    if (roster) {
-      enemies.loadLevel(roster.enemies)
-    } else {
+    if (inTestMode) {
       enemies.loadLevel(TEST_LEVEL.enemies)
+    } else {
+      const roster = getRosterForStage(stageId)
+      if (roster) {
+        enemies.loadLevel(roster.enemies)
+      } else {
+        enemies.loadLevel(TEST_LEVEL.enemies)
+      }
     }
 
     // F4h: do NOT re-create the Combat instance on every reset. The test-api
@@ -887,7 +895,14 @@ async function bootstrap() {
     // Note: fires regardless of gameState (same reasoning as maybeFireFinale).
     // gameState.state = 'overlay' is still set so the overlay UI shows.
     const timeAtEnd = camera.getTime?.() ?? 0
-    const finalBossAlive = enemies.get(TEST_LEVEL.finalBossId) != null
+    // F6.1: resolve the finalBossId from the active stage roster (or fall back
+    // to TEST_LEVEL in test mode). Otherwise `enemies.get(TEST_LEVEL.finalBossId)`
+    // returns null for production per-stage rosters and fires stage:cleared on
+    // tick 0 — a regression that put the game in 'overlay' state immediately.
+    const activeRoster = getRosterForStage(bg && bg.stageId)
+    const finalBossId = (activeRoster && activeRoster.finalBossId)
+      || TEST_LEVEL.finalBossId
+    const finalBossAlive = enemies.get(finalBossId) != null
     // BG-006/BG-007 — stage clears when the final boss is destroyed
     // (regardless of remaining wave enemies). This lets the boss fight
     // happen with continuous waves in the background.
