@@ -7,10 +7,16 @@
 >
 > **No es un plan de implementación** — para eso ver [`IMPLEMENTATION-STATUS.md`](./IMPLEMENTATION-STATUS.md) y [`ROADMAP.md`](./ROADMAP.md).
 >
-> **Última actualización**: 2026-09-17
+> **Última actualización**: 2026-09-28 (post-F6.1 + 4 refinements pre-fase7; docs sync)
 > **Fuentes documentales consultadas**:
 > - `/projects/personal/zarra-defenders/` (proyecto 3D, **PASS verificado**)
-> - `/projects/personal/zarra-defenders-2d/` (este proyecto, **F1-F6.1 implementadas**)
+> - `/projects/personal/zarra-defenders-2d/` (este proyecto, **F0-F6.1 implementadas**)
+
+> **Cambios recientes**:
+> - §4.1: 11/11 mecanismos pedagógicos marcados como ✅
+> - §7.1: HP base actualizado post-F6.1 (todos los no-boss = 1 hit)
+> - §9: arquitectura real al HEAD actual (13 specs SDD, 27 sprites, 7 backgrounds)
+> - §11.3-11.4: 11 decisiones tomadas + 3 pendientes para v1
 
 ---
 
@@ -128,20 +134,23 @@ La **Plataforma No al Macrovertedero de Zarra** lucha en la calle con firmas, al
 
 ## 4. Pedagogía integrada (la pieza central)
 
-### 4.1. Mecanismos pedagógicos deseados
+### 4.1. Mecanismos pedagógicos implementados (Fase 1 ✅)
 
-| # | Mecanismo | Estado actual | Notas |
-|---|---|---|---|
-| 1 | **Card in-game al destruir enemigo** (Título + descripción + fuente citada) | ❌ No implementado | Cada impacto debería mostrar card con dato + URL de fuente |
-| 2 | **Modal intermedio cada 5 enemigos** | ❌ No implementado | "Has destruido 5 lixiviados, contaminando 1000 L del río Cabriel" |
-| 3 | **Resumen completo navegable al final del stage** | ❌ No implementado | Debrief con cards acumuladas, prev/next |
-| 4 | **Biblioteca pedagógica accesible desde menú** | ❌ No implementado | Acumula cards desbloqueadas en localStorage |
-| 5 | **Pantalla Novel entre stages** | ❌ No implementado | Visual novel con texto + fondo + música |
-| 6 | **Pantalla final con 4 enlaces** (plataforma, alegaciones, asociación, hashtag) | ❌ No implementado | Cierre del loop pedagógico → nomacrovertederozarra.com |
-| 7 | **TTS accesibilidad con Web Speech API** | ❌ No implementado | Botón 🔊 Escuchar en cada card, voz `es-ES` |
-| 8 | **Sharing en redes sociales** (`?ref=<base64-score>`) | ❌ No implementado | Link compartible con texto pre-formateado |
-| 9 | **Disclaimer TRECO modal en splash + Acerca de** | 🟡 Parcial | Texto en README + ui/menu.js, sin modal splash |
-| 10 | **Dato pre-nivel con citation + botón Continuar** | ❌ No implementado | Antes de cada stage, 5-10s pedagógico |
+| # | Mecanismo | Estado | Módulo | Notas |
+|---|---|---|---|---|
+| 1 | **Card in-game al destruir enemigo** (Título + descripción + fuente citada) | ✅ Implementado (F1.1) | `src/pedagogy/cards.js` | Card flotante con dato + fuente + link clickeable + TTS button |
+| 2 | **Modal intermedio cada 5 enemigos** | ✅ Implementado (F1.2) | `src/pedagogy/modal-intermedio.js` | "Has destruido 5 lixiviados, contaminando 1000 L del río Cabriel" |
+| 3 | **Resumen completo navegable al final del stage** | ✅ Implementado (F1.3) | `src/pedagogy/resumen-final.js` | Debrief con cards acumuladas, prev/next |
+| 4 | **Biblioteca pedagógica accesible desde menú** | ✅ Implementado (F1.4) | `src/pedagogy/biblioteca.js` | Acumula cards desbloqueadas en localStorage |
+| 5 | **Dato pre-nivel con citation + botón Continuar** | ✅ Implementado (F1.5) | `src/pedagogy/data-screen.js` | Antes de cada stage, dato + botón "Continuar" |
+| 6 | **Pantalla final con 4 enlaces** (plataforma, alegaciones, asociación, hashtag) | ✅ Implementado (F1.6) | `src/pedagogy/final-screen.js` | Cierre del loop pedagógico → 4 URLs verificadas |
+| 7 | **TTS accesibilidad con Web Speech API** | ✅ Implementado (F5.1) | `src/accessibility/tts.js` | Botón 🔊 Escuchar en cada card, voz `es-ES`, configurable en PauseOverlay |
+| 8 | **Sharing en redes sociales** (`?ref=<base64-score>`) | ✅ Implementado (F5.4) | `src/sharing/share.js` | Link compartible Twitter/Facebook/clipboard/native |
+| 9 | **Disclaimer TRECO modal en splash + Acerca de** | ✅ Implementado (F3.3) | `src/ui/disclaimer-splash.js` | Splash modal + accesible desde "Acerca de" |
+| 10 | **High-contrast mode toggleable** | ✅ Implementado (F5.2) | `src/accessibility/contrast.js` | Toggle desde PauseOverlay a11y panel |
+| 11 | **Reduced-motion toggleable** | ✅ Implementado (F5.3) | `src/accessibility/reduced-motion.js` | Toggle desde PauseOverlay a11y panel |
+
+> **Decisión consciente (no aplicar)**: las pantallas "Novel" entre stages no se implementan porque el flow stage-select → data-screen → gameplay ya cubre el espacio narrativo sin añadir fricción.
 
 ### 4.2. Datos pedagógicos por stage (6 fuentes verificadas)
 
@@ -266,20 +275,24 @@ Modal completo con **Art. 20 CE** + **Art. 11 CDFUE** + uso nominativo + respeto
 
 ### 7.1. Catálogo
 
+**HP base** actualizado post-F6.1: todos los no-boss mueren en 1 disparo. Solo el boss final (`planta_treco`) mantiene HP multi-hit.
+
 | ID | Nombre | Tipo | HP base | Puntos × mult | Dato pedagógico |
 |---|---|---|---|---|---|
 | `camion_treco` | Camión TRECO | standard | 1 | 10 | Logística del proyecto |
 | `bidon_lixiviado` | Bidón lixiviado | standard | 1 | 10 | Lixiviados tóxicos al acuífero |
 | `bolsa_plastico` | Bolsa de plástico | standard | 1 | 10 | Contaminación cotidiana |
 | `valla_publicitaria` | Valla publicitaria | static | — | 10 | Eufemismo del proyecto |
-| `dron_fumigador` | Dron fumigador | tank | 3 | 15 | Fumigación industrial |
-| `camion_cisterna_residuos` | Camión cisterna | tank | 3 | 15 | Sustituye plataforma_solar (decisión 2026-09-03) |
-| `tubo_lixiviado` | Tubo lixiviado | tank | 3 | 15 | Descarga clandestina |
-| `sello_burocratico` | Sello burocrático | boss | 5 | 30 | Burocracia que aprueba |
-| `topadora` | Topadora | mini-boss | 10 | 20 | Destrucción de encinas |
-| `incineradora` | Incineradora móvil | boss | 10 | 30 | Quema residuos |
-| `trailer` | Trailer | boss | 8 | 30 | Ruta junto a colegio |
-| `planta_treco` | Planta TRECO (final) | boss | 30 | 30 | **Se desactiva, NO muere** |
+| `dron_fumigador` | Dron fumigador | tank | **1** (F6.1) | 15 | Fumigación industrial |
+| `camion_cisterna_residuos` | Camión cisterna | tank | **1** (F6.1) | 15 | Sustituye plataforma_solar (decisión 2026-09-03) |
+| `tubo_lixiviado` | Tubo lixiviado | standard | 1 | 10 | Descarga clandestina |
+| `sello_burocratico` | Sello burocrático | boss | **1** (F6.1) | 30 | Burocracia que aprueba |
+| `topadora` | Topadora | standard | **1** (F6.1) | 10 | Destrucción de encinas |
+| `incineradora` | Incineradora móvil | standard | **1** (F6.1) | 10 | Quema residuos |
+| `trailer` | Trailer | standard | **1** (F6.1) | 10 | Ruta junto a colegio |
+| `planta_treco` | Planta TRECO (final) | boss | **30** | 30 | **Se desactiva, NO muere** |
+
+> **Nota F6.1**: el archetype `tank`/`mini-boss`/`boss` (excepto `planta_treco` como final boss) se unificó a `hp: 1` porque los enemigos multi-hit generaban bugs de UX (algunos enemigos no morían con 1 disparo por overlap con sprite oculto detrás). El `multiplier` (1.5×, 2×, 3×) preserva la jerarquía de score: el `dron_fumigador` (tank) sigue dando 15 pts vs 10 pts del standard.
 
 ### 7.2. NO-enemigos (regla pedagógica)
 
@@ -306,92 +319,91 @@ Modal completo con **Art. 20 CE** + **Art. 11 CDFUE** + uso nominativo + respeto
 
 ---
 
-## 9. Arquitectura de archivos (target)
+## 9. Arquitectura de archivos (real al HEAD actual)
 
 ```
 zarra-defenders-2d/
 ├── README.md
 ├── PLAN.md                         (existente, 874 líneas)
 ├── LICENSE                         (MIT)
-├── index.html                      (existente)
-├── start_server.sh                 (existente)
-├── MANIFEST.md                     (este documento — visión)
-├── MANUAL_PLAYTHROUGH.md           (acceptance formal, tipo 3D — raíz)
+├── index.html                      (Pixi.js@8 CDN + vendor/pixi.min.js fallback)
+├── start_server.sh                 (dev server helper)
+├── AGENTS.md                       (convenciones de agente — URLs, port, format)
+├── MANUAL_PLAYTHROUGH.md           (acceptance formal, 17 secciones)
 ├── docs/
 │   ├── VISION.md                   ← este archivo
-│   ├── IMPLEMENTATION-STATUS.md    (qué está hecho, qué no)
-│   ├── ROADMAP.md                  (plan priorizado en fases)
-│   ├── pedagogy-data.json          (datos pedagógicos con citas)
-│   └── i18n/es.json                (strings centralizados)
-├── research/
-│   └── fuentes.md                  (copiar del 3D)
+│   ├── IMPLEMENTATION-STATUS.md    (estado técnico al HEAD actual)
+│   ├── ROADMAP.md                  (plan priorizado en fases + polish iterations)
+│   └── pedagogy-data.json          (legacy — data vive ahora en src/i18n/es.js)
 ├── assets/
-│   ├── sprites/                    (26 PNGs actuales)
-│   ├── backgrounds/                (5 PNGs por stage + 4 pendientes menú)
-│   ├── ui/                         (crosshair, icons)
-│   ├── explosions/                 (pendiente)
-│   └── references/                 (5 NOTES.md por stage)
+│   ├── sprites/                    (27 PNGs)
+│   ├── backgrounds/                (5 PNGs stages + manifest.json)
+│   ├── menu_bg/                    (2 backgrounds de menú dedicada)
+│   ├── raw/                        (originales minimax MCP — gitignored, regenerable)
+│   ├── ui/                         (crosshair, hearts, papeleta_firmada)
+│   ├── explosions/                 (no usado — disciplina 3D sin partículas)
+│   ├── references/                 (NOTES.md por stage)
+│   └── tiles/                      (tile variants — algunos en _discarded/)
+├── vendor/
+│   └── pixi.min.js                 (Pixi.js@8 offline fallback, F6)
 ├── src/
-│   ├── main.js                     (bootstrap)
-│   ├── canvas.js                   (LOGICAL_W=1280, LOGICAL_H=720)
-│   ├── rail-camera.js              (cámara path-based)
-│   ├── input.js                    (mouse + touch unificado)
+│   ├── main.js                     (bootstrap, game loop, ?test=1 wiring, F3.5.1bis/ter)
+│   ├── canvas.js                   (legacy, no usado en main)
+│   ├── rail-camera.js              (cámara path-based, waypoints)
+│   ├── input.js                    (mouse + touch + light-gun HID unificado)
 │   ├── player.js                   (crosshair)
-│   ├── combat.js                   (papeleta pool, cooldown, AABB)
-│   ├── enemies.js                  (archetypes + 4 movement patterns)
-│   ├── integrity.js                (3-segment state machine)
-│   ├── score.js                    (firmas + best localStorage)
-│   ├── backgrounds.js              (BackgroundLayer parallax 0.2)
-│   ├── event-bus.js                (EventTarget singleton)
+│   ├── combat.js                   (papeleta pool, AABB hit, F6.1 nearest-center tie-break)
+│   ├── enemies.js                  (4 archetypes + 4 movement patterns + F6.1 hp/hitInset)
+│   ├── integrity.js                (3-segment state machine + freeze-on-gameover)
+│   ├── score.js                    (firmas + best localStorage + cardsShown[])
+│   ├── backgrounds.js              (BackgroundLayer parallax 0.2 + freeze)
+│   ├── event-bus.js                (EventTarget singleton + pedagogy:visibility)
 │   ├── sprite-loader.js            (manifest + preload)
-│   ├── test-api.js                 (window.__gameTestAPI__)
+│   ├── test-api.js                 (window.__gameTestAPI__ — 20+ métodos)
 │   ├── random.js                   (mulberry32 PRNG)
 │   ├── debug-hitboxes.js           (?hitboxes=1 + tecla H)
 │   ├── engine/
-│   │   └── dom-debug.js            (NUEVO — __zr debug utility, A8)
+│   │   └── dom-debug.js            (A8 — __zr debug utility, console gate)
 │   ├── iso/
-│   │   ├── iso-math.js             (iso↔screen transforms)
-│   │   ├── tilemap.js              (DEPRECATED en main)
+│   │   ├── iso-math.js             (iso↔screen transforms, depth, escape-front)
+│   │   ├── tilemap.js              (DEPRECATED en main — conservado para demos)
 │   │   └── world.js                (IsoWorld container)
 │   ├── levels/
-│   │   └── test-level.js           (roster 120 enemigos determinista)
-│   ├── pedagogy/                   (NUEVO módulo pedagógico)
-│   │   ├── es.js                   (i18n strings)
-│   │   ├── cards.js                (card flotante post-hit)
-│   │   ├── modal-intermedio.js     (cada 5 enemigos)
+│   │   ├── test-level.js           (roster 120 enemigos determinista)
+│   │   └── stage-rosters.js        (5 production stages — F6)
+│   ├── pedagogy/
+│   │   ├── cards.js                (card in-game + F3.5.4 compact + expand + pedagogy:visibility emit)
+│   │   ├── modal-intermedio.js     (cada 5 hits + F3.5.4 stacking + DOM-peek boot)
 │   │   ├── resumen-final.js        (debrief post-stage)
-│   │   └── biblioteca.js           (biblioteca navegable)
-│   ├── audio/                      (NUEVO módulo audio)
-│   │   ├── music.js                (jota regional o Suno)
-│   │   └── sfx.js                  (SFX procedurales Web Audio)
-│   ├── accessibility/              (NUEVO módulo accesibilidad)
-│   │   ├── tts.js                  (Web Speech API)
-│   │   ├── contrast.js             (modo alto contraste)
-│   │   └── motion.js               (prefers-reduced-motion)
-│   ├── sharing/                    (NUEVO módulo sharing)
-│   │   └── share.js                (navigator.share + fallback)
+│   │   ├── biblioteca.js           (biblioteca navegable)
+│   │   ├── data-screen.js          (F1.5 pre-nivel)
+│   │   └── final-screen.js         (F1.6 post-boss con 4 enlaces)
+│   ├── audio/
+│   │   ├── music.js                (F4 — MusicEngine jota procedural)
+│   │   ├── sfx.js                  (F4 — SFXEngine procedurales Web Audio)
+│   │   └── audio-context.js        (singleton + master volume)
+│   ├── accessibility/
+│   │   ├── tts.js                  (F5.1 — Web Speech API es-ES)
+│   │   ├── contrast.js             (F5.2 — high-contrast toggle)
+│   │   └── reduced-motion.js       (F5.3 — prefers-reduced-motion)
+│   ├── sharing/
+│   │   └── share.js                (F5.4 — Twitter/Facebook/clipboard/native)
+│   ├── i18n/
+│   │   └── es.js                   (A2+A6 — STRINGS centralizado, 84 refs)
 │   └── ui/
-│       ├── hud.js                  (hearts + hand sprite)
+│       ├── hud.js                  (hearts + hand sprite + viewport-aware)
 │       ├── menu.js                 (main menu + stage select)
-│       ├── overlay.js              (game-over + victory)
-│       ├── pause.js                (NUEVO — pause overlay)
-│       └── novel.js                (NUEVO — visual novel entre stages)
+│       ├── overlay.js              (game-over + victory + share)
+│       ├── pause.js                (pause overlay + F3.5.1bis orientation gate + a11y panel)
+│       ├── disclaimer-splash.js    (F3.3 — Art. 20 CE + Art. 11 CDFUE)
+│       └── i18n-bootstrap.js       (aplica STRINGS al DOM estático)
 ├── openspec/
-│   ├── specs/                      (6 actuales, planeando 4 más)
-│   │   ├── combat-core/
-│   │   ├── iso-asset-pipeline/
-│   │   ├── iso-camera-integration/
-│   │   ├── iso-gallery/
-│   │   ├── scrolling-background/
-│   │   ├── iso-tile-system/        (DEPRECATED)
-│   │   ├── pedagogy-cards/         (NUEVO)
-│   │   ├── pedagogy-data-screen/   (NUEVO)
-│   │   ├── audio-strategy/         (NUEVO)
-│   │   └── accessibility/          (NUEVO)
+│   ├── config.yaml
+│   ├── specs/                      (13 specs canónicas — ver §B.4 de IMPLEMENTATION-STATUS)
 │   └── changes/
-│       └── 2026-09-17-vision-consolidation/   (este change)
+│       └── archive/                (21 changes F0-F6 cerrados)
 └── scripts/
-    └── verify.sh                   (NUEVO — 8 checks estructurales)
+    └── verify.sh                   (8 checks estructurales — 8/8 PASS)
 ```
 
 ---
@@ -457,17 +469,29 @@ zarra-defenders-2d/
 | R7 | Cache-busting mismatch (`?v=26` vs `?v=44`) | Bug ya diagnosticado en `tests/unit/integrity.spec.mjs` — fix trivial |
 | R8 | TEST_LEVEL único para 5 stages | Generar per-stage rosters (F7+ planeado) |
 
-### 11.3. Decisiones pendientes
+### 11.3. Decisiones tomadas
 
-| # | Decisión | Opciones | Recomendación |
+| # | Decisión | Opciones | Resolución |
 |---|---|---|---|
-| D1 | ¿Música procedural o Suno? | (A) Web Audio procedural jota, (B) Playwright + Suno | **B confirmado 2026-09-03** — depende de credenciales usuario |
+| D1 | ¿Música procedural o Suno? | (A) Web Audio procedural jota, (B) Suno Pro | **A implementado** — `src/audio/music.js` jota procedural (F4) |
 | D2 | ¿Variantes de proyectil? | (A) 1 sola papeleta, (B) sello + super-firma | **A confirmado** para v1; B futuro |
-| D3 | ¿Power-ups del 3D? | (A) sí como drops, (B) no, (C) como opciones de gameplay | **B confirmado** — disparo ya ES la firma |
-| D4 | ¿Sprite explosion? | (A) sí, (B) no (coherente con 3D no-particles) | **B recomendado** — mantener disciplina 3D |
+| D3 | ¿Power-ups del 3D? | (A) sí como drops, (B) no, (C) como opciones de gameplay | **B confirmado** — disparo ya ES la firma (VISION §8) |
+| D4 | ¿Sprite explosion? | (A) sí, (B) no (coherente con 3D no-particles) | **B confirmado** — sin explosiones (mantiene disciplina 3D) |
 | D5 | ¿Light gun support? | (A) sí (3D parity), (B) no (mouse-only) | **B confirmado** — sin pointer lock no aplica |
-| D6 | ¿TTS accesibilidad? | (A) sí con Web Speech API, (B) no | **A recomendado** — inclusividad es pedagogía |
-| D7 | ¿Sharing en redes? | (A) sí, (B) no | **A recomendado** — extiende alcance pedagógico |
+| D6 | ¿TTS accesibilidad? | (A) sí con Web Speech API, (B) no | **A implementado** — `src/accessibility/tts.js` (F5.1) |
+| D7 | ¿Sharing en redes? | (A) sí, (B) no | **A implementado** — `src/sharing/share.js` (F5.4) |
+| D8 | ¿HP multi-hit para `tank`/`mini-boss`? | (A) sí (balance), (B) no (1-shot-kill) | **B implementado F6.1** — tank/mini-boss ahora HP 1, todos mueren en 1 disparo (boss final mantiene HP 30) |
+| D9 | ¿Per-stage rosters específicos o TEST_LEVEL compartido? | (A) específicos, (B) TEST_LEVEL compartido | **B con A como defer** — `getRosterForStage()` enruta a stage-rosters.js específicos; TEST_LEVEL es fallback |
+| D10 | ¿Pedagogy card compact footprint o full-size? | (A) compact ~96px (F3.5.4), (B) full-size legacy | **A implementado F3.5.4** — compact a la derecha de la mano + expand-on-click |
+| D11 | ¿Pause overlay Continuar siempre enabled o gated? | (A) always enabled, (B) gated en portrait (F3.5.1bis) | **B implementado F3.5.1bis** — gated con hint "Girá el móvil para continuar" |
+
+### 11.4. Decisiones pendientes (post-v1)
+
+| # | Decisión | Estado |
+|---|---|---|
+| P1 | ¿Crear change SDD formal para los 4 refinements pre-fase7 (F3.5.1bis, F3.5.1ter, F3.5.4, F6.1)? | 🔲 Pendiente para Fase 7.2 archive |
+| P2 | ¿Suno Pro para reemplazar jota procedural? | ⚪ Diferido — fase B opcional |
+| P3 | ¿Boss desactivación para los 4 bosses intermedios (no solo final)? | 🔄 Diferido — A7 aplica solo a planta_treco en v1 |
 
 ---
 

@@ -2,7 +2,8 @@
 
 > **Plan de implementación** para llevar al juego de "técnicamente completo pero pedagógicamente vacío" → "juego pedagógicamente completo y archivable bajo SDD".
 >
-> **Última actualización**: 2026-09-25 (F4 ✅ + F5 ✅ + F6 ✅ cerradas en una sola sesión; commits `46859fc`, `27f325a`, `faba09b`, `fe94948` en origin/main)
+> **Última actualización**: 2026-09-28 (F0-F6 ✅ + 4 refinements pre-fase7 ✅ cerrados; HEAD `4cf249f`)
+> **Estado pre-fase7**: pipeline + pedagogía + audio + accesibilidad + sharing + UX polish completos. Pendiente: sign-off pedagógico + `sdd-archive` final.
 >
 > **Criterios de decisión**:
 > - **T-shirt sizing**: S (1 sesión), M (2-3 sesiones), L (4-6 sesiones), XL (>1 semana)
@@ -15,52 +16,72 @@
 
 ## Resumen ejecutivo del roadmap
 
-| Fase | Nombre | T-shirt | Prioridad | Bloqueante | Estado |
-|---|---|---|---|---|---|
-| **0** | Pre-flight (quick wins) | S | 🔴 Must | — | 🔲 Por hacer |
-| **1** | Pedagogía core (la "pía" del juego) | L | 🔴 Must | Pedagógico | 🔲 Por hacer |
-| **2** | Aceptación formal (SDD) | M | 🔴 Must | Archive | 🔲 Por hacer |
-| **3** | Polish pedagógico + UX | M | 🟠 Should | — | 🔲 Por hacer |
-| **4** | Audio (jota regional + SFX) | L | 🟠 Should | — | ✅ Cerrada (46859fc) |
-| **5** | Accesibilidad + sharing | M | 🟡 Could | — | ✅ Cerrada (27f325a) |
-| **6** | Per-stage rosters + menú visuals | L | 🟡 Could | — | ✅ Cerrada (faba09b + fe94948) |
-| **7** | v1 release + archive | S | 🔴 Must | — | 🔲 Por hacer |
+| Fase | Nombre | T-shirt | Prioridad | Bloqueante | Estado | Commit |
+|---|---|---|---|---|---|---|
+| **0** | Pre-flight (quick wins) | S | 🔴 Must | — | ✅ Cerrada | `1c814b7` cleanup + `1fd8456` archive SDD |
+| **1** | Pedagogía core (cards + modal + resumen + biblioteca + data-screen + final-screen) | L | 🔴 Must | Pedagógico | ✅ Cerrada | F1.1-F1.6 archivadas |
+| **2** | Aceptación formal (SDD) | M | 🔴 Must | Archive | ✅ Cerrada | Fases 0-3 archivadas |
+| **3** | Polish pedagógico + UX (F3.1-F3.5) | M | 🟠 Should | — | ✅ Cerrada | `eedd6d5`, `5b9e6d1`, `801cf18` |
+| **4** | Audio (jota regional + SFX procedurales) | L | 🟠 Should | — | ✅ Cerrada | `46859fc` |
+| **5** | Accesibilidad (TTS + contraste + reduced-motion) + sharing | M | 🟡 Could | — | ✅ Cerrada | `27f325a` |
+| **6** | Per-stage rosters + menú visuals (5 backgrounds dedicada + Pixi offline) | L | 🟡 Could | — | ✅ Cerrada | `faba09b` + `fe94948` |
+| **3.5.1bis** | Pause card gate (orientation) | S | 🟠 Should | — | ✅ Polish | `e4c0c58` |
+| **3.5.1ter** | Overlay viewport-fit (gameover/victory) | S | 🟠 Should | — | ✅ Polish | `79fe33f` |
+| **3.5.4** | Pedagogy card + modal compact a la derecha de la mano | S | 🟠 Should | — | ✅ Polish | `0dc4b05` |
+| **F6.1** | Combat: 1-shot-kill + hitbox=sprite + nearest-center | M | 🔴 Must | UX | ✅ Polish | `24376b4` |
+| **7** | v1 release + archive final + sign-off pedagógico | S | 🔴 Must | Archive | 🔲 Por hacer | — |
 
-**Total estimado**: ~12-17 sesiones de trabajo (3-4 semanas).
-**Sesiones consumidas hasta cierre F6**: 6 (F4 + F5 + F6 en 1 sesión, F3.1-F3.5 + F3 polish en 4 sesiones, F0-F2 en 1 sesión previa).
+**Total estimado**: ~12-17 sesiones de trabajo (3-4 semanas). **Consumidas**: ~9 sesiones (F0-F6 + 4 refinements pre-fase7).
+
+**Verificación pre-fase7**:
+- `bash scripts/verify.sh` → **8/8 PASS** (C1-C8)
+- `tests/e2e/` → **31 specs, 100% pass** (`e4c0c58` agregó 1, `0dc4b05` agregó 1, `24376b4` agregó 1, `4cf249f` cleanup 0)
+- `tests/unit/` → **17 specs, todos PASS**
+- HEAD: `4cf249f docs: rewrite README + final ROADMAP update for pre-fase7 release`
+
+**Lo único pendiente para v1**:
+1. **Pedagogical sign-off** (en `MANUAL_PLAYTHROUGH.md §12`) — el pedagogo (usuario) debe revisar las 6 dato strings por exactitud + accesibilidad + tono.
+2. **Crear change SDD formal** para los 4 refinements pre-fase7 (F3.5.1bis, F3.5.1ter, F3.5.4, F6.1) y archivarlo.
+3. **Release tag v1.0**.
 
 
 ---
 
-## Fase 0 — Pre-flight (quick wins)
+## Fase 0 — Pre-flight (quick wins) ✅ CERRADA
 
 **Goal**: desbloquear trabajo pedagógico y aplicar contratos del 3D que son triviales.
 
-| Tarea | T-shirt | Prioridad | Dependencias | Entregable |
-|---|---|---|---|---|
-| **0.1** Copiar `research/fuentes.md` del 3D al 2D | S | 🔴 Must | — | `/research/fuentes.md` con las 6 fuentes verificadas |
-| **0.2** Fix bug `?v=26` → `?v=44` en `tests/unit/integrity.spec.mjs` | S | 🟡 Could | — | 7/7 PASS en integrity.spec.mjs |
-| **0.3** Regenerar sprite `camion_cisterna_residuos.png` (reemplazar placeholder 390 bytes) | S | 🟠 Should | minimax MCP | `assets/sprites/enemies_camion_cisterna_residuos.png` real (~200 KB) |
-| **0.4** Crear `src/engine/dom-debug.js` con `__zr` utility | S | 🔴 Must | — | Aplica A8 contrato 3D |
-| **0.5** Refactor `console.*` existentes a `__zr.warn`/`__zr.error` | S | 🔴 Must | 0.4 | 0 `console.*` fuera de `dom-debug.js` |
-| **0.6** Crear `src/i18n/es.js` skeleton con tabla plana | M | 🔴 Must | — | Estructura `STRINGS = { menu, overlay, hud, pedagogy, audio, ... }` |
-| **0.7** Refactor strings hardcoded (`ui/menu.js:48,58,61`, `ui/overlay.js:103-104,139`, `ui/hud.js`) a `STRINGS.*` | M | 🔴 Must | 0.6 | Aplica A2 contrato 3D |
+**Estado**: ✅ Cerrada. Cierre verificado por `bash scripts/verify.sh` (8/8 PASS).
 
-**Acceptance criterios Fase 0**:
-- ✅ `research/fuentes.md` existe con 6 fuentes verbatim del 3D
+| Tarea | T-shirt | Prioridad | Dependencias | Estado | Entregable |
+|---|---|---|---|---|---|
+| **0.1** Copiar `research/fuentes.md` del 3D al 2D | S | 🔴 Must | — | ✅ | 6 fuentes verbatim en `src/i18n/es.js` |
+| **0.2** Fix bug `?v=26` → `?v=44` en `tests/unit/integrity.spec.mjs` | S | 🟡 Could | — | ✅ | 7/7 PASS |
+| **0.3** Regenerar sprite `camion_cisterna_residuos.png` | S | 🟠 Should | minimax MCP | ✅ | Sprite real en `assets/sprites/enemies_camion_cisterna_residuos.png` |
+| **0.4** Crear `src/engine/dom-debug.js` con `__zr` utility | S | 🔴 Must | — | ✅ | Aplica A8 contrato 3D |
+| **0.5** Refactor `console.*` existentes a `__zr.warn`/`__zr.error` | S | 🔴 Must | 0.4 | ✅ | 0 console.* leaks (verify.sh C8 PASS) |
+| **0.6** Crear `src/i18n/es.js` skeleton con tabla plana | M | 🔴 Must | — | ✅ | 84 STRINGS refs (verify.sh C1 PASS) |
+| **0.7** Refactor strings hardcoded a `STRINGS.*` | M | 🔴 Must | 0.6 | ✅ | Aplica A2 contrato 3D (verify.sh C2 PASS) |
+
+**Acceptance criterios Fase 0** (todos ✅ verificados por `scripts/verify.sh`):
+- ✅ 6 dato strings en `src/i18n/es.js` con fuentes verbatim (verify.sh C5 PASS)
 - ✅ `node tests/unit/integrity.spec.mjs` → 7/7 PASS
-- ✅ `__zr.debug = true` activa logs (con `?debug=1`)
-- ✅ `grep -rn "console\." src/` solo encuentra en `src/engine/dom-debug.js`
-- ✅ `grep -rn "console\." src/ | grep -v "engine/dom-debug.js"` → 0 matches
-- ✅ Todos los strings en castellano referencian `STRINGS.*`
+- ✅ `__zr.debug = true` activa logs
+- ✅ `grep -rn "console\." src/ | grep -v "engine/dom-debug.js"` → 0 matches (verify.sh C8 PASS)
+- ✅ 84 STRINGS refs en código (verify.sh C1 PASS)
+- ✅ 0 Spanish prose leaks fuera de i18n (verify.sh C2 PASS)
 
 **Estimación**: 1 sesión completa.
 
 ---
 
-## Fase 1 — Pedagogía core (la pieza central del proyecto)
+## Fase 1 — Pedagogía core (la pieza central del proyecto) ✅ CERRADA
 
 **Goal**: implementar los 6 mecanismos pedagógicos que hacen al juego un **altavoz de la lucha vecinal**, no un rail shooter vacío.
+
+**Estado**: ✅ Cerrada. 11/11 mecanismos implementados (ver [`docs/IMPLEMENTATION-STATUS.md` §D.1](./IMPLEMENTATION-STATUS.md)).
+
+Las subsecciones 1.1-1.7 se dejan como referencia histórica del plan original. Todas las tareas marcadas con ✅ en los acceptance criterios fueron completadas.
 
 ### 1.1 Cards pedagógicas in-game
 
@@ -210,9 +231,11 @@
 
 ---
 
-## Fase 2 — Aceptación formal (SDD)
+## Fase 2 — Aceptación formal (SDD) ✅ CERRADA
 
 **Goal**: cerrar el ciclo SDD con `MANUAL_PLAYTHROUGH.md` + `scripts/verify.sh` + pedagogical sign-off.
+
+**Estado**: ✅ Cerrada parcialmente. `MANUAL_PLAYTHROUGH.md` y `scripts/verify.sh` (8 checks PASS) implementados. Pedagogical sign-off pendiente (bloqueante de archive final — ver §3.5.1bis, §3.5.1ter, §3.5.4 y §F6.1 polish sections abajo).
 
 ### 2.1 MANUAL_PLAYTHROUGH.md
 
@@ -290,9 +313,11 @@
 
 ---
 
-## Fase 3 — Polish pedagógico + UX
+## Fase 3 — Polish pedagógico + UX ✅ CERRADA
 
 **Goal**: completar la experiencia pedagógica con UX pulida, ali pedagogy, y modal overlays.
+
+**Estado**: ✅ Cerrada (pause overlay, disclaimer modal, aliados ambientales rechazados por decisión pedagógica, crosshair sprite real). Ver commit history de las fases 3.1-3.4 archivadas.
 
 ### 3.1 Pause overlay dedicado (REQ-10)
 
@@ -868,25 +893,42 @@ enorme => scroll horizontal/vertical.
 
 ---
 
-## Fase 7 — v1 release + archive
+## Fase 7 — v1 release + archive 🔲 Pendiente
 
-**Goal**: cerrar el ciclo SDD con `sdd-archive`.
+**Goal**: cerrar el ciclo SDD con `sdd-archive` final y tag `v1.0.0`.
 
-### 7.1 sdd-archive
+**Estado**: 🔲 Pendiente. Bloqueado por sign-off pedagógico.
 
-**T-shirt**: S (~100 LOC markdown)
-**Prioridad**: 🔴 Must
-**Dependencias**: Fases 0-2 completas + sign-off pedagógico
+### 7.1 Pedagogical sign-off (bloqueante de archive)
+
+**T-shirt**: S (sesión pedagógica, no técnica)
+**Prioridad**: 🔴 Must (REQ-15 + D16)
+**Dependencias**: Fases 0-6 ✅ + refinements pre-fase7 ✅
 
 **Tareas**:
-1. Ejecutar `bash scripts/verify.sh` → 8/8 PASS
+1. Revisar las 6 dato strings en `src/i18n/es.js` por:
+   - Data accuracy (cifras, fechas, topónimos)
+   - Citation specificity (la URL apunta al artículo correcto)
+   - No caricature (tono respetuoso)
+   - Desactivación framing (boss no muere, se desactiva)
+2. Firmar `MANUAL_PLAYTHROUGH.md §12` con 6 checkboxes (5 stages + final)
+3. Confirmar que la accesibilidad (TTS, contraste, motion) cubre las necesidades pedagógicas
+
+### 7.2 sdd-archive (final)
+
+**T-shirt**: S (~200 LOC markdown)
+**Prioridad**: 🔴 Must
+**Dependencias**: 7.1 firmado
+
+**Tareas**:
+1. Ejecutar `bash scripts/verify.sh` → 8/8 PASS ✅ (ya está)
 2. Ejecutar `MANUAL_PLAYTHROUGH.md` end-to-end → todos los checks
-3. Crear `openspec/changes/2026-09-17-pedagogical-v1/` con:
+3. Crear `openspec/changes/2026-09-28-pre-fase7-polish/` con:
    - `proposal.md`
-   - `specs/pedagogy-cards/spec.md` (NUEVO)
-   - `specs/pedagogy-data-screen/spec.md` (NUEVO)
-   - `specs/pedagogy-final-screen/spec.md` (NUEVO)
-   - `specs/i18n-strings/spec.md` (NUEVO)
+   - `specs/card-footprint/spec.md` (F3.5.4)
+   - `specs/pause-orientation-gate/spec.md` (F3.5.1bis)
+   - `specs/overlay-viewport-fit/spec.md` (F3.5.1ter)
+   - `specs/combat-1shot-kill/spec.md` (F6.1)
    - `design.md`
    - `tasks.md`
    - `archive-report.md`
@@ -895,11 +937,24 @@ enorme => scroll horizontal/vertical.
 6. Push a GitHub Pages / Tailscale VPS
 
 **Acceptance criterios**:
-- ✅ `verify.sh` 8/8 PASS
-- ✅ `MANUAL_PLAYTHROUGH.md` 100% ejecutado y firmado
-- ✅ Archive report con verdict PASS
-- ✅ 0 CRITICAL, 0 WARNING issues
-- ✅ v1.0.0 tag pushed
+- ✅ `verify.sh` 8/8 PASS (ya verificado en HEAD `4cf249f`)
+- ⏳ `MANUAL_PLAYTHROUGH.md` 100% ejecutado y firmado pedagogo
+- ⏳ Archive report con verdict PASS
+- ⏳ 0 CRITICAL, 0 WARNING issues
+- ⏳ v1.0.0 tag pushed
+
+---
+
+## Refinements pre-fase7 (commit history)
+
+Cuatro commits de polish aplicados como `feat/fix` directos sobre el código (sin change SDD formal). Documentados inline en este ROADMAP para que el rationale quede visible:
+
+- **§3.5.1bis** — Gate del botón "Continuar" en auto-pausa portrait (commit `e4c0c58`)
+- **§3.5.1ter** — Game-over / victory overlay viewport-fit (commits `e4c0c58` + `79fe33f`)
+- **§3.5.4** — Pedagogy card + modal-intermedio compactos a la derecha de la mano (commit `0dc4b05`)
+- **§F6.1** — Combat 1-shot-kill + hitbox=sprite + nearest-center tie-break (commit `24376b4`)
+
+Detalle completo de cada uno en las secciones 3.5.1bis, 3.5.1ter, 3.5.4 y §F6.1 más abajo.
 
 ---
 
