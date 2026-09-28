@@ -396,6 +396,221 @@ warning CSS existente sigue siendo la señal visual de "rotar".
 - ✅ Landscape de vuelta → pause auto se cierra (si vino de orientación)
 - ✅ Esc durante gameplay → pausa manual sigue funcionando independiente
 
+### 3.5.1bis Gate del botón "Continuar" en auto-pausa portrait
+
+Refinamiento de F3.5.1 detectado durante la fase de auditoría pre-fase 7.
+
+**Problema**: F3.5.1 pausa el juego en portrait, pero el botón "Continuar"
+del pause overlay seguía clickable. El jugador podía destrabarlo en
+portrait aunque el viewport siguiera siendo injugable — quedaba en un
+estado roto (juego "resumido" pero el canvas seguía letterboxed y los
+controles mal calibrados para portrait).
+
+**Solución**: cuando el pause overlay es auto-abierto por el watcher de
+orientación (no por Esc manual), el botón primario "Continuar" queda
+`disabled` con `aria-disabled="true"` y se muestra el hint "Girá el
+móvil para continuar" debajo del título. En cuanto el viewport vuelve
+a landscape, el botón se re-habilita automáticamente y el hint
+desaparece. Esc-pause manual NO se gatea (mantiene la aceptación de
+F3.5.1).
+
+**Implementación**:
+- `PauseOverlay.show({ auto: true })` — flag nuevo que habilita el gate.
+- `PauseOverlay.setOrientation(isLandscape)` — main.js empuja el último
+  estado del viewport en cada resize/orientationchange. Idempotente.
+- `_applyOrientationGate()` privado — toggle de `disabled` + `hidden`
+  del hint en función de `_visible && _autoPaused && !_isLandscape`.
+- `_onContinue()` con defense-in-depth: aunque el botón esté disabled
+  en DOM, un `.click()` programático lo byviasea — bail también.
+- Unificación de predicado: `syncOrientationAutoPause` (F3.5.1) y
+  `setupOrientationLock` (F3.5) ahora ambos usan `w > h` para evitar
+  divergencias entre `matchMedia('(orientation: portrait)')` (que puede
+  reportar `true` en viewports cuadrados de devtools) y el warning CSS.
+- i18n key nueva: `pause.rotarMovil = 'Girá el móvil para continuar'`
+  en `src/i18n/es.js`. Regla A6 mantenida: cero free prose en index.html.
+
+**Aceptación**:
+- ✅ Portrait cold-load → pause auto + botón deshabilitado + hint visible
+- ✅ Rotar a landscape → pause auto-cierra + botón re-habilita + hint desaparece
+- ✅ Esc manual en landscape → botón habilitado (sin gate)
+- ✅ Click programático en botón disabled → no-op (defense-in-depth)
+
+### 3.5.1ter Combat: 1-shot-kill + hitbox = sprite bounds + nearest-center tie-break
+
+Refinamiento crítico detectado durante la auditoría pre-fase 7. El
+combate tenía tres bugs latentes que se manifestaban como
+"a veces hay algunos enemigos que no mueren aunque les impactes":
+
+1. **`tank` (hp:3) y `mini-boss` (hp:10) requerían múltiples disparos.**
+   El `dron_fumigador`, `camion_cisterna_residuos` y `planta_treco`
+   necesitaban 3 y 10 impactos respectivamente. Cambio a `hp: 1` para
+   todos los no-boss; solo el `boss` final (`sello_burocratico`)
+   mantiene `hp: 30` para que el finale siga siendo un desafío real.
+   El `multiplier` (1, 1.5, 2) se conserva — los tanks/mi­ni-boss siguen
+   dando 15 / 20 pts vs 10 pts del standard, manteniendo la jerarquía
+   visual y de score.
+
+2. **`hitInset` achicaba la hitbox 16/12/10/8px por lado.** El AABB del
+   sprite se reducía antes del hit-test, así que el jugador fallaba
+   clicks en el margen transparente del sprite (especialmente en
+   enemigos móviles que se deslizaban fuera del AABB shrunk entre
+   frames). Cambio a `hitInset = 0` en todos los arquetipos: la
+   hitbox = el `getBounds()` exacto del sprite PIXI. Lo que ves es lo
+   que golpeás.
+
+3. **Tie-break por depth-desc en lugar de nearest-center.** Cuando dos
+   sprites solapaban visualmente (típico en mid-game con un estándar
+   pasando detrás de un tank o mini-boss), el resolver elegía al de
+   mayor depth — generalmente el más lejano a la cámara, que era el
+   menos visible. El jugador apuntaba al tank visible pero el hit
+   impactaba al estándar invisible detrás. Cambio a nearest-center-
+   to-click (heurística "el sprite que VEO"): el AABB cuyo centro está
+   más cerca del punto de click gana. Depth-desc queda como
+   tie-break secundario, id-asc como final.
+
+**Implementación**:
+- `src/enemies.js`: `ARCHETYPES` — todos con `hp:1` excepto `boss`,
+  todos con `hitInset: 0`. Header doc actualizado.
+- `src/combat.js`: `_resolveHitAtScreenPoint` reescrito — calcula
+  distancia al cuadrado del centro de cada AABB al click point, sort
+  ascendente, depth-desc + id-asc como tie-breaks. Comentarios
+  extensos explicando por qué.
+
+**Tests** (`tests/e2e/one-shot-kill.spec.mjs` — 98 asserts en 4 partes):
+
+- **Part A — Walk-through**: 81 frames × 4 fires (no-boss) + 1 fire
+  (boss). Cada spriteId debe aparecer ≥ 1 vez y TODOS los no-boss
+  deben morir en 1 shot. El boss debe sobrevivir.
+- **Part B — Hitbox coverage**: para cada spriteId, spawn 1 instancia
+  aislada en iso (2,2) (Manhattan=4, dentro del escape threshold),
+  fire a 5 puntos del AABB (center, topLeft, topRight, bottomLeft,
+  bottomRight). El hit debe registrarse en NUESTRO enemy (no otro por
+  solapamiento) y destruirlo.
+- **Part C — Nearest-center tie-break**: encuentra 2 enemies con AABB
+  solapado, fire al centro del aimed, verifica que el aimed muere y
+  el otro (más lejano) sobrevive.
+- **Part D — Boss kill contract**: el boss sobrevive 29 hits, muere
+  en hit #30, `stage:cleared` se dispara (requiere `setTime(125)`
+  para superar `railEndTime=120`).
+
+**Aceptación**:
+- ✅ Cada uno de los 11 spriteIds no-boss muere en 1 shot (en ≥ 1
+  sample).
+- ✅ Cada uno de los 11 spriteIds × 5 puntos del AABB = 55 hits
+  impactan en el enemy correcto Y lo destruyen.
+- ✅ Overlap tie-break: aimed enemy (visible) gana sobre deeper enemy
+  (oculto).
+- ✅ Boss requiere 30 hits, stage:cleared dispara al destruirlo.
+- ✅ Todos los tests existentes (hit-detection, enemy-movement,
+  projectile-direction, rail-direction, smoke, modal-intermedio)
+  siguen verdes.
+
+### 3.5.1ter Overlay (gameover/victory) cabe en cualquier viewport
+
+Refinamiento detectado durante la auditoría pre-fase 7. El card del
+game-over / victory estaba fijo en `width: 480px; padding: 28px` con
+textos y botones en `font-size: 1rem` y `min-height: 48px` — en
+viewports chicos (iPhone SE 320x568, especialmente con el share block
+visible en victory) el card crecía hasta el ras del borde inferior y
+la sombra inferior quedaba cortada. En escenarios extremos (todos los
+share buttons visibles + share-status) el card directamente se iba del
+viewport.
+
+**Solución**: `clamp(min, fluid, max)` en todos los tokens escalables
+del card (padding, font-size, gap, min-height de botones). El card
+pasa a tener `max-height: calc(100dvh - 32px)` (con fallback `100vh`)
+como backstop duro por si el clamp no alcanza, `display:flex;
+flex-direction:column` para que `flex:0 1 auto` le permita comprimirse
+en lugar de overflowear, y `min-height:0` para que el flex parent no
+lo expanda. Se mantiene `min-height: clamp(36px, 5.5vw, 48px)` en
+los botones para que sigan tappables.
+
+**Decisión de diseño**: optamos por escalado proporcional, NO scroll
+interno. Razón: los textos del card son cortos (1-2 líneas), no
+justifica un scroll que rompa la lectura de una pantalla de fin de
+stage; el clamp() los ajusta a un tamaño legible en cualquier
+viewport.
+
+**Implementación**:
+- `styles/main.css` líneas 440-561: rewrite completo del bloque
+  `.overlay-card` y sus hijos con `clamp()`.
+- Media query de `max-width: 600px` del overlay eliminado (clamp
+  cubre la transición).
+- `tests/e2e/overlay-fits-viewport.spec.mjs`: 4 viewports × 2 variantes
+  (gameover + victory con share) × 3 asserts (card/retry/back dentro
+  del viewport) = 24 asserts.
+
+**Aceptación**:
+- ✅ iPhone SE 320x568 gameover → card + botones dentro
+- ✅ iPhone SE 320x568 victory+share → card + botones dentro
+- ✅ 360x640, 480x900, 1280x720 → idem
+- ✅ Desktop mantiene tamaño nominal (clamp toma el valor máximo)
+
+### 3.5.4 Pedagogy card + modal-intermedio compactas a la derecha de la mano
+
+Refinamiento pedido en sesión pre-fase 7. La card de enemigo
+(F1.1/F3.5.2) y la modal informativa cada 5 enemigos (F1.2) estaban
+en posiciones inconsistentes:
+
+- **Card**: bottom-right pero crecía verticalmente con el contenido
+  (~240px alto), ocupando mucho espacio.
+- **Modal**: top-center en panel grande (420px×~180px), nada relacionado
+  con la mano o los corazones.
+
+Pedido: ambos elementos a la **derecha de la mano** (bottom-center →
+bottom-right), con **alto tipo corazones** (~96px CSS) y **adaptando
+el contenido** (truncando con ellipsis).
+
+**Decisiones de diseño**:
+
+1. **Footprint compacto**: la card pasa a `height: clamp(80px, 9vw,
+   110px)` (igual al visual de los corazones a través de viewports).
+   En collapsed solo muestra título (1 línea, ellipsis) + descripción
+   (1 línea, ellipsis). Click expande a `height: auto` con todo el
+   contenido (dato + fuente + TTS + footer). El usuario puede volver
+   a compactar con otro click (auto-resume si nosotros pausamos).
+2. **Modal stackeada**: la modal pasa a bottom-right. Si la card está
+   visible al mismo tiempo, se aplica la clase `.stacked` que la
+   desplaza `bottom: calc(cardHeight + 24px)` para no solaparse. El
+   acoplamiento es vía evento del bus `pedagogy:visibility` (sin
+   referencias directas entre módulos).
+3. **Truncación con ellipsis**: la modal no se expande (es dismiss-
+   only por diseño), así que el mensaje se trunca con `text-overflow:
+   ellipsis` en una línea. Es acceptable: el dato es reinforcement,
+   no info nueva.
+4. **Boot-time DOM peek**: si la modal se instancia DESPUÉS de que la
+   card ya estaba visible (escenarios de test, hot-reload), peekeamos
+   el DOM en el constructor para seedear el estado de stacking.
+   Sin esto, la modal quedaría en bottom: 16px solapando la card.
+
+**Bug fix de paso**: el handler de click del card se apilaba en cada
+`_render()` (un listener por cada enemy destroyed). Tres destroys = 3
+handlers = 3 toggles en 1 click → vuelve al estado original. Fix:
+guardar referencia del handler y `removeEventListener` antes de
+`addEventListener` en cada render.
+
+**Implementación**:
+- `src/pedagogy/cards.js`: `_expanded` state, `_toggleExpand()`,
+  `pedagogy:visibility` emit on show/hide/expand/collapse, handler
+  reference cleanup, `isExpanded` getter.
+- `src/pedagogy/modal-intermedio.js`: `on('pedagogy:visibility', ...)`,
+  `_applyStackedClass()`, `_peekCardVisibleFromDom()`.
+- `styles/main.css`: `#pedagogy-card` con clamp() footprint + `expanded`
+  variant; `#modal-intermedio` bottom-right + `.stacked` modifier;
+  eliminado media query de 600px (clamp() cubre).
+- `tests/e2e/pedagogy-card-position.spec.mjs`: 29 asserts cubriendo
+  footprint, posición, expand/collapse, stacking.
+
+**Aceptación**:
+- ✅ Card compact (110px alto en 1280×720) muestra título + descripción truncada
+- ✅ Click expand → 220px alto con todo el contenido (dato/fuente/TTS/footer)
+- ✅ Click otra vez → vuelve a compact y auto-resume
+- ✅ Modal a la derecha de la mano en bottom-right
+- ✅ Modal + card visible → modal se apila arriba (8px gap), sin overlap
+- ✅ Card se cierra → modal vuelve a su footprint normal (bottom: 16px)
+- ✅ Desktop mantiene tamaño nominal (clamp toma valor máximo)
+- ✅ Modal no bloquea click en sí misma cuando la card está visible (z-index + stacking)
+
 ### 3.5.2 Pedagogía cards compactas en bottom-right
 
 La tarjeta in-game (F1.1 — PedagogyCards) se reescribe:
