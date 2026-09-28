@@ -18,6 +18,14 @@
  *
  * Camera: halted on show, unhalts on hide. bootTestLevel already calls
  * camera.unHalt(), so the Reiniciar-stage path is covered.
+ *
+ * F3.5.1bis — orientation gate (refinement over F3.5.1):
+ *   When the pause overlay is visible AND it was auto-opened by the
+ *   orientation watcher (i.e. portrait viewport during gameplay), the
+ *   primary "Continuar" button is disabled and a hint message asks the
+ *   user to rotate the device. As soon as main.js calls setOrientation(true)
+ *   (landscape re-acquired), the button re-enables and the hint hides.
+ *   Manual Esc-pauses are NOT gated — only auto-pauses from portrait are.
  */
 import { emit } from '../event-bus.js?v=44'
 import { STRINGS } from '../i18n/es.js?v=44'
@@ -42,6 +50,15 @@ export class PauseOverlay {
     this.motion = opts.motion ?? null
 
     this._visible = false
+    // F3.5.1bis — orientation gate state. `true` only when this overlay is
+    // currently the *auto* pause opened by main.js's portrait watcher.
+    // Manual Esc-pauses leave this false so the continue button stays
+    // clickable (F3.5.1 acceptance: Esc manual is independent of orient).
+    this._autoPaused = false
+    // Cached viewport-orientation predicate. main.js pushes the latest
+    // value via setOrientation(). Defaults to "assume landscape" so first
+    // paint doesn't accidentally gate a manual pause.
+    this._isLandscape = true
     this._build()
   }
 
@@ -50,15 +67,22 @@ export class PauseOverlay {
   /**
    * Show the pause overlay. Halts the camera and flips the state machine.
    * Idempotent — calling show() when already visible is a no-op.
+   *
+   * @param {Object} [opts]
+   * @param {boolean} [opts.auto]  true when opened by the orientation watcher
+   *                                (F3.5.1). Enables the orientation gate on
+   *                                the continue button.
    */
-  show() {
+  show(opts = {}) {
     if (this._visible) return
     this._visible = true
+    this._autoPaused = opts.auto === true
     if (this.camera && this.camera.halt) this.camera.halt()
     if (this.gameState) this.gameState.state = 'paused'
 
     this.root.classList.remove('hidden')
     this.root.setAttribute('aria-hidden', 'false')
+    this._applyOrientationGate()
     emit('ui:overlayShown', {})
     this._focusPrimary()
   }
@@ -70,16 +94,32 @@ export class PauseOverlay {
   hide() {
     if (!this._visible) return
     this._visible = false
+    this._autoPaused = false
     if (this.camera && this.camera.unHalt) this.camera.unHalt()
     if (this.gameState) this.gameState.state = 'gameplay'
 
     this.root.classList.add('hidden')
     this.root.setAttribute('aria-hidden', 'true')
+    this._applyOrientationGate()
     emit('ui:overlayHidden', {})
   }
 
   get isVisible() {
     return this._visible
+  }
+
+  /**
+   * F3.5.1bis — main.js pushes the latest viewport-orientation flag here.
+   * When the overlay is currently visible AND it was auto-opened by the
+   * portrait watcher, the continue button is gated until landscape is
+   * restored. Idempotent and safe to call from resize/orientationchange
+   * listeners at any tick.
+   *
+   * @param {boolean} isLandscape  true when viewport is wider than tall
+   */
+  setOrientation(isLandscape) {
+    this._isLandscape = !!isLandscape
+    this._applyOrientationGate()
   }
 
   destroy() {
@@ -103,6 +143,7 @@ export class PauseOverlay {
       : ''
     card.innerHTML = `
       <h2 class="pause-title">${P.titulo}</h2>
+      <p class="pause-orient-hint hidden" data-role="pause-orient-hint" aria-hidden="true">${P.rotarMovil}</p>
       <div class="pause-buttons">
         <button type="button" class="pause-btn pause-btn--primary" data-role="continue">${P.continuar}</button>
         <button type="button" class="pause-btn" data-role="restart">${P.reiniciarStage}</button>
@@ -236,11 +277,47 @@ export class PauseOverlay {
   }
 
   _focusPrimary() {
+    // F3.5.1bis: when the overlay was auto-opened by portrait AND the
+    // viewport is still portrait, the continue button is disabled, so
+    // focusing it would trap keyboard users on a no-op. Focus the
+    // back button instead (always interactive) so keyboard / screen-reader
+    // users can still leave the overlay while waiting for rotation.
     const btn = this.root.querySelector('[data-role="continue"]')
-    if (btn) btn.focus()
+    if (!btn) return
+    if (btn.disabled) {
+      const back = this.root.querySelector('[data-role="back"]')
+      if (back) back.focus()
+      return
+    }
+    btn.focus()
+  }
+
+  /**
+   * F3.5.1bis — applies the orientation gate to the continue button and
+   * the hint message. Gate is active IFF the overlay is currently visible
+   * AND it was auto-opened by the portrait watcher AND the viewport is
+   * still portrait. Manual pauses (`_autoPaused === false`) are never
+   * gated.
+   */
+  _applyOrientationGate() {
+    const btn = this.root.querySelector('[data-role="continue"]')
+    const hint = this.root.querySelector('[data-role="pause-orient-hint"]')
+    const gated = this._visible && this._autoPaused && !this._isLandscape
+    if (btn) {
+      btn.disabled = gated
+      btn.setAttribute('aria-disabled', gated ? 'true' : 'false')
+    }
+    if (hint) {
+      hint.classList.toggle('hidden', !gated)
+      hint.setAttribute('aria-hidden', gated ? 'false' : 'true')
+    }
   }
 
   _onContinue() {
+    // F3.5.1bis — defense in depth: the button is `disabled` in DOM, but
+    // a programmatic .click() bypasses that. Bail here too so the gate
+    // holds regardless of how the click was triggered.
+    if (this._visible && this._autoPaused && !this._isLandscape) return
     this.hide()
   }
 

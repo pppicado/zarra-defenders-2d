@@ -549,12 +549,27 @@ async function bootstrap() {
     }
   })
 
-  // F3.5.1 — orientation auto-pause. matchMedia('(orientation: portrait)')
-  // fires whenever the viewport taller-than-wide state flips; resize covers
-  // cases where matchMedia doesn't emit (older browsers, edge resize via
-  // devtools). When portrait, pause the game via the same pauseOverlay.show()
-  // path that Esc uses; mark the pause as auto-opened so the landscape handler
-  // closes it without clobbering a user-initiated Esc-pause.
+  // F3.5.1 — orientation auto-pause. Two sources trigger sync:
+  //   - matchMedia('(orientation: portrait)') for proper device-rotation
+  //     events on phones/tablets
+  //   - window 'resize' for browsers that don't emit matchMedia (and for
+  //     devtools resize on desktop)
+  // The auto-pause path uses PauseOverlay.show({ auto: true }) so the
+  // overlay can gate its "Continuar" button until landscape is restored
+  // (F3.5.1bis). When portrait, we pause via the same overlay.show()
+  // path that Esc uses; when landscape returns, we close the overlay ONLY
+  // if it was auto-opened — manual Esc-pauses persist (F3.5.1 acceptance).
+  //
+  // Predicate unification (F3.5.1bis): both the auto-pause watcher AND
+  // setupOrientationLock use the same `w > h` aspect-ratio check, so a
+  // 360x361 viewport counts as landscape and avoids false-portrait false
+  // positives that matchMedia('orientation: portrait)') can produce on
+  // square-ish devtools viewports.
+  //
+  // Reading `pauseOverlay._autoPaused` from main.js is intentional — it's
+  // the orientation-watcher's own flag set via show({ auto: true }) and
+  // the only authoritative signal that this pause was opened by us (not
+  // by Esc). Keeping the read here avoids duplicating the state.
   //
   // Declared at bootstrap scope so bootTestLevel can call it directly after
   // setting gameState.state = 'gameplay' (the initial sync otherwise fires
@@ -562,16 +577,17 @@ async function bootstrap() {
   let syncOrientationAutoPause = () => {}
   if (typeof window.matchMedia === 'function') {
     syncOrientationAutoPause = () => {
-      const portrait = window.matchMedia('(orientation: portrait)').matches
-      if (portrait) {
+      const w = window.innerWidth
+      const h = window.innerHeight
+      const isLandscape = w > h
+      pauseOverlay.setOrientation(isLandscape)
+      if (!isLandscape) {
         if (gameState.state === 'gameplay') {
-          pauseOverlay._autoPaused = true
-          pauseOverlay.show()
+          pauseOverlay.show({ auto: true })
         }
       } else {
-        if (pauseOverlay._autoPaused && pauseOverlay.isVisible) {
+        if (pauseOverlay.isVisible && pauseOverlay._autoPaused) {
           pauseOverlay.hide()
-          pauseOverlay._autoPaused = false
         }
       }
     }

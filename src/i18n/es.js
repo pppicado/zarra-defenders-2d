@@ -320,12 +320,16 @@ export const STRINGS = {
   // Pause overlay (Fase 3.1) — REQ-10: 3 botones durante gameplay.
   // Trigger: Esc / P durante gameplay → muestra overlay.
   // Esc adicional con overlay visible = "Continuar".
+  // F3.5.1bis: rotarMovil se muestra bajo el título cuando el pause fue
+  // auto-abierto por orientación portrait y el viewport sigue portrait.
+  // El botón "Continuar" queda disabled en ese estado.
   // ============================================================
   pause: {
     titulo: 'Pausa',
     continuar: 'Continuar',
     reiniciarStage: 'Reiniciar stage',
     salirMenu: 'Salir al menú',
+    rotarMovil: 'Girá el móvil para continuar',
   },
 
   // ============================================================

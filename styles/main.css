@@ -443,43 +443,60 @@ canvas {
   border-radius: 4px;
   width: 480px;
   max-width: 95vw;
-  padding: 28px;
+  /* F3.5.1-ter: the card must never overflow the viewport, regardless of
+   * whether the share block is visible (victory) or the player has a very
+   * tall best/firmas string. clamp(min, fluid, max) scales padding/font
+   * smoothly between tiny phones and 1080p, while max-height is a hard
+   * backstop in case clamp() can't shrink enough (e.g. long share-status
+   * line). flex:0 1 auto + min-height:0 lets the card shrink instead of
+   * overflowing the flex parent (#game-overlay). */
+  max-height: calc(100dvh - 32px);
+  max-height: calc(100vh - 32px); /* fallback for browsers without dvh */
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  min-height: 0;
+  padding: clamp(16px, 3vw, 28px);
   color: #e8e8e8;
   text-align: center;
   box-shadow: 0 8px 0 rgba(0, 0, 0, 0.6);
+  overflow: hidden;
 }
 #game-overlay .overlay-title {
-  font-size: 1.8rem;
+  font-size: clamp(1.25rem, 4.5vw, 1.8rem);
   font-weight: 700;
-  margin-bottom: 16px;
+  margin-bottom: clamp(8px, 1.8vw, 16px);
+  line-height: 1.15;
 }
 #game-overlay .overlay-title--fail { color: #d04848; }
 #game-overlay .overlay-title--win  { color: #5cd87a; }
 #game-overlay .overlay-score-line,
 #game-overlay .overlay-firmas-line,
 #game-overlay .overlay-best-line {
-  font-size: 1rem;
-  margin-bottom: 6px;
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
+  margin-bottom: clamp(3px, 0.6vw, 6px);
   color: #d6d6d6;
+  line-height: 1.3;
 }
 #game-overlay .overlay-newrecord {
   color: #f5a623;
   font-weight: 700;
-  margin-top: 8px;
+  margin-top: clamp(4px, 0.8vw, 8px);
   text-shadow: 0 0 4px #f5a623;
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
 }
 #game-overlay .overlay-buttons {
-  margin-top: 24px;
+  margin-top: clamp(14px, 2.5vw, 24px);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: clamp(8px, 1.5vw, 12px);
 }
 #game-overlay .overlay-btn {
   font-family: inherit;
-  font-size: 1rem;
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
   font-weight: 600;
-  padding: 14px 20px;
-  min-height: 48px;
+  padding: clamp(8px, 1.8vw, 14px) clamp(14px, 3vw, 20px);
+  min-height: clamp(36px, 5.5vw, 48px);
   background: rgba(245, 166, 35, 0.12);
   color: #f5a623;
   border: 2px solid #f5a623;
@@ -503,21 +520,21 @@ canvas {
 
 /* F5.4: sharing block + buttons inside victory overlay */
 #game-overlay .overlay-share {
-  margin: 16px 0 8px;
-  padding: 12px 8px;
+  margin: clamp(10px, 2vw, 16px) 0 clamp(4px, 0.8vw, 8px);
+  padding: clamp(8px, 1.5vw, 12px) clamp(6px, 1.2vw, 8px);
   border-top: 1px solid #3a3a3a;
   border-bottom: 1px solid #3a3a3a;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: clamp(6px, 1.2vw, 10px);
 }
 #game-overlay .overlay-share.hidden {
   display: none;
 }
 #game-overlay .overlay-share-hint {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: clamp(0.7rem, 1.8vw, 0.85rem);
   color: #a0a0a0;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -525,17 +542,17 @@ canvas {
 #game-overlay .overlay-share-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: clamp(5px, 1vw, 8px);
   justify-content: center;
 }
 #game-overlay .overlay-share-btn {
-  padding: 6px 14px;
+  padding: clamp(4px, 0.9vw, 6px) clamp(10px, 2vw, 14px);
   background: rgba(255, 255, 255, 0.06);
   color: #e5e5e5;
   border: 1px solid #555;
   border-radius: 4px;
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: clamp(0.72rem, 1.8vw, 0.85rem);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
@@ -621,6 +638,38 @@ canvas {
 }
 #pause .pause-btn--primary:hover {
   background: #6a9fb8;
+}
+/* F3.5.1bis: when the auto-orientation pause is active, the primary
+ * "Continuar" button is disabled until the viewport rotates to landscape.
+ * Visually de-emphasised so the user reads it as "blocked", not "selected". */
+#pause .pause-btn--primary:disabled,
+#pause .pause-btn--primary[aria-disabled="true"] {
+  background: rgba(106, 159, 184, 0.18);
+  color: rgba(232, 232, 232, 0.45);
+  border-color: rgba(106, 159, 184, 0.45);
+  cursor: not-allowed;
+}
+#pause .pause-btn--primary:disabled:hover,
+#pause .pause-btn--primary[aria-disabled="true"]:hover {
+  background: rgba(106, 159, 184, 0.18);
+}
+
+/* F3.5.1bis: hint shown inside the pause card while the orientation gate
+ * is active. Same warm palette as #orientation-warning so the user sees
+ * the same "rotate the device" affordance in both surfaces. */
+#pause .pause-orient-hint {
+  margin: -8px 0 16px;
+  padding: 10px 14px;
+  background: rgba(245, 166, 35, 0.16);
+  color: #f5a623;
+  border: 1px solid rgba(245, 166, 35, 0.55);
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+#pause .pause-orient-hint.hidden {
+  display: none;
 }
 
 /* While pause overlay is visible, disable canvas pointer events so taps reach the DOM. */
@@ -823,34 +872,61 @@ body.menu-mode #game-hud-wrapper {
 /* ============================================================
    Pedagogy card (F1.1) — overlay flotante al destruir enemigo
    - z-index 150 (entre integridad HUD 50 y game-overlay 200)
-   - top-right para no bloquear el crosshair central
-   - slide-in desde la derecha + auto-dismiss 3s
+   - F3.5.4: compact footprint (height ≈ hearts, bottom-right of hand)
+     sits to the right of the hand sprite. Click expands to show full
+     content; click again collapses to compact.
    ============================================================ */
 #pedagogy-card {
-  /* F3.5.2: compact, bottom-right, paired with the 3 hearts (bottom-left).
-     Compact footprint (~240x120) instead of the prior 320px card-top-right. */
+  /* F3.5.4: compact footprint matches the 3-hearts height (~96px CSS).
+     Anchored to bottom-right (right of the hand sprite at bottom-center).
+     Width is constrained with clamp so it scales smoothly across viewports
+     while keeping the compact-card feel on small phones. The card expands
+     vertically when the user clicks it (see .expanded below). */
   position: absolute;
   bottom: 16px;
   right: 16px;
-  width: 240px;
+  width: clamp(220px, 30vw, 320px);
   max-width: calc(100vw - 32px);
+  /* Compact footprint height: clamp to the heart HUD's visual height
+     (~96px CSS at the default scale). When expanded, height auto-grows
+     up to a max-height that fits within the viewport. */
+  height: clamp(80px, 9vw, 110px);
+  max-height: calc(100dvh - 48px);
+  max-height: calc(100vh - 48px); /* fallback for browsers without dvh */
   background: rgba(24, 24, 24, 0.94);
   border: 2px solid #f5a623;
   border-radius: 4px;
-  padding: 10px 12px 8px;
+  padding: 8px 12px;
   color: #e8e8e8;
   font-size: 0.78rem;
   line-height: 1.3;
   z-index: 150;
   box-shadow: 0 6px 0 rgba(0, 0, 0, 0.6);
-  cursor: pointer;            /* click = pause game */
+  cursor: pointer;            /* click = expand/collapse */
   user-select: none;
+  overflow: hidden;           /* F3.5.4: clip when collapsed */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   animation: pedagogy-card-slide-in 240ms ease-out;
+  transition: height 200ms ease, max-height 200ms ease, padding 200ms ease;
 }
 
 @keyframes pedagogy-card-slide-in {
   from { transform: translateX(120%); opacity: 0; }
   to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* F3.5.4: expanded view — the card grows to fit its full content.
+ * `height: auto` lets the natural content height win; max-height keeps
+ * it from overflowing the viewport. The `expanded` class is toggled
+ * by the JS toggle handler on body click. */
+#pedagogy-card.expanded {
+  height: auto;
+  max-height: calc(100dvh - 48px);
+  max-height: calc(100vh - 48px);
+  overflow: auto;             /* scroll if content still taller than viewport */
+  cursor: default;            /* body no longer toggles (link/close handles it) */
 }
 
 /* F3.5.2: while pedagogy card is visible, canvas pointer events are blocked
@@ -862,7 +938,7 @@ body.menu-mode #game-hud-wrapper {
 
 #pedagogy-card .pedagogy-card-close {
   position: absolute;
-  top: 6px;
+  top: 4px;
   right: 8px;
   background: transparent;
   border: 0;
@@ -871,6 +947,7 @@ body.menu-mode #game-hud-wrapper {
   cursor: pointer;
   padding: 2px 6px;
   line-height: 1;
+  z-index: 2;
 }
 
 #pedagogy-card .pedagogy-card-close:hover,
@@ -882,29 +959,106 @@ body.menu-mode #game-hud-wrapper {
   font-size: 0.92rem;
   font-weight: 700;
   color: #f5a623;
-  margin: 0 22px 4px 0;
+  margin: 0 22px 2px 0;
   text-shadow: 0 0 4px rgba(245, 166, 35, 0.4);
+  /* F3.5.4: in compact view, the title must not wrap (single line).
+     In expanded view it wraps normally. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#pedagogy-card.expanded .pedagogy-card-title {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
 }
 
+/* F3.5.4: collapsed view — only title + 1-line description. The other
+ * blocks (dato, fuente, TTS, footer) are visually hidden until expanded.
+ * Using visibility:hidden + max-height:0 + padding/margin 0 to fully
+ * collapse the bounding box (otherwise the native <button> TTS element
+ * keeps a 4px intrinsic height and gets measured as "visible"). */
 #pedagogy-card .pedagogy-card-description {
   font-style: italic;
   color: #d6d6d6;
-  margin: 0 0 6px 0;
+  margin: 0;
   font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 0 auto;
 }
-
-#pedagogy-card .pedagogy-card-dato {
+#pedagogy-card .pedagogy-card-dato,
+#pedagogy-card .pedagogy-card-fuente,
+#pedagogy-card .pedagogy-card-tts,
+#pedagogy-card .pedagogy-card-footer {
+  visibility: hidden;
+  height: 0;
+  max-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  transition: visibility 0s linear 200ms, max-height 200ms ease, margin 200ms ease, padding 200ms ease;
+}
+#pedagogy-card.expanded .pedagogy-card-description {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+#pedagogy-card.expanded .pedagogy-card-dato {
+  visibility: visible;
   font-size: 0.78rem;
   color: #c8c8c8;
   border-left: 2px solid #f5a623;
   padding-left: 6px;
   margin: 0 0 6px 0;
+  height: auto;
+  max-height: 400px;
+  transition: visibility 0s linear 0s, max-height 200ms ease, margin 200ms ease, padding 200ms ease;
 }
-
-#pedagogy-card .pedagogy-card-fuente {
+#pedagogy-card.expanded .pedagogy-card-fuente {
+  visibility: visible;
   font-size: 0.7rem;
   color: #a0a0a0;
   margin: 0;
+  height: auto;
+  max-height: 200px;
+  transition: visibility 0s linear 0s, max-height 200ms ease, margin 200ms ease, padding 200ms ease;
+}
+#pedagogy-card.expanded .pedagogy-card-tts {
+  visibility: visible;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 4px;
+  padding: 6px 14px;
+  background: rgba(245, 166, 35, 0.12);
+  color: #f5a623;
+  border: 1px solid #f5a623;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  height: auto;
+  max-height: 60px;
+  transition: visibility 0s linear 0s, max-height 200ms ease, margin 200ms ease, padding 200ms ease;
+}
+#pedagogy-card.expanded .pedagogy-card-tts:hover,
+#pedagogy-card.expanded .pedagogy-card-tts:focus {
+  background: #f5a623;
+  color: #181818;
+}
+#pedagogy-card.expanded .pedagogy-card-footer {
+  visibility: visible;
+  font-size: 0.7rem;
+  color: #888;
+  margin: 4px 0 0;
+  font-style: italic;
+  height: auto;
+  max-height: 100px;
+  transition: visibility 0s linear 0s, max-height 200ms ease, margin 200ms ease, padding 200ms ease;
 }
 
 #pedagogy-card .pedagogy-card-link {
@@ -924,68 +1078,68 @@ body.menu-mode #game-hud-wrapper {
   margin-left: 4px;
 }
 
-/* F5.1: TTS button inside pedagogy cards */
-#pedagogy-card .pedagogy-card-tts {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin: 8px 0 4px;
-  padding: 6px 14px;
-  background: rgba(245, 166, 35, 0.12);
-  color: #f5a623;
-  border: 1px solid #f5a623;
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-#pedagogy-card .pedagogy-card-tts:hover,
-#pedagogy-card .pedagogy-card-tts:focus {
-  background: #f5a623;
-  color: #181818;
-}
-
 /* ============================================================
-   Modal intermedio cada 5 enemigos (F1.2) — overlay top-center
-   - z-index 140 (entre pedagogy card 150 y menu 100)
+   Modal intermedio cada 5 enemigos (F1.2) — overlay compacto
+   - F3.5.4: bottom-right, paired with pedagogy card and 3 hearts.
+     When pedagogy card is visible, modal STACKS above it (.stacked).
+   - z-index 140 (card 150 encima, menu 100 debajo)
    - pointer-events: none en root para no bloquear disparo
    - el botón close sí recibe pointer-events
    ============================================================ */
 #modal-intermedio {
   position: absolute;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 420px;
-  max-width: 90vw;
+  /* F3.5.4: sit at the same bottom anchor as the pedagogy card. The
+   * .stacked modifier shifts the modal up so it sits above the card
+   * without overlapping. The exact offset (card height + 8px gap) is
+   * approximated via clamp() to match the card's compact footprint. */
+  bottom: 16px;
+  right: 16px;
+  width: clamp(220px, 30vw, 320px);
+  max-width: calc(100vw - 32px);
   z-index: 140;
   pointer-events: none;          /* don't block fire */
   animation: modal-intermedio-slide-down 320ms ease-out;
+  /* slide-down is now horizontal slide-up from below; we keep the keyframes
+   * name for compatibility but adjust the transform origin. */
+  transform-origin: bottom right;
 }
 
 @keyframes modal-intermedio-slide-down {
-  from { transform: translate(-50%, -40px); opacity: 0; }
-  to   { transform: translate(-50%, 0);     opacity: 1; }
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* F3.5.4: when the pedagogy card is visible, stack the modal above it.
+ * Card compact height ≈ clamp(80px, 9vw, 110px), plus 8px gap, plus the
+ * card's own bottom: 16px — so total offset ≈ cardHeight + 24px. We use
+ * the same clamp() so both elements stay in sync across viewports. */
+#modal-intermedio.stacked {
+  bottom: calc(clamp(80px, 9vw, 110px) + 24px);
 }
 
 #modal-intermedio .modal-intermedio-card {
   background: rgba(24, 24, 24, 0.95);
   border: 2px solid #f5a623;
   border-radius: 6px;
-  padding: 18px 24px 16px;
+  padding: clamp(6px, 1.4vw, 14px) clamp(10px, 2vw, 18px);
   color: #e8e8e8;
   text-align: center;
   box-shadow: 0 6px 0 rgba(0, 0, 0, 0.6);
   position: relative;
   pointer-events: auto;          /* card itself clickable */
   cursor: pointer;
+  /* F3.5.4: match the pedagogy-card compact footprint height so the two
+   * elements feel like a paired pair rather than a floating panel. */
+  min-height: clamp(80px, 9vw, 110px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(2px, 0.5vw, 6px);
 }
 
 #modal-intermedio .modal-intermedio-close {
   position: absolute;
-  top: 6px;
+  top: 4px;
   right: 8px;
   background: transparent;
   border: 0;
@@ -994,6 +1148,7 @@ body.menu-mode #game-hud-wrapper {
   cursor: pointer;
   padding: 2px 6px;
   line-height: 1;
+  z-index: 2;
 }
 
 #modal-intermedio .modal-intermedio-close:hover,
@@ -1001,34 +1156,40 @@ body.menu-mode #game-hud-wrapper {
   color: #ffd28a;
 }
 
+/* F3.5.4: the firmas number is the primary visual anchor. Inline with
+ * the mensaje to keep the compact footprint (no vertical stack). On
+ * viewports wider than 600px they sit side-by-side; on mobile, stacked. */
 #modal-intermedio .modal-intermedio-firmas {
-  font-size: 2.4rem;
+  font-size: clamp(1.6rem, 4.5vw, 2.2rem);
   font-weight: 700;
   color: #f5a623;
-  margin: 0 0 6px 0;
+  margin: 0;
   text-shadow: 0 0 8px rgba(245, 166, 35, 0.5);
   line-height: 1;
 }
 
 #modal-intermedio .modal-intermedio-mensaje {
-  font-size: 1rem;
+  font-size: clamp(0.72rem, 1.8vw, 0.9rem);
   color: #e8e8e8;
-  margin: 0 0 6px 0;
-  line-height: 1.3;
+  margin: 0;
+  line-height: 1.25;
+  /* F3.5.4: in compact mode, clamp mensaje to 1 line with ellipsis so
+   * the footprint stays predictable. Click to expand? Modal is dismiss-
+   * only by design (auto-dismiss + click-outside) — truncation is
+   * acceptable since the data is reinforcement, not new info. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #modal-intermedio .modal-intermedio-subtitulo {
-  font-size: 0.8rem;
+  font-size: clamp(0.65rem, 1.6vw, 0.78rem);
   color: #a0a0a0;
   margin: 0;
   font-style: italic;
-}
-
-@media (max-width: 600px) {
-  #modal-intermedio { top: 60px; width: 280px; }
-  #modal-intermedio .modal-intermedio-card { padding: 14px 16px 12px; }
-  #modal-intermedio .modal-intermedio-firmas { font-size: 2rem; }
-  #modal-intermedio .modal-intermedio-mensaje { font-size: 0.85rem; }
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ============================================================
@@ -1040,15 +1201,14 @@ body.menu-mode #game-hud-wrapper {
   /* F3.5.3: override the clamp() defaults below 600px so the nav fits on
      tiny phones (320x568 etc.) without scrolling. */
   #main-menu .menu-btn { min-height: clamp(28px, 6vw, 38px); padding: 6px 12px; font-size: 0.78rem; }
-  #game-overlay .overlay-card { padding: 20px; }
-  #game-overlay .overlay-title { font-size: 1.4rem; }
+  /* F3.5.1-ter: overlay paddings/font-sizes now use clamp() at the rule
+   * level so they scale smoothly across viewports — no per-breakpoint
+   * override needed here. The integrity HUD canvas stays fixed at 160x20
+   * so the 3 hearts remain legible on small screens. */
   #integrity-hud canvas { width: 160px; height: 20px; }
-  #pedagogy-card { top: 8px; right: 8px; width: 240px; padding: 12px 14px 10px; font-size: 0.8rem; }
-  #pedagogy-card .pedagogy-card-title { font-size: 0.95rem; }
-  #modal-intermedio { top: 60px; width: 280px; }
-  #modal-intermedio .modal-intermedio-card { padding: 14px 16px 12px; }
-  #modal-intermedio .modal-intermedio-firmas { font-size: 2rem; }
-  #modal-intermedio .modal-intermedio-mensaje { font-size: 0.85rem; }
+  /* F3.5.4: pedagogy-card AND modal-intermedio paddings/widths/fonts now
+   * use clamp() at the rule level so they scale smoothly across viewports
+   * — no per-breakpoint override needed for either. */
   #resumen-final .resumen-card { padding: 20px; max-width: 95vw; }
   #resumen-final .resumen-card-title { font-size: 1.2rem; }
 }
