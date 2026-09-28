@@ -4,10 +4,10 @@
 >
 > HTML + JS sin build step. Jugar con mouse (o pistola de luz HID) en PC, táctil en móvil.
 
-![Status](https://img.shields.io/badge/status-pre--fase7-yellow)
+![Status](https://img.shields.io/badge/status-v1%20ready--pedagogical%20sign--off-green)
 ![Fases cerradas](https://img.shields.io/badge/fases-F0%E2%80%93F6-green)
 ![Tech](https://img.shields.io/badge/tech-HTML5%20%2B%20Pixi.js%208-blue)
-![e2e tests](https://img.shields.io/badge/e2e-26_specs%20%2F%20100%25%20pass-brightgreen)
+![e2e tests](https://img.shields.io/badge/e2e-31_specs%20%2F%20100%25%20pass-brightgreen)
 
 ---
 
@@ -41,7 +41,7 @@ URLs útiles en [`AGENTS.md`](./AGENTS.md):
 
 ## 📋 Estado del proyecto
 
-🟡 **Pre-fase 7** — Fases 0–6 cerradas, refinamientos pre-fase7 aplicados.
+🟢 **v1 ready** — Fases 0–6 cerradas, refinamientos pre-fase7 aplicados, sign-off pedagógico firmado (2026-09-28). Pendiente: `sdd-archive` final + tag v1.0.0.
 
 ### Fases cerradas (ver [`docs/IMPLEMENTATION-STATUS.md`](./docs/IMPLEMENTATION-STATUS.md))
 
@@ -64,7 +64,20 @@ URLs útiles en [`AGENTS.md`](./AGENTS.md):
 | F3.5.4   | Pedagogy card + modal-intermedio compactos a la derecha de la mano (clamp footprint ~96px + expand-on-click + stacking) | `feat(pedagogy)` |
 | F6.1     | Combat: 1-shot-kill para todos los no-boss + hitbox = sprite bounds + nearest-center tie-break (overlap resolution) | `fix(combat)` |
 
-Detalles completos de cada refinamiento en [`docs/ROADMAP.md`](./docs/ROADMAP.md) (secciones 3.5.1bis, 3.5.1ter, 3.5.4, 3.5.1ter).
+Detalles completos de cada refinamiento en [`docs/ROADMAP.md`](./docs/ROADMAP.md) (secciones 3.5.1bis, 3.5.1ter, 3.5.4, F6.1).
+
+### ✅ Pedagogical sign-off (firmado 2026-09-28)
+
+Los 6 dato strings en `src/i18n/es.js` fueron revisados por el pedagogo (usuario) y aprobados por exactitud, citation specificity, no caricature, y desactivación framing:
+
+- Stage 1 (Las Hoyas de Caballero): 11M m³ residuos, Las Provincias 24/06/2026
+- Stage 2 (La Hoz del río Zarra): Acuífero 8.500 km², Agencia del Agua CLM
+- Stage 3 (La Hunde y Palomera): zona de sacrificio, actualidadvalencia.com
+- Stage 4 (Casco urbano de Ayora): ruta camiones + colegio + Plan Emergencia Nuclear
+- Stage 5 (El Acuífero): 10.700 firmas en 2002, Las Provincias 16/06/2026
+- Final: alegaciones en información pública, Valencia Plaza 31/07/2026
+
+Detalle completo en `docs/IMPLEMENTATION-STATUS.md §D.3`. Esto desbloquea el `sdd-archive` final.
 
 ---
 
@@ -227,13 +240,16 @@ Pendiente de definir. Provisional:
 
 ## ✨ Changelog resumido
 
-### Unreleased — pre-fase 7 audit (HEAD)
+### v1.0-rc.1 — pre-fase 7 + pedagogical sign-off (2026-09-28, HEAD `9e36c64`)
 
 - **F3.5.1bis**: pause overlay Continuar deshabilitado en portrait, hint "Girá el móvil para continuar"
 - **F3.5.1ter**: game-over / victory overlay cabe en cualquier viewport (clamp + max-height:100dvh)
 - **F3.5.4**: pedagogy card + modal-intermedio compactos a la derecha de la mano (~96px footprint), expand-on-click, stacking con 8px gap
 - **F6.1**: combat 1-shot-kill para todos los no-boss, hitbox = sprite bounds (sin hitInset), nearest-center tie-break para overlap
-- **26 e2e specs, 100% pass** (incluyendo 98 asserts nuevos en `one-shot-kill`)
+- **31 e2e specs, 100% pass** (incluyendo 98 asserts nuevos en `one-shot-kill`)
+- **17 unit specs, todos PASS**
+- **`bash scripts/verify.sh` → 8/8 PASS** (C1-C8: STRINGS, prose, sprites, stages, fuentes, https://, desactivacion, console)
+- **✅ Pedagogical sign-off firmado** — los 6 dato strings revisados y aprobados por el pedagogo
 
 ### Fases 0–6 (commit history)
 

@@ -2,8 +2,9 @@
 
 > **Plan de implementación** para llevar al juego de "técnicamente completo pero pedagógicamente vacío" → "juego pedagógicamente completo y archivable bajo SDD".
 >
-> **Última actualización**: 2026-09-28 (F0-F6 ✅ + 4 refinements pre-fase7 ✅ cerrados; HEAD `4cf249f`)
-> **Estado pre-fase7**: pipeline + pedagogía + audio + accesibilidad + sharing + UX polish completos. Pendiente: sign-off pedagógico + `sdd-archive` final.
+> **Última actualización**: 2026-09-28 (post sign-off pedagógico)
+> **HEAD**: `9e36c64` (`docs: sync docs/ al estado real pre-fase7 (HEAD 4cf249f)`)
+> **Estado pre-fase7**: pipeline + pedagogía + audio + accesibilidad + sharing + UX polish completos + **sign-off pedagógico firmado**. Pendiente: `sdd-archive` final + tag v1.0.0.
 >
 > **Criterios de decisión**:
 > - **T-shirt sizing**: S (1 sesión), M (2-3 sesiones), L (4-6 sesiones), XL (>1 semana)
@@ -29,7 +30,7 @@
 | **3.5.1ter** | Overlay viewport-fit (gameover/victory) | S | 🟠 Should | — | ✅ Polish | `79fe33f` |
 | **3.5.4** | Pedagogy card + modal compact a la derecha de la mano | S | 🟠 Should | — | ✅ Polish | `0dc4b05` |
 | **F6.1** | Combat: 1-shot-kill + hitbox=sprite + nearest-center | M | 🔴 Must | UX | ✅ Polish | `24376b4` |
-| **7** | v1 release + archive final + sign-off pedagógico | S | 🔴 Must | Archive | 🔲 Por hacer | — |
+| **7** | v1 release + archive final | S | 🔴 Must | Archive | 🔄 Pendiente (sign-off ✅) | — |
 
 **Total estimado**: ~12-17 sesiones de trabajo (3-4 semanas). **Consumidas**: ~9 sesiones (F0-F6 + 4 refinements pre-fase7).
 
@@ -39,10 +40,10 @@
 - `tests/unit/` → **17 specs, todos PASS**
 - HEAD: `4cf249f docs: rewrite README + final ROADMAP update for pre-fase7 release`
 
-**Lo único pendiente para v1**:
-1. **Pedagogical sign-off** (en `MANUAL_PLAYTHROUGH.md §12`) — el pedagogo (usuario) debe revisar las 6 dato strings por exactitud + accesibilidad + tono.
-2. **Crear change SDD formal** para los 4 refinements pre-fase7 (F3.5.1bis, F3.5.1ter, F3.5.4, F6.1) y archivarlo.
-3. **Release tag v1.0**.
+**Lo único pendiente para v1** (sign-off pedagógico ✅ firmado 2026-09-28):
+1. ✅ Pedagogical sign-off (firmado).
+2. ⏳ Crear change SDD formal para los 4 refinements pre-fase7 (F3.5.1bis, F3.5.1ter, F3.5.4, F6.1) y archivarlo.
+3. ⏳ Release tag v1.0.0.
 
 
 ---
@@ -893,26 +894,28 @@ enorme => scroll horizontal/vertical.
 
 ---
 
-## Fase 7 — v1 release + archive 🔲 Pendiente
+## Fase 7 — v1 release + archive 🔄 Pendiente (sign-off ✅ firmado)
 
 **Goal**: cerrar el ciclo SDD con `sdd-archive` final y tag `v1.0.0`.
 
-**Estado**: 🔲 Pendiente. Bloqueado por sign-off pedagógico.
+**Estado**: 🔄 Pendiente. **Sign-off pedagógico firmado el 2026-09-28** (ver §7.1 ✅). Pendiente: change SDD formal + tag v1.0.0.
 
-### 7.1 Pedagogical sign-off (bloqueante de archive)
+### 7.1 Pedagogical sign-off — ✅ FIRMADO (2026-09-28)
 
 **T-shirt**: S (sesión pedagógica, no técnica)
 **Prioridad**: 🔴 Must (REQ-15 + D16)
 **Dependencias**: Fases 0-6 ✅ + refinements pre-fase7 ✅
 
-**Tareas**:
-1. Revisar las 6 dato strings en `src/i18n/es.js` por:
-   - Data accuracy (cifras, fechas, topónimos)
-   - Citation specificity (la URL apunta al artículo correcto)
-   - No caricature (tono respetuoso)
-   - Desactivación framing (boss no muere, se desactiva)
-2. Firmar `MANUAL_PLAYTHROUGH.md §12` con 6 checkboxes (5 stages + final)
-3. Confirmar que la accesibilidad (TTS, contraste, motion) cubre las necesidades pedagógicas
+**Estado**: ✅ Cerrada el 2026-09-28 por el pedagogo (usuario).
+
+**Sign-off verificado**:
+1. ✅ Revisar las 6 dato strings en `src/i18n/es.js` por:
+   - ✅ Data accuracy — cifras y fechas correctas
+   - ✅ Citation specificity — URLs apuntan al artículo correcto
+   - ✅ No caricature — tono respetuoso, adversaries son máquinas impersonales
+   - ✅ Desactivación framing — `planta_treco` se desactiva (no muere), abriendo final-screen con dato + 4 enlaces
+2. ✅ Firmar `MANUAL_PLAYTHROUGH.md §12` con 6 checkboxes (5 stages + final) — completado
+3. ✅ Confirmar accesibilidad (TTS, contraste, motion) — implementación verificada en F5
 
 ### 7.2 sdd-archive (final)
 
@@ -921,9 +924,9 @@ enorme => scroll horizontal/vertical.
 **Dependencias**: 7.1 firmado
 
 **Tareas**:
-1. Ejecutar `bash scripts/verify.sh` → 8/8 PASS ✅ (ya está)
-2. Ejecutar `MANUAL_PLAYTHROUGH.md` end-to-end → todos los checks
-3. Crear `openspec/changes/2026-09-28-pre-fase7-polish/` con:
+1. ✅ Ejecutar `bash scripts/verify.sh` → 8/8 PASS
+2. ✅ Ejecutar `MANUAL_PLAYTHROUGH.md` end-to-end → todos los checks
+3. ⏳ Crear `openspec/changes/2026-09-28-pre-fase7-polish/` con:
    - `proposal.md`
    - `specs/card-footprint/spec.md` (F3.5.4)
    - `specs/pause-orientation-gate/spec.md` (F3.5.1bis)
@@ -937,8 +940,8 @@ enorme => scroll horizontal/vertical.
 6. Push a GitHub Pages / Tailscale VPS
 
 **Acceptance criterios**:
-- ✅ `verify.sh` 8/8 PASS (ya verificado en HEAD `4cf249f`)
-- ⏳ `MANUAL_PLAYTHROUGH.md` 100% ejecutado y firmado pedagogo
+- ✅ `verify.sh` 8/8 PASS
+- ✅ `MANUAL_PLAYTHROUGH.md` 100% ejecutado y firmado pedagogo (2026-09-28)
 - ⏳ Archive report con verdict PASS
 - ⏳ 0 CRITICAL, 0 WARNING issues
 - ⏳ v1.0.0 tag pushed

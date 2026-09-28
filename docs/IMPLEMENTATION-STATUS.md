@@ -30,10 +30,10 @@
 | **Pixi offline fallback** (F6) | ✅ Completo | `vendor/pixi.min.js` local |
 | **Pedagogía in-game** | ✅ Completo | Cards, modal-intermedio, biblioteca, data-screen, final-screen, resumen-final |
 | **Refinements pre-fase7** | ✅ Cerrado | F3.5.1bis (pause gate) + F3.5.1ter (overlay fit) + F3.5.4 (compact pedagogy) + F6.1 (1-shot-kill) |
-| **v1 release + archive SDD** | 🔄 Pendiente | Polish pedagógico sign-off + `sdd-archive` final |
+| **v1 release + archive SDD** | 🔄 Pendiente | Polish: change SDD formal para refinements pre-fase7 + `sdd-archive` final. Sign-off pedagógico ✅ firmado 2026-09-28. |
 | **Per-stage rosters específicos** | 🔄 Diferido | F6 BG-005 marca "future scope" — todos comparten TEST_LEVEL |
 
-**Diagnóstico**: el juego está **completo end-to-end**. Pipeline, audio, accesibilidad, sharing, pedagogía in-game y polish UX están ✅. Lo único pendiente para v1 es el **sign-off pedagógico** (revisar 6 dato strings por exactitud + accesibilidad + tono) y **archivar bajo SDD** el último change pre-fase7.
+**Diagnóstico**: el juego está **completo end-to-end** y con **sign-off pedagógico firmado**. Pipeline, audio, accesibilidad, sharing, pedagogía in-game y polish UX están ✅. Lo único pendiente para v1 es **archivar bajo SDD** el último change pre-fase7 + tag v1.0.0.
 
 ---
 
@@ -57,7 +57,7 @@
 | REQ-12 | Combo ×5 cap + 2s decay | ❌ | Solo `points = 10 × archetype_multiplier` por hit | Sin combo — refuerzo pedagógico vía modal-intermedio cada 5 hits |
 | REQ-13 | STRINGS centralizado en data.js | ✅ | `src/i18n/es.js` con 84 STRINGS refs, 0 prose leaks (verify.sh C1, C2 PASS) | Cierre F0.6-F0.7 |
 | REQ-14 | Final screen + desactivación planta_treco + 4 enlaces | ✅ | `src/pedagogy/final-screen.js` con dato + 4 enlaces a fuentes verificadas | A7 contrato cumplido |
-| REQ-15 | Manual playthrough + verify.sh | ✅ | `MANUAL_PLAYTHROUGH.md` + `scripts/verify.sh` (8 checks estructurales, todos PASS) | Sign-off pedagógico ⏳ |
+| REQ-15 | Manual playthrough + verify.sh | ✅ | `MANUAL_PLAYTHROUGH.md` + `scripts/verify.sh` (8 checks estructurales, todos PASS) | Sign-off pedagógico ✅ firmado 2026-09-28 |
 
 ### A.2. Decisiones arquitectónicas A1-A9
 
@@ -300,11 +300,26 @@
 | 5 | "En 2002 los vecinos del Valle ya rechazaron un vertedero igual en la misma zona. 10.700 firmas, manifestación con ataúd frente a la Diputación. Se puede volver a parar." | Las Provincias, 16/06/2026 | https://www.lasprovincias.es/comarcas/valle-ayoracofrentes-moviliza-macrovertedero-proyectado-zarra-20260616173049-nt.html |
 | final | "A fecha de hoy, la solicitud está en información pública. Puedes presentar alegaciones." | Valencia Plaza, 31/07/2026 | https://valenciaplaza.com/valenciaplaza/comarca-y-empresa/crece-el-rechazo-contra-el-macrovertedero-de-zarra-tras-la-ultima-concentracion-de-casi-mil-personas |
 
-### D.3. Pedagogical sign-off — checklist
+### D.3. Pedagogical sign-off — ✅ FIRMADO
 
-El sign-off pedagógico sigue **pendiente**: el usuario (pedagogo) debe revisar las 6 dato strings por exactitud, citation specificity, no caricature, y desactivación framing. Sin este sign-off, no se puede hacer `sdd-archive` final.
+**Firmado por el pedagogo (usuario) el 2026-09-28.** Los 6 dato strings en `src/i18n/es.js` fueron revisados por exactitud, citation specificity, no caricature, y desactivación framing.
 
-Ver `MANUAL_PLAYTHROUGH.md` §12 para el checklist completo.
+| Stage | Dato | Sign-off |
+|---|---|---|
+| 1 — Las Hoyas de Caballero | "El proyecto prevé 11 millones de metros cúbicos de residuos, más del doble del vertedero de Dos Aguas." (Las Provincias, 24/06/2026) | ✅ |
+| 2 — La Hoz del río Zarra | "El Acuífero de la Mancha Oriental tiene 8.500 km²..." (Agencia del Agua de CLM, s/f) | ✅ |
+| 3 — Sierra de La Hunde y Palomera | "La comarca ya convive con la central nuclear de Cofrentes..." (actualidadvalencia.com, 05/08/2026) | ✅ |
+| 4 — Casco urbano de Ayora | "La ruta de camiones pasa junto al colegio y el polideportivo de Ayora..." (Las Provincias, 24/06/2026) | ✅ |
+| 5 — El Acuífero | "En 2002 los vecinos del Valle ya rechazaron un vertedero igual..." (Las Provincias, 16/06/2026) | ✅ |
+| Final | "A fecha de hoy, la solicitud está en información pública. Puedes presentar alegaciones." (Valencia Plaza, 31/07/2026) | ✅ |
+
+**Criterios verificados por stage**:
+- ✅ Data accuracy — cifras y fechas correctas
+- ✅ Citation specificity — URLs apuntan al artículo correcto
+- ✅ No caricature — tono respetuoso, adversaries son máquinas impersonales
+- ✅ Desactivación framing — `planta_treco` se desactiva (no muere), abriendo final-screen con dato + 4 enlaces
+
+**Resultado**: ✅ `sdd-archive` final desbloqueado (ver Fase 7.2 en ROADMAP).
 
 ---
 
@@ -448,7 +463,7 @@ verify.sh: 8 PASS, 0 FAIL
 | **i18n-ready** | ✅ | 84 STRINGS refs, 0 leaks, 0 https:// literals fuera (verify.sh C1, C2, C6) |
 | **Console discipline** (A8) | ✅ | `__zr` utility, 0 console.* leaks (verify.sh C8) |
 | **Compatibilidad navegadores** | 🔄 | Chrome/Firefox/Safari últimas 2; Pixi.js@8 estable; no testeado formalmente con BrowserStack |
-| **Pedagogical sign-off** | 🔄 Pendiente | Sin firma pedagogo en MANUAL_PLAYTHROUGH §12 (bloqueante de `sdd-archive` final) |
+| **Pedagogical sign-off** | ✅ Firmado | Pedagogo (usuario) firmó 2026-09-28 — los 6 dato strings revisados y aprobados |
 | **Asset budget** | ✅ | ~1.3 MB backgrounds + ~5.5 MB sprites = ~6.8 MB total en git |
 | **Tests coverage** | ✅ | 31 e2e specs + 17 unit specs, todos PASS |
 | **Verify estructural** | ✅ | `bash scripts/verify.sh` → 8/8 PASS |
@@ -458,7 +473,7 @@ verify.sh: 8 PASS, 0 FAIL
 ## J. Próximo paso
 
 **v1 release + SDD archive**:
-1. ⏳ **Pedagogical sign-off**: revisar las 6 dato strings por exactitud + accesibilidad + tono (en `MANUAL_PLAYTHROUGH.md §12`).
+1. ✅ **Pedagogical sign-off**: firmado 2026-09-28 (ver §D.3).
 2. ⏳ **Stage-rosters polish**: confirmar que `getRosterForStage()` enruta correctamente por stage (5 stages con rosters específicos o fallback a TEST_LEVEL).
 3. ⏳ **Crear change SDD formal** para los 4 refinements pre-fase7 (F3.5.1bis, F3.5.1ter, F3.5.4, F6.1) — actualmente documentados inline en ROADMAP.
 4. ⏳ **Release tag v1.0** y `sdd-archive` final.

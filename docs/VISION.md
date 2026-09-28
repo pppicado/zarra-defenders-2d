@@ -7,16 +7,17 @@
 >
 > **No es un plan de implementación** — para eso ver [`IMPLEMENTATION-STATUS.md`](./IMPLEMENTATION-STATUS.md) y [`ROADMAP.md`](./ROADMAP.md).
 >
-> **Última actualización**: 2026-09-28 (post-F6.1 + 4 refinements pre-fase7; docs sync)
+> **Última actualización**: 2026-09-28 (post sign-off pedagógico)
 > **Fuentes documentales consultadas**:
 > - `/projects/personal/zarra-defenders/` (proyecto 3D, **PASS verificado**)
-> - `/projects/personal/zarra-defenders-2d/` (este proyecto, **F0-F6.1 implementadas**)
+> - `/projects/personal/zarra-defenders-2d/` (este proyecto, **F0-F6.1 implementadas** + **sign-off pedagógico firmado**)
 
 > **Cambios recientes**:
 > - §4.1: 11/11 mecanismos pedagógicos marcados como ✅
 > - §7.1: HP base actualizado post-F6.1 (todos los no-boss = 1 hit)
 > - §9: arquitectura real al HEAD actual (13 specs SDD, 27 sprites, 7 backgrounds)
 > - §11.3-11.4: 11 decisiones tomadas + 3 pendientes para v1
+> - 2026-09-28: Pedagogical sign-off firmado (los 6 dato strings revisados)
 
 ---
 
