@@ -4,19 +4,29 @@
  * Intermediate modal every N enemies destroyed — Phase 1.2 (ROADMAP).
  *
  * Mechanism: every time the player destroys N enemies, a brief overlay
- * appears (top-center) with a cumulative summary of pedagogical impact:
+ * appears with a cumulative summary of pedagogical impact:
  *
  *   "You have 5 signatures against the TRECO project. Each slip adds up
  *    to the Valle de Ayora-Cofrentes' neighborhood fight."
+ *
+ * F3.5.4 (refinement over F1.2): the modal no longer appears top-center
+ * as a large panel. It now sits bottom-right, paired with the
+ * pedagogy-card and matched to the 3-hearts height. When the card is
+ * also visible (which happens whenever the player just killed an enemy
+ * and the modal fires on a hit boundary that coincides), the modal
+ * STACKS above the card with an 8px gap. When the card is hidden, the
+ * modal uses the card's footprint position.
  *
  * Behavior:
  *   - Configurable trigger (default every 5 enemies)
  *   - Auto-dismiss at `dismissMs` (default 5000 ms)
  *   - Click-to-dismiss
- *   - Z-index lower than the card (180 < card's 150? no, card 150 modal 140)
- *     Actually the modal is full-width top-center, doesn't visually compete
+ *   - Z-index lower than the card (modal 140, card 150) so the card
+ *     remains the primary focus when both are visible
  *   - Does NOT block firing (pointer-events: none on overlay, only the close button)
  *   - Reset on each new stage (call `reset()` when stage changes)
+ *   - Listens to `pedagogy:visibility` from PedagogyCards to apply the
+ *     `.stacked` modifier class (CSS does the actual positioning)
  *
  * Pedagogy:
  *   - Reinforces the "each signature adds up" metaphor — reinforces that the act sums up.
@@ -25,6 +35,7 @@
  */
 
 import { STRINGS } from '../i18n/es.js?v=44'
+import { on } from '../event-bus.js?v=44'
 
 const DEFAULT_TRIGGER_EVERY = 5
 const DEFAULT_DISMISS_MS = 5000
@@ -48,8 +59,20 @@ export class ModalIntermedio {
     this._shownCount = 0
     /** @type {number|null} timeout id */
     this._dismissTimer = null
+    // F3.5.4: track whether the pedagogy card is currently visible so the
+    // modal can stack above it via the .stacked CSS class. Subscribed to
+    // the `pedagogy:visibility` event so siblings stay loosely coupled.
+    // We also peek at the DOM at boot — if the card was rendered BEFORE
+    // this modal was constructed (test scenarios, late instantiation), we
+    // still want to apply the stacked offset immediately.
+    this._pedagogyCardVisible = this._peekCardVisibleFromDom()
 
     this._build()
+    this._unsubs = []
+    this._unsubs.push(on('pedagogy:visibility', ({ visible }) => {
+      this._pedagogyCardVisible = !!visible
+      this._applyStackedClass()
+    }))
   }
 
   /**
@@ -77,6 +100,7 @@ export class ModalIntermedio {
   hide() {
     this._clearDismissTimer()
     this.root.classList.add('hidden')
+    this.root.classList.remove('stacked')  // F3.5.4: clear stacking state
     this.root.setAttribute('aria-hidden', 'true')
     this.root.innerHTML = ''
   }
@@ -91,6 +115,36 @@ export class ModalIntermedio {
   destroy() {
     this._clearDismissTimer()
     this.root.innerHTML = ''
+    for (const u of this._unsubs) u()
+    this._unsubs = []
+  }
+
+  // ============== F3.5.4 stacking ==============
+
+  /**
+   * Apply or remove the .stacked CSS class based on whether the pedagogy
+   * card is currently visible. CSS uses .stacked to shift the modal up
+   * by the card's height + 8px gap so the two never overlap.
+   */
+  _applyStackedClass() {
+    if (!this.root) return
+    this.root.classList.toggle('stacked', this._pedagogyCardVisible)
+  }
+
+  /**
+   * Read the current pedagogy-card visibility from the DOM. Used at
+   * construction time to seed the stacking state — without this, a
+   * modal instantiated AFTER the card was already visible (e.g. in
+   * tests that build ModalIntermedio after rendering a card) would
+   * ignore the existing card and overlap it.
+   */
+  _peekCardVisibleFromDom() {
+    try {
+      const card = document.getElementById('pedagogy-card')
+      return !!(card && !card.classList.contains('hidden'))
+    } catch (_) {
+      return false
+    }
   }
 
   // ============== Internal =================
@@ -117,6 +171,10 @@ export class ModalIntermedio {
     `
     this.root.classList.remove('hidden')
     this.root.setAttribute('aria-hidden', 'false')
+    // F3.5.4: stack above the pedagogy card if it's currently visible.
+    // Called AFTER classList.remove('hidden') so the stacked transform
+    // applies to the visible modal, not the hidden one.
+    this._applyStackedClass()
 
     // Wire listeners AFTER innerHTML so we attach to the freshly-created elements
     this.root.querySelector('.modal-intermedio-close').addEventListener('click', (e) => {

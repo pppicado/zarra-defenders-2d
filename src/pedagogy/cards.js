@@ -12,6 +12,12 @@
  *      reading; click outside the card closes it and resumes the game
  *      if it was paused by the card. Pressing Esc also closes the card.
  *
+ * F3.5.4 (refinement over F3.5.2): the compact footprint matches the
+ * 3-heart height (~96px CSS) and sits to the RIGHT of the hand sprite
+ * (bottom-center → bottom-right). When collapsed, only the title + a
+ * truncated description line are visible. Click expands the card to
+ * show the full content (description + dato + fuente + TTS + footer).
+ *
  * Each card shows:
  *   - Title of the enemy
  *   - Description (specific to the enemy)
@@ -19,16 +25,19 @@
  *   - Clickable source citation
  *   - Footer "Datos basados en fuentes publicas verificables"
  *
- * Behavior (F3.5.2):
+ * Behavior (F3.5.2 + F3.5.4):
  *   - Single card visible at a time (a new enemy replaces the prior)
  *   - NO auto-dismiss; card persists until dismissed by user
- *   - Click on card body (not link / not close button): pause game
+ *   - Click on card body (not link / not close button): toggle expanded;
+ *     expanding pauses the game; collapsing resumes if we paused it
  *   - Click on card link: open in new tab (does NOT pause / close)
  *   - Click on close button: close + auto-resume
  *   - Click outside the card: close + auto-resume (if paused by card)
  *   - Esc when card visible: close + auto-resume
+ *   - Emits `pedagogy:visibility` on show/hide/expand/collapse so
+ *     siblings (modal-intermedio) can stack without coupling
  *
- * Pedagogy (Phase 1.1 MVP, preserved in F3.5.2):
+ * Pedagogy (Phase 1.1 MVP, preserved in F3.5.2 + F3.5.4):
  *   - Each enemy has a specific description (no generic copy)
  *   - Each card cites a real source with a verified link
  *   - Footer reminds the player that the data comes from public sources
@@ -38,6 +47,7 @@
  */
 import { STRINGS } from '../i18n/es.js?v=44'
 import { __zr } from '../engine/dom-debug.js?v=44'
+import { emit } from '../event-bus.js?v=44'
 
 export class PedagogyCards {
   /**
@@ -69,6 +79,13 @@ export class PedagogyCards {
     this._outsideClickHandler = null
     /** @type {Function|null} window keydown listener (Esc to close) */
     this._escHandler = null
+    /** @type {Function|null} root click listener (card-internal handler) — F3.5.4 fix
+     *  for duplicate-listener leak: every _render() registers a fresh listener
+     *  via addEventListener, so subsequent renders would stack. We store the
+     *  current handler reference and removeEventListener before re-adding. */
+    this._rootClickHandler = null
+    // F3.5.4: compact footprint by default; click toggles expanded.
+    this._expanded = false
 
     this._build()
   }
@@ -96,14 +113,22 @@ export class PedagogyCards {
     this.root.setAttribute('aria-hidden', 'true')
     this.root.innerHTML = ''
     this._current = null
+    this._expanded = false
     // F3.5.2: closing the card auto-resumes if we paused because of it
     if (this._pausedByCard) {
       this._resume()
     }
+    // F3.5.4: notify siblings (e.g. modal-intermedio) that the card went away
+    emit('pedagogy:visibility', { visible: false, expanded: false })
   }
 
   get isVisible() {
     return !this.root.classList.contains('hidden')
+  }
+
+  /** F3.5.4: whether the card is currently in expanded (full-content) view */
+  get isExpanded() {
+    return this._expanded
   }
 
   /** @returns {Object|null} current card payload (for tests) */
@@ -119,6 +144,10 @@ export class PedagogyCards {
   /** Cleanup. */
   destroy() {
     this._uninstallGlobalListeners()
+    if (this._rootClickHandler && this.root) {
+      this.root.removeEventListener('click', this._rootClickHandler)
+      this._rootClickHandler = null
+    }
     this.root.innerHTML = ''
   }
 
@@ -132,6 +161,11 @@ export class PedagogyCards {
   _render(payload) {
     const url = payload.url
     const isHashLink = payload.isHashLink
+    // F3.5.4: every new card starts collapsed (compact footprint). The
+    // user clicks to expand and read the full content; clicks again to
+    // collapse and resume gameplay. Reset expansion state on every render
+    // so the footprint never carries stale state across enemy kills.
+    this._expanded = false
 
     this.root.innerHTML = `
       <button type="button" class="pedagogy-card-close" aria-label="${escapeAttr(STRINGS.pedagogy.cards.cerrarAriaLabel)}">\u2715</button>
@@ -150,14 +184,24 @@ export class PedagogyCards {
     `
     this.root.dataset.cardId = payload.cardId
     this.root.classList.remove('hidden')
+    this.root.classList.remove('expanded')
     this.root.setAttribute('aria-hidden', 'false')
+    this.root.setAttribute('aria-expanded', 'false')
 
-    // F3.5.2: 3 click targets inside the card
+    // F3.5.2 + F3.5.4: 4 click targets inside the card
     //   - link: opens in new tab; do NOT pause / close
     //   - close button (✕): explicitly closes; resumes if we paused
-    //   - body click: pauses the game if playing
+    //   - body click: toggle expand/collapse; expanding pauses the game
     //   - tts button: speaks the dato via Web Speech API (F5.1)
-    this.root.addEventListener('click', (e) => {
+    //
+    // F3.5.4: remove the previous handler before adding a new one. Without
+    // this, every _render() stacked a duplicate listener and a single
+    // click fired _toggleExpand() N times (once per render), making the
+    // pause/expand state toggle back to its starting value.
+    if (this._rootClickHandler) {
+      this.root.removeEventListener('click', this._rootClickHandler)
+    }
+    this._rootClickHandler = (e) => {
       if (e.target.closest('.pedagogy-card-link')) return
       if (e.target.closest('.pedagogy-card-close')) {
         this.hide()
@@ -171,12 +215,11 @@ export class PedagogyCards {
         }
         return
       }
-      // Body click — pause if currently playing
-      if (this.gameState && this.gameState.state === 'gameplay') {
-        e.stopPropagation()
-        this._pause()
-      }
-    })
+      // Body click — toggle expand + pause/resume
+      e.stopPropagation()
+      this._toggleExpand()
+    }
+    this.root.addEventListener('click', this._rootClickHandler)
 
     // Document-level outside-click detection. Bubble phase so it runs AFTER
     // the card-internal handler (whose e.stopPropagation prevents outside
@@ -201,6 +244,37 @@ export class PedagogyCards {
     this._shownCount++
 
     if (this.onCardShown) this.onCardShown(payload)
+    // F3.5.4: notify siblings that the card is visible (collapsed)
+    emit('pedagogy:visibility', { visible: true, expanded: false })
+  }
+
+  /**
+   * F3.5.4 — toggle the card between compact (collapsed) and full
+   * (expanded) views. Expanding pauses the game so the player can read;
+   * collapsing resumes only if we were the one who paused it (preserves
+   * the F3.5.2 invariant that the card doesn't clobber manual Esc pauses).
+   */
+  _toggleExpand() {
+    if (!this.isVisible) return
+    if (!this._expanded) {
+      // Expanding — pause if currently playing
+      this._expanded = true
+      this.root.classList.add('expanded')
+      this.root.setAttribute('aria-expanded', 'true')
+      if (this.gameState && this.gameState.state === 'gameplay') {
+        this._pause()
+      }
+      emit('pedagogy:visibility', { visible: true, expanded: true })
+    } else {
+      // Collapsing — auto-resume if we paused it
+      this._expanded = false
+      this.root.classList.remove('expanded')
+      this.root.setAttribute('aria-expanded', 'false')
+      if (this._pausedByCard) {
+        this._resume()
+      }
+      emit('pedagogy:visibility', { visible: true, expanded: false })
+    }
   }
 
   _uninstallGlobalListeners() {
