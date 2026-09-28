@@ -3,16 +3,21 @@
  *
  * Enemy archetypes + Enemy + EnemyManager (F3 enemy-archetypes spec).
  *
- * Archetype table — F3.5 widened footprints:
- *   standard    : HP 1,  multiplier 1,   footprint hw=1.0 hh=1.0, flash 200 ms
- *   tank        : HP 3,  multiplier 1.5, footprint hw=1.2 hh=1.2, flash 200 ms
- *   'mini-boss' : HP 10, multiplier 2,   footprint hw=1.5 hh=1.5, flash 200 ms
- *   boss        : HP 30, multiplier 3,   footprint hw=2.0 hh=2.0, flash 200 ms
+ * Archetype table — F6.1 (pre-fase7 audit, see ARCHETYPES for full rationale):
+ *   standard    : HP 1,  multiplier 1,   footprint hw=1.5 hh=2.5, hitbox = sprite
+ *   tank        : HP 1,  multiplier 1.5, footprint hw=1.7 hh=2.7, hitbox = sprite
+ *   'mini-boss' : HP 1,  multiplier 2,   footprint hw=2.0 hh=3.0, hitbox = sprite
+ *   boss        : HP 30, multiplier 3,   footprint hw=2.5 hh=3.5, hitbox = sprite
+ *
+ * Every non-final-boss enemy dies in ONE shot. The visual hierarchy and
+ * scoring reward (multiplier) survive — only the kill-threshold changes.
+ * The hitbox is the PIXI sprite bounds exactly (no `hitInset` shrinkage).
  *
  * F3.5: footprints enlarged from the original 0.5x0.5 / 0.7x0.7. At tileSize=128,
  * a 0.5 footprint = 64px hittable area, which required pixel-perfect clicks.
- * 1.0 footprint = 128px, matching the visible sprite size, so any click on or
- * near the visible enemy counts as a hit.
+ * The current widened footprints (hw up to 2.5) cover the full vertical extent
+ * of every sprite (each is anchored bottom-center and extends ~1 tile above
+ * the iso center).
  *
  * dron_fumigador -> tank (locked by user 2026-09-07).
  *
@@ -157,14 +162,26 @@ export const ARCHETYPES = Object.freeze({
   // and the projectile whiffed. Widening hh to ~2.5 tiles makes the hit box
   // cover the sprite from iso center up to the sprite top.
   //
-  // F5 (REQ-CMB-006): per-archetype `hitInset` shrinks the screen-space AABB
-  // before hit testing, so transparent-padding clicks miss. Values match the
-  // spec (16/12/10/8 px) — tighter for the larger archetypes because they have
-  // proportionally less transparent margin around the visible body.
-  standard:    Object.freeze({ hp: 1,  multiplier: 1,   footprint: Object.freeze({ hw: 1.5, hh: 2.5 }), flashMs: 200, hitInset: Object.freeze({ top: 16, right: 16, bottom: 16, left: 16 }) }),
-  tank:        Object.freeze({ hp: 3,  multiplier: 1.5, footprint: Object.freeze({ hw: 1.7, hh: 2.7 }), flashMs: 200, hitInset: Object.freeze({ top: 12, right: 12, bottom: 12, left: 12 }) }),
-  'mini-boss': Object.freeze({ hp: 10, multiplier: 2,   footprint: Object.freeze({ hw: 2.0, hh: 3.0 }), flashMs: 200, hitInset: Object.freeze({ top: 10, right: 10, bottom: 10, left: 10 }) }),
-  boss:        Object.freeze({ hp: 30, multiplier: 3,   footprint: Object.freeze({ hw: 2.5, hh: 3.5 }), flashMs: 200, hitInset: Object.freeze({ top: 8,  right: 8,  bottom: 8,  left: 8  }) }),
+  // F6.1 (pre-fase7 audit): EVERY non-final-boss enemy dies in 1 hit.
+  //   - `standard`, `tank`, and `mini-boss` all carry `hp: 1`.
+  //   - Only `boss` (the final stage boss, sello_burocratico) keeps multi-HP
+  //     so the finale remains a meaningful challenge.
+  //   - `multiplier` is preserved so killing a `tank` or `mini-boss` still
+  //     scores more (15 / 20 pts) — the visual hierarchy and scoring reward
+  //     survive, only the kill-threshold changes.
+  //
+  // F6.1 (pre-fase7 audit): `hitInset` removed. Hit-test AABB now equals the
+  // sprite's PIXI `getBounds()` exactly — what you see is what you hit.
+  // The previous 16/12/10/8 px insets shrunk the box below the visible
+  // sprite, which is exactly the "a veces hay algunos enemigos que no
+  // mueren aunque les impactes" bug: clicking on the sprite's transparent
+  // margin area whiffed, especially on moving targets where the next frame
+  // would slide the enemy back into the hitbox. Hitbox == sprite bounds
+  // makes hit resolution fully predictable.
+  standard:    Object.freeze({ hp: 1,  multiplier: 1,   footprint: Object.freeze({ hw: 1.5, hh: 2.5 }), flashMs: 200, hitInset: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }) }),
+  tank:        Object.freeze({ hp: 1,  multiplier: 1.5, footprint: Object.freeze({ hw: 1.7, hh: 2.7 }), flashMs: 200, hitInset: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }) }),
+  'mini-boss': Object.freeze({ hp: 1,  multiplier: 2,   footprint: Object.freeze({ hw: 2.0, hh: 3.0 }), flashMs: 200, hitInset: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }) }),
+  boss:        Object.freeze({ hp: 30, multiplier: 3,   footprint: Object.freeze({ hw: 2.5, hh: 3.5 }), flashMs: 200, hitInset: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }) }),
 })
 
 export const ARCHETYPE_IDS = Object.freeze(Object.keys(ARCHETYPES))

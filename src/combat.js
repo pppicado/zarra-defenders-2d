@@ -360,8 +360,27 @@ if (target) {
 
   /**
    * Pure hit-resolution: read enemies, collect screen-space AABB candidates via
-   * `Enemy.getScreenBounds`, AABB-containment test, sort by depth desc
-   * (tie-break: id asc). REQ-CMB-003.
+   * `Enemy.getScreenBounds`, AABB-containment test, sort by **nearest-center-to-
+   * click** so the player hits the sprite they actually see (F6.1 pre-fase7 audit).
+   *
+   * Pre-fix behavior was `sort by depth desc` — which selects the sprite farthest
+   * along the rail. When two sprites visually overlap (common in mid-game when a
+   * standard enemy passes behind/in front of a tank or mini-boss), the depth-sorted
+   * winner was often the one further from the camera, i.e. a sprite the player
+   * could barely see — the player would fire at the visible tank, the resolver
+   * would route the hit to a hidden standard, and the tank survived. The
+   * "a veces hay algunos enemigos que no mueren aunque les impactes" bug.
+   *
+   * New tie-break chain:
+   *   1. Distance from (screenX, screenY) to AABB center, ascending — the
+   *      sprite whose center is closest to the click wins. This is the sprite
+   *      the player aimed at.
+   *   2. Tie-break by depth desc (preserves the legacy rail-front bias when two
+   *      AABBs are equidistant from the click — rare, but keeps deterministic).
+   *   3. Tie-break by id asc (stable sort).
+   *
+   * REQ-CMB-003 (kept): the resolver still compares against each enemy's screen-
+   * space sprite bounds; the only change is the candidate-selection heuristic.
    *
    * @param {number} screenX        logical canvas X
    * @param {number} screenY        logical canvas Y
@@ -376,22 +395,32 @@ if (target) {
     const all = this.enemies._live?.() ?? null
     if (!all) return null
 
+    // Collect candidates with their AABB so we can score by click distance.
     const candidates = []
     for (const enemy of all) {
       if (enemy.state !== 'alive') continue
       const b = Enemy.getScreenBounds(enemy, isoWorld, cameraIso, viewportCenter)
       if (screenX >= b.x && screenX <= b.x + b.w && screenY >= b.y && screenY <= b.y + b.h) {
-        candidates.push(enemy)
+        candidates.push({ enemy, bounds: b })
       }
     }
     if (candidates.length === 0) return null
+
+    // Sort: nearest-center-to-click first; depth desc as secondary; id asc as final.
     candidates.sort((a, b) => {
-      const da = a.isoX + a.isoY
-      const db = b.isoX + b.isoY
-      if (da !== db) return db - da                  // depth desc
-      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0  // id asc
+      const ax = a.bounds.x + a.bounds.w / 2
+      const ay = a.bounds.y + a.bounds.h / 2
+      const bx = b.bounds.x + b.bounds.w / 2
+      const by = b.bounds.y + b.bounds.h / 2
+      const distA = (ax - screenX) * (ax - screenX) + (ay - screenY) * (ay - screenY)
+      const distB = (bx - screenX) * (bx - screenX) + (by - screenY) * (by - screenY)
+      if (distA !== distB) return distA - distB  // nearest center first
+      const da = a.enemy.isoX + a.enemy.isoY
+      const db = b.enemy.isoX + b.enemy.isoY
+      if (da !== db) return db - da              // depth desc as tie-break
+      return a.enemy.id < b.enemy.id ? -1 : a.enemy.id > b.enemy.id ? 1 : 0
     })
-    return candidates[0]
+    return candidates[0].enemy
   }
 
   /**
