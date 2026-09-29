@@ -429,8 +429,30 @@ async function bootstrap() {
     },
   })
   // Hide final screen on lifecycle events
-  busOn('menu:startRequested', () => finalScreen.hide())
-  busOn('bootTestLevel:request', () => finalScreen.hide())
+  busOn('menu:startRequested', () => {
+    finalScreen.hide()
+    // F7.3.2: reset the once-per-stage guards so a new stage can re-trigger
+    // the final-screen when its final-boss is deactivated.
+    _finalScreenEmitted = false
+    _stageClearedEmitted = false
+  })
+  busOn('bootTestLevel:request', () => {
+    finalScreen.hide()
+    _finalScreenEmitted = false
+    _stageClearedEmitted = false
+  })
+
+  // F7.3.2 — guard against multiple `stage:cleared` emissions from the same
+  // stage. Pre-fix: killing e11/e23 (TEST_LEVEL mini-bosses with
+  // `lifecycle: 'desactivacion'`) AFTER the final-boss (e24 sello_burocratico)
+  // would re-fire `zarra:desactivacion` with `spriteId` matching
+  // `FINAL_BOSS_SPRITE_IDS`, causing `finalScreen.show()` + `stage:cleared`
+  // to fire multiple times. Side effects on re-firing were idempotent
+  // (showVictory guarded by `_modal === kind`, tryWriteBest guarded,
+  // recordCards merges by cardId) but the duplicate `sfxEngine.play('victory')`
+  // restarted the SFX unnecessarily and the duplicate resumen-listener setup
+  // was wasteful. The once-per-stage guard prevents all of this.
+  let _finalScreenEmitted = false
 
   // Trigger: when the final boss (planta_treco / planta_treco_boss) is
   // desactivado (F1.6 A7). F7.3 (B4): listener matches against
@@ -439,6 +461,12 @@ async function bootstrap() {
   // 'enemies_planta_treco_boss' for the final-boss of stage5).
   busOn('zarra:desactivacion', (detail) => {
     if (!detail || !FINAL_BOSS_SPRITE_IDS.includes(detail.spriteId)) return
+    // F7.3.2: idempotency guard. Subsequent mini-boss planta_treco kills
+    // (e.g. e11 / e23 in TEST_LEVEL after the boss e24) won't re-trigger
+    // the final-screen for the same stage. Reset on `menu:startRequested`
+    // and `bootTestLevel:request` (handlers above).
+    if (_finalScreenEmitted) return
+    _finalScreenEmitted = true
     finalScreen.show()
     // Trigger stage:cleared-equivalent so resumen also appears after closing
     emit('stage:cleared', { stageId: 'stage5-acuifero' })
@@ -911,6 +939,18 @@ async function bootstrap() {
     __zr.log(`[ZarraDefenders2D] finale started — bg frozen, ${queued} wave enemies scheduled`)
   }
 
+  // F7.3.2 — guard against emitting `stage:cleared` every tick after the
+  // final boss dies. Pre-fix: `maybeFireVictory` ran every tick while
+  // `finalBossAlive === false && timeAtEnd >= railEndTime`, dispatching
+  // `stage:cleared` repeatedly (could be 25+ times before the overlay
+  // modal was dismissed by the user). Most listeners are idempotent
+  // (`overlay.showVictory()` is guarded by `_modal === kind`,
+  // `tryWriteBest()` checks if new is better, `biblioteca.recordCards()`
+  // merges by cardId) but `sfxEngine.play('victory')` restarted the
+  // SFX on every tick, generating ~60 oscillator instances per second
+  // of wasted CPU/audio activity. The once-per-stage guard prevents this.
+  let _stageClearedEmitted = false
+
   function maybeFireVictory({ camera, enemies, integrity }) {
     // Note: fires regardless of gameState (same reasoning as maybeFireFinale).
     // gameState.state = 'overlay' is still set so the overlay UI shows.
@@ -926,7 +966,8 @@ async function bootstrap() {
     // BG-006/BG-007 — stage clears when the final boss is destroyed
     // (regardless of remaining wave enemies). This lets the boss fight
     // happen with continuous waves in the background.
-    if (timeAtEnd >= TEST_LEVEL.railEndTime && !finalBossAlive) {
+    if (timeAtEnd >= TEST_LEVEL.railEndTime && !finalBossAlive && !_stageClearedEmitted) {
+      _stageClearedEmitted = true
       emit('stage:cleared', { stageId: bg.stageId })
       gameState.state = 'overlay'
     }

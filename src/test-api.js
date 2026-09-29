@@ -183,6 +183,18 @@ export function mountTestAPI(ctx) {
       } else if (ctx.testLevel?.enemies) {
         for (const def of ctx.testLevel.enemies) ctx.enemies.spawn(def)
       }
+      // F7.3.2 — emit `bootTestLevel:request` so any once-per-stage guards in
+      // main.js listeners (currently: `_stageClearedEmitted`,
+      // `_finalScreenEmitted`) reset to their pre-stage state. Without this,
+      // a test that calls `reset()` mid-game would carry over the guard
+      // from the previous run, and a boss kill in the new run wouldn't
+      // re-trigger `stage:cleared`.
+      try {
+        if (window.__zarraEmit__) window.__zarraEmit__('bootTestLevel:request', { reason: 'test-api.reset' })
+      } catch (e) {
+        // emit may throw if bus is not yet wired (early bootstrap). Safe
+        // to ignore — guards will reset on the next menu:startRequested.
+      }
     },
     spawnEnemy(def) { return ctx.enemies?.spawn?.(def) ?? null },
     /**
