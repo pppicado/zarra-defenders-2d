@@ -75,6 +75,14 @@ export class PedagogyCards {
     this._shownCount = 0
     /** @type {boolean} tracks if the current card pause was initiated by clicking it */
     this._pausedByCard = false
+    /**
+     * F7.4 — kills-by-spriteId counter (in-memory, per-run).
+     * Shows the cumulative count of each enemy type destroyed in this run.
+     * Reset on `bootTestLevel` (via `resetRunCounters`) so it doesn't leak
+     * across runs. NOT persisted to localStorage (it's a "per-run" stat
+     * like `firmas`).
+     */
+    this._killsBySpriteId = new Map()
     /** @type {Function|null} document-level click listener (outside-click detection) */
     this._outsideClickHandler = null
     /** @type {Function|null} window keydown listener (Esc to close) */
@@ -103,7 +111,27 @@ export class PedagogyCards {
       __zr.warn('[PedagogyCards] show(): could not build payload (missing stage data?)')
       return
     }
+    // F7.4 — increment kills-by-spriteId counter BEFORE rendering so the
+    // card shows the cumulative count including this kill.
+    if (payload.spriteId) {
+      const prev = this._killsBySpriteId.get(payload.spriteId) || 0
+      this._killsBySpriteId.set(payload.spriteId, prev + 1)
+    }
+    payload.killsThisRun = payload.spriteId
+      ? this._killsBySpriteId.get(payload.spriteId)
+      : 0
     this._render(payload)
+  }
+
+  /**
+   * F7.4 — Reset per-run counters (killsBySpriteId). Called from main.js
+   * on `bootTestLevel` (new run / retry / re-stage) so the cumulative
+   * count doesn't leak across runs. Counter is per-spriteId so the card
+     * title can show "Camion TRECO (3)" when the player has destroyed
+   * 3 of that type in this run.
+   */
+  resetRunCounters() {
+    this._killsBySpriteId.clear()
   }
 
   /** Hide the current card immediately. */
@@ -167,9 +195,20 @@ export class PedagogyCards {
     // so the footprint never carries stale state across enemy kills.
     this._expanded = false
 
+    // F7.4 — build the title with the cumulative count for this spriteId.
+    // "Camion TRECO (3)" if the player has destroyed 3 of this type in this
+    // run; plain "Camion TRECO" for the first kill (count = 1). The counter
+    // is omitted from the title for the first kill to keep the canonical
+    // name prominent — pedagogical rationale: the cumulative count is only
+    // meaningful once the player has destroyed more than one.
+    const kills = payload.killsThisRun ?? 1
+    const titleText = kills > 1
+      ? `${payload.titulo} (${kills})`
+      : payload.titulo
+
     this.root.innerHTML = `
       <button type="button" class="pedagogy-card-close" aria-label="${escapeAttr(STRINGS.pedagogy.cards.cerrarAriaLabel)}">\u2715</button>
-      <h3 class="pedagogy-card-title" id="pedagogy-card-title">${escapeHtml(payload.titulo)}</h3>
+      <h3 class="pedagogy-card-title" id="pedagogy-card-title">${escapeHtml(titleText)}</h3>
       <p class="pedagogy-card-description">${escapeHtml(payload.descripcion)}</p>
       <p class="pedagogy-card-dato">${escapeHtml(payload.datoTexto)}</p>
       <p class="pedagogy-card-fuente">
@@ -368,5 +407,8 @@ export function buildCardPayload(enemy, clock, strings) {
     url,
     timestamp: ts,
     isHashLink: url.startsWith('#'),
+    // F7.4 — populated by show() before _render() runs. Default 1 here for
+    // direct callers of buildCardPayload (e.g. tests).
+    killsThisRun: 1,
   }
 }

@@ -743,6 +743,8 @@ async function bootstrap() {
     enemies.reset()
     integrity.reset()
     score.reset()
+    // F7.4 — reset per-run pedagogy counters when returning to menu.
+    if (pedagogyCards?.resetRunCounters) pedagogyCards.resetRunCounters()
     camera.setTime(0)
     gameState.state = 'main-menu'
     musicEngine.stop()
@@ -862,6 +864,9 @@ async function bootstrap() {
     enemies.reset()
     integrity.reset()
     score.reset()
+    // F7.4 — reset per-run pedagogy counters (cumulative kills-by-spriteId)
+    // so the card's "(N)" counter doesn't leak across runs.
+    if (pedagogyCards?.resetRunCounters) pedagogyCards.resetRunCounters()
     // BG-006 — reset finale flag + unfreeze bg so it scrolls again on retry.
     finaleStarted = false
     bg.unfreeze()
