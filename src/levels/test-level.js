@@ -78,7 +78,14 @@ function _buildEnemyDefs() {
     { id: 'e08', archetype: 'standard',    isoX: 14, isoY:  9, spriteId: 'enemies_topadora' },
     { id: 'e09', archetype: 'tank',        isoX: 15, isoY: 10, spriteId: 'enemies_camion_cisterna_residuos' },
     { id: 'e10', archetype: 'standard',    isoX: 16, isoY: 11, spriteId: 'enemies_trailer' },
-    { id: 'e11', archetype: 'mini-boss',   isoX: 17, isoY: 12, spriteId: 'enemies_planta_treco' },
+    { id: 'e11', archetype: 'mini-boss',   isoX: 17, isoY: 12, spriteId: 'enemies_planta_treco',
+      // F7.3.1 — bug fix post-2026-09-28 audit: e11 (and e23 below) were missing
+      // `lifecycle: 'desactivacion'` while the 6 e_miniboss_* entries had it.
+      // Inconsistent: killing e11/e23 in `?test=1` did NOT dispatch
+      // `zarra:desactivacion`, so the final-screen never appeared. Adding
+      // the lifecycle brings all 8 mini-boss `enemies_planta_treco` to the
+      // same pedagogical contract: they deactivate (not explode) on HP=0.
+      lifecycle: 'desactivacion' },
     { id: 'e12', archetype: 'boss',        isoX: 18, isoY: 13, spriteId: 'enemies_sello_burocratico' },
     { id: 'e13', archetype: 'standard',    isoX: 17, isoY: 19, spriteId: 'enemies_bolsa_plastico' },
     { id: 'e14', archetype: 'standard',    isoX: 19, isoY: 21, spriteId: 'enemies_camion_treco' },
@@ -90,7 +97,9 @@ function _buildEnemyDefs() {
     { id: 'e20', archetype: 'standard',    isoX: 30, isoY: 32, spriteId: 'enemies_bidon_lixiviado' },
     { id: 'e21', archetype: 'tank',        isoX: 32, isoY: 34, spriteId: 'enemies_camion_cisterna_residuos' },
     { id: 'e22', archetype: 'standard',    isoX: 34, isoY: 35, spriteId: 'enemies_incineradora' },
-    { id: 'e23', archetype: 'mini-boss',   isoX: 35, isoY: 36, spriteId: 'enemies_planta_treco' },
+    { id: 'e23', archetype: 'mini-boss',   isoX: 35, isoY: 36, spriteId: 'enemies_planta_treco',
+      // F7.3.1 — see e11 above.
+      lifecycle: 'desactivacion' },
     { id: 'e24', archetype: 'boss',        isoX: 36, isoY: 35, spriteId: 'enemies_sello_burocratico' },
   ]
   for (const e of original24) items.push(e)
