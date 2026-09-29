@@ -8,11 +8,13 @@
 > - ❌ **No implementado** — no existe en código
 > - ❓ **Por verificar** — necesita inspección directa
 >
-> **Última actualización**: 2026-09-28 (pre-fase7 audit + README + docs sync)
+> **Última actualización**: 2026-09-28 (auditoría docs vs código real post-unificación en `docs/`)
 > **HEAD**: `4cf249f` (`docs: rewrite README + final ROADMAP update for pre-fase7 release`)
-> **Working tree**: clean
+> **Working tree**: cambios unstaged en AGENTS.md + README.md + docs/PLAN.md (unificación docs/); cambios staged: 2 renames
 >
 > **Verificación estructural**: `bash scripts/verify.sh` → **8/8 PASS** (C1-C8).
+>
+> **Importante (2026-09-28)**: este pase corrigió múltiples inconsistencias detectadas contrastando la doc contra el código real. Ver §K (Bugs pedagógicos conocidos) y §L (Estado real de URLs pedagógicas) al final del archivo. Los bugs pedagógicos identificados NO se arreglaron en este pase — son para abrir como issues separados.
 
 ---
 
@@ -21,17 +23,17 @@
 | Categoría | Estado | Notas |
 |---|---|---|
 | **Pipeline técnico** (combat, integridad, score, menús, backgrounds, test API) | ✅ Completo | ~95% (ver §B) |
-| **i18n + STRINGS centralizado** (A2 + A6) | ✅ Completo | `src/i18n/es.js`, 84 STRINGS refs, 0 leaks, 0 https:// literals fuera |
+| **i18n + STRINGS centralizado** (A2 + A6) | ✅ Completo | `src/i18n/es.js`, 84 STRINGS refs (verify.sh C1 PASS), 0 leaks, 0 https:// literals fuera |
 | **Console discipline** (A8) | ✅ Completo | `__zr` utility en `src/engine/dom-debug.js`, 0 console.* leaks |
-| **Audio procedural** (F4) | ✅ Completo | MusicEngine (jota regional) + SFXEngine procedurales Web Audio |
+| **Audio procedural** (F4) | ✅ Completo | MusicEngine (jota regional 110-138 BPM per stage) + SFXEngine procedurales Web Audio |
 | **Accesibilidad** (F5) | ✅ Completo | TTS (es-ES), high-contrast, reduced-motion |
 | **Sharing** (F5.4) | ✅ Completo | Twitter/Facebook/clipboard/native (navigator.share) |
-| **Stages + menú visuals** (F6) | ✅ Completo | 5 stages con backgrounds dedicada + menú selector |
-| **Pixi offline fallback** (F6) | ✅ Completo | `vendor/pixi.min.js` local |
-| **Pedagogía in-game** | ✅ Completo | Cards, modal-intermedio, biblioteca, data-screen, final-screen, resumen-final |
-| **Refinements pre-fase7** | ✅ Cerrado | F3.5.1bis (pause gate) + F3.5.1ter (overlay fit) + F3.5.4 (compact pedagogy) + F6.1 (1-shot-kill) |
-| **v1 release + archive SDD** | 🔄 Pendiente | Polish: change SDD formal para refinements pre-fase7 + `sdd-archive` final. Sign-off pedagógico ✅ firmado 2026-09-28. |
-| **Per-stage rosters específicos** | 🔄 Diferido | F6 BG-005 marca "future scope" — todos comparten TEST_LEVEL |
+| **Stages + menú visuals** (F6) | ✅ Completo | 5 production stages con `getRosterForStage()` + menú selector |
+| **Pixi offline fallback** (F6) | ✅ Completo | `vendor/pixi.min.js` (Pixi v8) |
+| **Pedagogía in-game** | ⚠️ **Casi completo** | 11/11 mecanismos ✅ — pero **contrato A7 desactivación roto en production** (ver §K.1). Bug bloqueante pedagógico. |
+| **Refinements pre-fase7** | ✅ Cerrado | F3.5.1bis (pause gate) + F3.5.1ter (overlay fit) + F3.5.4 (compact pedagogy) + F6.1 (1-shot-kill). Change SDD archivado. |
+| **v1 release + archive SDD** | ✅ **Cerrado** | Change `2026-09-28-pre-fase7-polish` archivado con verdict PASS (ver §B.4). Tag v1.0.0 pendiente de crear. |
+| **Per-stage rosters específicos** | ✅ Implementado | 5 rosters en `src/levels/stage-rosters.js` con `getRosterForStage()`; TEST_LEVEL es fallback en `?test=1` mode |
 
 **Diagnóstico**: el juego está **completo end-to-end** y con **sign-off pedagógico firmado**. Pipeline, audio, accesibilidad, sharing, pedagogía in-game y polish UX están ✅. Lo único pendiente para v1 es **archivar bajo SDD** el último change pre-fase7 + tag v1.0.0.
 
@@ -127,7 +129,7 @@
 | 13 | Screen-space hit detection + 1-shot-kill + nearest-center | `src/combat.js:_resolveHitAtScreenPoint` | — |
 | 14 | Per-archetype hitInset=0 (F6.1: hitbox = sprite bounds) | `src/enemies.js:ARCHETYPES` | — |
 | 15 | Determinismo `?test=1` + mulberry32 seed `0xC0FFEE` | `src/random.js` | ~32 |
-| 16 | Test API `window.__gameTestAPI__` (20+ métodos) | `src/test-api.js` | ~240 |
+| 16 | Test API `window.__gameTestAPI__` (23 métodos: fireAtIso, getEnemies, getIntegrity, getScore, getProjectiles, on/off eventBus, setTime, tick, setSeed, simulateTap, etc.) | `src/test-api.js` | ~240 |
 | 17 | Integrity 3-segment state machine + freeze-on-gameover | `src/integrity.js` | ~80 |
 | 18 | Score + firmas + best localStorage + cardsShown[] | `src/score.js` | ~140 |
 | 19 | HUD: 3 hearts + hand sprite + viewport-aware layout | `src/ui/hud.js` | ~210 |
@@ -183,37 +185,70 @@
 
 ### B.3. Stages con producción (F6)
 
-| # | Stage | Topónimo real | Boss | Dato pedagógico |
-|---|---|---|---|---|
-| 1 | Las Hoyas de Caballero | Polígono 11, Zarra — encinas, almendros | topadora | 11M m³ de residuos |
-| 2 | La Hoz del río Zarra | Barranco del Agua (13 km), río Zarra | tubería lixiviados | Acuífero 8.500 km² |
-| 3 | Sierra de La Hunde y Palomera | Pinar denso, Ayora | incineradora | Convive con central nuclear Cofrentes |
-| 4 | Casco urbano de Ayora | Casas encaladas, colegio, polideportivo | convoy de trailers | Ruta camiones pasa junto a colegio |
-| 5 | El Acuífero (jefe final) | Acuífero de la Mancha Oriental | **planta TRECO (se desactiva, NO muere)** | 2002: 10.700 firmas, ya rechazaron |
+**IMPORTANTE**: cada stage tiene 2 bosses (boss principal + boss secundario). `finalBossSpriteId` es el que abre el final-screen en stage5; los bosses intermedios se destruyen normal (no desactivación).
+
+| # | Stage | Topónimo real | Boss principal (`finalBossSpriteId`) | Boss secundario | Roster size | Dato pedagógico |
+|---|---|---|---|---|---|---|
+| 1 | Las Hoyas de Caballero | Polígono 11, Zarra — encinas, almendros | `enemies_topadora` | `enemies_sello_burocratico` | ~22 | 11M m³ de residuos |
+| 2 | La Hoz del río Zarra | Barranco del Agua (13 km), río Zarra | `enemies_tubo_lixiviado` | `enemies_camion_cisterna_residuos` | ~22 | Acuífero 8.500 km² |
+| 3 | Sierra de La Hunde y Palomera | Pinar denso, Ayora | `enemies_incineradora` | `enemies_topadora` | ~22 | Convive con central nuclear Cofrentes |
+| 4 | Casco urbano de Ayora | Casas encaladas, colegio, polideportivo | `enemies_trailer` | `enemies_camion_cisterna_residuos` | ~22 | Ruta camiones pasa junto a colegio |
+| 5 | El Acuífero (jefe final) | Acuífero de la Mancha Oriental | **`enemies_planta_treco`** ⚠️ | `enemies_sello_burocratico` | ~22 | 2002: 10.700 firmas, ya rechazaron |
+
+**Routing real** (`src/main.js:848-858`):
+```js
+const stageId = bg && bg.stageId
+if (inTestMode) {
+  enemies.loadLevel(TEST_LEVEL.enemies)  // 120-enemy canonical composition
+} else {
+  const roster = getRosterForStage(stageId)
+  if (roster) {
+    enemies.loadLevel(roster.enemies)  // 5 rosters distintos de ~22 enemies
+  } else {
+    enemies.loadLevel(TEST_LEVEL.enemies)  // fallback
+  }
+}
+```
+
+**Atributos del `planta_treco`** (ver §K.1 sobre bug pedagógico):
+- En TEST_LEVEL (modo `?test=1`): `archetype:'mini-boss'` (hp:1) + `lifecycle:'desactivacion'` ✅ contrato A7 cumplido
+- En `stage-rosters.js` (production): `archetype:'mini-boss'` (hp:1) — **NO setea `lifecycle:'desactivacion'`** ❌ se destruye normal, no dispara `zarra:desactivacion`
 
 ### B.4. SDD OpenSpec
 
-**Specs canónicas** (`openspec/specs/`) — 13 archivos:
+**Specs canónicas** (`openspec/specs/`) — **12 archivos `spec.md`** + 1 `README.md`:
 
 | Spec | Tema | Líneas |
 |---|---|---|
-| `accessibility/` | TTS + contraste + motion | — |
-| `audio/` | MusicEngine + SFXEngine | — |
-| `combat-core/` | 13 REQ-CMB-001..013 | ~670 |
-| `iso-asset-pipeline/` | 11 ASSET-001..011 | ~310 |
-| `iso-camera-integration/` | 4 CAM-001..004 | ~165 |
-| `iso-gallery/` | 5 entries galería dev | ~185 |
-| `iso-tile-system/` | DEPRECATED en main | ~226 |
-| `menu-visuals/` | 4 backgrounds menú dedicada | — |
-| `pixi-offline/` | Vendor bundle | — |
-| `scrolling-background/` | 7 BG-001..007 parallax + freeze + lock progression | ~178 |
-| `sharing/` | 4 share buttons + ?ref= | — |
-| `stage-rosters/` | 5 production stages | — |
-| `README.md` | Índice | — |
+| `accessibility/spec.md` | TTS + contraste + motion | 124 |
+| `audio/spec.md` | MusicEngine + SFXEngine | 147 |
+| `combat-core/spec.md` | 13 REQ-CMB-001..013 | 669 |
+| `iso-asset-pipeline/spec.md` | 11 ASSET-001..011 | 308 |
+| `iso-camera-integration/spec.md` | 4 CAM-001..004 | 165 |
+| `iso-gallery/spec.md` | 5 entries galería dev | 185 |
+| `iso-tile-system/spec.md` | DEPRECATED en main | 226 |
+| `menu-visuals/spec.md` | 4 backgrounds menú dedicada | 68 |
+| `pixi-offline/spec.md` | Vendor bundle (Pixi v8) | 55 |
+| `scrolling-background/spec.md` | 7 BG-001..007 parallax + freeze + lock progression | 178 |
+| `sharing/spec.md` | 4 share buttons + ?ref= | 105 |
+| `stage-rosters/spec.md` | 5 production stages + `getRosterForStage()` | 92 |
+| `README.md` | Índice (no cuenta como spec) | 37 |
 
-**Cambios archivados** (`openspec/changes/archive/`): 21 changes cerrados (F0-F6.1). Ver `1fd8456 docs(archive): Fase 4 + 5 + 6 cerradas bajo SDD`.
+**Cambios archivados** (`openspec/changes/archive/`): **25 changes** (no 21):
 
-**Cambios activos** (`openspec/changes/`): **vacío** — los refinements pre-fase7 (F3.5.1bis, F3.5.1ter, F3.5.4, F6.1) se documentaron inline en `docs/ROADMAP.md` y no como changes SDD formales.
+| Cambio | Notas |
+|---|---|
+| F2.5.1..F2.5.5 (5 cambios) | Tile system iterations (2026-09-06 a 2026-09-07) |
+| F3 shooter-rail-gameplay | 2026-09-08 |
+| F4a..F4d (4 cambios) | Canvas 720, level extension, hand size, papeleta sprite (2026-09-10) |
+| F5 enemy-movement + 7 fixes | 2026-09-12 (movement, hit-detection, hitbox-viz, projectile-homing, retry-camera-unhalt, screen-space-escape, movement-calibration) |
+| F6 scrolling-background + F6.1-bg-bugfixes | 2026-09-12 a 2026-09-13 |
+| F4 audio (separado de F4d) | 2026-09-25 |
+| F5 a11y + share | 2026-09-25 |
+| F6 stages + menus | 2026-09-25 |
+| **`2026-09-28-pre-fase7-polish`** | ✅ **VERIFIED PASS — archive-ready**. Captura los 4 refinements pre-fase7 (F3.5.1bis, F3.5.1ter, F3.5.4, F6.1) con proposal + design + tasks + verify-report + archive-report. **El §J más abajo ya está desactualizado — este cambio ya está cerrado.** |
+
+**Cambios activos** (`openspec/changes/`): solo `archive/` — **vacío de changes activos** al HEAD actual.
 
 ---
 
@@ -325,31 +360,35 @@
 
 ## E. Assets — Estado
 
-### E.1. Sprites (27 PNGs / ~5.5 MB)
+### E.1. Sprites (27 PNGs en `assets/sprites/` / ~5.8 MB)
 
 | Categoría | Cantidad | Estado |
 |---|---|---|
-| Enemigos | 11 | ✅ Todos regenerados (incluye `camion_cisterna_residuos` que era placeholder en F2) |
+| Enemigos (manifest active) | 12 | ✅ Todos regenerados (incluye `camion_cisterna_residuos` real, regenerado en F0.3) |
+| Enemigos (manifest deprecated) | 1 | `enemies_plataforma_solar.png` — el PNG sigue en disco aunque el manifest lo marca `deprecated` (decisión 2026-09-03: energías renovables no son enemigo) |
 | Buildings | 3 | ✅ |
 | Trees | 3 | ✅ |
 | Props | 3 | ✅ |
-| UI (hand, papeleta, hearts×2) | 4 | ✅ |
-| Crosshair | 1 (PIXI.Graphics vector) | ✅ Sin PNG necesario |
+| UI (hand, papeleta, hearts×2, crosshair) | 5 | ✅ — `crosshair.png` SÍ existe (F3.4): 128×128 pixel art con chroma-key magenta removido. Reemplaza al PIXI.Graphics vector que existía en `src/player.js`. |
 
-**Pendientes**: ninguno bloqueante para v1.
+**Pendientes**: ninguno bloqueante para v1. Limpieza opcional: borrar `enemies_plataforma_solar.png` (no se referencia desde el manifest).
 
-### E.2. Backgrounds (5 stages + 2 menús = 7 PNGs / ~1.3 MB)
+### E.2. Backgrounds (5 stages + 1 legacy + 4 menu_bg dedicated = 10 PNGs / ~1.55 MB)
 
-**Definitivos** en `assets/backgrounds/`:
+**Definitivos** en `assets/backgrounds/` (referenciados desde `manifest.json`):
 - `stage1-lashoyas.png` ~180 KB
 - `stage2-lahoz.png` ~632 KB
 - `stage3-lahunde.png` ~188 KB
 - `stage4-ayora.png` ~200 KB
 - `stage5-acuifero.png` ~152 KB
 
-**Backgrounds de menú** en `assets/menu_bg/`:
+**Backgrounds de menú** en `assets/menu_bg/` (F6):
 - `menu-panorama-cofrentes.png` — Valle panorámica desde Castillo de Cofrentes
 - `menu-vertedero-satirico.png` — Vertedero satírico para game-over
+- `menu-mapa-cartografico.png` — Mapa cartográfico del Valle (Biblioteca)
+- `menu-rio-cabriel.png` — Río Cabriel (final screen / victoria)
+
+**Legacy** (no referenciado desde código actual): `assets/backgrounds/menu_bg.png` ~180 KB — copia temprana del bg del menú.
 
 ### E.3. Audio (procedural, F4)
 
@@ -474,8 +513,133 @@ verify.sh: 8 PASS, 0 FAIL
 
 **v1 release + SDD archive**:
 1. ✅ **Pedagogical sign-off**: firmado 2026-09-28 (ver §D.3).
-2. ⏳ **Stage-rosters polish**: confirmar que `getRosterForStage()` enruta correctamente por stage (5 stages con rosters específicos o fallback a TEST_LEVEL).
-3. ⏳ **Crear change SDD formal** para los 4 refinements pre-fase7 (F3.5.1bis, F3.5.1ter, F3.5.4, F6.1) — actualmente documentados inline en ROADMAP.
-4. ⏳ **Release tag v1.0** y `sdd-archive` final.
+2. ✅ **Stage-rosters polish**: `getRosterForStage()` enruta correctamente por stage — 5 rosters específicos (production) o fallback a TEST_LEVEL (`?test=1`).
+3. ✅ **Change SDD formal** para los 4 refinements pre-fase7 (F3.5.1bis, F3.5.1ter, F3.5.4, F6.1): creado, verificado y **archivado** en `openspec/changes/archive/2026-09-28-pre-fase7-polish/` con verdict PASS.
+4. ⏳ **Release tag v1.0** — pendiente de crear.
+5. ⏳ **Resolver bugs pedagógicos §K** antes de release o como v1.0.1.
 
-Ver [`docs/ROADMAP.md`](./ROADMAP.md) para el plan priorizado en fases.
+Ver [`docs/ROADMAP.md`](./ROADMAP.md) para el plan priorizado en fases y §K para los bugs pendientes.
+
+---
+
+## K. Bugs pedagógicos resueltos en el change `2026-09-29-fix-pedagogical-bugs`
+
+Identificados durante la auditoría docs vs código del 2026-09-28.
+**Resueltos el 2026-09-29** en el change
+[`openspec/changes/archive/2026-09-29-fix-pedagogical-bugs/`](../../openspec/changes/archive/2026-09-29-fix-pedagogical-bugs/).
+Esta sección queda como **documentación histórica** del bug y su fix
+para referencia futura.
+
+### K.1. ✅ RESUELTO — Contrato A7 desactivación NO se disparaba en producción
+
+**Síntoma**: el final-screen pedagógico ("El Valle se planta" con dato + 4 enlaces) **no aparece cuando se mata a `planta_treco` en production** (modo menu/5 stages). Solo funciona en `?test=1` mode.
+
+**Reproducción**:
+```bash
+# En ?test=1 funciona correctamente:
+TEST_URL=http://127.0.0.1:8000/?test=1 node _playwright_check_final_screen.mjs
+# Final-screen aparece ✅
+
+# En production (cualquier stage): matar planta_treco no dispara final-screen ❌
+TEST_URL=http://127.0.0.1:8000/ ?stage=stage5-acuifero
+```
+
+**Causa raíz** (`src/levels/stage-rosters.js`):
+- `_enemy()` factory (línea 46-48) no acepta ni setea `lifecycle`.
+- Los 5 stages se construyen con `_buildRoster()` que invoca `_enemy()` para todos los enemigos, **incluyendo `planta_treco` del stage5** (línea 278).
+- Resultado: `planta_treco` en production se crea con `lifecycle='destroyed'` (default), no `'desactivacion'`.
+- Cuando `applyHit()` lo lleva a hp:0, entra al branch `markDestroyed()` (no `markDesactivated()`) → **NO se emite `zarra:desactivacion`** → main.js listener no dispara → final-screen no se muestra.
+
+**Test comparison**: solo `src/levels/test-level.js:184` setea `lifecycle:'desactivacion'` explícitamente. Por eso `?test=1` SÍ funciona.
+
+**Impacto pedagógico**: crítico. El cierre pedagógico (4 enlaces a plataforma + alegaciones + asociación + final screen) es la pieza central del proyecto. Sin él, el juego termina en game-over genérico sin cierre cívico.
+
+**Fix sugerido** (no aplicado):
+```js
+// src/levels/stage-rosters.js — _enemy() factory:
+function _enemy(archetype, isoX, isoY, spriteId, idSuffix, spawnTimeSec) {
+  return { archetype, isoX, isoY, spriteId, id: idSuffix, spawnTimeSec }
+}
+// Agregar parámetro lifecycle + pasarlo al Enemy constructor.
+
+// En _buildRoster() para el boss del stage5:
+boss: {
+  ...,
+  lifecycle: 'desactivacion',  // ← agregar
+}
+```
+
+Alternativa: agregar lógica en `main.js:maybeFireVictory()` que detecte `planta_treco` muerto y emita `zarra:desactivacion` directamente.
+
+### K.2. ✅ RESUELTO — `planta_treco` tenía `hp:1` (no 30)
+
+**Síntoma**: el "boss final" `planta_treco` muere de un solo disparo como cualquier standard.
+
+**Causa**: en `src/levels/test-level.js:177-185` se crea con `archetype:'mini-boss'` → `ARCHETYPES['mini-boss'].hp = 1` (definido en `src/enemies.js:155`). El `archetype` debería ser `'boss'` (hp:30) para que sea un "boss fight" dramático.
+
+**STATUS §B.3** dice "planta TRECO (se desactiva, NO muere)" — la desactivación sí funciona, pero el "boss fight" como momento dramático **no existe**: muere en 1 hit.
+
+**Fix sugerido**: cambiar `archetype:'mini-boss'` → `archetype:'boss'` en `test-level.js:177-185` y en `stage-rosters.js` para los bosses con `lifecycle='desactivacion'`.
+
+### K.3. ✅ RESUELTO — 2 de los 4 enlaces del final-screen devolvían 404
+
+**Verificación con `curl -L`** (2026-09-28):
+
+| URL | HTTP |
+|---|---|
+| `https://nomacrovertederozarra.com` | 200 ✅ |
+| `https://nomacrovertederozarra.com/alegaciones` | **404** ❌ |
+| `https://nomacrovertederozarra.com/asociacion` | **404** ❌ |
+| `#NoAlMacrovertederoDeZarra` (hashtag, texto seleccionable) | n/a ✅ |
+
+**Causa**: las URLs están hardcodeadas en `src/i18n/es.js` (sección `pedagogy.final.enlaces.alegaciones` y `pedagogy.final.enlaces.asociacion`) pero la plataforma vecinal no tiene esas páginas.
+
+**Impacto**: cuando el bug K.1 se arregle y el final-screen se muestre, 2 de los 4 enlaces llevan a páginas rotas. El pedagogical sign-off (firmado 2026-09-28) probablemente no validó estos enlaces con curl real.
+
+**Fix sugerido** (no aplicado):
+1. Confirmar con la Plataforma No al Macrovertedero de Zarra qué URLs SÍ existen.
+2. Si las páginas no existen, crear contenido de al menos una página de redirección / instrucciones.
+3. Mientras tanto, marcarlas como placeholder o reemplazar por URLs a comunicados de prensa existentes.
+
+### K.4. ✅ RESUELTO — Pedagogical sign-off no validaba URLs del final-screen
+
+El sign-off (STATUS §D.3, MANUAL_PLAYTHROUGH §12) marcó ✅ los 6 dato strings + enlaces finales, pero la auditoría del 2026-09-28 detectó que 2 de los 4 enlaces del final-screen dan 404. El proceso de sign-off **debería incluir verificación HTTP real** de cada URL — ahora sabemos que no la hizo.
+
+---
+
+## L. Estado real de URLs pedagógicas (verificado con `curl -L` el 2026-09-29)
+
+### L.1. URLs de fuentes citadas en cards pedagógicas (6/6 OK)
+
+| Stage | URL | HTTP |
+|---|---|---|
+| 1 (Las Hoyas) | `lasprovincias.es/comarcas/plataforma-vertedero-zarra-acuerda-protestas-cortes-trafico-...` | 200 ✅ |
+| 2 (La Hoz) | `agenciadelagua.castillalamancha.es/el-agua-en-castilla-la-mancha/situacion-del-agua-en-clm/acuiferos` | 200 ✅ |
+| 3 (La Hunde) | `actualidadvalencia.com/macrovertedero-zarra-pp-exige-retirada-proyecto/` | 200 ✅ |
+| 4 (Ayora) | `lasprovincias.es/comarcas/plataforma-vertedero-zarra-...` (mismo URL que stage1) | 200 ✅ |
+| 5 (El Acuífero) | `lasprovincias.es/comarcas/valle-ayoracofrentes-moviliza-macrovertedero-proyectado-zarra-...` | 200 ✅ |
+| Final | `valenciaplaza.com/valenciaplaza/comarca-y-empresa/crece-el-rechazo-contra-el-macrovertedero-de-zarra-...` | 200 ✅ |
+
+### L.2. URLs del final-screen (4/4 OK — post-fix K.3)
+
+Tras el fix del change `2026-09-29-fix-pedagogical-bugs`, las 2 URLs que
+antes daban 404 fueron reemplazadas por comunicados públicos reales.
+
+| Enlace | URL | HTTP |
+|---|---|---|
+| Plataforma | `nomacrovertederozarra.com` | 200 ✅ |
+| Alegaciones | `valenciaplaza.com/.../crece-el-rechazo-contra-el-macrovertedero-de-zarra-...` | 200 ✅ |
+| Asociación | `lasprovincias.es/comarcas/plataforma-vertedero-zarra-acuerda-protestas-cortes-trafico-...` | 200 ✅ |
+| Hashtag | `#NoAlMacrovertederoDeZarra` (texto seleccionable, no URL) | n/a ✅ |
+
+### L.3. Proceso de validación en cada sign-off (institucionalizado)
+
+Cualquier sign-off pedagógico futuro debe incluir este bloque mínimo:
+
+```bash
+for url in $(grep -oE 'https?://[^"]+' src/i18n/es.js | sort -u); do
+  printf "%s %s\n" "$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 10 "$url")" "$url"
+done
+```
+
+Solo URLs con 200/2xx cuentan como verificadas. 404, 5xx, timeout → no firmar.

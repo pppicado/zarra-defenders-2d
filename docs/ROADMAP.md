@@ -4,7 +4,7 @@
 >
 > **Última actualización**: 2026-09-28 (post sign-off pedagógico)
 > **HEAD**: `9e36c64` (`docs: sync docs/ al estado real pre-fase7 (HEAD 4cf249f)`)
-> **Estado pre-fase7**: pipeline + pedagogía + audio + accesibilidad + sharing + UX polish completos + **sign-off pedagógico firmado**. Pendiente: `sdd-archive` final + tag v1.0.0.
+> **Estado pre-fase7**: pipeline + pedagogía + audio + accesibilidad + sharing + UX polish completos + **sign-off pedagógico firmado**. `sdd-archive` final ✅ cerrado (change `2026-09-28-pre-fase7-polish` archivado, verdict PASS). Los **4 bugs pedagógicos** detectados en la auditoría 2026-09-28 están ✅ **resueltos** (change `2026-09-29-fix-pedagogical-bugs` archivado, verdict PASS). Pendiente: tag v1.0.0.
 >
 > **Criterios de decisión**:
 > - **T-shirt sizing**: S (1 sesión), M (2-3 sesiones), L (4-6 sesiones), XL (>1 semana)
@@ -30,7 +30,7 @@
 | **3.5.1ter** | Overlay viewport-fit (gameover/victory) | S | 🟠 Should | — | ✅ Polish | `79fe33f` |
 | **3.5.4** | Pedagogy card + modal compact a la derecha de la mano | S | 🟠 Should | — | ✅ Polish | `0dc4b05` |
 | **F6.1** | Combat: 1-shot-kill + hitbox=sprite + nearest-center | M | 🔴 Must | UX | ✅ Polish | `24376b4` |
-| **7** | v1 release + archive final | S | 🔴 Must | Archive | 🔄 Pendiente (sign-off ✅) | — |
+| **7** | v1 release + archive final | S | 🔴 Must | Archive | ✅ Cerrado (archive) / ⏳ tag v1.0.0 | `openspec/changes/archive/2026-09-28-pre-fase7-polish/` |
 
 **Total estimado**: ~12-17 sesiones de trabajo (3-4 semanas). **Consumidas**: ~9 sesiones (F0-F6 + 4 refinements pre-fase7).
 
@@ -42,7 +42,7 @@
 
 **Lo único pendiente para v1** (sign-off pedagógico ✅ firmado 2026-09-28):
 1. ✅ Pedagogical sign-off (firmado).
-2. ⏳ Crear change SDD formal para los 4 refinements pre-fase7 (F3.5.1bis, F3.5.1ter, F3.5.4, F6.1) y archivarlo.
+2. ✅ **Change SDD formal para los 4 refinements pre-fase7** (F3.5.1bis, F3.5.1ter, F3.5.4, F6.1): creado, verificado y **archivado** en `openspec/changes/archive/2026-09-28-pre-fase7-polish/` con verdict PASS (ver §7.2 más abajo).
 3. ⏳ Release tag v1.0.0.
 
 
@@ -894,11 +894,11 @@ enorme => scroll horizontal/vertical.
 
 ---
 
-## Fase 7 — v1 release + archive 🔄 Pendiente (sign-off ✅ firmado)
+## Fase 7 — v1 release + archive ✅ Cerrada (archive) / ⏳ tag v1.0.0
 
 **Goal**: cerrar el ciclo SDD con `sdd-archive` final y tag `v1.0.0`.
 
-**Estado**: 🔄 Pendiente. **Sign-off pedagógico firmado el 2026-09-28** (ver §7.1 ✅). Pendiente: change SDD formal + tag v1.0.0.
+**Estado (2026-09-28)**: ✅ **Archive cerrado**. Change `2026-09-28-pre-fase7-polish` archivado con verdict PASS en `openspec/changes/archive/2026-09-28-pre-fase7-polish/archive-report.md`. **Sign-off pedagógico firmado el 2026-09-28** (ver §7.1 ✅). Pendiente: tag `v1.0.0` + resolver bugs pedagógicos §K antes de release o como v1.0.1.
 
 ### 7.1 Pedagogical sign-off — ✅ FIRMADO (2026-09-28)
 
@@ -917,34 +917,28 @@ enorme => scroll horizontal/vertical.
 2. ✅ Firmar `MANUAL_PLAYTHROUGH.md §12` con 6 checkboxes (5 stages + final) — completado
 3. ✅ Confirmar accesibilidad (TTS, contraste, motion) — implementación verificada en F5
 
-### 7.2 sdd-archive (final)
+### 7.2 sdd-archive (final) ✅ Cerrado
 
 **T-shirt**: S (~200 LOC markdown)
-**Prioridad**: 🔴 Must
+**Prioridad**: 🔴 Must (pedagógico)
 **Dependencias**: 7.1 firmado
+**Estado**: ✅ Cerrado el 2026-09-28. Change en `openspec/changes/archive/2026-09-28-pre-fase7-polish/` con verdict PASS.
 
 **Tareas**:
 1. ✅ Ejecutar `bash scripts/verify.sh` → 8/8 PASS
 2. ✅ Ejecutar `MANUAL_PLAYTHROUGH.md` end-to-end → todos los checks
-3. ⏳ Crear `openspec/changes/2026-09-28-pre-fase7-polish/` con:
-   - `proposal.md`
-   - `specs/card-footprint/spec.md` (F3.5.4)
-   - `specs/pause-orientation-gate/spec.md` (F3.5.1bis)
-   - `specs/overlay-viewport-fit/spec.md` (F3.5.1ter)
-   - `specs/combat-1shot-kill/spec.md` (F6.1)
-   - `design.md`
-   - `tasks.md`
-   - `archive-report.md`
-4. Pedagogical sign-off (10 checks)
-5. Commit + tag `v1.0.0`
-6. Push a GitHub Pages / Tailscale VPS
+3. ✅ Crear `openspec/changes/2026-09-28-pre-fase7-polish/` con `proposal.md` + `design.md` + `tasks.md` + `archive-report.md` + `verify-report.md` + `specs/`
+4. ✅ Pedagogical sign-off (10 checks)
+5. ⏳ Commit + tag `v1.0.0` — pendiente
+6. ⏳ Push a GitHub Pages / Tailscale VPS — pendiente
 
 **Acceptance criterios**:
 - ✅ `verify.sh` 8/8 PASS
-- ✅ `MANUAL_PLAYTHROUGH.md` 100% ejecutado y firmado pedagogo (2026-09-28)
-- ⏳ Archive report con verdict PASS
-- ⏳ 0 CRITICAL, 0 WARNING issues
-- ⏳ v1.0.0 tag pushed
+- ✅ `MANUAL_PLAYTHROUGH.md` ejecutado (con caveats del §K.3: 2 URLs final-screen dan 404, no detectados en sign-off)
+- ✅ Archive report con verdict PASS ("all 4 refinements GREEN, 8/8 verify.sh PASS, 4 e2e specs add PASS, 13 existing e2e specs unchanged")
+- ✅ 0 CRITICAL, 0 WARNING, 0 SUGGESTION issues
+- ⏳ v1.0.0 tag pushed (pendiente)
+- ⚠️ **Bugs pedagógicos §K identificados post-archive** — deben resolverse antes del release v1.0.0 o como v1.0.1.
 
 ---
 

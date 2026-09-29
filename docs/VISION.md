@@ -276,7 +276,7 @@ Modal completo con **Art. 20 CE** + **Art. 11 CDFUE** + uso nominativo + respeto
 
 ### 7.1. Catálogo
 
-**HP base** actualizado post-F6.1: todos los no-boss mueren en 1 disparo. Solo el boss final (`planta_treco`) mantiene HP multi-hit.
+**HP base** actualizado post-F6.1 y F7.3: todos los no-boss mueren en 1 disparo. `planta_treco` mini-boss estático (stages 1-4) tiene `hp:1`. `planta_treco_boss` final-boss del stage5 tiene `archetype:'boss'` → `hp:30`. `sello_burocratico` (boss archetype en stages 1-5 como boss secundario) también mantiene `hp:30`. El "boss fight" dramático del stage5 ahora existe (30 hits, lifecycle='desactivacion').
 
 | ID | Nombre | Tipo | HP base | Puntos × mult | Dato pedagógico |
 |---|---|---|---|---|---|
@@ -291,7 +291,8 @@ Modal completo con **Art. 20 CE** + **Art. 11 CDFUE** + uso nominativo + respeto
 | `topadora` | Topadora | standard | **1** (F6.1) | 10 | Destrucción de encinas |
 | `incineradora` | Incineradora móvil | standard | **1** (F6.1) | 10 | Quema residuos |
 | `trailer` | Trailer | standard | **1** (F6.1) | 10 | Ruta junto a colegio |
-| `planta_treco` | Planta TRECO (final) | boss | **30** | 30 | **Se desactiva, NO muere** |
+| `planta_treco_boss` | Planta TRECO (final boss del stage5) | boss | **30** | 30 | **Se desactiva, NO muere** |
+| `planta_treco` | Planta TRECO (mini-boss estático stages 1-4) | mini-boss | 1 | 20 | Se destruye normal (sin desactivación) |
 
 > **Nota F6.1**: el archetype `tank`/`mini-boss`/`boss` (excepto `planta_treco` como final boss) se unificó a `hp: 1` porque los enemigos multi-hit generaban bugs de UX (algunos enemigos no morían con 1 disparo por overlap con sprite oculto detrás). El `multiplier` (1.5×, 2×, 3×) preserva la jerarquía de score: el `dron_fumigador` (tank) sigue dando 15 pts vs 10 pts del standard.
 
@@ -433,9 +434,9 @@ zarra-defenders-2d/
 ### 10.4. Pedagogía (A5/A7)
 
 - **6 dato strings** populated desde `research/fuentes.md`, sin TODO markers
-- **Boss desactivación** uniforme: `lifecycle='desactivacion'` en planta_treco + (opcional) otros 4 bosses
+- **Boss desactivación (A7 contract)**: `lifecycle='desactivacion'` se aplica al **final-boss** del stage5 (`enemies_planta_treco_boss`). Se setea tanto en `src/levels/test-level.js:184` (modo `?test=1`, para `enemies_planta_treco`) como en `src/levels/stage-rosters.js` (production, para `enemies_planta_treco_boss`). El listener en `main.js:436` discrimina via `FINAL_BOSS_SPRITE_IDS.includes(detail.spriteId)`.
 - **No explosión**, no partículas, no debris — solo desaturación + halt motion
-- **Final screen** tras desactivar plant_treco: dato + 4 enlaces
+- **Final screen** tras desactivar el final-boss del stage5: dato + 3 enlaces web + 1 hashtag. **Todas las URLs verificadas con `curl -L`** (ver `IMPLEMENTATION-STATUS.md §L`).
 
 ### 10.5. Pedagogical sign-off antes de apply
 
@@ -481,7 +482,7 @@ zarra-defenders-2d/
 | D5 | ¿Light gun support? | (A) sí (3D parity), (B) no (mouse-only) | **B confirmado** — sin pointer lock no aplica |
 | D6 | ¿TTS accesibilidad? | (A) sí con Web Speech API, (B) no | **A implementado** — `src/accessibility/tts.js` (F5.1) |
 | D7 | ¿Sharing en redes? | (A) sí, (B) no | **A implementado** — `src/sharing/share.js` (F5.4) |
-| D8 | ¿HP multi-hit para `tank`/`mini-boss`? | (A) sí (balance), (B) no (1-shot-kill) | **B implementado F6.1** — tank/mini-boss ahora HP 1, todos mueren en 1 disparo (boss final mantiene HP 30) |
+| D8 | ¿HP multi-hit para `tank`/`mini-boss`? | (A) sí (balance), (B) no (1-shot-kill) | **B implementado F6.1** — tank/mini-boss ahora HP 1, todos mueren en 1 disparo (boss `sello_burocratico` mantiene HP 30). El `planta_treco_boss` final-boss del stage5 (F7.3) ahora tiene `archetype:'boss'` → HP 30 (boss fight real). |
 | D9 | ¿Per-stage rosters específicos o TEST_LEVEL compartido? | (A) específicos, (B) TEST_LEVEL compartido | **B con A como defer** — `getRosterForStage()` enruta a stage-rosters.js específicos; TEST_LEVEL es fallback |
 | D10 | ¿Pedagogy card compact footprint o full-size? | (A) compact ~96px (F3.5.4), (B) full-size legacy | **A implementado F3.5.4** — compact a la derecha de la mano + expand-on-click |
 | D11 | ¿Pause overlay Continuar siempre enabled o gated? | (A) always enabled, (B) gated en portrait (F3.5.1bis) | **B implementado F3.5.1bis** — gated con hint "Girá el móvil para continuar" |
@@ -492,7 +493,7 @@ zarra-defenders-2d/
 |---|---|---|
 | P1 | ¿Crear change SDD formal para los 4 refinements pre-fase7 (F3.5.1bis, F3.5.1ter, F3.5.4, F6.1)? | 🔲 Pendiente para Fase 7.2 archive |
 | P2 | ¿Suno Pro para reemplazar jota procedural? | ⚪ Diferido — fase B opcional |
-| P3 | ¿Boss desactivación para los 4 bosses intermedios (no solo final)? | 🔄 Diferido — A7 aplica solo a planta_treco en v1 |
+| P3 | ¿Boss desactivación para los 4 bosses intermedios (no solo final)? | 🔄 Diferido — A7 aplica solo al final-boss del stage5 (`planta_treco_boss`). Los `sello_burocratico` bosses intermedios se destruyen normal (sin desactivación). |
 
 ---
 
@@ -552,3 +553,22 @@ zarra-defenders-2d/
 ---
 
 **Próximos pasos**: ver [`IMPLEMENTATION-STATUS.md`](./IMPLEMENTATION-STATUS.md) para el inventario ✅/🟡/❌, y [`ROADMAP.md`](./ROADMAP.md) para el plan priorizado en fases.
+
+---
+
+## 13. Auditoría 2026-09-28 — bugs pedagógicos RESUELTOS el 2026-09-29
+
+Durante el refactor de docs (unificación bajo `docs/`, agregación de índice en
+AGENTS.md) se contrastó esta visión y los otros documentos contra el código
+real. Se identificaron **4 bugs pedagógicos** que **fueron resueltos el
+2026-09-29** en el change
+[`openspec/changes/archive/2026-09-29-fix-pedagogical-bugs/`](../../openspec/changes/archive/2026-09-29-fix-pedagogical-bugs/)
+(verdict PASS):
+
+1. **✅ Resuelto** — Contrato A7 desactivación roto en producción: `planta_treco_boss` (spriteId distinto) ahora se desactiva correctamente en stage5 production, emitiendo `zarra:desactivacion` que dispara el `final-screen`. Listener discrimina mini-boss vs final-boss con `FINAL_BOSS_SPRITE_IDS = ['enemies_planta_treco', 'enemies_planta_treco_boss']`.
+2. **✅ Resuelto** — `planta_treco` con `hp:30`: en stage5 production ahora se carga con `archetype:'boss'` (hp:30). El "boss fight" dramático existe (30 hits).
+3. **✅ Resuelto** — 2 enlaces del final-screen 404 reemplazados por comunicados públicos reales (200 OK): `nomacrovertederozarra.com/alegaciones` → Valencia Plaza "Crece el rechazo..."; `nomacrovertederozarra.com/asociacion` → Las Provincias "La plataforma acuerda...".
+4. **✅ Resuelto** — Pedagogical sign-off futuro: proceso institucionalizado en `IMPLEMENTATION-STATUS.md §L.3` (bloque `curl -L` obligatorio antes de firmar).
+
+Detalles completos del fix en [`IMPLEMENTATION-STATUS.md §K`](./IMPLEMENTATION-STATUS.md#k-bugs-pedag%C3%B3gicos-resueltos-en-el-change-2026-09-29-fix-pedagogical-bugs).
+Spec nuevo de regresión: [`tests/e2e/final-screen-production.spec.mjs`](../../tests/e2e/final-screen-production.spec.mjs).
