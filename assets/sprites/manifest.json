@@ -42,6 +42,12 @@
       "path": "assets/sprites/enemies_planta_treco.png",
       "archetype": "mini-boss"
     },
+    "enemies_planta_treco_boss": {
+      "path": "assets/sprites/enemies_planta_treco.png",
+      "archetype": "boss",
+      "real": true,
+      "note": "F7.3 — spriteId distinto para el final-boss del stage5 (mismo PNG que enemies_planta_treco). Permite al listener del final-screen discriminar entre mini-boss planta_treco (stages 1-4) y final-boss (stage 5). Ver openspec/changes/2026-09-29-fix-pedagogical-bugs/."
+    },
     "enemies_sello_burocratico": {
       "path": "assets/sprites/enemies_sello_burocratico.png",
       "archetype": "boss"

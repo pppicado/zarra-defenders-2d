@@ -155,11 +155,18 @@ async function main() {
     const linkTexts = state.links.map(l => l.text.toLowerCase()).join(' | ')
     const hashtagTexts = state.hashtags.map(h => h.toLowerCase()).join(' | ')
     const allText = `${linkTexts} | ${hashtagTexts}`
-    // Should contain: plataforma, alegaciones, asociación, hashtag
-    const expected = ['plataforma', 'alegaciones', 'asociaci', 'noalmacrovertedero']
+    // Should contain: plataforma, alegaciones, asociación/tejido asociativo, hashtag.
+    // F7.3 (B3): labels were updated when URLs changed from 404 placeholders
+    // to real public-domain articles. The keywords 'asociat' / 'asociativ' /
+    // 'asociaci' are all acceptable forms of the concept.
+    const expected = ['plataforma', 'alegaciones', /asociat|asociativ|asociaci/i, 'noalmacrovertedero']
     for (const e of expected) {
-      if (!allText.toLowerCase().includes(e)) {
-        throw new Error(`expected '${e}' in enlaces, got '${allText}'`)
+      const matches = typeof e === 'string'
+        ? allText.toLowerCase().includes(e)
+        : e.test(allText)
+      if (!matches) {
+        const expected_str = e instanceof RegExp ? e.source : e
+        throw new Error(`expected '${expected_str}' in enlaces, got '${allText}'`)
       }
     }
   })

@@ -27,7 +27,7 @@
 import { mulberry32 } from './random.js?v=44'
 import { on as busOn } from './event-bus.js?v=44'
 import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=44'
-import { Enemy, LATERAL_MIN_PX, LATERAL_MAX_PX } from './enemies.js?v=44'
+import { Enemy, LATERAL_MIN_PX, LATERAL_MAX_PX } from './enemies.js?v=45'
 
 export const DEFAULT_TEST_SEED = 0xC0FFEE
 

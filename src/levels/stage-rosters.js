@@ -34,7 +34,7 @@
  * We use the 12 spriteIds that DO exist as a baseline — when new assets are
  * added later, the rosters can be expanded without structural changes.
  */
-import { ARCHETYPES, resolveMovementConfig, STATIC_SPRITE_IDS } from '../enemies.js?v=44'
+import { ARCHETYPES, resolveMovementConfig, STATIC_SPRITE_IDS } from '../enemies.js?v=45'
 
 const RAIL_LENGTH_S = 120
 const RAIL_DEPTH_MAX = 72
@@ -43,8 +43,14 @@ function _spawnTime(depth) {
   return Math.max(0, ((depth - 5) / RAIL_DEPTH_MAX) * RAIL_LENGTH_S)
 }
 
-function _enemy(archetype, isoX, isoY, spriteId, idSuffix, spawnTimeSec) {
-  return { archetype, isoX, isoY, spriteId, id: idSuffix, spawnTimeSec }
+function _enemy(archetype, isoX, isoY, spriteId, idSuffix, spawnTimeSec, lifecycle) {
+  const def = { archetype, isoX, isoY, spriteId, id: idSuffix, spawnTimeSec }
+  // F7.3 (B1 — fix A7 desactivacion in production): optionally forwards the
+  // `lifecycle` field to the Enemy constructor so the A7 contract (boss
+  // desactivacion uniforme) holds in per-stage rosters, not only in
+  // TEST_LEVEL.
+  if (lifecycle) def.lifecycle = lifecycle
+  return def
 }
 
 /**
@@ -103,7 +109,7 @@ function _buildRoster({
   const bossEntry = boss
   const bossDepth = bossEntry.isoX + bossEntry.isoY
   const bossSpawnTime = Math.max(0, ((bossDepth - 5) / 72) * 120)
-  items.push(_enemy('boss', bossEntry.isoX, bossEntry.isoY, bossEntry.spriteId, bossEntry.id, bossSpawnTime))
+  items.push(_enemy('boss', bossEntry.isoX, bossEntry.isoY, bossEntry.spriteId, bossEntry.id, bossSpawnTime, bossEntry.lifecycle))
   // Optional secondary boss if defined
   if (bossEntry.secondary) {
     const secDepth = bossEntry.secondary.isoX + bossEntry.secondary.isoY
@@ -259,7 +265,7 @@ const stage4 = _buildRoster({
 // ============================================================
 const stage5 = _buildRoster({
   stageId: 'stage5-acuifero',
-  finalBossSpriteId: 'enemies_planta_treco',
+  finalBossSpriteId: 'enemies_planta_treco_boss',
   backgroundPath: 'assets/backgrounds/stage5-acuifero.png',
   mobile: [
     { spriteId: 'enemies_dron_fumigador', count: 5, startDepth: 6, step: 3 },     // surveillance drones
@@ -275,7 +281,13 @@ const stage5 = _buildRoster({
   boss: {
     id: 'stage5_boss_1',
     isoX: 35, isoY: 36,
-    spriteId: 'enemies_planta_treco',
+    // F7.3 (B1+B2+B4): distinct spriteId (`enemies_planta_treco_boss`) so
+    // the final-screen listener can discriminate between mini-boss
+    // planta_treco (stages 1-4) and final-boss (stage 5). `lifecycle:
+    // 'desactivacion'` activates the A7 contract in production (not only in
+    // `?test=1`). The archetype is always 'boss' (hp:30) per `_buildRoster()`.
+    spriteId: 'enemies_planta_treco_boss',
+    lifecycle: 'desactivacion',
     secondary: {
       id: 'stage5_boss_2',
       isoX: 36, isoY: 35,

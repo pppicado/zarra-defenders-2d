@@ -21,7 +21,7 @@
  *
  * Determinism: no Math.random anywhere in this file or the spawn consumption.
  */
-import { ARCHETYPES, STATIC_SPRITE_IDS, MOBILE_DEFAULT, resolveMovementConfig } from '../enemies.js?v=44'
+import { ARCHETYPES, STATIC_SPRITE_IDS, MOBILE_DEFAULT, resolveMovementConfig } from '../enemies.js?v=45'
 
 /** Spawn time relative to camera progress — when cameraIso depth reaches this value, spawn. */
 function _spawnTimeFromDepth(depth) {

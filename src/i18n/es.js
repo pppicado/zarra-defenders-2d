@@ -291,6 +291,10 @@ export const STRINGS = {
 
     // Final screen (Fase 1.7) — los 4 enlaces de cierre del loop pedagógico.
     // A6 contract: URLs centralizadas acá, cero literales en código.
+    // Auditoría 2026-09-28: las URLs originales a /alegaciones y /asociacion
+    // devolvían 404 (páginas no creadas en nomacrovertederozarra.com). Se
+    // reemplazaron por comunicados públicos reales verificados con curl -L
+    // (HTTP 200, título específico del artículo).
     final: {
       titulo: 'El Valle se planta',
       dato: 'A fecha de hoy, la solicitud está en información pública. Puedes presentar alegaciones.',
@@ -300,12 +304,16 @@ export const STRINGS = {
           url: 'https://nomacrovertederozarra.com',
         },
         alegaciones: {
-          label: 'Formulario de alegaciones',
-          url: 'https://nomacrovertederozarra.com/alegaciones',
+          // Reemplaza el 404 /alegaciones por comunicado real sobre
+          // movilización vecinal contra el macrovertedero.
+          label: 'Movilización vecinal y alegaciones',
+          url: 'https://valenciaplaza.com/valenciaplaza/comarca-y-empresa/crece-el-rechazo-contra-el-macrovertedero-de-zarra-tras-la-ultima-concentracion-de-casi-mil-personas',
         },
         asociacion: {
-          label: 'Asociación Naturalista de Ayora y la Valle',
-          url: 'https://nomacrovertederozarra.com/asociacion',
+          // Reemplaza el 404 /asociacion por comunicado sobre la plataforma
+          // vecinal que coordina protestas + tejido asociativo local.
+          label: 'Plataforma y tejido asociativo',
+          url: 'https://www.lasprovincias.es/comarcas/plataforma-vertedero-zarra-acuerda-protestas-cortes-trafico-20260624183217-nt.html',
         },
         hashtag: {
           label: '#NoAlMacrovertederoDeZarra',

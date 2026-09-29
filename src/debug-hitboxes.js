@@ -18,7 +18,7 @@
  * 1 per enemy — fewer draw calls, simpler lifecycle, and enemies don't
  * change archetype at runtime.
  */
-import { Enemy } from './enemies.js?v=44'
+import { Enemy } from './enemies.js?v=45'
 
 // Color per archetype — locked by REQ-CMB-007. Co-located with the only
 // consumer so the palette + use stay together (TASK-X2).

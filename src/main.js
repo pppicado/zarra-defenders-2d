@@ -23,7 +23,7 @@ import { IsoWorld } from './iso/world.js?v=44'
 import { Tilemap } from './iso/tilemap.js?v=44' // eslint-disable-line no-unused-vars -- kept for tests/iso-tile-system references; no longer instantiated in main game (fase-6 BG-005)
 import { Integrity } from './integrity.js?v=44'
 import { Score } from './score.js?v=44'
-import { EnemyManager, ARCHETYPES, LATERAL_MIN_PX, LATERAL_MAX_PX } from './enemies.js?v=44'
+import { EnemyManager, ARCHETYPES, LATERAL_MIN_PX, LATERAL_MAX_PX } from './enemies.js?v=45'
 import { Combat } from './combat.js?v=44'
 import { MainMenu } from './ui/menu.js?v=44'
 import { Overlay } from './ui/overlay.js?v=44'
@@ -41,7 +41,7 @@ import { ModalIntermedio } from './pedagogy/modal-intermedio.js?v=44'
 import { ResumenFinal } from './pedagogy/resumen-final.js?v=44'
 import { Biblioteca } from './pedagogy/biblioteca.js?v=44'
 import { DataScreen } from './pedagogy/data-screen.js?v=44'
-import { FinalScreen, FINAL_BOSS_SPRITE_ID } from './pedagogy/final-screen.js?v=44'
+import { FinalScreen, FINAL_BOSS_SPRITE_IDS } from './pedagogy/final-screen.js?v=44'
 import { PauseOverlay } from './ui/pause.js?v=44'
 import { __zr } from './engine/dom-debug.js?v=44'
 import { MusicEngine } from './audio/music.js?v=44'
@@ -432,9 +432,13 @@ async function bootstrap() {
   busOn('menu:startRequested', () => finalScreen.hide())
   busOn('bootTestLevel:request', () => finalScreen.hide())
 
-  // Trigger: when the boss final (planta_treco) is desactivado (F1.6 A7)
+  // Trigger: when the final boss (planta_treco / planta_treco_boss) is
+  // desactivado (F1.6 A7). F7.3 (B4): listener matches against
+  // FINAL_BOSS_SPRITE_IDS (array) to support both `?test=1` mode (TEST_LEVEL
+  // uses 'enemies_planta_treco') and production mode (stage-rosters uses
+  // 'enemies_planta_treco_boss' for the final-boss of stage5).
   busOn('zarra:desactivacion', (detail) => {
-    if (!detail || detail.spriteId !== FINAL_BOSS_SPRITE_ID) return
+    if (!detail || !FINAL_BOSS_SPRITE_IDS.includes(detail.spriteId)) return
     finalScreen.show()
     // Trigger stage:cleared-equivalent so resumen also appears after closing
     emit('stage:cleared', { stageId: 'stage5-acuifero' })

@@ -21,7 +21,7 @@
  *     pointer tap pipeline is gated; this is for tests + UI button "fire" hooks).
  */
 import { emit } from './event-bus.js?v=44'
-import { ARCHETYPES, Enemy } from './enemies.js?v=44'
+import { ARCHETYPES, Enemy } from './enemies.js?v=45'
 import { LOGICAL_W, LOGICAL_H } from './canvas.js?v=44'
 import { __zr } from './engine/dom-debug.js?v=44'
 

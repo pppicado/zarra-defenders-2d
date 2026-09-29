@@ -15,7 +15,14 @@
  *       4. Hashtag #NoAlMacrovertederoDeZarra (selectable text)
  *   - "Volver a jugar" button → main menu
  *
- * Trigger: zarra:desactivacion with spriteId='enemies_planta_treco'.
+ * Trigger: zarra:desactivacion with spriteId matching FINAL_BOSS_SPRITE_IDS.
+ *
+ * F7.3 (B4 — fix listener discrimination): the listener matches against
+ * BOTH 'enemies_planta_treco' (used by mini-bosses in stages 1-4 AND by
+ * TEST_LEVEL) AND 'enemies_planta_treco_boss' (used by the stage5 final-boss
+ * in `stage-rosters.js`). This preserves `?test=1` backward compatibility
+ * while enabling production discrimination. The final-screen only shows
+ * when the active stage is stage5 — see main.js:436.
  *
  * A6 contract: URLs come from STRINGS, zero literals in code.
  *
@@ -25,7 +32,10 @@
 
 import { STRINGS } from '../i18n/es.js?v=44'
 
-const FINAL_BOSS_SPRITE_ID = 'enemies_planta_treco'
+// F7.3 (B4): array of spriteIds accepted by the final-screen listener.
+// Maintains retrocompat with TEST_LEVEL (`enemies_planta_treco`) and enables
+// production discrimination (`enemies_planta_treco_boss`).
+const FINAL_BOSS_SPRITE_IDS = Object.freeze(['enemies_planta_treco', 'enemies_planta_treco_boss'])
 
 export class FinalScreen {
   /**
@@ -122,4 +132,4 @@ function escapeAttr(str) {
   return escapeHtml(str)
 }
 
-export { FINAL_BOSS_SPRITE_ID }
+export { FINAL_BOSS_SPRITE_IDS }
