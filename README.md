@@ -21,7 +21,7 @@ Este juego es una obra de **ficción con fines educativos y cívicos**.
 - Los datos mostrados (volúmenes, daños, cuantías) provienen de **fuentes citadas en cada card pedagógica** del juego.
 - Si TRECO o sus titulares consideran que el uso excede el ámbito de la crítica documentada, pueden solicitar la modificación de textos vía GitHub Issues. Se atenderá cualquier petición razonable.
 
-Ver el disclaimer completo y la política de contenido en [`PLAN.md`](./PLAN.md#-disclaimer-y-política-de-contenido).
+Ver el disclaimer completo y la política de contenido en [`docs/PLAN.md`](./docs/PLAN.md#-disclaimer-y-política-de-contenido).
 
 ---
 
@@ -79,6 +79,15 @@ Los 6 dato strings en `src/i18n/es.js` fueron revisados por el pedagogo (usuario
 
 Detalle completo en `docs/IMPLEMENTATION-STATUS.md §D.3`. Esto desbloquea el `sdd-archive` final.
 
+> ✅ **Bugs pedagógicos resueltos el 2026-09-29** (change
+> `2026-09-29-fix-pedagogical-bugs` archivado): los 4 bugs detectados en la
+> auditoría del 2026-09-28 (contrato A7 desactivación roto en producción,
+> `planta_treco` con `hp:1`, 2 enlaces del final-screen con 404, sign-off
+> sin verificación curl) están todos arreglados. Ver
+> [`docs/IMPLEMENTATION-STATUS.md §K`](./docs/IMPLEMENTATION-STATUS.md#k-bugs-pedag%C3%B3gicos-resueltos-en-el-change-2026-09-29-fix-pedagogical-bugs)
+> para el detalle histórico + los fixes aplicados + el spec nuevo
+> `tests/e2e/final-screen-production.spec.mjs` que valida production mode.
+
 ---
 
 ## 🎯 Contexto
@@ -101,7 +110,7 @@ On-rails shooter pedagógico sobre el impacto del macrovertedero de Zarra (TRECO
 - **Pixi.js 8** vía CDN (loader local fallback en `vendor/pixi.min.js`)
 - **Sprites isométricos** pre-generados (21 assets en `assets/sprites/`)
 - **Mouse / touch** unificados bajo `InputManager`
-- **e2e tests** con Playwright (Chromium headless), 26 specs, **100% pass**
+- **e2e tests** con Playwright (Chromium headless), **31 specs**, **100% pass**
 - **SDD** (Spec-Driven Development) con OpenSpec — Fases 4–6 archivadas
 
 ---
@@ -111,10 +120,8 @@ On-rails shooter pedagógico sobre el impacto del macrovertedero de Zarra (TRECO
 ```
 zarra-defenders-2d/
 ├── README.md              ← este archivo
-├── PLAN.md                ← diseño original + decisiones de scope
-├── AGENTS.md              ← convenciones de agente (URLs, port, format)
+├── AGENTS.md              ← convenciones de agente + índice de documentación
 ├── LICENSE                ← CC BY-NC-SA 4.0 (assets) + MIT (code)
-├── MANUAL_PLAYTHROUGH.md  ← guía de juego + URLs verificadas + pedagogía por enemy
 ├── index.html             ← entry point (Pixi loader, DISCLAIMER, modals)
 ├── styles/
 │   └── main.css           ← pixel-perfect, image-rendering: pixelated, clamp() responsive
@@ -174,8 +181,10 @@ zarra-defenders-2d/
 │   ├── make_gallery.py    ← genera preview HTML de assets
 │   └── minimax_mcp_*.py   ← sprite generation pipeline (regenerable)
 ├── docs/
+│   ├── PLAN.md            ← documento histórico (diseño original, decisiones 2026-09-03)
+│   ├── MANUAL_PLAYTHROUGH.md ← guía de juego + pedagogical sign-off (21 secciones)
 │   ├── ROADMAP.md         ← decisiones de fase + refinements
-│   ├── IMPLEMENTATION-STATUS.md ← qué está cerrado y qué falta
+│   ├── IMPLEMENTATION-STATUS.md ← qué está cerrado y qué falta al HEAD actual
 │   └── VISION.md          ← visión del proyecto a largo plazo
 ├── openspec/              ← SDD artifact store (cambios archivados por fase)
 │   ├── config.yaml        ← OpenSpec config
@@ -183,7 +192,7 @@ zarra-defenders-2d/
 │   └── changes/           ← changes activos (vacío pre-fase7)
 ├── start_server.sh        ← dev server helper (kills old, binds 0.0.0.0:8000)
 └── tests/
-    └── e2e/               ← 26 Playwright specs (one-shot-kill, orientation-autopause, etc.)
+    └── e2e/               ← 31 Playwright specs (one-shot-kill, orientation-autopause, etc.)
 ```
 
 ---
@@ -194,7 +203,7 @@ zarra-defenders-2d/
 TEST_URL=http://127.0.0.1:8000/?test=1 node tests/e2e/<spec>.spec.mjs
 ```
 
-**Suite actual: 26 specs, 100% pass.** Destacados:
+**Suite actual: 31 specs, 100% pass.** Destacados:
 
 - `one-shot-kill.spec.mjs` — 98 asserts: cada no-boss muere en 1 hit, hitbox = sprite, nearest-center overlap tie-break, boss kill contract.
 - `pedagogy-card-position.spec.mjs` — 29 asserts: card compact footprint, expand-on-click, stacking con modal firmas.
@@ -220,12 +229,14 @@ Issues bienvenidos. Para cambios grandes, abrir issue primero para discutir scop
 
 ## 📚 Documentación adicional
 
-- [`PLAN.md`](./PLAN.md) — diseño original, mecánicas, fases, assets
-- [`MANUAL_PLAYTHROUGH.md`](./MANUAL_PLAYTHROUGH.md) — guía de juego + URLs verificadas + pedagogía por enemigo
+Toda la documentación del proyecto vive en `docs/`. Índice completo en [`AGENTS.md`](./AGENTS.md#-documentación-del-proyecto).
+
+- [`docs/PLAN.md`](./docs/PLAN.md) — **documento histórico** de planificación (sesión 2026-09-03). Decisiones originales, fases, assets
+- [`docs/MANUAL_PLAYTHROUGH.md`](./docs/MANUAL_PLAYTHROUGH.md) — guía de juego + URLs verificadas + pedagogía por enemigo + pedagogical sign-off
 - [`docs/ROADMAP.md`](./docs/ROADMAP.md) — decisiones de fase + refinements (3.5.1bis, 3.5.1ter, 3.5.4, F6.1)
-- [`docs/IMPLEMENTATION-STATUS.md`](./docs/IMPLEMENTATION-STATUS.md) — qué está cerrado y qué falta
-- [`docs/VISION.md`](./docs/VISION.md) — visión a largo plazo
-- [`AGENTS.md`](./AGENTS.md) — convenciones de agente (URLs, port, format)
+- [`docs/IMPLEMENTATION-STATUS.md`](./docs/IMPLEMENTATION-STATUS.md) — qué está cerrado y qué falta al HEAD actual
+- [`docs/VISION.md`](./docs/VISION.md) — visión consolidada a largo plazo + decisiones tomadas/pendientes
+- [`AGENTS.md`](./AGENTS.md) — convenciones de agente (URLs, port, format) + índice de docs
 - [`openspec/`](./openspec/) — SDD artifact store (cambios archivados)
 
 ---
@@ -250,6 +261,13 @@ Pendiente de definir. Provisional:
 - **17 unit specs, todos PASS**
 - **`bash scripts/verify.sh` → 8/8 PASS** (C1-C8: STRINGS, prose, sprites, stages, fuentes, https://, desactivacion, console)
 - **✅ Pedagogical sign-off firmado** — los 6 dato strings revisados y aprobados por el pedagogo
+- **⚠️ Auditoría docs vs código post-unificación** (2026-09-28): detectados 4 bugs pedagógicos (§K de STATUS)
+- **✅ 4 bugs pedagógicos resueltos el 2026-09-29** (change `2026-09-29-fix-pedagogical-bugs` archivado):
+  - Contrato A7 desactivación funciona en production (stage-rosters.js setea `lifecycle:'desactivacion'` para el final-boss del stage5)
+  - `planta_treco` final-boss ahora `archetype:'boss'` (hp:30, 30 hits para matar — boss fight real)
+  - 2 enlaces del final-screen reemplazados por comunicados públicos reales (200 OK)
+  - Listener discrimina mini-boss vs final-boss con `FINAL_BOSS_SPRITE_IDS = ['enemies_planta_treco', 'enemies_planta_treco_boss']`
+  - Nuevo spec `tests/e2e/final-screen-production.spec.mjs` valida production mode end-to-end
 
 ### Fases 0–6 (commit history)
 

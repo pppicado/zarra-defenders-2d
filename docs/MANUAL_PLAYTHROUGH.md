@@ -183,6 +183,17 @@ El juego requiere servidor HTTP — `file://` no permite Pointer Lock ni Pixi.js
 
 > **Cada uno de los 6 datos pedagógicos debe ser revisado y firmado por el
 > pedagogo (usuario) antes de hacer `sdd-archive` (Fase 7).**
+>
+> ✅ **Auditoría 2026-09-28 — bugs pedagógicos RESUELTOS el 2026-09-29** (cambio
+> `2026-09-29-fix-pedagogical-bugs` archivado, verdict PASS). Detalle histórico
+> en [`IMPLEMENTATION-STATUS.md §K`](./IMPLEMENTATION-STATUS.md#k-bugs-pedag%C3%B3gicos-resueltos-en-el-change-2026-09-29-fix-pedagogical-bugs):
+> - ✅ §K.1 RESUELTO: contrato A7 desactivación funciona en production (stage-rosters.js setea `lifecycle:'desactivacion'` para el final-boss del stage5 `planta_treco_boss`)
+> - ✅ §K.2 RESUELTO: `planta_treco_boss` (final-boss del stage5) ahora `archetype:'boss'` con `hp:30` (boss fight real de 30 hits)
+> - ✅ §K.3 RESUELTO: 2 enlaces del final-screen reemplazados por comunicados públicos reales (200 OK verificados con `curl -L`)
+> - ✅ §K.4 RESUELTO: el proceso de sign-off ahora incluye validación `curl -L` obligatoria (ver §L.3 de STATUS)
+>
+> Spec nuevo de regresión en production mode:
+> [`tests/e2e/final-screen-production.spec.mjs`](../../tests/e2e/final-screen-production.spec.mjs).
 
 **A5 contract**: cada `.fuente` value populated verbatim desde `research/fuentes.md`
 (6 fuentes verificadas). Sin TODO markers. Sin empty strings.
@@ -234,13 +245,24 @@ El juego requiere servidor HTTP — `file://` no permite Pointer Lock ni Pixi.js
 
 ### §12.6 Final screen (post-boss desactivación)
 
+> ✅ **Bugs pedagógicos §K.1 + §K.3 RESUELTOS el 2026-09-29** (cambio
+> `2026-09-29-fix-pedagogical-bugs` archivado). El final-screen ahora se
+> muestra correctamente en production cuando se mata al final-boss del
+> stage5 (`enemies_planta_treco_boss`, 30 hits), y los 4 enlaces apuntan
+> a URLs verificadas con HTTP 200.
+
 | Item | Value | Reviewed? | Pedagogo sign-off |
 |---|---|---|---|
 | `STRINGS.pedagogy.datos['final'].texto` | "A fecha de hoy, la solicitud está en información pública. Puedes presentar alegaciones." | [ ] | [ ] |
 | `STRINGS.pedagogy.datos['final'].fuente` | "Valencia Plaza, 31/07/2026" | [ ] | [ ] |
 | `STRINGS.pedagogy.datos['final'].url` | https://valenciaplaza.com/valenciaplaza/comarca-y-empresa/crece-el-rechazo-contra-el-macrovertedero-de-zarra-tras-la-ultima-concentracion-de-casi-mil-personas | [ ] | [ ] |
-| 4 enlaces (plataforma, alegaciones, asociación, hashtag) | URLs verificadas, no caricature | [ ] | [ ] |
+| **4 enlaces** (plataforma, alegaciones, asociación, hashtag) | URLs verificadas con `curl -L` el 2026-09-29 (ver §L de STATUS): | | |
+| → Plataforma | `https://nomacrovertederozarra.com` | ✅ HTTP 200 | [ ] |
+| → Movilización vecinal y alegaciones | `https://valenciaplaza.com/valenciaplaza/comarca-y-empresa/crece-el-rechazo-contra-el-macrovertedero-de-zarra-tras-la-ultima-concentracion-de-casi-mil-personas` | ✅ HTTP 200 | [ ] |
+| → Plataforma y tejido asociativo | `https://www.lasprovincias.es/comarcas/plataforma-vertedero-zarra-acuerda-protestas-cortes-trafico-20260624183217-nt.html` | ✅ HTTP 200 | [ ] |
+| → Hashtag | `#NoAlMacrovertederoDeZarra` (texto seleccionable, no URL) | ✅ n/a | [ ] |
 | **Desactivación framing** | El boss NO muere en explosión, se desactiva con desaturación + halt | [ ] | [ ] |
+| **Boss fight real** | El final-boss `enemies_planta_treco_boss` tiene `hp:30` (boss archetype), 30 hits para desactivar — boss fight dramático | [ ] | [ ] |
 
 ### §12.7 Tono general (criterio global)
 

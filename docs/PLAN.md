@@ -1,6 +1,47 @@
 # PLAN: Zarra Defenders 2D
 
-> **Documento de planificación previo al código.** Por favor revisar y modificar lo que sea necesario antes de empezar a implementar. Las decisiones marcadas con `[?]` son preguntas abiertas.
+> **DOCUMENTO HISTÓRICO** — Este es el documento madre de planificación del
+> proyecto, escrito antes de empezar a implementar (sesión 2026-09-03 y
+> siguientes). Conserva el razonamiento original, las decisiones confirmadas
+> durante el bootstrap y el inventario de assets pensado en su momento.
+>
+> **Para el estado actual del proyecto**, consultar las fuentes vivas:
+> - [`README.md`](./README.md) — pitch + disclaimer + estado actual + estructura
+> - [`VISION.md`](./VISION.md) — visión consolidada del 2D, 11 mecanismos pedagógicos
+>   implementados, decisiones tomadas y pendientes
+> - [`ROADMAP.md`](./ROADMAP.md) — plan priorizado por fases + polish iterations
+> - [`IMPLEMENTATION-STATUS.md`](./IMPLEMENTATION-STATUS.md) — inventario ✅/🟡/❌
+>   al HEAD actual, contratos A1-A9 del 3D, métricas de calidad
+> - [`MANUAL_PLAYTHROUGH.md`](./MANUAL_PLAYTHROUGH.md) — script de aceptación
+>   manual con 21 secciones + pedagogical sign-off
+>
+> **Cómo leer este PLAN**:
+> - §1-§6 — diseño original (mecánicas, stages, pedagogía, controles, estilo,
+>   stack, audio) — útil como referencia histórica de por qué el juego es como
+>   es. Algunas decisiones ya no aplican (ej. Pixi.js v7 mencionado en §2.5.6
+>   cuando el proyecto migró a Pixi.js@8 con vendor fallback en F6).
+> - §7 — fases de implementación originales — todas las fases 0-6 ya están
+>   cerradas y archivadas bajo SDD (ver `openspec/changes/archive/`).
+> - §11 — spec del test level (`?test=1`) — sigue vigente.
+> - §12 — referencias de los stages — los NOTES.md viven en
+>   `assets/references/stage{1-5}-*/`.
+> - §13 — pivote a vista isométrica tipo Diablo 2 — implementado en
+>   `src/iso/`.
+>
+> Las decisiones marcadas con `[?]` son preguntas que ya fueron resueltas en
+> las sesiones del 2026-09-03 y siguientes (ver §"Decisiones confirmadas" más
+> abajo en este mismo archivo y [`docs/ROADMAP.md`](./ROADMAP.md) §"Resumen
+> ejecutivo").
+>
+> **Auditoría 2026-09-28 — bugs pedagógicos RESUELTOS el 2026-09-29**: durante la
+> unificación de docs y el contraste contra el código real, se detectaron
+> 4 bugs que **fueron resueltos** el 2026-09-29 en el change
+> `2026-09-29-fix-pedagogical-bugs`. Detalle histórico en
+> [`IMPLEMENTATION-STATUS.md §K`](./IMPLEMENTATION-STATUS.md#k-bugs-pedag%C3%B3gicos-resueltos-en-el-change-2026-09-29-fix-pedagogical-bugs).
+> Bugs resueltos: (1) contrato A7 desactivación del final-boss del stage5
+> ahora funciona en producción (no solo en `?test=1`); (2) las 2 URLs del
+> final-screen que daban 404 fueron reemplazadas por comunicados públicos
+> reales con HTTP 200.
 
 ---
 

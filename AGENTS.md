@@ -8,6 +8,27 @@
 
 ---
 
+## Documentación del proyecto
+
+Toda la documentación vive en `docs/`. El entry point del repo para humanos es
+[`README.md`](./README.md); este archivo es para agentes. Cuando el usuario
+pregunte por diseño, pedagogía, planes, estado o script de aceptación, leer
+desde aquí primero.
+
+| Archivo | Para qué sirve | Cuándo leerlo |
+|---|---|---|
+| [`docs/VISION.md`](./docs/VISION.md) | Visión consolidada del 2D: identidad, tono, contrato cívico, decisiones tomadas y pendientes | Cuando el usuario pregunte "qué es este juego" o "¿por qué se hace así?" |
+| [`docs/PLAN.md`](./docs/PLAN.md) | **Documento histórico** de planificación (sesión 2026-09-03). Decisiones originales, fases, inventario de assets | Solo como referencia histórica. El estado vivo está en `IMPLEMENTATION-STATUS.md` y `ROADMAP.md` |
+| [`docs/ROADMAP.md`](./docs/ROADMAP.md) | Plan priorizado por fases (F0-F7) + polish iterations (F3.5.1bis, F3.5.1ter, F3.5.4, F6.1) | Cuando el usuario pregunte "¿qué viene después?" o "¿cuál es el siguiente paso?" |
+| [`docs/IMPLEMENTATION-STATUS.md`](./docs/IMPLEMENTATION-STATUS.md) | Inventario técnico al HEAD actual: ✅ implementado, 🟡 parcial, ❌ no. Contratos A1-A9 del 3D, métricas de calidad | Cuando el usuario pregunte "¿qué está hecho?" o "¿qué falta?" |
+| [`docs/MANUAL_PLAYTHROUGH.md`](./docs/MANUAL_PLAYTHROUGH.md) | Script de aceptación manual (21 secciones) + pedagogical sign-off + URLs verificadas | Cuando el usuario pida hacer QA manual, verificar URLs, o firmar la release |
+
+**Orden de lectura recomendado** para un agente nuevo: VISION →
+IMPLEMENTATION-STATUS → ROADMAP → MANUAL_PLAYTHROUGH. PLAN solo si necesitás
+el rationale original de una decisión que ya cambió.
+
+---
+
 ## When the user asks for "urls" / "dame los enlaces" / "urls tailscale"
 
 Deliver **the URLs that are currently live and useful for THIS project**, in this
@@ -168,8 +189,8 @@ TEST_URL=http://127.0.0.1:8000/?test=1 node tests/e2e/<spec>.spec.mjs
 
 ## Pointers to existing URL documentation in this repo
 
-- `MANUAL_PLAYTHROUGH.md` §"URLs probadas" — running verified-URL inventory,
-  updated per-session.
+- `docs/MANUAL_PLAYTHROUGH.md` §"URLs probadas" — running verified-URL
+  inventory, updated per-session.
 - `docs/IMPLEMENTATION-STATUS.md` — mentions Tailscale as the TEST_URL fallback.
 - `src/i18n/es.js` — the ONLY file allowed to contain `https://` literals
   (project rule A6). Do not surface these unless explicitly asked.
