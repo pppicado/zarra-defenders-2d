@@ -31,6 +31,15 @@ el rationale original de una decisión que ya cambió.
 
 ## When the user asks for "urls" / "dame los enlaces" / "urls tailscale"
 
+**Default: deliver ALL URLs via Tailscale** (`http://100.116.137.66:8000/...`).
+Only fall back to `127.0.0.1:8000` if Tailscale is unreachable from the
+sandbox (verify with `ip -4 addr show tailscale0 | grep 100.116.137.66`).
+This applies to **every URL** the agent shares with the user in this project:
+- Entry points (`/`, `/catalog.html`, `/catalogoraw.html`)
+- Diagnostic captures (`/tests/playwright-screenshots/...`)
+- Any other resource served by the dev server
+User confirmed this rule explicitly on 2026-09-29.
+
 Deliver **the URLs that are currently live and useful for THIS project**, in this
 order:
 
@@ -42,6 +51,8 @@ order:
    backgrounds are the topic of conversation.
 4. **Test fixtures / debug pages** from `tests/*.html` only if the user is
    debugging or running e2e harnesses.
+5. **Diagnostic Playwright captures** from `tests/playwright-screenshots/`
+   when sharing screenshots (these are served as static files by the dev server).
 
 Do **not** deliver:
 
