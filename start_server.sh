@@ -1,5 +1,5 @@
 #!/bin/bash
-# Start HTTP server for zarra-defenders-2d on port 8000 (daemonized)
+# Start HTTP server for zarra-defenders-2d on port 8000 (daemonized, no-cache headers)
 # Usage: ./start_server.sh [port]
 
 set -u
@@ -9,24 +9,13 @@ LOG="/tmp/zarra2d-server.log"
 PIDFILE="/tmp/zarra2d-server.pid"
 
 # Kill any previous instance
+pkill -f "dev_server.py ${PORT}" 2>/dev/null
 pkill -f "http.server ${PORT}" 2>/dev/null
 sleep 1
 
-# Start with setsid + redirect all fds to log/null
-nohup setsid python3 -m http.server "${PORT}" --bind 0.0.0.0 \
-    --directory "${DIR}" \
+# Start custom server (no-cache headers so browsers don't serve stale JS/CSS)
+nohup setsid python3 "${DIR}/tools/dev_server.py" "${PORT}" \
     < /dev/null > "${LOG}" 2>&1 &
 
 echo $! > "${PIDFILE}"
-sleep 2
-PID="$(cat ${PIDFILE})"
-
-if kill -0 "${PID}" 2>/dev/null; then
-  echo "Server PID: ${PID} on port ${PORT} serving ${DIR}"
-  echo "Test: curl -sI http://localhost:${PORT}/"
-  echo "Log: tail -f ${LOG}"
-else
-  echo "Server FAILED to start. Log:"
-  cat "${LOG}"
-  exit 1
-fi
+echo "zarra-dev-server pid=$(cat ${PIDFILE}), port=${PORT}, no-cache enabled"
