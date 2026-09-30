@@ -871,7 +871,9 @@ body.menu-mode #game-hud-wrapper {
 
 /* ============================================================
    Pedagogy card (F1.1) — overlay flotante al destruir enemigo
-   - z-index 150 (entre integridad HUD 50 y game-overlay 200)
+   - z-index 210 (entre game-overlay 200 y final-screen 250) — F7.4.2
+     raised from 150 so the card stays visible when the game-over modal
+     is briefly visible during its fade-in/out transition.
    - F3.5.4: compact footprint (height ≈ hearts, bottom-right of hand)
      sits to the right of the hand sprite. Click expands to show full
      content; click again collapses to compact.
@@ -900,7 +902,12 @@ body.menu-mode #game-hud-wrapper {
   color: #e8e8e8;
   font-size: 0.78rem;
   line-height: 1.3;
-  z-index: 150;
+  /* F7.4.2 — z-index 210 (was 150): the pedagogy card must render above the
+     game-overlay (z-index 200) so the user can see the pedagogical note even
+     while the game-over modal is being dismissed (or while waiting for the
+     player to read it before retrying). The final-screen (z-index 250) still
+     correctly renders above the card, preserving the documented layer order. */
+  z-index: 210;
   box-shadow: 0 6px 0 rgba(0, 0, 0, 0.6);
   cursor: pointer;            /* click = expand/collapse */
   user-select: none;

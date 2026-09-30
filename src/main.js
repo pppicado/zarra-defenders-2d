@@ -867,6 +867,13 @@ async function bootstrap() {
     // F7.4 — reset per-run pedagogy counters (cumulative kills-by-spriteId)
     // so the card's "(N)" counter doesn't leak across runs.
     if (pedagogyCards?.resetRunCounters) pedagogyCards.resetRunCounters()
+    // F7.4.1 — ensure the game-over/victory overlay is hidden at the start of
+    // every run. Without this, the overlay's opaque background (z-index 200)
+    // covers the entire viewport and hides the pedagogy cards (z-index 150),
+    // which is the user-reported "notas informativas no las veo" bug.
+    // The overlay is only shown by showGameOver() / showVictory() in response
+    // to integrity:exhausted / stage:cleared, so hiding it here is safe.
+    if (ctx?.overlay?.hide) ctx.overlay.hide()
     // BG-006 — reset finale flag + unfreeze bg so it scrolls again on retry.
     finaleStarted = false
     bg.unfreeze()
