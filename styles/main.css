@@ -883,10 +883,16 @@ body.menu-mode #game-hud-wrapper {
      Anchored to bottom-right (right of the hand sprite at bottom-center).
      Width is constrained with clamp so it scales smoothly across viewports
      while keeping the compact-card feel on small phones. The card expands
-     vertically when the user clicks it (see .expanded below). */
+     vertically when the user clicks it (see .expanded below).
+
+     F7.4.3 — instead of fixed viewport corner, the card is positioned
+     RELATIVE to the scaled game canvas using CSS custom properties
+     --pedagogy-x and --pedagogy-y. main.js applyCssScale() updates these
+     on every resize. This keeps the card over the actual game canvas
+     regardless of viewport aspect ratio (portrait/landscape/4:3/ultrawide). */
   position: absolute;
-  bottom: 16px;
-  right: 16px;
+  right: var(--pedagogy-x, 16px);
+  bottom: var(--pedagogy-y, 16px);
   width: clamp(220px, 30vw, 320px);
   max-width: calc(100vw - 32px);
   /* Compact footprint height: clamp to the heart HUD's visual height

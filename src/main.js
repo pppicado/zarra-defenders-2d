@@ -102,6 +102,18 @@ function applyCssScale(wrappers, logicalW, logicalH) {
   const transform = `translate(${xOff}px, ${yOff}px) scale(${scale})`
   for (const w of list) if (w) w.style.transform = transform
   window.__cssScale__ = { scale, xOff, yOff }
+
+  // F7.4.3 — anchor the pedagogy card to the bottom-right corner of the
+  // scaled game canvas, not the viewport. Without this, on portrait
+  // viewports (aspect < 16:9) the card lands in the bottom letterbox
+  // margin instead of over the actual game canvas. We use CSS custom
+  // properties (--pedagogy-x, --pedagogy-y) so the CSS can keep its
+  // position:absolute + bottom/right:16px declaration.
+  const card = document.getElementById('pedagogy-card')
+  if (card) {
+    card.style.setProperty('--pedagogy-x', `${xOff + 16}px`)
+    card.style.setProperty('--pedagogy-y', `${yOff + 16}px`)
+  }
 }
 
 /**
