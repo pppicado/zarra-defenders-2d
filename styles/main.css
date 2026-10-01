@@ -878,54 +878,30 @@ body.menu-mode #game-hud-wrapper {
      sits to the right of the hand sprite. Click expands to show full
      content; click again collapses to compact.
    ============================================================ */
-@media (max-width: 640px), (max-height: 480px) {
-  /* F7.4.5 — mobile-sized card on small viewports so the compact footprint
-     stays compact and readable after portrait→landscape rotation.
-     Covers both cases:
-     - (max-width: 640px): mobile portrait
-     - (max-height: 480px): mobile landscape (e.g. iPhone landscape is
-       typically 780×360) */
-  #pedagogy-card {
-    width: clamp(180px, 40vw, 240px);
-    height: clamp(70px, 12vw, 96px);
-    border-width: 1px;
-  }
-  #pedagogy-card .pedagogy-card-title {
-    font-size: 0.78rem;
-  }
-  #pedagogy-card .pedagogy-card-description {
-    font-size: 0.7rem;
-  }
-}
+/* F7.4.6 — removed the mobile media query. Now that the card lives inside
+   #game-hud-wrapper and inherits its CSS transform, the card scales
+   automatically with the canvas. The compact footprint stays compact
+   on mobile without needing a separate media-query block. */
 
 #pedagogy-card {
-  /* F3.5.4: compact footprint matches the 3-hearts height (~96px CSS).
-     Anchored to bottom-right (right of the hand sprite at bottom-center).
-     Width is constrained with clamp so it scales smoothly across viewports
-     while keeping the compact-card feel on small phones. The card expands
-     vertically when the user clicks it (see .expanded below).
-
-     F7.4.3 — instead of fixed viewport corner, the card is positioned
-     RELATIVE to the scaled game canvas using CSS custom properties
-     --pedagogy-x and --pedagogy-y. main.js applyCssScale() updates these
-     on every resize. This keeps the card over the actual game canvas
-     regardless of viewport aspect ratio (portrait/landscape/4:3/ultrawide).
-
-     F7.4.5 — reduced sizes on mobile viewports (≤640px) so the compact
-     footprint fits comfortably on small phones after portrait→landscape
-     rotation. User feedback: source was too large on mobile, making the
-     title get ellipsized too aggressively. */
+  /* F7.4.6 — the pedagogy card now lives INSIDE #game-hud-wrapper, which
+     carries the CSS transform that scales the game canvas to fit the
+     viewport. Because we re-parent the card into that wrapper, its
+     absolute coordinates are now in the wrapper's logical space
+     (1920x720), NOT the viewport space. This makes the card behave like
+     the integrity hearts: it always occupies the same relative position
+     inside the visible game canvas, regardless of viewport size, aspect
+     ratio, or letterbox orientation. The fixed-pixel anchors and viewport
+     --pedagogy-x/y custom props are no longer necessary. */
   position: absolute;
-  right: var(--pedagogy-x, 16px);
-  bottom: var(--pedagogy-y, 16px);
-  width: clamp(220px, 30vw, 320px);
-  max-width: calc(100vw - 32px);
-  /* Compact footprint height: clamp to the heart HUD's visual height
-     (~96px CSS at the default scale). When expanded, height auto-grows
-     up to a max-height that fits within the viewport. */
-  height: clamp(80px, 9vw, 110px);
-  max-height: calc(100dvh - 48px);
-  max-height: calc(100vh - 48px); /* fallback for browsers without dvh */
+  /* Logical 1920x720 space: bottom-right corner with margin equivalent to
+     the integrity hearts' HEART_MARGIN (32px in logical space). */
+  right: 32px;
+  bottom: 32px;
+  width: clamp(220px, 11vw, 320px);
+  max-width: calc(100% - 64px);
+  /* Compact footprint height: ~96px at the default scale (matches hearts). */
+  height: clamp(80px, 6vw, 110px);
   background: rgba(24, 24, 24, 0.94);
   border: 2px solid #f5a623;
   border-radius: 4px;

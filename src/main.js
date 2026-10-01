@@ -103,17 +103,11 @@ function applyCssScale(wrappers, logicalW, logicalH) {
   for (const w of list) if (w) w.style.transform = transform
   window.__cssScale__ = { scale, xOff, yOff }
 
-  // F7.4.3 — anchor the pedagogy card to the bottom-right corner of the
-  // scaled game canvas, not the viewport. Without this, on portrait
-  // viewports (aspect < 16:9) the card lands in the bottom letterbox
-  // margin instead of over the actual game canvas. We use CSS custom
-  // properties (--pedagogy-x, --pedagogy-y) so the CSS can keep its
-  // position:absolute + bottom/right:16px declaration.
-  const card = document.getElementById('pedagogy-card')
-  if (card) {
-    card.style.setProperty('--pedagogy-x', `${xOff + 16}px`)
-    card.style.setProperty('--pedagogy-y', `${yOff + 16}px`)
-  }
+  // F7.4.6 — no longer needed. The pedagogy card now lives inside
+  // #game-hud-wrapper (which carries the transform) and uses absolute
+  // coordinates in the wrapper's logical space (right: 32px, bottom:
+  // 32px). It positions itself relative to the scaled game canvas
+  // automatically via the parent wrapper's CSS transform.
 }
 
 /**
@@ -658,6 +652,21 @@ async function bootstrap() {
   // scope; F3.5.2 click handler uses camera.halt/unHalt to pause/resume).
   // F5.1 — TTS engine (Web Speech API) injected for "Escuchar" button.
   const pedagogyCardRoot = document.getElementById('pedagogy-card')
+  // F7.4.6 — move the pedagogy card INSIDE the scaled HUD wrapper so it
+  // scales and positions with the game canvas (like the integrity hearts).
+  // Before: the card was a sibling of #game-canvas-wrapper, anchored to
+  // the viewport bottom-right via position:absolute + bottom: 16px. This
+  // caused the card to land in the bottom letterbox on portrait viewports
+  // and to NOT move with the canvas when the canvas was repositioned via
+  // JS applyCssScale() at the rotated coordinates. Moving the card into
+  // #game-hud-wrapper makes it inherit the wrapper's CSS transform, so it
+  // always sits at the same relative position inside the game canvas.
+  // The HTML still has the card as a child of #game-container for layout-
+  // script compatibility (CSS queries against #game-container), but we
+  // physically re-parent it here.
+  if (pedagogyCardRoot && hudWrapper) {
+    hudWrapper.appendChild(pedagogyCardRoot)
+  }
   pedagogyCards = new PedagogyCards({
     root: pedagogyCardRoot,
     gameState,
