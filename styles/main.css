@@ -895,10 +895,16 @@ body.menu-mode #game-hud-wrapper {
      --pedagogy-x/y custom props are no longer necessary. */
   position: absolute;
   /* Logical 1920x720 space: bottom-right corner with margin equivalent to
-     the integrity hearts' HEART_MARGIN (32px in logical space). */
+     the integrity hearts' HEART_MARGIN (32px in logical space).
+     F7.4.7 — width shrunk to fit smaller viewports without overflowing.
+     The previous clamp(220px, 11vw, 320px) computed 320px at 1280px+,
+     plus right:32 left the card starting at x=1600 in logical space.
+     When viewport is 1280px (scale=1), the card starts at x=1600 and
+     extends beyond the visible area. Reduced to clamp(160px, 11vw, 260px)
+     so the card always sits within the bottom-right corner. */
   right: 32px;
   bottom: 32px;
-  width: clamp(220px, 11vw, 320px);
+  width: clamp(160px, 11vw, 260px);
   max-width: calc(100% - 64px);
   /* Compact footprint height: ~96px at the default scale (matches hearts). */
   height: clamp(80px, 6vw, 110px);
@@ -1110,7 +1116,9 @@ body.menu-mode #game-hud-wrapper {
    * .stacked modifier still shifts the modal up to sit above the card. */
   bottom: 32px;
   right: 32px;
-  width: clamp(220px, 11vw, 320px);
+  /* F7.4.7 — same width reduction as the pedagogy card so they both fit in
+     the bottom-right corner without overflowing the canvas. */
+  width: clamp(160px, 11vw, 260px);
   max-width: calc(100% - 64px);
   z-index: 140;
   pointer-events: none;          /* don't block fire */
