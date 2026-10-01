@@ -665,7 +665,21 @@ async function bootstrap() {
     onCardShown: (payload) => score.addCardShown(payload),
     tts: ttsEngine,
   })
-  busOn('ui:overlayShown', () => pedagogyCards.hide())
+  // F7.4.4 — REMOVED `busOn('ui:overlayShown', () => pedagogyCards.hide())`.
+  //
+  // Why: the mobile flow (portrait→landscape rotation) was hiding the
+  // pedagogy card. The chain was:
+  //   1. Mobile starts in portrait → syncOrientationAutoPause() detects
+  //      portrait → pauseOverlay.show({ auto: true }) → emits
+  //      ui:overlayShown → this handler hid the card.
+  //   2. User rotates to landscape → pauseOverlay.hide() (does NOT emit
+  //      ui:overlayHidden) → card stays hidden even though gameplay
+  //      resumes.
+  //
+  // Pedagogically: the card is informational, not a modal blocker.
+  // It should stay visible through pause transitions so the player
+  // can read it when resuming. The only legitimate reason to hide it
+  // is when leaving the stage (menu:startRequested).
   busOn('menu:startRequested', () => pedagogyCards.hide())
   busOn('enemy:destroyed', (detail) => {
     if (!detail) return
