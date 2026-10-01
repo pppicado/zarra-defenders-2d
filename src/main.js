@@ -361,6 +361,14 @@ async function bootstrap() {
 
   // F1.2 — modal intermedio cada 5 hits.
   const modalIntermedioRoot = document.getElementById('modal-intermedio')
+  // F7.4.6 — re-parent the modal into the scaled canvas wrapper so it
+  // shares the wrapper's CSS transform with the pedagogy card and the
+  // integrity hearts. The modal was previously anchored to the viewport
+  // (bottom: 16px / right: 16px), so on portrait viewports it landed
+  // in the letterbox instead of over the canvas.
+  if (modalIntermedioRoot && hudWrapper) {
+    hudWrapper.appendChild(modalIntermedioRoot)
+  }
   const modalIntermedio = new ModalIntermedio({
     root: modalIntermedioRoot,
     triggerEvery: 5,

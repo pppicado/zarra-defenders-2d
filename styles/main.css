@@ -1102,19 +1102,19 @@ body.menu-mode #game-hud-wrapper {
    ============================================================ */
 #modal-intermedio {
   position: absolute;
-  /* F3.5.4: sit at the same bottom anchor as the pedagogy card. The
-   * .stacked modifier shifts the modal up so it sits above the card
-   * without overlapping. The exact offset (card height + 8px gap) is
-   * approximated via clamp() to match the card's compact footprint. */
-  bottom: 16px;
-  right: 16px;
-  width: clamp(220px, 30vw, 320px);
-  max-width: calc(100vw - 32px);
+  /* F7.4.6 — same bottom anchor as the pedagogy card. With the card
+   * moved inside #game-hud-wrapper (which scales with the canvas), the
+   * modal now also lives inside the wrapper, so its absolute coordinates
+   * are in the wrapper's logical 1920x720 space. Same margins as the
+   * card (right: 32, bottom: 32) keep them visually consistent. The
+   * .stacked modifier still shifts the modal up to sit above the card. */
+  bottom: 32px;
+  right: 32px;
+  width: clamp(220px, 11vw, 320px);
+  max-width: calc(100% - 64px);
   z-index: 140;
   pointer-events: none;          /* don't block fire */
   animation: modal-intermedio-slide-down 320ms ease-out;
-  /* slide-down is now horizontal slide-up from below; we keep the keyframes
-   * name for compatibility but adjust the transform origin. */
   transform-origin: bottom right;
 }
 
@@ -1124,11 +1124,9 @@ body.menu-mode #game-hud-wrapper {
 }
 
 /* F3.5.4: when the pedagogy card is visible, stack the modal above it.
- * Card compact height ≈ clamp(80px, 9vw, 110px), plus 8px gap, plus the
- * card's own bottom: 16px — so total offset ≈ cardHeight + 24px. We use
- * the same clamp() so both elements stay in sync across viewports. */
+ * Card compact height (logical 1920x720 space) + 8px gap + 24px margin. */
 #modal-intermedio.stacked {
-  bottom: calc(clamp(80px, 9vw, 110px) + 24px);
+  bottom: calc(clamp(80px, 6vw, 110px) + 24px);
 }
 
 #modal-intermedio .modal-intermedio-card {
